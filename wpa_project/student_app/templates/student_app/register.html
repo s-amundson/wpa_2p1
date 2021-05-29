@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form method="post" action="." autocomplete="off" class="form">
+    {% csrf_token %}
+        <div class="row">
+                <div class="input-group input-group-md">
+                    {{ form.street }}
+<!--                    <input type="text" name="id" hidden disabled value="{{ membership_id }}">-->
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="input-group input-group-md">
+                    {{ form.city }}
+                    {{ form.state }}
+                    {{ form.post_code }}
+                </div>
+        </div>
+
+        <div class="row">
+            <div class="input-group input-group-md">
+                {{ form.phone }}
+            </div>
+        </div>
+    <button type="submit"> Sign Up</button>
+    </form>
+{% endblock %}

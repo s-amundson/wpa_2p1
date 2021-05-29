@@ -1,0 +1,13 @@
+# Docker won't copy these files into the image
+
+.*
+*.sqlite3
+*.md
+geckodriver.log
+htmlcov
+local_tests.py
+notes
+README*
+settings.cfg
+temp*
+venv

@@ -1,0 +1,41 @@
+<form class="bg-dark" method="post" action="">
+    {% csrf_token %}
+
+    <div class="modal-header">
+        <h5 class="modal-title">Add a Student</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <div class="form-group{% if form.first_name.errors %} invalid{% endif %}">
+            <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+            {{ form.first_name }}
+            {% for error in form.first_name.errors %}
+                <p class="help-block">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class="form-group{% if form.last_name.errors %} invalid{% endif %}">
+            <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+            {{ form.last_name }}
+            {% for error in form.last_name.errors %}
+                <p class="help-block">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class="form-group{% if form.dob.errors %} invalid{% endif %}">
+            <label for="{{ form.dob.id_for_label }}">Date of Birth</label>
+            {{ form.dob }}
+            {% for error in form.dob.errors %}
+                <p class="help-block">{{ error }}</p>
+            {% endfor %}
+        </div>
+    
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </div>
+
+</form>
