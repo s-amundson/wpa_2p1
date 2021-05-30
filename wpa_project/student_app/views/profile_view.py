@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.views.generic.base import View
 import logging
 
-from ..models import StudentFamily
+from ..models import StudentFamily, Student
 logger = logging.getLogger(__name__)
 
 
@@ -17,7 +17,10 @@ class ProfileView(LoginRequiredMixin, View):
         logging.debug(f'user is staff = {request.user.is_staff}')
         logging.debug(student_family.exists())
         if student_family.exists():
-            return render(request, 'student_app/profile.html')
+            logging.debug(student_family[0])
+            students = student_family[0].student_set.all()
+            logging.debug(students)
+            return render(request, 'student_app/profile.html', {'students': students})
         else:
             return HttpResponseRedirect(reverse('registration:student_register'))
             # return render(request, 'student_app/profile.html')

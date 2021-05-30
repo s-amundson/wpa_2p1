@@ -1,11 +1,11 @@
 from bootstrap_modal_forms.forms import BSModalModelForm
 from django import forms
-from django.forms import TextInput
+from django.forms import TextInput, ModelForm
 
 from ..models import Student
 
 
-class StudentForm(BSModalModelForm):
+class StudentForm(ModelForm):
     dob = forms.DateField(
         error_messages={'invalid': "Enter a valid date in YYYY-MM-DD format"}
     )

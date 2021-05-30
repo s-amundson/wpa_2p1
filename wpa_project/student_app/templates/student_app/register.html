@@ -8,7 +8,7 @@
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
 
-    <form method="post" action="." autocomplete="off" class="form">
+    <form method="post" action="{% url 'registration:student_register' %}" autocomplete="off" class="form">
     {% csrf_token %}
         <div class="row">
                 <div class="input-group input-group-md">
