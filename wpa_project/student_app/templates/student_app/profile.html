@@ -1,31 +1,43 @@
 {% extends 'base.html' %}
 
-{% block script %}
-<script type="text/javascript">
-$(document).ready(function() {
-    $("#add-student").modalForm({
-        formURL: "{% url 'registration:add_student' %}"
-    });
-});
-</script>
-{% endblock %}
 {% block title %} Index {% endblock %}
 
 {% block main %}
-<h2> Profile Page </h2>
+<div class="row p-3 align-items-center mx-auto">
+    <div class="col-12">
+        <h2> Profile Page </h2>
+    </div>
+</div>
+<div class="row p-3 align-items-center mx-auto">
+    <div class="col-12">
+        <h3> Students </h3>
+    </div>
+</div>
     {% for student in students %}
         <div class="row">
-            {{ student.first_name }}
+            <div class="col">
+                <a class="nav-link" href="{% url 'registration:add_student' student.id %}">
+                    {{ student.first_name }} {{ student.last_name }}
+                </a>
+            </div>
+            <div class="col">
+
+            </div>
         </div>
     {% endfor %}
-    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content"></div>
-      </div>
-    </div>
+
     <div class="row">
         <button id="add-student" class="btn btn-primary" type="button" name="button">
             Add Student
         </button>
     </div>
+<div class="row p-3 align-items-center mx-auto">
+    <div class="col-12">
+        <h3> Address </h3>
+    </div>
+</div>
+<div class="row">
+    TODO put address here
+</div>
+
 {% endblock %}

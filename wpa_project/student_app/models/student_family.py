@@ -19,6 +19,6 @@ class StudentFamily(models.Model):
 
     # hidden fields
     # email_verified = models.BooleanField(default=False)
-    registration_date = models.DateField(default=timezone.now())
+    registration_date = models.DateField(default=timezone.now)
     # verification_code = models.CharField(max_length=50, null=True)
 

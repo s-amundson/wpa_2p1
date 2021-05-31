@@ -4,3 +4,7 @@ Useful Commands:
     python manage.py migrate
     python manage.py runserver
     python manage.py startapp
+
+
+TODO
+    Align auth templates with my templates
