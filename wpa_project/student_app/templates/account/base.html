@@ -1,25 +1,15 @@
-<!DOCTYPE html>
-<html>
-  <head>
-          <!-- documentation at http://getbootstrap.com/docs/4.1/, alternative themes at https://bootswatch.com/ -->
-      <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+{% extends 'base.html' %}
+{% block title %}
+  {% block head_title %}{% endblock %}
+{% endblock %}
 
-      <link rel="shortcut icon" type="image/png" href="{% static 'target2.png' %}"/>
-
-
-      <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
-      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-      <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-
-      <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
-
-    <title>{% block head_title %}{% endblock %}</title>
+{% block script %}
     {% block extra_head %}
     {% endblock %}
-  </head>
-  <body>
+{% endblock %}
+
+
+{% block main %}
     {% block body %}
 
     {% if messages %}
@@ -50,5 +40,5 @@
     {% endblock %}
     {% block extra_body %}
     {% endblock %}
-  </body>
-</html>
+{% endblock %}
+
