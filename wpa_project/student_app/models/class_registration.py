@@ -15,4 +15,4 @@ class ClassRegistration(models.Model):
     new_student = models.BooleanField()
     pay_status = models.CharField(max_length=20)
     idempotency_key = models.UUIDField(default=str(uuid.uuid4()))
-    reg_time = models.DateField()
+    reg_time = models.DateField(default=timezone.now)
