@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %} Class Sign up {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form method="post" action="{% url 'registration:class_registration' %}" autocomplete="off" class="form">
+    {% csrf_token %}
+        <div class="row">
+            <div class="input-group input-group-md">
+                    {{ form.beginner_class }}
+            </div>
+        </div>
+        {% for student in form.get_boxes %}
+            <div class="row">
+                <div class="input-group input-group-md">
+                    {{ student }} {{ student.label }}
+                </div>
+            </div>
+        {% endfor %}
+        <div class="row">
+            <button type="submit"> Sign Up</button>
+        </div>
+    </form>
+
+{% endblock %}

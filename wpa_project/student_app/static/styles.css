@@ -50,6 +50,10 @@ main img
 {
 
 }
+
+body {
+    padding-top: 80px;
+}
 /*body
 {
     background-color:Black;
