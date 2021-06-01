@@ -7,4 +7,5 @@ Useful Commands:
 
 
 TODO
-    Align auth templates with my templates
+    Align auth templates with my templates - changed template inheritance need to check
+    Check on square's payment SDK or API. new one?

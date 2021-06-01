@@ -44,7 +44,8 @@ class TestsBeginnerClass(TestCase):
 
         # Add a class
         response = self.client.post(reverse('registration:beginner_class'),
-                        {'class_date': '2021-05-30', 'beginner_limit': 2, 'returnee_limit': 2, 'state': 'scheduled'})
+                        {'class_date': '2021-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
+                         'state': 'scheduled', 'cost': 5})
         # self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, reverse('registration:index'))
         bc = BeginnerClass.objects.all()
@@ -57,7 +58,8 @@ class TestsBeginnerClass(TestCase):
 
         # Update the class
         response = self.client.post(reverse('registration:beginner_class', kwargs={'beginner_class': 1}),
-                        {'class_date': '2022-05-30', 'beginner_limit': 2, 'returnee_limit': 2, 'state': 'open'})
+                        {'class_date': '2022-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
+                         'state': 'open', 'cost': 5})
         # self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, reverse('registration:index'))
         bc = BeginnerClass.objects.all()
@@ -66,7 +68,8 @@ class TestsBeginnerClass(TestCase):
 
         # New class same day
         response = self.client.post(reverse('registration:beginner_class'),
-                        {'class_date': '2022-05-30', 'beginner_limit': 2, 'returnee_limit': 2, 'state': 'scheduled'})
+                        {'class_date': '2022-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
+                         'state': 'scheduled', 'cost': 5})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_list.html')
         bc = BeginnerClass.objects.all()
@@ -80,31 +83,9 @@ class TestsBeginnerClass(TestCase):
 
         # New class different day
         response = self.client.post(reverse('registration:beginner_class'),
-                        {'class_date': '2022-06-06', 'beginner_limit': 2, 'returnee_limit': 2, 'state': 'scheduled'})
+                        {'class_date': '2022-06-06', 'beginner_limit': 2, 'returnee_limit': 2,
+                         'state': 'scheduled', 'cost': 5})
         self.assertRedirects(response, reverse('registration:index'))
         self.assertTemplateUsed('student_app/class_list.html')
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 2)
-
-        # Add a student family to do the next test.
-        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        self.client.post(reverse('registration:student_register'), d)
-        d = {'first_name': 'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
-        self.client.post(reverse('registration:add_student'), d)
-        response = self.client.get(reverse('registration:class_registration'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('student_app/form_as_p.html')
-
-        self.client.post(reverse('registration:class_registration'), {'beginner_class': '2022-05-30', 'student_1': 'on'})
-        bc = BeginnerClass.objects.all()
-        self.assertEqual(bc[0].enrolled_beginners, 1)
-        logging.debug(bc[0])
-
-#     class_date = models.DateField()
-#     enrolled_beginners = models.IntegerField(default=0)
-#     beginner_limit = models.IntegerField()
-#     enrolled_returnee = models.IntegerField(default=0)
-#     returnee_limit = models.IntegerField()
-#     states = [('scheduled', 'scheduled'), ('open', 'open'), ('full', 'full'), ('closed', 'closed'),
-#               ('canceled', 'canceled')]
-#     state = models.CharField(max_length=20, null=True, choices=states)

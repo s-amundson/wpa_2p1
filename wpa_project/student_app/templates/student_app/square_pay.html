@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}
+    Payment Form
+{% endblock %}
+
+{% block script %}
+    <!-- link to the SqPaymentForm library -->
+    <script type="text/javascript" src="{{ paydict.pay_url }}"></script>
+
+    <script type="application/javascript">
+        window.applicationId = '{{ paydict.app_id }}';
+        window.locationId = '{{ paydict.location_id }}';
+    </script>
+
+    <!-- link to the local SqPaymentForm initialization -->
+    <script type="text/javascript" src="static/sq-payment-form.js"></script>
+
+    <!-- link to the custom styles for SqPaymentForm -->
+    <link rel="stylesheet" type="text/css" href="static/sq-payment-form.css">
+{% endblock %}
+
+{% block main %}
+  <div class="row table_head border">
+    <div class="col-md">
+      <strong>Item</strong>
+    </div>
+    <div class="col-md">
+      Quanity
+    </div>
+    <div class="col-md">
+      <strong>Amount each</strong>
+    </div>
+    <div class="col-md">
+      <strong>Amount</strong>
+    </div>
+  </div>
+
+  {% for row in rows %}
+    <div class="row table_row border border-top-0">
+      <div class="col-md">
+        {{ row.name }}
+      </div>
+      <div class="col-md">
+        {{ row.quantity }}
+      </div>
+      <div class="col-md">
+        {{ row.amount_each }}
+      </div>
+      <div class="col-md">
+        {{ row.amount_total }}
+      </div>
+    </div>
+  {% endfor %}
+
+    <div class="row table_row border border-top-0">
+      <div class="col-md">
+        Total
+      </div>
+      <div class="col-md"></div>
+      <div class="col-md"></div>
+      <div class="col-md">
+        {{ total }}
+      </div>
+    </div>
+  <div class="row">
+    Payments are processed with Square.
+  </div>
+    <!-- Begin Payment Form -->
+    <div class="sq-payment-form">
+      <!--
+        Square's JS will automatically hide these buttons if they are unsupported
+        by the current device.
+      -->
+      <div id="sq-walletbox">
+        <button id="sq-google-pay" class="button-google-pay"></button>
+        <button id="sq-apple-pay" class="sq-apple-pay"></button>
+        <button id="sq-masterpass" class="sq-masterpass"></button>
+        <div class="sq-wallet-divider">
+          <span class="sq-wallet-divider__text">Or</span>
+        </div>
+      </div>
+      <div id="sq-ccbox">
+        <!--
+          You should replace the action attribute of the form with the path of
+          the URL you want to POST the nonce to (for example, "/process-card").
+
+          You need to then make a "Charge" request to Square's Payments API with
+          this nonce to securely charge the customer.
+
+          Learn more about how to setup the server component of the payment form here:
+          https://developer.squareup.com/docs/payments-api/overview
+        -->
+        <form id="nonce-form" novalidate action="/process_payment" method="post">
+          {% csrf_token %}
+          <div class="sq-field">
+            <label class="sq-label">Card Number</label>
+            <div id="sq-card-number"></div>
+          </div>
+          <div class="sq-field-wrapper">
+            <div class="sq-field sq-field--in-wrapper">
+              <label class="sq-label">CVV</label>
+              <div id="sq-cvv"></div>
+            </div>
+            <div class="sq-field sq-field--in-wrapper">
+              <label class="sq-label">Expiration</label>
+              <div id="sq-expiration-date"></div>
+            </div>
+            <div class="sq-field sq-field--in-wrapper">
+              <label class="sq-label">Postal</label>
+              <div id="sq-postal-code"></div>
+            </div>
+          </div>
+          <div class="sq-field">
+            <button id="sq-creditcard" class="sq-button" onclick="onGetCardNonce(event)">
+              Pay Now
+            </button>
+          </div>
+          <!--
+            After a nonce is generated it will be assigned to this hidden input field.
+          -->
+          <div id="error"></div>
+          <input type="hidden" id="card-nonce" name="nonce">
+        </form>
+      </div>
+
+    </div>
+    <!-- End Payment Form -->
+  <div class="row">
+    {% if bypass %}
+<!--      <form id="form1" action="/process_payment" method="post" class="form" name="form1">-->
+    <form method="post" action="." autocomplete="off" class="form">
+        {% csrf_token %}
+          <button class="btn btn-primary m-2" type="submit" id="id_submit">Bypass</button>
+      </form>
+    {% endif %}
+  </div>
+
+{% endblock %}
