@@ -1,9 +1,10 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 
 
 class PaymentLog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     student_family = models.ForeignKey('student_app.StudentFamily', on_delete=models.SET_NULL, null=True)
     checkout_created_time = models.DateTimeField()
     checkout_id = models.CharField(max_length=50, null=True)

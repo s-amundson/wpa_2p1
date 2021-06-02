@@ -1,16 +1,9 @@
-import json
 import logging
-import os
 
-import allauth
-from datetime import date
-from django.conf import settings
-from django.template.loader import render_to_string
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.contrib import auth
-from django.contrib.auth.models import User
-from ..models import BeginnerClass, ClassRegistration
+
+from ..models import BeginnerClass, ClassRegistration, User
 
 logger = logging.getLogger(__name__)
 

@@ -9,8 +9,8 @@ from django.template.loader import render_to_string
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib import auth
-from django.contrib.auth.models import User
-from ..models import BeginnerClass
+
+from ..models import BeginnerClass, User
 
 logger = logging.getLogger(__name__)
 

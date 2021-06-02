@@ -41,14 +41,30 @@
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="navbar-nav ml-auto mt-2">
                     {% if user.is_authenticated %}
+                        {% if user.is_board %}
+                             <li class="nav-item">
+                                 board member
+                             </li>
+                        {% endif %}
+                        {% if user.is_instructor %}
+                            <li class="nav-item">
+                                Instructor
+                            </li>
+                        {% endif %}
+
+
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
-                            <a class="nav-link" href="{% url 'account_email' %}">account email</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'registration:profile' %}">Profile</a>
 
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_signup' %}">Join</a>
                         </li>
                     {% endif %}
                 </ul>
