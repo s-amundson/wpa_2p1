@@ -1,0 +1,46 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark border fixed-top">
+    <a class="navbar-brand" href="/"> <span class="red">Membership Project</span></a>
+    <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+            data-target="#navbar" data-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav ml-auto mt-2">
+            {% if user.is_authenticated %}
+                {% if user.is_board %}
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Dropdown
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'registration:beginner_class'%}">Beginner Class</a>
+                        <a class="dropdown-item" href="{% url 'registration:student_search'%}">Search</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                      </div>
+                    </li>
+                {% endif %}
+                {% if user.is_instructor %}
+                    <li class="nav-item">
+                        Instructor
+                    </li>
+                {% endif %}
+
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'registration:profile' %}">Profile</a>
+
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'account_signup' %}">Join</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>

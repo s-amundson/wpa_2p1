@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Student Search
+{% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    {% for sf in student_family %}
+        <div class="row">
+            <div class="col-3 font-weight-bold border" > First Name </div>
+            <div class="col-3 font-weight-bold border"> Last Name </div>
+            <div class="col-3 font-weight-bold border"> Date of Birth </div>
+            <div class="col-3 font-weight-bold border"> Safety Class Date </div>
+        </div>
+        {% for student in sf.student_set.all %}
+            <div class="row">
+                <div class="col-3 border"> {{ student.first_name }} </div>
+                <div class="col-3 border"> {{ student.last_name }} </div>
+                <div class="col-3 border"> {{ student.dob }} </div>
+                <div class="col-3 border"> {{ student.safety_class }} </div>
+            </div>
+        {% endfor %}
+
+        <div class="row pt-4">
+            <div class="col "><h4>Address</h4></div>
+        </div>
+        <div class="row">
+            <div class="col"> {{ sf.street }} </div>
+        </div>
+        <div class="row pt-4">
+            <div class="col"> {{ sf.city }} </div>
+            <div class="col"> {{ sf.state }} </div>
+            <div class="col"> {{ sf.post_code }} </div>
+            <div class="col"> {{ sf.phone }} </div>
+        </div>
+        <div class="row pt-4">
+            <div class="col">Registration date: {{ sf.registration_date}} </div>
+        </div>
+        <hr/>
+    {% endfor %}
+
+
+{% endblock %}
