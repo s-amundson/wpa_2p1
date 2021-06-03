@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Student Search
+{% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row">
+        <form method="post" autocomplete="off" class="form">
+        {% csrf_token %}
+            <div class="row">
+                <h4>
+                    Search by Email
+                </h4>
+            </div>
+            <div class="row">
+                <div class="col input-group input-group-md">
+                        {{ email_form.email }}
+                </div>
+                <div class="col">
+                    <button type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <form method="post" autocomplete="off" class="form">
+        {% csrf_token %}
+            <div class="row">
+                <h4>
+                    Search by Name
+                </h4>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="row">
+                        <div class="col input-group input-group-md">
+                                {{ name_form.first_name }}
+                        </div>
+                        <div class="col input-group input-group-md">
+                                {{ name_form.last_name }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <button type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <form method="post" autocomplete="off" class="form">
+        {% csrf_token %}
+            <div class="row">
+                <h4>
+                    Search by Phone
+                </h4>
+            </div>
+            <div class="row">
+                <div class="col input-group input-group-md">
+                        {{ phone_form.phone }}
+                </div>
+                <div class="col">
+                    <button type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

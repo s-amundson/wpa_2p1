@@ -1,4 +1,3 @@
-from bootstrap_modal_forms.forms import BSModalModelForm
 from django import forms
 from django.forms import TextInput, ModelForm
 

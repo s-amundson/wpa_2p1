@@ -20,7 +20,7 @@ class ProfileView(LoginRequiredMixin, View):
             logging.debug(student_family[0])
             students = student_family[0].student_set.all()
             logging.debug(students)
-            return render(request, 'student_app/profile.html', {'students': students})
+            return render(request, 'student_app/profile.html', {'students': students, 'student_family': student_family[0]})
         else:
             return HttpResponseRedirect(reverse('registration:student_register'))
             # return render(request, 'student_app/profile.html')

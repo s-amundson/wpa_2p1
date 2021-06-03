@@ -2,3 +2,4 @@ from .beginner_class_form import BeginnerClassForm
 from .class_registration_form import ClassRegistrationForm
 from .student_form import StudentForm
 from .student_registration_form import StudentRegistrationForm
+from .student_search_forms import SearchEmailForm, SearchNameForm, SearchPhoneForm

@@ -43,7 +43,9 @@
                     {% if user.is_authenticated %}
                         {% if user.is_board %}
                              <li class="nav-item">
-                                 board member
+                                 <a class="nav-link" href="{% url 'registration:beginner_class'%}">
+                                     Beginner Class
+                                 </a>
                              </li>
                         {% endif %}
                         {% if user.is_instructor %}

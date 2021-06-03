@@ -5,3 +5,4 @@ from .index_view import IndexView
 from .process_payment_view import ProcessPaymentView
 from .profile_view import ProfileView
 from .student_register_view import StudentRegisterView
+from .search_view import SearchView

@@ -33,13 +33,26 @@
                 </a>
         </button>
     </div>
-<div class="row p-3 align-items-center mx-auto">
-    <div class="col-12">
-        <h3> Address </h3>
+    <div class="row p-3 align-items-center mx-auto">
+        <div class="col-12">
+            <h3> Address </h3>
+        </div>
     </div>
-</div>
-<div class="row">
-    TODO put address here
-</div>
-
+    <div class="row">
+        {{ student_family.street }} </br>
+        {{ student_family.city }} {{ student_family.state }} {{ student_family.post_code }} </br>
+        {{ student_family.phone }}
+    </div>
+    {% if user.is_instructor %}
+        <div class="row p-3 align-items-center mx-auto">
+            <div class="col-12">
+                <h3> Instructor </h3>
+            </div>
+        </div>
+        <div class="row p-3 mx-auto">
+            <div class="col-12">
+                {{ user.instructor_expire_date }}
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
