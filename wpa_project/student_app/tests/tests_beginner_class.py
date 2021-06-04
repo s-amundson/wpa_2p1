@@ -38,6 +38,11 @@ class TestsBeginnerClass(TestCase):
         # Get the page
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('registration:beginner_class'))
+        self.assertEqual(response.status_code, 403)
+
+        self.test_user.is_staff = True
+        self.test_user.save()
+        response = self.client.get(reverse('registration:beginner_class'))
         self.assertEqual(response.context['form'].initial['beginner_limit'], 20)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/beginner_class.html')

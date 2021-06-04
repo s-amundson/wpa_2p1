@@ -16,3 +16,4 @@ class ClassRegistration(models.Model):
     pay_status = models.CharField(max_length=20)
     idempotency_key = models.UUIDField(default=str(uuid.uuid4()))
     reg_time = models.DateField(default=timezone.now)
+    attended = models.BooleanField(default=False)

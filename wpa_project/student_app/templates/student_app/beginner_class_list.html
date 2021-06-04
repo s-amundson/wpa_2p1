@@ -40,9 +40,11 @@
     {% endfor %}
 
     <div class="row">
-        <a class="nav-link" href="{% url 'registration:beginner_class' %}">
-            Add
-        </a>
+        {% if user.is_board %}
+            <a class="nav-link" href="{% url 'registration:beginner_class' %}">
+                Add
+            </a>
+        {% endif %}
     </div>
 
 {% endblock %}

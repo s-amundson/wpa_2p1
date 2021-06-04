@@ -12,7 +12,7 @@ class BeginnerClass(models.Model):
     enrolled_returnee = models.IntegerField(default=0)
     returnee_limit = models.IntegerField()
     states = [('scheduled', 'scheduled'), ('open', 'open'), ('full', 'full'), ('closed', 'closed'),
-              ('canceled', 'canceled')]
+              ('canceled', 'canceled'), ('recorded', 'recorded')]
     state = models.CharField(max_length=20, null=True, choices=states)
     cost = models.IntegerField(default=5)
 

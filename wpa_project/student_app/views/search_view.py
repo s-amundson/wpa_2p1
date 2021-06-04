@@ -25,12 +25,9 @@ class SearchView(LoginRequiredMixin, View):
     def post(self, request):
         if not (request.user.is_board or request.user.is_superuser):
             return HttpResponseForbidden()
-        logging.debug(request.POST)
         if 'email' in request.POST:
-            logging.debug('email')
             form = SearchEmailForm(request.POST)
             if form.is_valid():
-                logging.debug(form.cleaned_data)
                 user = EmailAddress.objects.filter(email=form.cleaned_data['email'])
                 if len(user) == 0:
                     return render(request, 'registration/message.html', {'message': 'No email found'})
@@ -39,7 +36,6 @@ class SearchView(LoginRequiredMixin, View):
                     student_family.append(StudentFamily.objects.filter(user=u.user))
                 return render(request, 'student_app/search_result.html', {'student_family': student_family})
         elif 'first_name' in request.POST:
-            logging.debug('name form used')
             form = SearchNameForm(request.POST)
             if form.is_valid():
                 student = Student.objects.filter(first_name=form.cleaned_data['first_name'],
@@ -51,7 +47,6 @@ class SearchView(LoginRequiredMixin, View):
                     student_family.append(s.student_family)
                 return render(request, 'student_app/search_result.html', {'student_family': student_family})
         elif 'phone' in request.POST:
-            logging.debug('phone form used')
             form = SearchPhoneForm(request.POST)
             if form.is_valid():
                 s = StudentFamily.objects.filter(phone=form.cleaned_data['phone'])

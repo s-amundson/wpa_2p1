@@ -10,23 +10,32 @@
                 {% if user.is_board %}
                     <li class="nav-item dropdown">
                       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Dropdown
+                        Board Links
                       </a>
                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{% url 'registration:beginner_class'%}">Beginner Class</a>
-                        <a class="dropdown-item" href="{% url 'registration:student_search'%}">Search</a>
+                        <a class="dropdown-item" href="{% url 'registration:search'%}">Search</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">Something else here</a>
                       </div>
                     </li>
                 {% endif %}
                 {% if user.is_instructor %}
-                    <li class="nav-item">
-                        Instructor
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Instructor Links
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'registration:class_list'%}">class list</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                      </div>
                     </li>
                 {% endif %}
 
-
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'registration:class_registration' %}">Classes</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
                 </li>
