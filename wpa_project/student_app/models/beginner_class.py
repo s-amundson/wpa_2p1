@@ -16,9 +16,9 @@ class BeginnerClass(models.Model):
     state = models.CharField(max_length=20, null=True, choices=states)
     cost = models.IntegerField(default=5)
 
-    def get_open_classes(self):
-        classes = self.objects.filter(class_date__gt=timezone.now(), state__exact='open')
-        d = [("", "None")]
-        for c in classes:
-            d.append((str(c.class_date), str(c.class_date)))
-        return d
+    # def get_open_classes(self):
+    #     classes = self.objects.filter(class_date__gt=timezone.now(), state__exact='open')
+    #     d = [("", "None")]
+    #     for c in classes:
+    #         d.append((str(c.class_date), str(c.class_date)))
+    #     return d

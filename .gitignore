@@ -1,5 +1,6 @@
 # Untracked files:
-settings.py
 temp_tests.py
 venv/**
 .sqlite3
+/secrets.json
+*~

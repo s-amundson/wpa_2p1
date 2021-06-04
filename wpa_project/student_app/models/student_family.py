@@ -1,10 +1,9 @@
 import logging
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models
-
 from django.utils import timezone
+from ..fields import PhoneField
 logger = logging.getLogger(__name__)
 
 
@@ -15,7 +14,7 @@ class StudentFamily(models.Model):
     city = models.CharField(max_length=150)
     state = models.CharField(max_length=3)
     post_code = models.CharField(max_length=10)
-    phone = models.CharField(max_length=20)
+    phone = PhoneField()
 
     # hidden fields
     registration_date = models.DateField(default=timezone.now)

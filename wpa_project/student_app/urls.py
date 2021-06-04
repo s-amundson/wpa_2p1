@@ -12,5 +12,5 @@ urlpatterns = [
         path('process_payment', ProcessPaymentView.as_view(), name='process_payment'),
         path('profile', ProfileView.as_view(), name='profile'),
         path('search', SearchView.as_view(), name='search'),
-        path('student_register', StudentRegisterView.as_view(), name='student_register'),
+        path('student_register', StudentFamilyRegisterView.as_view(), name='student_register'),
 ]

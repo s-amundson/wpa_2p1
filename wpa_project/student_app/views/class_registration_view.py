@@ -94,18 +94,8 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 else:
                     logging.debug(message)
                     return render(request, 'student_app/class_registration.html', {'form': form, 'message': message})
-        #     enrolled_beginners = models.IntegerField(default=0)
-        #     beginner_limit = models.IntegerField()
-        #     enrolled_returnee = models.IntegerField(default=0)
-        #     returnee_limit = models.IntegerField()
 
         else:
             logging.debug(form.errors)
+            return render(request, 'student_app/class_registration.html', {'form': form})
 
-        return HttpResponseRedirect(reverse('registration:profile'))
-    #     beginner_class = models.ForeignKey(BeginnerClass, on_delete=models.SET_NULL, null=True)
-    #     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
-    #     new_student = models.BooleanField()
-    #     pay_status = models.CharField(max_length=20)
-    #     idempotency_key = models.UUIDField(default=str(uuid.uuid4()))
-    #     reg_time = models.DateField()

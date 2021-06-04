@@ -1,10 +1,11 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import forms, CheckboxInput, BooleanField, ModelForm, TextInput
-
+import logging
 from ..models import StudentFamily
+logger = logging.getLogger(__name__)
 
 
-class StudentRegistrationForm(ModelForm):
+class StudentFamilyRegistrationForm(ModelForm):
 
     # terms = BooleanField(widget=CheckboxInput(attrs={'class': "form-control m-2 custom-control-input"}),
     #                            required=True)
@@ -21,4 +22,4 @@ class StudentRegistrationForm(ModelForm):
                    'post_code': TextInput(attrs={'placeholder': 'Zip', 'autocomplete': 'off',
                                                  'class': "form-control m-2 not_empty"}),
                    'phone': TextInput(attrs={'placeholder': 'Phone', 'autocomplete': 'off',
-                                             'class': "form-control m-2 not_empty"}),}
+                                             'class': "form-control m-2 not_empty"})}
