@@ -35,11 +35,18 @@ class TestsBeginnerClass(TestCase):
     #     get_page('registration:class_list', 'class_list')
 
     def test_beginner_class(self):
-        # Get the page
+        # Get the page user is forbidden
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('registration:beginner_class'))
         self.assertEqual(response.status_code, 403)
 
+        # Post the page user is forbidden
+        response = self.client.post(reverse('registration:beginner_class'),
+                                    {'class_date': '2021-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
+                                     'state': 'scheduled', 'cost': 5})
+        self.assertEqual(response.status_code, 403)
+
+        # allow user to access
         self.test_user.is_staff = True
         self.test_user.save()
         response = self.client.get(reverse('registration:beginner_class'))
@@ -91,6 +98,15 @@ class TestsBeginnerClass(TestCase):
                         {'class_date': '2022-06-06', 'beginner_limit': 2, 'returnee_limit': 2,
                          'state': 'scheduled', 'cost': 5})
         self.assertRedirects(response, reverse('registration:index'))
+        self.assertTemplateUsed('student_app/class_list.html')
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 2)
+
+        # New class different day invalid
+        response = self.client.post(reverse('registration:beginner_class'),
+                        {'beginner_limit': 2, 'returnee_limit': 2,
+                         'state': 'scheduled', 'cost': 5})
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_list.html')
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 2)

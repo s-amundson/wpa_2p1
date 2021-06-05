@@ -28,9 +28,9 @@ class SearchView(LoginRequiredMixin, View):
         if 'email' in request.POST:
             form = SearchEmailForm(request.POST)
             if form.is_valid():
-                user = EmailAddress.objects.filter(email=form.cleaned_data['email'])
+                user = EmailAddress.objects.filter(email__iexact=form.cleaned_data['email'])
                 if len(user) == 0:
-                    return render(request, 'registration/message.html', {'message': 'No email found'})
+                    return render(request, 'student_app/message.html', {'message': 'No email found'})
                 student_family = []
                 for u in user:
                     student_family.append(StudentFamily.objects.filter(user=u.user))
@@ -38,10 +38,10 @@ class SearchView(LoginRequiredMixin, View):
         elif 'first_name' in request.POST:
             form = SearchNameForm(request.POST)
             if form.is_valid():
-                student = Student.objects.filter(first_name=form.cleaned_data['first_name'],
-                                                 last_name=form.cleaned_data['last_name'])
+                student = Student.objects.filter(first_name__iexact=form.cleaned_data['first_name'],
+                                                 last_name__iexact=form.cleaned_data['last_name'])
                 if len(student) == 0:
-                    return render(request, 'registration/message.html', {'message': 'No student found'})
+                    return render(request, 'student_app/message.html', {'message': 'No student found'})
                 student_family = []
                 for s in student:
                     student_family.append(s.student_family)
@@ -51,7 +51,7 @@ class SearchView(LoginRequiredMixin, View):
             if form.is_valid():
                 s = StudentFamily.objects.filter(phone=form.cleaned_data['phone'])
                 if len(s) == 0:
-                    return render(request, 'registration/message.html', {'message': 'No student found'})
+                    return render(request, 'student_app/message.html', {'message': 'No student found'})
                 return render(request, 'student_app/search_result.html', {'student_family': s})
 
         email_form = SearchEmailForm()

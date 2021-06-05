@@ -1,10 +1,5 @@
-import json
 import logging
-import os
 
-import allauth
-from django.conf import settings
-from django.template.loader import render_to_string
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib import auth
@@ -13,7 +8,7 @@ from ..models import StudentFamily, Student, User
 
 logger = logging.getLogger(__name__)
 
-class RegisterStudent(TestCase):
+class TestsRegisterStudent(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +37,18 @@ class RegisterStudent(TestCase):
         response = self.client.get(reverse('registration:profile'))
         self.assertRedirects(response, reverse('registration:student_register'))
 
+        response = self.client.get(reverse('registration:student_register'))
+        self.assertEqual(response.status_code, 200)
+
+        # add a student family with error
+        d = {'street': '123 main', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
+        response = self.client.post(reverse('registration:student_register'), d)
+        self.assertTemplateUsed('student_app/register.html')
+        self.assertEqual(response.status_code, 200)
+        sf = StudentFamily.objects.all()
+        self.assertEquals(len(sf), 0)
+
+
         # add a student family
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
         response = self.client.post(reverse('registration:student_register'), d)
@@ -55,12 +62,31 @@ class RegisterStudent(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # add a student
+        response = self.client.get(reverse('registration:add_student'))
+        self.assertEqual(response.status_code, 200)
         d = {'first_name':'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
         response = self.client.post(reverse('registration:add_student'), d)
         # self.assertEqual(response.status_code, 200)
         s = sf[0].student_set.all()
-        logging.debug(s)
         self.assertEquals(len(s), 1)
+
+        # check that when we get a page with a student the student shows up.
+        response = self.client.get(reverse('registration:add_student', kwargs={'student_id': 1}))
+        self.assertContains(response, 'Christy')
+
+        # add student with error
+        d = {'first_name': 'Tom', 'last_name': 'Smith', 'dob': '2020/02/02'}
+        response = self.client.post(reverse('registration:add_student'), d)
+        s = sf[0].student_set.all()
+        self.assertEquals(len(s), 1)
+        self.assertEqual(response.status_code, 200)
+        logging.debug(response.status_code)
+
+        # go back to student family registration
+        response = self.client.get(reverse('registration:student_register'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '123 main')
+
 
     def test_login_invaid(self):
         """Tests invalid login with username and password"""
@@ -79,14 +105,3 @@ class RegisterStudent(TestCase):
         # with :
         #     render_to_string('account/login.html')
         logging.debug(response)
-
-    # def test_login_valid(self):
-    #     logging.debug(self.test_user.email)
-    #     response = self.client.post(reverse('account_login'),
-    #                                 {'login': self.test_user.email, 'password': self.test_user.password})
-    #     user = auth.get_user(self.client)
-    #     # logging.debug(self.client.)
-    #     self.assertTrue(user.is_authenticated)
-    #     self.assertTemplateUsed('account/login.html')
-    #     self.assertEqual(response.status_code, 200)
-

@@ -27,6 +27,15 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/form_as_p.html')
 
+        # add a user to the class with error
+        self.client.post(reverse('registration:class_registration'), {'beginner_class': '2022-06', 'student_1': 'on'})
+        bc = BeginnerClass.objects.all()
+        self.assertEqual(bc[0].enrolled_beginners, 0)
+        self.assertEqual(bc[0].enrolled_returnee, 0)
+        self.assertEqual(bc[0].state, 'open')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 0)
+
         # add a user to the class
         self.client.post(reverse('registration:class_registration'), {'beginner_class': '2022-06-05', 'student_1': 'on'})
         bc = BeginnerClass.objects.all()

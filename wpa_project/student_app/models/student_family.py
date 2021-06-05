@@ -1,10 +1,10 @@
 import logging
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models
 
 from django.utils import timezone
+from ..fields import PhoneField
 logger = logging.getLogger(__name__)
 
 

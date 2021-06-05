@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 from django.db import models
 from .beginner_class import BeginnerClass
@@ -14,6 +13,6 @@ class ClassRegistration(models.Model):
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
     new_student = models.BooleanField()
     pay_status = models.CharField(max_length=20)
-    idempotency_key = models.UUIDField(default=str(uuid.uuid4()))
+    idempotency_key = models.UUIDField()
     reg_time = models.DateField(default=timezone.now)
     attended = models.BooleanField(default=False)

@@ -4,7 +4,7 @@ from django.forms import forms, CheckboxInput, BooleanField, ModelForm, TextInpu
 from ..models import StudentFamily
 
 
-class StudentRegistrationForm(ModelForm):
+class StudentFamilyRegistrationForm(ModelForm):
 
     # terms = BooleanField(widget=CheckboxInput(attrs={'class': "form-control m-2 custom-control-input"}),
     #                            required=True)
@@ -21,4 +21,4 @@ class StudentRegistrationForm(ModelForm):
                    'post_code': TextInput(attrs={'placeholder': 'Zip', 'autocomplete': 'off',
                                                  'class': "form-control m-2 not_empty"}),
                    'phone': TextInput(attrs={'placeholder': 'Phone', 'autocomplete': 'off',
-                                             'class': "form-control m-2 not_empty"}),}
+                                             'class': "form-control m-2 not_empty"})}
