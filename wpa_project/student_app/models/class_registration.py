@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 from django.db import models
 from .beginner_class import BeginnerClass

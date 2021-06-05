@@ -58,7 +58,7 @@ class TestsClassSearch(TestCase):
         self.assertTemplateUsed('student_app/search_result.html')
 
         # search by phone without result
-        response = self.client.post(reverse('registration:search'), {'phone': 'NoPhone'})
+        response = self.client.post(reverse('registration:search'), {'phone': '19009009999'})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/message.html')
 

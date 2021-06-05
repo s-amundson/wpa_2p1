@@ -8,7 +8,6 @@ from ..models import StudentFamily, Student, User
 
 logger = logging.getLogger(__name__)
 
-
 class TestsRegisterStudent(TestCase):
 
     def __init__(self, *args, **kwargs):
@@ -49,8 +48,9 @@ class TestsRegisterStudent(TestCase):
         sf = StudentFamily.objects.all()
         self.assertEquals(len(sf), 0)
 
+
         # add a student family
-        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': +11231231234}
+        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
         response = self.client.post(reverse('registration:student_register'), d)
         self.assertTemplateUsed('student_app/profile.html')
         self.assertRedirects(response, reverse('registration:profile'))
@@ -86,6 +86,7 @@ class TestsRegisterStudent(TestCase):
         response = self.client.get(reverse('registration:student_register'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '123 main')
+
 
     def test_login_invaid(self):
         """Tests invalid login with username and password"""

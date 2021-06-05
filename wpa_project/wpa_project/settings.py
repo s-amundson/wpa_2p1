@@ -17,7 +17,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-with open(os.path.join(BASE_DIR, 'wpa_project', 'secrets.json')) as secrets_file:
+with open(os.path.join(BASE_DIR,'wpa_project', 'secrets.json')) as secrets_file:
     secret_settings = json.load(secrets_file)
 
 

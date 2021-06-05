@@ -14,7 +14,6 @@ from ..models import BeginnerClass, User
 
 logger = logging.getLogger(__name__)
 
-
 class TestsBeginnerClass(TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

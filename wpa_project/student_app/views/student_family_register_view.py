@@ -14,23 +14,20 @@ class StudentFamilyRegisterView(LoginRequiredMixin, View):
     """To register a student"""
 
     def get_students(self, request):
-        student_family =  StudentFamily.objects.filter(user=request.user)
+        student_family = StudentFamily.objects.filter(user=request.user)
         if student_family.exists():
             self.form = StudentFamilyRegistrationForm(instance=student_family[0])
         else:
             self.form = StudentFamilyRegistrationForm()
 
     def get(self, request):
-        logging.debug(request)
         self.get_students(request)
-        logging.debug('here')
         return render(request, 'student_app/register.html', {'form': self.form})
 
     def post(self, request):
         form = StudentFamilyRegistrationForm(request.POST)
-        logging.debug(request.POST)
         if form.is_valid():
-            logging.debug(form.cleaned_data)
+
             f = form.save()
             f.user.add(request.user)
             # request.session['student_family'] = f.id

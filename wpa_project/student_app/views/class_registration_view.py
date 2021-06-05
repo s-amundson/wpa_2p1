@@ -99,3 +99,4 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             logging.debug(form.errors)
             return render(request, 'student_app/class_registration.html', {'form': form})
 
+        return HttpResponseRedirect(reverse('registration:profile'))

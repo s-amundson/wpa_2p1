@@ -1,8 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import forms, CheckboxInput, BooleanField, ModelForm, TextInput
-import logging
+
 from ..models import StudentFamily
-logger = logging.getLogger(__name__)
 
 
 class StudentFamilyRegistrationForm(ModelForm):

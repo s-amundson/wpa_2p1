@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm db.sqlite3
+rm wpa_project/db.sqlite3
 rm ./student_app/migrations/0*
 
 python manage.py makemigrations student_app
