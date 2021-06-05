@@ -15,7 +15,7 @@ class StudentFamily(models.Model):
     city = models.CharField(max_length=150)
     state = models.CharField(max_length=3)
     post_code = models.CharField(max_length=10)
-    phone = models.CharField(max_length=20)
+    phone = PhoneField(max_length=20)
 
     # hidden fields
     registration_date = models.DateField(default=timezone.now)
