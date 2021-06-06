@@ -66,6 +66,17 @@
   <div class="row">
     Payments are processed with Square.
   </div>
+
+  {% if bypass %}
+    <div class="row">
+      <form method="post" autocomplete="off" class="form">
+        {% csrf_token %}
+        <input type="hidden" id="bypass" name="bypass" value="">
+          <button class="btn btn-primary m-2" type="submit" id="id_submit">Comp</button>
+      </form>
+    </div>
+  {% endif %}
+
 <!--     <form id="payment-form">-->
 <!--       <div id="card-container"></div>-->
 <!--       <button id="card-button" type="button">Pay $1.00</button>-->
@@ -80,8 +91,9 @@
   <div class="row">
     {% if bypass %}
 <!--      <form id="form1" action="/process_payment" method="post" class="form" name="form1">-->
-    <form method="post" action="." autocomplete="off" class="form">
+    <form method="post" autocomplete="off" class="form">
         {% csrf_token %}
+        <input type="hidden" id="bypass" name="bypass" value="">
           <button class="btn btn-primary m-2" type="submit" id="id_submit">Bypass</button>
       </form>
     {% endif %}

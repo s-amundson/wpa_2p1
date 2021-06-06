@@ -15,7 +15,7 @@ class PhoneField(models.CharField):
         if isinstance(value, str):
             n = phonenumbers.parse(value, 'US')
             s = phonenumbers.format_number(n, phonenumbers.PhoneNumberFormat.E164)
-            logging.debug(f'n = {n}, s = {s}')
+            # logging.debug(f'n = {n}, s = {s}')
             return s
         if value is None:
             return value

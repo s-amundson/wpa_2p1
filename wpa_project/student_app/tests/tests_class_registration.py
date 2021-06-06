@@ -23,7 +23,7 @@ class TestsClassRegistration(TestCase):
         # Get the page
         self.client.force_login(self.test_user)
 
-        response = self.client.get(reverse('registration:class_registration'))
+        response = self.client.get(reverse('registration:class_registration'), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/form_as_p.html')
 
@@ -37,7 +37,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 0)
 
         # add a user to the class
-        self.client.post(reverse('registration:class_registration'), {'beginner_class': '2022-06-05', 'student_1': 'on'})
+        self.client.post(reverse('registration:class_registration'), {'beginner_class': '2022-06-05', 'student_1': 'on'}, secure=True)
         bc = BeginnerClass.objects.all()
         self.assertEqual(bc[0].enrolled_beginners, 1)
         self.assertEqual(bc[0].enrolled_returnee, 0)
@@ -80,7 +80,7 @@ class TestsClassRegistration(TestCase):
         # change user, then add 1 beginner students and 1 returnee.
         self.client.force_login(User.objects.get(pk=3))
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_4': 'on', 'student_5': 'on'})
+                         {'beginner_class': '2022-06-05', 'student_4': 'on', 'student_5': 'on'}, secure=True)
         bc = BeginnerClass.objects.all()
         self.assertEqual(bc[0].enrolled_beginners, 2)
         self.assertEqual(bc[0].enrolled_returnee, 1)
@@ -90,7 +90,7 @@ class TestsClassRegistration(TestCase):
 
         # don't change user, try to add user not in family to class
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_6': 'on'})
+                         {'beginner_class': '2022-06-05', 'student_6': 'on'}, secure=True)
         bc = BeginnerClass.objects.all()
         self.assertEqual(bc[0].enrolled_beginners, 2)
         self.assertEqual(bc[0].enrolled_returnee, 1)
@@ -101,7 +101,7 @@ class TestsClassRegistration(TestCase):
         # change user, then add 1 returnee.
         self.client.force_login(User.objects.get(pk=4))
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_6': 'on'})
+                         {'beginner_class': '2022-06-05', 'student_6': 'on'}, secure=True)
         bc = BeginnerClass.objects.all()
         self.assertEqual(bc[0].enrolled_beginners, 2)
         self.assertEqual(bc[0].enrolled_returnee, 2)

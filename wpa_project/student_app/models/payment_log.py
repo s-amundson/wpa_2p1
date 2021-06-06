@@ -15,4 +15,5 @@ class PaymentLog(models.Model):
     description = models.CharField(max_length=50, null=True)
     idempotency_key = models.UUIDField()
     receipt = models.CharField(max_length=100, null=True)
+    source_type = models.CharField(max_length=50, null=True)
 

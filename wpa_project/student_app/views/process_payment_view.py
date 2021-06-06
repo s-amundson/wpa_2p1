@@ -1,27 +1,24 @@
 import logging
 import uuid
-from datetime import timedelta
 from django.conf import settings
 from django.shortcuts import render
-from django.utils.datetime_safe import date
+from django.utils.datetime_safe import datetime
 from django.views.generic.base import View
+from django.contrib.auth.mixins import LoginRequiredMixin
 from square.client import Client
 from ..models import ClassRegistration, PaymentLog, StudentFamily
-from ..src.square_helper import line_item
-#
-# from registration.models import Joad_session_registration, Member, Payment_log, Membership
-# from registration.src.Email import Email
+from ..src.square_helper import dummy_response, line_item
 
 logger = logging.getLogger(__name__)
 
 
-class ProcessPaymentView(View):
+class ProcessPaymentView(LoginRequiredMixin, View):
     """Shows a payment page for making purchases"""
 
     def get(self, request):
-        # TODO remove this as it is just to get square working
-        request.session['idempotency_key'] = str(uuid.uuid4())
-        request.session['line_items'] = [line_item(f"Class on None student id: 1", 1, 5), ]
+        # # TODO remove this as it is just to get square working
+        # request.session['idempotency_key'] = str(uuid.uuid4())
+        # request.session['line_items'] = [line_item(f"Class on None student id: 1", 1, 5), ]
 
         paydict = {}
         if settings.SQUARE_CONFIG['environment'] == "production":
@@ -58,19 +55,8 @@ class ProcessPaymentView(View):
     def post(self, request):
         logging.debug(request.POST)
         idempotency_key = request.session.get('idempotency_key', None)
-        sq_token = request.session.get('sq_token', None)
-
-        if idempotency_key is None or sq_token is None:
-            return render(request, 'student_app/message.html', {'message': 'payment processing error'})
-
-        # Create an instance of the API Client
-        # and initialize it with the credentials
-        # for the Square account whose assets you want to manage
-
-        client = Client(
-            access_token=settings.SQUARE_CONFIG['access_token'],
-            environment=settings.SQUARE_CONFIG['environment'],
-        )
+        sq_token = request.POST.get('sq_token', None)
+        logging.debug(f'uuid = {idempotency_key}, sq_token = {sq_token}')
 
         # get the amount form the line items
         # also get line item name and add to notes
@@ -82,6 +68,48 @@ class ProcessPaymentView(View):
 
         # Monetary amounts are specified in the smallest unit of the applicable currency.
         amount = {'amount': amt, 'currency': 'USD'}
+
+        if idempotency_key is not None and sq_token is not None:
+            square_response = self.process_payment(idempotency_key, sq_token, note, amount)
+            create_date = datetime.strptime(square_response['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        elif request.POST.get('bypass', None) is not None:
+            logging.debug(request.POST.get('bypass', None))
+            square_response = dummy_response(note, amount)
+            create_date = datetime.now()
+        else:
+            return render(request, 'student_app/message.html', {'message': 'payment processing error'})
+
+        log = PaymentLog.objects.create(user=request.user,
+                                        student_family=StudentFamily.objects.filter(user=request.user)[0],
+                                        checkout_created_time=create_date,
+                                        checkout_id=square_response['id'],
+                                        order_id=square_response['order_id'],
+                                        location_id=square_response['location_id'],
+                                        state=square_response['status'],
+                                        total_money=square_response['approved_money']['amount'],
+                                        description=square_response['note'],
+                                        idempotency_key=idempotency_key,
+                                        receipt=square_response['receipt_url'],
+                                        source_type=square_response['source_type'])
+        # TODO email receipt if exists
+
+        if request.session.get('payment_db', None) == 'ClassRegistration':
+            class_registration = ClassRegistration.objects.filter(idempotency_key=idempotency_key)
+            for student in class_registration:
+                student.pay_status = 'paid'
+
+        return render(request, 'student_app/message.html', {'message': 'payment successful'})
+
+    def process_payment(self, idempotency_key, sq_token, note, amount):
+
+        # Create an instance of the API Client
+        # and initialize it with the credentials
+        # for the Square account whose assets you want to manage
+
+        client = Client(
+            access_token=settings.SQUARE_CONFIG['access_token'],
+            environment=settings.SQUARE_CONFIG['environment'],
+        )
 
         result = client.payments.create_payment(
             body={
@@ -99,36 +127,5 @@ class ProcessPaymentView(View):
         elif result.is_error():
             logging.debug(result.errors)
 
-        # if not settings.DEBUG and not settings.TESTING:
-        #     nonce = request.POST.get('nonce')
+        return result.body['payment']
 
-        #     # environment = square_cfg['environment']
-        #     square_response = self.nonce(idempotency_key, nonce, request.session['line_items'])
-        #     if isinstance(square_response, str):
-        #         return render(request, 'student_app/message.html', {'message': 'payment processing error'})
-        #     # if response.is_error():
-        #     logging.debug(f"response type = {type(square_response)} response = {square_response}")
-        # else:
-        #     square_response = {'created_at': date.today().isoformat(), 'id': "", 'order_id': '', 'location_id': '',
-        #                        'status': '', 'amount_money': {'amount': '12300'}, 'receipt_url': ''}
-
-        # if request.session['payment_db'] == 'ClassRegistration':
-        #     class_registration = ClassRegistration.objects.filter(idempotency_key=idempotency_key)
-        #     for student in class_registration:
-        #         student.pay_status = 'paid'
-        #
-        # description = request.session['line_items'][0]['name']
-        # cd = date.fromisoformat(square_response['created_at'])
-        # log = PaymentLog.objects.create(user=request.user,
-        #                                 student_family=StudentFamily.objects.filter(user=request.user)[0],
-        #                                 checkout_created_time=cd,
-        #                                 checkout_id=square_response['id'],
-        #                                 order_id=square_response['order_id'],
-        #                                 location_id=square_response['location_id'],
-        #                                 state=square_response['status'],
-        #                                 total_money=square_response['amount_money']['amount'],
-        #                                 description=description,
-        #                                 idempotency_key=idempotency_key,
-        #                                 receipt=square_response['receipt_url'])
-
-        return render(request, 'student_app/message.html', {'message': 'payment successful'})
