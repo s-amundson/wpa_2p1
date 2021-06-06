@@ -10,6 +10,7 @@ urlpatterns = [
         path('class_list', BeginnerClassListView.as_view(), name='class_list'),
         path('class_registration', ClassRegistrationView.as_view(), name='class_registration'),
         path('process_payment', ProcessPaymentView.as_view(), name='process_payment'),
+        path('process_payment/<str:message>/', ProcessPaymentView.as_view(), name='process_payment'),
         path('profile', ProfileView.as_view(), name='profile'),
         path('search', SearchView.as_view(), name='search'),
         path('student_register', StudentFamilyRegisterView.as_view(), name='student_register'),

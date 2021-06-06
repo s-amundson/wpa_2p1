@@ -92,3 +92,11 @@ if (status === 'SUCCESS') {
 
 statusContainer.style.visibility = 'visible';
 }
+
+
+$(document).ready(function() {
+    if ($('#message').html() != "") {
+        alert($('#message').html());
+    };
+
+});

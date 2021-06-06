@@ -1,7 +1,9 @@
 import logging
 import uuid
 from django.conf import settings
-from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.utils.datetime_safe import datetime
 from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,8 +19,8 @@ class ProcessPaymentView(LoginRequiredMixin, View):
 
     def get(self, request):
         # # TODO remove this as it is just to get square working
-        # request.session['idempotency_key'] = str(uuid.uuid4())
-        # request.session['line_items'] = [line_item(f"Class on None student id: 1", 1, 5), ]
+        request.session['idempotency_key'] = str(uuid.uuid4())
+        request.session['line_items'] = [line_item(f"Class on None student id: 1", 1, 5), ]
 
         paydict = {}
         if settings.SQUARE_CONFIG['environment'] == "production":
@@ -34,7 +36,8 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         if settings.DEBUG or request.user.is_authenticated:
             bypass = True
         logging.debug(paydict)
-        context = {'paydict': paydict, 'rows': rows, 'total': total, 'bypass': bypass}
+        message = request.session.get('message', '')
+        context = {'paydict': paydict, 'rows': rows, 'total': total, 'bypass': bypass, 'message': message}
         return render(request, 'student_app/square_pay.html', context)
 
     def table_rows(self, session):
@@ -57,7 +60,10 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         idempotency_key = request.session.get('idempotency_key', None)
         sq_token = request.POST.get('sq_token', None)
         logging.debug(f'uuid = {idempotency_key}, sq_token = {sq_token}')
-
+        request.session['message'] = ''
+        if request.session.get('line_items', None) is None:
+            logging.debug('missing line items.')
+            return render(request, 'student_app/message.html', {'message': 'payment processing error'})
         # get the amount form the line items
         # also get line item name and add to notes
         amt = 0
@@ -71,12 +77,27 @@ class ProcessPaymentView(LoginRequiredMixin, View):
 
         if idempotency_key is not None and sq_token is not None:
             square_response = self.process_payment(idempotency_key, sq_token, note, amount)
+            logging.debug(square_response['error'])
+            if len(square_response['error']) > 0:
+
+                for e in square_response['error']:
+                    if e['code'] == 'GENERIC_DECLINE':
+                        request.session['message'] += 'Card was declined, '
+                    elif e['code'] == 'CVV_FAILURE':
+                        request.session['message'] += 'Error with CVV, '
+                    elif e['code'] == 'INVALID_EXPIRATION':
+                        request.session['message'] += 'Invalid expiration date, '
+                    else:
+                        request.session['message'] += 'Other payment error'
+                logging.debug(request.session['message'])
+                return redirect('registration:process_payment')
             create_date = datetime.strptime(square_response['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
         elif request.POST.get('bypass', None) is not None:
             logging.debug(request.POST.get('bypass', None))
             square_response = dummy_response(note, amount)
             create_date = datetime.now()
         else:
+            logging.debug('payment processing error')
             return render(request, 'student_app/message.html', {'message': 'payment processing error'})
 
         log = PaymentLog.objects.create(user=request.user,
@@ -121,11 +142,13 @@ class ProcessPaymentView(LoginRequiredMixin, View):
                 "note": note
             }
         )
-
+        square_response = result.body.get('payment', {'payment': None})
         if result.is_success():
             logging.debug(result.body)
+            square_response['error'] = []
         elif result.is_error():
             logging.debug(result.errors)
+            square_response['error'] = result.errors
 
-        return result.body['payment']
+        return square_response
 
