@@ -4,6 +4,7 @@
 {% endblock %}
 
 {% block script %}
+    {% load static %}
     <!-- link to the SqPaymentForm library -->
     <script type="text/javascript" src="{{ paydict.pay_url }}"></script>
 
@@ -13,10 +14,10 @@
     </script>
 
     <!-- link to the local SqPaymentForm initialization -->
-    <script type="text/javascript" src="static/sq-payment-form.js"></script>
+    <script src="{% static 'js/sq-payment-form.js' %}"></script>
 
     <!-- link to the custom styles for SqPaymentForm -->
-    <link rel="stylesheet" type="text/css" href="static/sq-payment-form.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'sq-payment-form.css' %}">
 {% endblock %}
 
 {% block main %}
@@ -65,66 +66,17 @@
   <div class="row">
     Payments are processed with Square.
   </div>
-    <!-- Begin Payment Form -->
-    <div class="sq-payment-form">
-      <!--
-        Square's JS will automatically hide these buttons if they are unsupported
-        by the current device.
-      -->
-      <div id="sq-walletbox">
-        <button id="sq-google-pay" class="button-google-pay"></button>
-        <button id="sq-apple-pay" class="sq-apple-pay"></button>
-        <button id="sq-masterpass" class="sq-masterpass"></button>
-        <div class="sq-wallet-divider">
-          <span class="sq-wallet-divider__text">Or</span>
-        </div>
-      </div>
-      <div id="sq-ccbox">
-        <!--
-          You should replace the action attribute of the form with the path of
-          the URL you want to POST the nonce to (for example, "/process-card").
-
-          You need to then make a "Charge" request to Square's Payments API with
-          this nonce to securely charge the customer.
-
-          Learn more about how to setup the server component of the payment form here:
-          https://developer.squareup.com/docs/payments-api/overview
-        -->
-        <form id="nonce-form" novalidate action="/process_payment" method="post">
+<!--     <form id="payment-form">-->
+<!--       <div id="card-container"></div>-->
+<!--       <button id="card-button" type="button">Pay $1.00</button>-->
+<!--     </form>-->
+        <form id="payment-form" novalidate action="/process_payment" method="post">
           {% csrf_token %}
-          <div class="sq-field">
-            <label class="sq-label">Card Number</label>
-            <div id="sq-card-number"></div>
-          </div>
-          <div class="sq-field-wrapper">
-            <div class="sq-field sq-field--in-wrapper">
-              <label class="sq-label">CVV</label>
-              <div id="sq-cvv"></div>
-            </div>
-            <div class="sq-field sq-field--in-wrapper">
-              <label class="sq-label">Expiration</label>
-              <div id="sq-expiration-date"></div>
-            </div>
-            <div class="sq-field sq-field--in-wrapper">
-              <label class="sq-label">Postal</label>
-              <div id="sq-postal-code"></div>
-            </div>
-          </div>
-          <div class="sq-field">
-            <button id="sq-creditcard" class="sq-button" onclick="onGetCardNonce(event)">
-              Pay Now
-            </button>
-          </div>
-          <!--
-            After a nonce is generated it will be assigned to this hidden input field.
-          -->
-          <div id="error"></div>
-          <input type="hidden" id="card-nonce" name="nonce">
+          <input type="hidden" id="sq_token" name="sq_token" value="">
+          <div id="card-container"></div>
+          <button id="card-button" type="button"> Pay Now </button>
         </form>
-      </div>
-
-    </div>
-    <!-- End Payment Form -->
+    <div id="payment-status-container"></div>
   <div class="row">
     {% if bypass %}
 <!--      <form id="form1" action="/process_payment" method="post" class="form" name="form1">-->

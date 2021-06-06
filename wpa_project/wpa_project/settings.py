@@ -102,7 +102,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     # 'allauth.socialaccount.providers.facebook',
     # 'allauth.socialaccount.providers.instagram',
-
+    "sslserver",
 ]
 
 LOGIN_REDIRECT_URL = 'registration:profile'
@@ -122,6 +122,7 @@ LOGIN_REDIRECT_URL = 'registration:profile'
 #     },
 #
 # }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -179,17 +180,15 @@ ROOT_URLCONF = 'wpa_project.urls'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
 
+SECURE_SSL_REDIRECT = True
+
 SITE_ID = 1
 
 # Provider specific settings
 SOCIALACCOUNT_PROVIDERS = get_secret('SOCIALACCOUNT_PROVIDERS')
 
 
-SQUARE_CONFIG = {
-    'access_token': 'EAAAEAqek4pqVJESMVRdtlsL0OkEFPjs4QqmjwDqJJDGqFQ6NmgiRCAAcleTcDhR',
-    'application_id': 'sandbox-sq0idb-GT2r-GRa1mdpWUuMdTJZcw',
-    'location_id': 'SVM1F73THA9W6',
-    'environment': 'sandbox'}
+SQUARE_CONFIG = get_secret('SQUARE_CONFIG')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
