@@ -7,6 +7,7 @@ async function initializeCard(payments) {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
+$("#receipt").hide();
 if (!window.Square) {
   throw new Error('Square.js failed to load properly');
 }
@@ -51,9 +52,24 @@ try {
 // to the project server code so that a payment can be created with
 // Payments API
 async function createPayment(token) {
-    $("#sq_token").val(token);
-    $('#payment-form').submit();
+//    $("#sq_token").val(token);
+//    $('#payment-form').submit();
 
+    var paymentResponse = await $.post("payment", {
+        sq_token: token,
+        csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
+        }, function(data, status){
+            return data;
+            }, "json");
+    if (paymentResponse["status"] == "COMPLETED") {
+        $("#receipt").show();
+        $("#receipt").attr("href", paymentResponse["receipt_url"]);
+        }
+    else {
+        alert(paymentResponse["error"]);
+        throw new Error(paymentResponse["error"]);
+        }
+    return paymentResponse;
 }
 
 // This function tokenizes a payment method.
@@ -94,9 +110,9 @@ statusContainer.style.visibility = 'visible';
 }
 
 
-$(document).ready(function() {
-    if ($('#message').html() != "") {
-        alert($('#message').html());
-    };
-
-});
+//$(document).ready(function() {
+//    if ($('#message').html() != "") {
+//        alert($('#message').html());
+//    };
+//
+//});

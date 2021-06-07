@@ -6,12 +6,6 @@ body {
   font-family: Arial, sans-serif;
 }
 
-#payment-form {
-  max-width: 550px;
-  min-width: 300px;
-  margin: 150px auto;
-}
-
 .buyer-inputs {
   display: flex;
   gap: 20px;

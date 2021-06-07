@@ -28,13 +28,13 @@
     <div class="col-md">
       <strong>Item</strong>
     </div>
-    <div class="col-md">
+    <div class="col-md-2">
       Quanity
     </div>
-    <div class="col-md">
+    <div class="col-md-2">
       <strong>Amount each</strong>
     </div>
-    <div class="col-md">
+    <div class="col-md-2">
       <strong>Amount</strong>
     </div>
   </div>
@@ -44,13 +44,13 @@
       <div class="col-md">
         {{ row.name }}
       </div>
-      <div class="col-md">
+      <div class="col-md-2">
         {{ row.quantity }}
       </div>
-      <div class="col-md">
+      <div class="col-md-2">
         {{ row.amount_each }}
       </div>
-      <div class="col-md">
+      <div class="col-md-2">
         {{ row.amount_total }}
       </div>
     </div>
@@ -60,9 +60,9 @@
       <div class="col-md">
         Total
       </div>
-      <div class="col-md"></div>
-      <div class="col-md"></div>
-      <div class="col-md">
+      <div class="col-md-2"></div>
+      <div class="col-md-2"></div>
+      <div class="col-md-2">
         {{ total }}
       </div>
     </div>
@@ -80,26 +80,19 @@
     </div>
   {% endif %}
 
-<!--     <form id="payment-form">-->
-<!--       <div id="card-container"></div>-->
-<!--       <button id="card-button" type="button">Pay $1.00</button>-->
-<!--     </form>-->
-        <form id="payment-form" novalidate action="/process_payment" method="post">
-          {% csrf_token %}
-          <input type="hidden" id="sq_token" name="sq_token" value="">
-          <div id="card-container"></div>
-          <button id="card-button" type="button"> Pay Now </button>
-        </form>
-    <div id="payment-status-container"></div>
   <div class="row">
-    {% if bypass %}
-<!--      <form id="form1" action="/process_payment" method="post" class="form" name="form1">-->
-    <form method="post" autocomplete="off" class="form">
+      <form class="col" id="payment-form" novalidate action="/process_payment" method="post">
         {% csrf_token %}
-        <input type="hidden" id="bypass" name="bypass" value="">
-          <button class="btn btn-primary m-2" type="submit" id="id_submit">Bypass</button>
+        <input type="hidden" id="sq_token" name="sq_token" url="{% url 'registration:payment' %}" value="">
+        <div id="card-container"></div>
+        <button id="card-button" type="button"> Pay Now </button>
       </form>
-    {% endif %}
+  </div>
+  <div class="row">
+    <div class="col" id="payment-status-container"></div>
+    <div class="col" >
+      <a class="nav-link" id="receipt" href=""> Reciept </a>
+    </div>
   </div>
 
 {% endblock %}
