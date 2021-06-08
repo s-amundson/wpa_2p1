@@ -79,6 +79,7 @@ class ProcessPaymentView(LoginRequiredMixin, View):
             logging.debug(request.POST.get('bypass', None))
             square_response = dummy_response(note, amount)
             log_response(request, square_response, create_date=datetime.now())
+            return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})
         else:
             logging.debug('payment processing error')
             return render(request, 'student_app/message.html', {'message': 'payment processing error'})

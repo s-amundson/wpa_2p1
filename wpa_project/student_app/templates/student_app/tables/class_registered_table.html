@@ -1,0 +1,21 @@
+<form class="col form" method="post" action="{% url 'registration:class_registration' %}" autocomplete="off">
+    <div class="row">
+        <div class="col border"> Class Date</div>
+        <div class="col border"> First Name </div>
+        <div class="col border"> Last Name </div>
+        <div class="col border"> Cancel </div>
+    </div>
+    {% for class in enrolled_classes %}
+        <div class="row">
+            <div class="col border"> {{ class.beginner_class.class_date }} </div>
+            <div class="col border"> {{ class.student.first_name }} </div>
+            <div class="col border"> {{ class.student.last_name }} </div>
+            <div class="col border">
+                <input type="checkbox" class_id={{ class.id }} class="m-2 unreg" id="id_class_{{ class.id }}">
+            </div>
+        </div>
+    {% endfor %}
+    <div class="row p-2">
+        <button class="btn btn-primary" type="submit">Unregister</button>
+    </div>
+</form>

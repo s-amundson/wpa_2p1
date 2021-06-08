@@ -50,6 +50,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(self.client.session['payment_db'], 'ClassRegistration')
         # self.assertRedirects(response, reverse('registration:index'))
         # self.assertRedirects(response, reverse('registration:process_payment'))
+        self.client.get(reverse('registration:class_registration'), secure=True)
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(User.objects.get(pk=2))
@@ -61,6 +62,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(bc[0].state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
+
 
         # try to add first user to class again.
         logging.debug('add user again')

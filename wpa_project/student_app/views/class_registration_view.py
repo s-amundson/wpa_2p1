@@ -17,12 +17,18 @@ from ..src.square_helper import line_item
 logger = logging.getLogger(__name__)
 
 
+class ClassRegisteredTable(LoginRequiredMixin, View):
+    def get(self, request):
+        students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
+        enrolled_classes = ClassRegistration.objects.filter(student__in=students)
+        logging.debug(enrolled_classes.values())
+        return render(request, 'student_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
+
+
 class ClassRegistrationView(LoginRequiredMixin, View):
     def get(self, request):
-        # classes = BeginnerClass.get_open_classes()
         students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
         form = ClassRegistrationForm(students)
-
         return render(request, 'student_app/class_registration.html', {'form': form})
 
     def post(self, request):
