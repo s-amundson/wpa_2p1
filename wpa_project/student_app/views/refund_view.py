@@ -1,21 +1,11 @@
-import uuid
-
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
 from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
-from django.utils import timezone
+
 import logging
-
-
 from ..forms import ClassRegistrationForm
-from ..models import BeginnerClass, ClassRegistration, Student, StudentFamily
-from ..src.square_helper import line_item
-
+from ..models import StudentFamily
 logger = logging.getLogger(__name__)
-
 
 
 class RefundView(LoginRequiredMixin, View):

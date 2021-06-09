@@ -9,7 +9,7 @@ from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from square.client import Client
 from ..models import ClassRegistration, PaymentLog, StudentFamily
-from ..src.square_helper import dummy_response, line_item, log_response
+from ..src.square_helper import SquareHelper
 
 logger = logging.getLogger(__name__)
 
@@ -76,9 +76,10 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         amount = {'amount': amt, 'currency': 'USD'}
 
         if request.POST.get('bypass', None) is not None:
+            sh = SquareHelper()
             logging.debug(request.POST.get('bypass', None))
-            square_response = dummy_response(note, amount)
-            log_response(request, square_response, create_date=datetime.now())
+            square_response = sh.comp_response(note, amount)
+            sh.log_payment(request, square_response, create_date=datetime.now())
             return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})
         else:
             logging.debug('payment processing error')

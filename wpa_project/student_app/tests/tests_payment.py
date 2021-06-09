@@ -5,7 +5,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from ..models import PaymentLog, User
-from ..src.square_helper import line_item, dummy_response
+from ..src.square_helper import SquareHelper
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class TestsPayment(TestCase):
         self.client.force_login(self.test_user)
         session = self.client.session
         session['idempotency_key'] = str(uuid.uuid4())
-        session['line_items'] = [line_item(f"Class on None student id: 1", 1, 5), ]
+        session['line_items'] = [SquareHelper().line_item(f"Class on None student id: 1", 1, 5), ]
         session.save()
 
     def test_payment_success(self):

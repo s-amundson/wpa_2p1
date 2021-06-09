@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from ..models import ClassRegistration, PaymentLog, User
-from ..src.square_helper import line_item, dummy_response
+from ..src import SquareHelper
 
 logger = logging.getLogger(__name__)
 

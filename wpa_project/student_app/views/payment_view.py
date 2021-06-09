@@ -1,19 +1,20 @@
 import logging
 
-from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
-from square.client import Client
 from ..serializers import PaymentSerializer
-from ..src.square_helper import log_response
+from ..src.square_helper import SquareHelper
 
 logger = logging.getLogger(__name__)
 
 
 class PaymentView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
+    def __init__(self):
+        self.square_helper = SquareHelper()
 
     def post(self, request, format=None):
         response_dict = {'status': 'ERROR', 'receipt_url': '', 'error': ''}
@@ -43,7 +44,7 @@ class PaymentView(APIView):
             amount = {'amount': amt, 'currency': 'USD'}
             message = ""
 
-            square_response = self.process_payment(idempotency_key, sq_token, note, amount)
+            square_response = self.square_helper.process_payment(idempotency_key, sq_token, note, amount)
             logging.debug(square_response['error'])
             if len(square_response['error']) > 0:
                 for e in square_response['error']:
@@ -59,7 +60,7 @@ class PaymentView(APIView):
                 response_dict['error'] = message
                 return Response(response_dict)
                 # return redirect('registration:process_payment')
-            log_response(request, square_response, create_date=None)
+            self.square_helper.log_payment(request, square_response, create_date=None)
 
             response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],
                              'error': square_response['error']}
@@ -69,33 +70,4 @@ class PaymentView(APIView):
             response_dict['error'] = 'payment processing error'
             return JsonResponse(response_dict)
 
-    def process_payment(self, idempotency_key, sq_token, note, amount):
 
-        # Create an instance of the API Client
-        # and initialize it with the credentials
-        # for the Square account whose assets you want to manage
-
-        client = Client(
-            access_token=settings.SQUARE_CONFIG['access_token'],
-            environment=settings.SQUARE_CONFIG['environment'],
-        )
-
-        result = client.payments.create_payment(
-            body={
-                "source_id": sq_token,
-                "idempotency_key": idempotency_key,
-                "amount_money": amount,
-                "autocomplete": True,
-                "location_id": settings.SQUARE_CONFIG['location_id'],
-                "note": note
-            }
-        )
-        square_response = result.body.get('payment', {'payment': None})
-        if result.is_success():
-            logging.debug(result.body)
-            square_response['error'] = []
-        elif result.is_error():
-            logging.debug(result.errors)
-            square_response['error'] = result.errors
-
-        return square_response

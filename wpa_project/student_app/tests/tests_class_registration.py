@@ -55,7 +55,7 @@ class TestsClassRegistration(TestCase):
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(User.objects.get(pk=2))
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on'})
+                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on'}, secure=True)
         bc = BeginnerClass.objects.all()
         self.assertEqual(bc[0].enrolled_beginners, 1)
         self.assertEqual(bc[0].enrolled_returnee, 0)

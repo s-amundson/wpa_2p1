@@ -12,7 +12,7 @@ import logging
 
 from ..forms import ClassRegistrationForm
 from ..models import BeginnerClass, ClassRegistration, Student, StudentFamily
-from ..src.square_helper import line_item
+from ..src.square_helper import SquareHelper
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                                               pay_status='start', idempotency_key=uid).save()
                             logging.debug(s.id)
                             request.session['line_items'].append(
-                                line_item(f"Class on {beginner_class.class_date} student id: {str(s.id)}", 1,
+                                SquareHelper().line_item(f"Class on {beginner_class.class_date} student id: {str(s.id)}", 1,
                                           beginner_class.cost))
                     return HttpResponseRedirect(reverse('registration:process_payment'))
 
