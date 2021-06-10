@@ -50,6 +50,19 @@ function myFunction() {
             console.log(data)
             return data;
             }, "json");
+        $.get("class_registered_table", function(data, status){
+        $("#registered_table").html(data);
+        if($(".unreg").length > 0) {
+            $("#unreg_form").show();
+        }
+        else{
+            $("#unreg_form").hide();
+        }
+        $("#unreg_form").submit(function(e){
+            e.preventDefault();
+            myFunction()
+        });
+    });
     }
     else {
         console.log('canceled');

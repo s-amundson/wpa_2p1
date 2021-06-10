@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class ClassRegisteredTable(LoginRequiredMixin, View):
     def get(self, request):
         students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
-        enrolled_classes = ClassRegistration.objects.filter(student__in=students)
+        enrolled_classes = ClassRegistration.objects.filter(student__in=students).exclude(pay_status='refunded')
         logging.debug(enrolled_classes.values())
         return render(request, 'student_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
 
@@ -50,7 +50,8 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 if str(k).startswith('student_') and v:
                     i = int(str(k).split('_')[-1])
                     s = Student.objects.get(pk=i)
-                    if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s)) == 0:
+                    if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
+                            pay_status="refunded")) == 0:
                         if s.safety_class is None:
                             beginner += 1
                             students.append(s)

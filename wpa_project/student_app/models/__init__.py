@@ -1,5 +1,6 @@
 from .beginner_class import BeginnerClass
 from .class_registration import ClassRegistration
+from .costs_model import CostsModel
 from .payment_log import PaymentLog
 from .refund_log import RefundLog
 from .student import Student

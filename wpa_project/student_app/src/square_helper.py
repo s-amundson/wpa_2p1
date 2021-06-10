@@ -6,9 +6,8 @@ from django.db import models
 from django.utils.datetime_safe import datetime
 from square.client import Client
 
-
 from ..models import PaymentLog, RefundLog, StudentFamily
-import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -105,13 +104,20 @@ class SquareHelper:
         return square_response
 
     def refund_payment(self, idempotency_key, amount):
+        """ does either a full or partial refund. """
         try:
             log = PaymentLog.objects.get(idempotency_key=idempotency_key)
         except models.DoesNotExist:
             return {'status': "FAIL"}
         # if(len(log)) == 0:
         #
-        logging.debug(log)
+        logging.debug(log.status)
+        if log.status == 'comped':  # payment was comped therefore no refund
+            log.status = 'refund'
+            log.save()
+            return {'status': "SUCCESS", 'error': ''}
+        elif log.status == 'refund':
+            return {'status': 'error', 'error': 'Previously refunded'}
         result = self.client.refunds.refund_payment(
             body={"idempotency_key": str(uuid.uuid4()),
                   "amount_money": {'amount': amount * 100, 'currency': 'USD'},
