@@ -1,6 +1,6 @@
 from bootstrap_modal_forms.generic import BSModalCreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 import logging
 from django.http import HttpResponseRedirect
@@ -16,7 +16,12 @@ logger = logging.getLogger(__name__)
 class AddStudentView(LoginRequiredMixin, View):
     def get(self, request, student_id=None):
         if student_id is not None:
-            g = Student.objects.get(id=student_id)
+            if request.user.is_board:
+                g = get_object_or_404(Student, pk=student_id)
+            else:
+                sf = StudentFamily.objects.get(user=request.user)
+                g = get_object_or_404(Student, id=student_id, student_family=sf)
+            # g = Student.objects.get(id=student_id)
             form = StudentForm(instance=g)
         else:
             form = StudentForm()

@@ -11,7 +11,7 @@ from django.utils import timezone
 # from django.core.exceptions import ObjectDoesNotExist
 
 from ..forms import BeginnerClassForm, ClassAttendanceForm
-from ..models import BeginnerClass, ClassRegistration, Student
+from ..models import BeginnerClass, ClassRegistration, CostsModel
 from ..src import SquareHelper
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,14 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 c = c + timedelta(days=7)
             except BeginnerClass.DoesNotExist:
                 c = timezone.now()
+            try:
+                cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1][0].standard_cost
+                logging.debug(cost)
+            except CostsModel.DoesNotExist:
+                cost = 0
+                logging.error('cost does not exist')
             form = BeginnerClassForm(initial={'class_date': c, 'beginner_limit': 20, 'returnee_limit': 20,
-                                              'state': 'scheduled'})
+                                              'state': 'scheduled', 'cost': cost})
         return render(request, 'student_app/beginner_class.html', {'form': form, 'attendee_form': attendee_form})
 
     def post(self, request, beginner_class=None):

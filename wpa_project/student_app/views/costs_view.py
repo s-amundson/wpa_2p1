@@ -1,36 +1,44 @@
 import logging
-from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponseForbidden
-from django.urls import reverse
+from django.http import  HttpResponseForbidden
 from django.views.generic.base import View
-from django.views.generic import ListView
-from django.utils import timezone
-# from django.db.models import model
-# from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 
 from ..forms import CostsForm
 from ..models import CostsModel
-from ..src import SquareHelper
 
 logger = logging.getLogger(__name__)
 
 
 class CostsView(LoginRequiredMixin, View):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.table = CostsModel.objects.all()
+
     def get(self, request, cost_id=None):
         if not request.user.is_staff:
             return HttpResponseForbidden()
+        if cost_id is not None:
+            c = get_object_or_404(CostsModel, pk=cost_id)
+        else:
+            c = None
+        form = CostsForm(instance=c)
 
-        form = CostsForm(initial=cost_id)
-
-        table = CostsModel.objects.all()
-        return render(request, 'student_app/form_as_p.html', {'form': form, 'table': table})
+        return render(request, 'student_app/costs.html', {'form': form, 'cost_id': cost_id, 'table': self.table})
 
     def post(self, request, cost_id=None):
-        form = CostsForm(request.POST)
+        if cost_id is not None:
+            c = get_object_or_404(CostsModel, pk=cost_id)
+        else:
+            c = None
+        form = CostsForm(request.POST, instance=c)
         if form.is_valid():
             form.save()
+            form = CostsForm()
+            message = "Saved"
         else:
             logging.debug(form.errors)
-        return render(request, 'student_app/message.html', {'message': 'payment processing error'})
+            message = 'Errors on form'
+        return render(request, 'student_app/costs.html',
+                      {'form': form, 'table': self.table, 'cost_id': cost_id, 'message': message})

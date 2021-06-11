@@ -4,6 +4,7 @@ Useful Commands:
     python manage.py migrate
     python manage.py runserver
     python manage.py startapp
+    python manage.py dumpdata student_app[.ModelName]
 
 
 TODO
@@ -11,3 +12,7 @@ TODO
     edit address from profile
     instructors
     social accounts
+    terms to class reg and signin
+    edit student after search
+    fix add student form.
+    remove step from signout process

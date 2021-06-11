@@ -18,6 +18,7 @@ class TestsClassRegistration(TestCase):
         # Every test needs a client.
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
 
     def test_class_register(self):
         # Get the page
@@ -25,7 +26,7 @@ class TestsClassRegistration(TestCase):
 
         response = self.client.get(reverse('registration:class_registration'), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('student_app/form_as_p.html')
+        self.assertTemplateUsed(response, 'student_app/class_registration.html')
 
         # add a user to the class with error
         self.client.post(reverse('registration:class_registration'), {'beginner_class': '2022-06', 'student_1': 'on'}, secure=True)
@@ -110,3 +111,24 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(bc[0].state, 'full')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 4)
+
+    def test_no_pay_if_cost_zero(self):
+        """test that no payment is required if the cost is set to 0"""
+        # change the cost of the class
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.cost = 0
+        bc.save()
+        # add a user to the class
+        response = self.client.post(reverse('registration:class_registration'),
+                                    {'beginner_class': '2022-06-05', 'student_1': 'on'}, secure=True)
+        bc = BeginnerClass.objects.all()
+        self.assertEqual(bc[0].enrolled_beginners, 1)
+        self.assertEqual(bc[0].enrolled_returnee, 0)
+        self.assertEqual(bc[0].state, 'open')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 1)
+        self.assertEqual(cr[0].beginner_class, bc[0])
+        self.assertEqual(self.client.session['line_items'][0]['name'],
+                         'Class on 2022-06-05 student id: 1')
+        self.assertEqual(self.client.session['payment_db'], 'ClassRegistration')
+        self.assertTemplateUsed(response, 'student_app/message.html')
