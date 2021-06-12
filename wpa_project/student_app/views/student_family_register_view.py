@@ -22,7 +22,9 @@ class StudentFamilyRegisterView(LoginRequiredMixin, View):
 
     def get(self, request):
         self.get_students(request)
-        return render(request, 'student_app/register.html', {'form': self.form})
+        message = request.session.get('message', '')
+        logging.debug(message)
+        return render(request, 'student_app/register.html', {'form': self.form, 'message': message})
 
     def post(self, request):
         form = StudentFamilyRegistrationForm(request.POST)

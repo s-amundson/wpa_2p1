@@ -19,11 +19,12 @@
                         {{ email_form.email }}
                 </div>
                 <div class="col">
-                    <button type="submit">Search</button>
+                    <button class="btn btn-primary" type="submit">Search</button>
                 </div>
             </div>
         </form>
     </div>
+
     <div class="row">
         <form method="post" autocomplete="off" class="form">
         {% csrf_token %}
@@ -44,11 +45,12 @@
                     </div>
                 </div>
                 <div class="col">
-                    <button type="submit">Search</button>
+                    <button class="btn btn-primary" type="submit">Search</button>
                 </div>
             </div>
         </form>
     </div>
+
     <div class="row">
         <form method="post" autocomplete="off" class="form">
         {% csrf_token %}
@@ -62,7 +64,7 @@
                         {{ phone_form.phone }}
                 </div>
                 <div class="col">
-                    <button type="submit">Search</button>
+                    <button class="btn btn-primary" type="submit">Search</button>
                 </div>
             </div>
         </form>

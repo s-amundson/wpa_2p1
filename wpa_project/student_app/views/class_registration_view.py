@@ -19,7 +19,11 @@ logger = logging.getLogger(__name__)
 
 class ClassRegisteredTable(LoginRequiredMixin, View):
     def get(self, request):
-        students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
+        try:
+            students = StudentFamily.objects.get(user=request.user).student_set.all()
+        except StudentFamily.DoesNotExist:
+            request.session['message'] = 'Address form is required'
+            return HttpResponseRedirect(reverse('registration:profile'))
         bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:3])
         enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
             pay_status='refunded')
@@ -29,7 +33,12 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
 
 class ClassRegistrationView(LoginRequiredMixin, View):
     def get(self, request):
-        students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
+        try:
+            students = StudentFamily.objects.get(user=request.user).student_set.all()
+        except StudentFamily.DoesNotExist:
+            request.session['message'] = 'Address form is required'
+            logging.debug(request.session['message'])
+            return HttpResponseRedirect(reverse('registration:student_register'))
         form = ClassRegistrationForm(students)
         return render(request, 'student_app/class_registration.html', {'form': form})
 

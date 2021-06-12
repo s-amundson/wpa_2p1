@@ -45,8 +45,8 @@ async function myFunction() {
 
         //       Send the unregister request to the server
         let data = await $.post("unregister_class", {
-        "class_list": unreg_list,
-        csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
+            "class_list": unreg_list,
+            csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
         }, function(data, status){
             console.log(data)
             return data;

@@ -1,0 +1,31 @@
+<form class="col form" method="post" action="{% url 'registration:add_student' %}" autocomplete="off" id="student_form">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col input-group input-group-md">
+            {{ form.first_name }}
+            {% for error in form.first_name.errors %}
+                <p class="help-block">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class=" col input-group input-group-md">
+            {{ form.last_name }}
+            {% for error in form.last_name.errors %}
+                <p class="help-block">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class="col input-group input-group-md">
+            <div class="row">Date of Birth (YYYY-MM-DD)</div>
+            <div class="row">
+                {{ form.dob }}
+                {% for error in form.dob.errors %}
+                    <p class="help-block">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button id="btn-student-form" class="btn btn-primary" type="submit">Add</button>
+        </div>
+    </div>
+</form>

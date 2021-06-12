@@ -1,38 +1,32 @@
 {% extends 'base.html' %}
 
 {% block title %} Index {% endblock %}
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}
 
 {% block main %}
-<div class="row p-3 align-items-center mx-auto">
-    <div class="col-12">
-        <h2> Profile Page </h2>
-    </div>
-</div>
-<div class="row p-3 align-items-center mx-auto">
-    <div class="col-12">
-        <h3> Students </h3>
-    </div>
-</div>
-    {% for student in students %}
-        <div class="row">
-            <div class="col">
-                <a class="nav-link" href="{% url 'registration:add_student' student.id %}">
-                    {{ student.first_name }} {{ student.last_name }}
-                </a>
-            </div>
-            <div class="col">
-
-            </div>
+    <div class="row p-3 align-items-center mx-auto">
+        <div class="col-12">
+            <h2> Profile Page </h2>
         </div>
-    {% endfor %}
+    </div>
+    <div class="row p-3 align-items-center mx-auto">
+        <div class="col-12">
+            <h3> Students </h3>
+        </div>
+    </div>
+    <div id="student-table-div"></div>
+
+    <div class="row p-2" id="student_add_div"></div>
 
     <div class="row">
-        <button id="add-student" class="btn btn-primary" type="button" name="button">
-                <a class="text-white" href="{% url 'registration:add_student' %}">
-                    Add Student
-                </a>
+        <button id="btn-add-student" class="btn btn-primary" type="button" name="button">
+            Add Student
         </button>
     </div>
+
     <div class="row p-3 align-items-center mx-auto">
         <div class="col-12">
             <h3> Address </h3>

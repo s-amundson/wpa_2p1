@@ -52,7 +52,6 @@ class TestsRegisterStudent(TestCase):
         sf = StudentFamily.objects.all()
         self.assertEquals(len(sf), 0)
 
-
         # add a student family
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
         response = self.client.post(reverse('registration:student_register'), d, secure=True)
@@ -66,24 +65,44 @@ class TestsRegisterStudent(TestCase):
         response = self.client.get(reverse('registration:profile'), secure=True)
         self.assertEqual(response.status_code, 200)
 
+    def test_add_student(self):
+        self.client.force_login(self.test_user)
+        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
+        response = self.client.post(reverse('registration:student_register'), d, secure=True)
+
         # add a student
         response = self.client.get(reverse('registration:add_student'), secure=True)
         self.assertEqual(response.status_code, 200)
         d = {'first_name':'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
         response = self.client.post(reverse('registration:add_student'), d, secure=True)
         # self.assertEqual(response.status_code, 200)
+        sf = StudentFamily.objects.all()
         s = sf[0].student_set.all()
         self.assertEquals(len(s), 1)
 
+        #update the record
+        d['first_name'] = 'Chris'
+        response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 1}),  d, secure=True)
+        sf = StudentFamily.objects.all()
+        s = sf[0].student_set.all()
+        self.assertEquals(len(s), 1)
+        self.assertEqual(s[0].first_name, 'Chris')
+
         # check that when we get a page with a student the student shows up.
         response = self.client.get(reverse('registration:add_student', kwargs={'student_id': 1}), secure=True)
-        self.assertContains(response, 'Christy')
+        self.assertContains(response, 'Chris')
+
+    def test_add_student_error(self):
+        self.client.force_login(self.test_user)
+        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
+        response = self.client.post(reverse('registration:student_register'), d, secure=True)
 
         # add student with error
         d = {'first_name': 'Tom', 'last_name': 'Smith', 'dob': '2020/02/02'}
         response = self.client.post(reverse('registration:add_student'), d, secure=True)
+        sf = StudentFamily.objects.all()
         s = sf[0].student_set.all()
-        self.assertEquals(len(s), 1)
+        self.assertEquals(len(s), 0)
         self.assertEqual(response.status_code, 200)
         logging.debug(response.status_code)
 
@@ -92,21 +111,36 @@ class TestsRegisterStudent(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '123 main')
 
+    def test_add_student_api(self):
 
-    def test_login_invaid(self):
-        """Tests invalid login with username and password"""
-        response = self.client.post(reverse('account_login'), {'login': 'john', 'password': 'smith'}, secure=True)
-        user = auth.get_user(self.client)
-        self.assertFalse(user.is_authenticated)
-        self.assertTemplateUsed('account/login.html')
-        self.assertEqual(response.status_code, 200)
+        self.client.force_login(self.test_user)
+        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
+        response = self.client.post(reverse('registration:student_register'), d, secure=True)
 
-        response = self.client.post(reverse('account_login'), {'login': 'john@smith.com', 'password': 'smith'}, secure=True)
-        user = auth.get_user(self.client)
-        self.assertFalse(user.is_authenticated)
-        self.assertTemplateUsed('account/login.html')
-        self.assertEqual(response.status_code, 200)
-        # self.assertRedirects(reverse('account_login'))
-        # with :
-        #     render_to_string('account/login.html')
-        logging.debug(response)
+        # add a student
+        # response = self.client.get(reverse('registration:add_student'), secure=True)
+        # self.assertEqual(response.status_code, 200)
+        d = {'first_name':'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
+        response = self.client.post(reverse('registration:add_student_api'), d, secure=True)
+        # self.assertEqual(response.status_code, 200)
+        sf = StudentFamily.objects.all()
+        s = sf[0].student_set.all()
+        self.assertEquals(len(s), 1)
+
+    # def test_login_invaid(self):
+    #     """Tests invalid login with username and password"""
+    #     response = self.client.post(reverse('account_login'), {'login': 'john', 'password': 'smith'}, secure=True)
+    #     user = auth.get_user(self.client)
+    #     self.assertFalse(user.is_authenticated)
+    #     self.assertTemplateUsed('account/login.html')
+    #     self.assertEqual(response.status_code, 200)
+    #
+    #     response = self.client.post(reverse('account_login'), {'login': 'john@smith.com', 'password': 'smith'}, secure=True)
+    #     user = auth.get_user(self.client)
+    #     self.assertFalse(user.is_authenticated)
+    #     self.assertTemplateUsed('account/login.html')
+    #     self.assertEqual(response.status_code, 200)
+    #     # self.assertRedirects(reverse('account_login'))
+    #     # with :
+    #     #     render_to_string('account/login.html')
+    #     logging.debug(response)

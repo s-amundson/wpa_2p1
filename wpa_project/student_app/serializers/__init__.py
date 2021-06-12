@@ -1,2 +1,3 @@
 from .payment_serializers import PaymentSerializer
+from .student_serializers import StudentSerializer
 from .unregister_serializers import UnregisterSerializer
