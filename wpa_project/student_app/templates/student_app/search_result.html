@@ -16,7 +16,11 @@
         </div>
         {% for student in sf.student_set.all %}
             <div class="row">
-                <div class="col-3 border"> {{ student.first_name }} </div>
+                <div class="col-3 border">
+                    <a class="nav-link" href="{% url 'registration:add_student' student.id %}">
+                        {{ student.first_name }}
+                    </a>
+                </div>
                 <div class="col-3 border"> {{ student.last_name }} </div>
                 <div class="col-3 border"> {{ student.dob }} </div>
                 <div class="col-3 border"> {{ student.safety_class }} </div>

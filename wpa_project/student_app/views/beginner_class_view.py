@@ -1,7 +1,7 @@
 import logging
 from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, get_list_or_404
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.urls import reverse
 from django.views.generic.base import View
@@ -21,6 +21,7 @@ class BeginnerClassView(LoginRequiredMixin, View):
     def get(self, request, beginner_class=None):
         if not request.user.is_staff:
             return HttpResponseForbidden()
+        logging.debug('staff')
         attendee_form = False
         if beginner_class is not None:
             c = BeginnerClass.objects.get(id=beginner_class)
@@ -35,8 +36,10 @@ class BeginnerClassView(LoginRequiredMixin, View):
             except BeginnerClass.DoesNotExist:
                 c = timezone.now()
             try:
-                cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1][0].standard_cost
-                logging.debug(cost)
+                cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1] #[0].standard_cost
+                costs = get_list_or_404(CostsModel, name='Beginner Class', enabled=True)
+                costs = cost[0]
+                logging.debug(costs)
             except CostsModel.DoesNotExist:
                 cost = 0
                 logging.error('cost does not exist')

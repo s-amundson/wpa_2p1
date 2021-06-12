@@ -1,14 +1,11 @@
 import logging
 import uuid
 from django.conf import settings
-from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.urls import reverse
 from django.utils.datetime_safe import datetime
 from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from square.client import Client
-from ..models import ClassRegistration, PaymentLog, StudentFamily
+
 from ..src.square_helper import SquareHelper
 
 logger = logging.getLogger(__name__)
@@ -16,6 +13,12 @@ logger = logging.getLogger(__name__)
 
 class ProcessPaymentView(LoginRequiredMixin, View):
     """Shows a payment page for making purchases"""
+
+    def bypass_payment(self, request, table_rows):
+        sh = SquareHelper()
+        square_response = sh.comp_response(table_rows['note'], table_rows['total'])
+        sh.log_payment(request, square_response, create_date=datetime.now())
+        return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})
 
     def get(self, request):
         # # TODO remove this as it is just to get square working
@@ -31,20 +34,25 @@ class ProcessPaymentView(LoginRequiredMixin, View):
             paydict['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"  #"https://js.squareupsandbox.com/v2/paymentform"
         paydict['app_id'] = settings.SQUARE_CONFIG['application_id']
         paydict['location_id'] = settings.SQUARE_CONFIG['location_id']
-        rows, total = self.table_rows(request.session)
+        # rows, total = self.table_rows(request.session)
+        table_rows = self.table_rows(request.session)
+        if table_rows['total'] == 0:
+            # No payment necessary
+            self.bypass_payment(request, table_rows)
         bypass = False
-        if settings.DEBUG or request.user.is_authenticated:
+        if request.user.is_board: # TODO add comp group or colum
             bypass = True
         logging.debug(paydict)
         message = request.session.get('message', '')
-        context = {'paydict': paydict, 'rows': rows, 'total': total, 'bypass': bypass, 'message': message}
+        context = {'paydict': paydict, 'rows': table_rows['rows'], 'total': table_rows['total'],
+                   'bypass': bypass, 'message': message}
         return render(request, 'student_app/square_pay.html', context)
 
     def table_rows(self, session):
         rows = []
         total = 0
+        note = ""
         if 'line_items' in session:
-            # line_items = session['line_items']
             for row in session['line_items']:
                 d = {'name': row['name'], 'quantity': int(row['quantity']),
                      'amount_each': int(row['base_price_money']['amount']) / 100,
@@ -52,8 +60,9 @@ class ProcessPaymentView(LoginRequiredMixin, View):
                 logging.debug(f"amount {row['base_price_money']['amount']}, {int(row['base_price_money']['amount'])}")
                 rows.append(d)
                 total += int(d['amount_total'])
+                note += row['name']
 
-        return rows, total
+        return {'rows': rows, 'total': total, 'note': note}
 
     def post(self, request):
         logging.debug(request.POST)
@@ -66,21 +75,11 @@ class ProcessPaymentView(LoginRequiredMixin, View):
             return render(request, 'student_app/message.html', {'message': 'payment processing error'})
         # get the amount form the line items
         # also get line item name and add to notes
-        amt = 0
-        note = ""
-        for line in request.session['line_items']:
-            amt += line['base_price_money']['amount'] * int(line['quantity'])
-            note += f" {line['name']},"
-
-        # Monetary amounts are specified in the smallest unit of the applicable currency.
-        amount = {'amount': amt, 'currency': 'USD'}
+        table_rows = self.table_rows(request.session)
 
         if request.POST.get('bypass', None) is not None:
-            sh = SquareHelper()
-            logging.debug(request.POST.get('bypass', None))
-            square_response = sh.comp_response(note, amount)
-            sh.log_payment(request, square_response, create_date=datetime.now())
-            return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})
+            return self.bypass_payment(request, table_rows)
+
         else:
             logging.debug('payment processing error')
             return render(request, 'student_app/message.html', {'message': 'payment processing error'})

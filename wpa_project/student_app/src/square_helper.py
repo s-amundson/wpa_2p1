@@ -22,18 +22,19 @@ class SquareHelper:
         )
 
     def comp_response(self, note, amount):
-        body = {
-            'payment': {'approved_money': amount,
-                        'created_at': '2021-06-06T00:24:48.978Z',
-                        'id': None,
-                        'location_id': 'SVM1F73THA9W6',
-                        'note': note,
-                        'order_id': None,  # datetime.now().format('%Y%m%d%H%M%S%f'),
-                        'receipt_url': None,
-                        'source_type': None,
-                        'status': 'comped',
-                        'total_money': amount}}
-        return body['payment']
+        payment = {'approved_money': {'amount': amount},
+                    'created_at': '2021-06-06T00:24:48.978Z',
+                    'id': None,
+                    'location_id': 'SVM1F73THA9W6',
+                    'note': note,
+                    'order_id': None,  # datetime.now().format('%Y%m%d%H%M%S%f'),
+                    'receipt_url': None,
+                    'source_type': None,
+                    'status': 'comped',
+                    'total_money': amount}
+        if amount == 0:
+            payment['status'] = 'paid'
+        return payment
 
     def line_item(self, name, quantity, amount):
         # square requires amount in pennies
@@ -107,7 +108,7 @@ class SquareHelper:
         """ does either a full or partial refund. """
         try:
             log = PaymentLog.objects.get(idempotency_key=idempotency_key)
-        except models.DoesNotExist:
+        except PaymentLog.DoesNotExist:
             return {'status': "FAIL"}
         # if(len(log)) == 0:
         #
@@ -117,7 +118,13 @@ class SquareHelper:
             log.save()
             return {'status': "SUCCESS", 'error': ''}
         elif log.status == 'refund':
-            return {'status': 'error', 'error': 'Previously refunded'}
+            rl = RefundLog.objects.filter(payment_id=log.payment_id)
+            refunded_amount = 0
+            for r in rl:
+                refunded_amount += r.amount
+            logging.debug(refunded_amount)
+            if log.total_money <= refunded_amount:  # check if only partial refund was applied
+                return {'status': 'error', 'error': 'Previously refunded'}
         result = self.client.refunds.refund_payment(
             body={"idempotency_key": str(uuid.uuid4()),
                   "amount_money": {'amount': amount * 100, 'currency': 'USD'},

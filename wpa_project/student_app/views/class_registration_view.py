@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 class ClassRegisteredTable(LoginRequiredMixin, View):
     def get(self, request):
         students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
-        enrolled_classes = ClassRegistration.objects.filter(student__in=students).exclude(pay_status='refunded')
+        bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:3])
+        enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
+            pay_status='refunded')
         logging.debug(enrolled_classes.values())
         return render(request, 'student_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
 
@@ -111,7 +113,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     SquareHelper().line_item(f"Class on {beginner_class.class_date} student id: {str(s.id)}", 1,
                                              beginner_class.cost))
                 total_cost += beginner_class.cost
-        if total_cost > 0:
-            return HttpResponseRedirect(reverse('registration:process_payment'))
-        else:
-            return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})
+        # if total_cost > 0:
+        return HttpResponseRedirect(reverse('registration:process_payment'))
+        # else:
+        #     return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})

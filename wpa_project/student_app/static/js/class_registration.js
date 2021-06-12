@@ -16,7 +16,7 @@ $(document).ready(function(){
     });
 });
 
-function myFunction() {
+async function myFunction() {
     console.log('on submit')
     let refund = 0;
     let unreg_list = [];
@@ -43,26 +43,31 @@ function myFunction() {
         console.log("submit");
         console.log(unreg_list);
 
-        let data = $.post("unregister_class", {
+        //       Send the unregister request to the server
+        let data = await $.post("unregister_class", {
         "class_list": unreg_list,
         csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
         }, function(data, status){
             console.log(data)
             return data;
             }, "json");
+
+        //      request new table from server
+        console.log('get table from server')
         $.get("class_registered_table", function(data, status){
-        $("#registered_table").html(data);
-        if($(".unreg").length > 0) {
-            $("#unreg_form").show();
-        }
-        else{
-            $("#unreg_form").hide();
-        }
-        $("#unreg_form").submit(function(e){
-            e.preventDefault();
-            myFunction()
+            $("#registered_table").html(data);
+
+            if($(".unreg").length > 0) {
+                $("#unreg_form").show();
+            }
+            else{
+                $("#unreg_form").hide();
+            }
+            $("#unreg_form").submit(function(e){
+                e.preventDefault();
+                myFunction()
+            });
         });
-    });
     }
     else {
         console.log('canceled');

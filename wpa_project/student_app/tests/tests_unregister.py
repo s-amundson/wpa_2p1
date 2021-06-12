@@ -34,61 +34,16 @@ class TestsUnregisterStudent(TestCase):
         # logging.debug(session['line_items'])
         # session.save()
 
-    def test_refund_success_entire_purchase(self):
-        self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on'}, secure=True)
-        bc = BeginnerClass.objects.all()
-        logging.debug(bc.values())
-        self.assertEqual(bc[0].enrolled_beginners, 2)
-        self.assertEqual(bc[0].enrolled_returnee, 0)
-        self.assertEqual(bc[0].state, 'open')
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
-
-        # process a good payment
-        response = self.client.post(reverse('registration:payment'),
-                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
-        self.eval_content(json.loads(response.content), 'COMPLETED', [], 1)
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
-        logging.debug(cr[0].pay_status)
-
-        # give square some time to process the payment got bad requests without it.
-        time.sleep(5)
-
-        # make student a returnee and the class full
-        student = Student.objects.get(pk=3)
-        student.safety_class = '2020-01-01'
-        student.save()
-        bc = BeginnerClass.objects.get(pk=1)
-        bc.enrolled_returnee = 2
-        bc.state = 'full'
-        bc.save()
-
-        response = self.client.post(reverse('registration:unregister_class'),
-                                    {'class_list': ['1', '2']}, secure=True)
-        logging.debug(response.data)
-        self.assertEqual(response.data['status'], 'SUCCESS')
-        rl = RefundLog.objects.all()
-        self.assertEqual(len(rl), 1)
-        self.assertEqual(rl[0].amount, 1000)
-        pl = PaymentLog.objects.filter(payment_id=rl[0].payment_id)
-        self.assertEqual(len(pl), 1)
-        self.assertEqual(pl[0].status, 'refund')
-        bc = BeginnerClass.objects.get(pk=1)
-        # logging.debug(bc.values())
-        self.assertEqual(bc.enrolled_beginners, 1)
-        self.assertEqual(bc.enrolled_returnee, 1)
-        self.assertEqual(bc.state, 'open')
-        # cr = ClassRegistration.objects.get(beginner_class=bc)
-        cr = bc.classregistration_set.all()
-        logging.debug(len(cr))
-        self.assertEqual(cr[0].pay_status, 'refunded')
-        self.assertEqual(cr[1].pay_status, 'refunded')
-    #
-    # def test_refund_success_partial_purchase(self):
+    # def test_refund_success_entire_purchase(self):
     #     self.client.post(reverse('registration:class_registration'),
     #                      {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on'}, secure=True)
+    #     bc = BeginnerClass.objects.all()
+    #     logging.debug(bc.values())
+    #     self.assertEqual(bc[0].enrolled_beginners, 2)
+    #     self.assertEqual(bc[0].enrolled_returnee, 0)
+    #     self.assertEqual(bc[0].state, 'open')
+    #     cr = ClassRegistration.objects.all()
+    #     self.assertEqual(len(cr), 2)
     #
     #     # process a good payment
     #     response = self.client.post(reverse('registration:payment'),
@@ -97,18 +52,63 @@ class TestsUnregisterStudent(TestCase):
     #     cr = ClassRegistration.objects.all()
     #     self.assertEqual(len(cr), 2)
     #     logging.debug(cr[0].pay_status)
-    #     time.sleep(10)
+    #
+    #     # give square some time to process the payment got bad requests without it.
+    #     time.sleep(5)
+    #
+    #     # make student a returnee and the class full
+    #     student = Student.objects.get(pk=3)
+    #     student.safety_class = '2020-01-01'
+    #     student.save()
+    #     bc = BeginnerClass.objects.get(pk=1)
+    #     bc.enrolled_returnee = 2
+    #     bc.state = 'full'
+    #     bc.save()
     #
     #     response = self.client.post(reverse('registration:unregister_class'),
-    #                                 {'class_list': ['2']}, secure=True)
+    #                                 {'class_list': ['1', '2']}, secure=True)
     #     logging.debug(response.data)
     #     self.assertEqual(response.data['status'], 'SUCCESS')
     #     rl = RefundLog.objects.all()
     #     self.assertEqual(len(rl), 1)
-    #     self.assertEqual(rl[0].amount, 500)
+    #     self.assertEqual(rl[0].amount, 1000)
     #     pl = PaymentLog.objects.filter(payment_id=rl[0].payment_id)
     #     self.assertEqual(len(pl), 1)
     #     self.assertEqual(pl[0].status, 'refund')
+    #     bc = BeginnerClass.objects.get(pk=1)
+    #     # logging.debug(bc.values())
+    #     self.assertEqual(bc.enrolled_beginners, 1)
+    #     self.assertEqual(bc.enrolled_returnee, 1)
+    #     self.assertEqual(bc.state, 'open')
+    #     # cr = ClassRegistration.objects.get(beginner_class=bc)
+    #     cr = bc.classregistration_set.all()
+    #     logging.debug(len(cr))
+    #     self.assertEqual(cr[0].pay_status, 'refunded')
+    #     self.assertEqual(cr[1].pay_status, 'refunded')
+    #
+    def test_refund_success_partial_purchase(self):
+        self.client.post(reverse('registration:class_registration'),
+                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on'}, secure=True)
+
+        # process a good payment
+        response = self.client.post(reverse('registration:payment'),
+                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
+        self.eval_content(json.loads(response.content), 'COMPLETED', [], 1)
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 2)
+        logging.debug(cr[0].pay_status)
+        time.sleep(5)
+
+        response = self.client.post(reverse('registration:unregister_class'),
+                                    {'class_list': ['2']}, secure=True)
+        logging.debug(response.data)
+        self.assertEqual(response.data['status'], 'SUCCESS')
+        rl = RefundLog.objects.all()
+        self.assertEqual(len(rl), 1)
+        self.assertEqual(rl[0].amount, 500)
+        pl = PaymentLog.objects.filter(payment_id=rl[0].payment_id)
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].status, 'refund')
 
     # def test_refund_invalid_student(self):
     #

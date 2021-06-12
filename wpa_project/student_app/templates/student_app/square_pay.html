@@ -66,9 +66,7 @@
         {{ total }}
       </div>
     </div>
-  <div class="row">
-    Payments are processed with Square.
-  </div>
+
 
   {% if bypass %}
     <div class="row">
@@ -79,7 +77,9 @@
       </form>
     </div>
   {% endif %}
-
+  <div class="row">
+    Payments are processed with Square. Your credit card information is not stored on our servers.
+  </div>
   <div class="row">
       <form class="col" id="payment-form" novalidate action="/process_payment" method="post">
         {% csrf_token %}

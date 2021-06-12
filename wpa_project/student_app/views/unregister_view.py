@@ -53,16 +53,17 @@ class UnregisterView(LoginRequiredMixin, APIView):
                 cr = ClassRegistration.objects.get(pk=c)
                 if cr.beginner_class.state in BeginnerClass().get_states()[3:]:
                     logging.error(f'beginner class state is {cr.beginner_class.state}')
-                if cr.student.student_family.id not in student_list:
+                elif cr.student.student_family.id not in student_list:
                     logging.error('not authorized')
                     return Response(response_dict)
-                self.add_key(cr.idempotency_key)
+                else:
+                    self.add_key(cr.idempotency_key)
             for ik in self.ik_list:
                 square_response = self.square_helper.refund_payment(ik.idempotency_key, ik.amount * ik.count)
                 if square_response['status'] == 'error':
                     logging.error(square_response)
                     errors += square_response['error']
-
+            logging.debug(errors)
             if errors == '':
                 response_dict['status'] = "SUCCESS"
                 # update the number of enrolled students
@@ -78,6 +79,8 @@ class UnregisterView(LoginRequiredMixin, APIView):
                     cr.pay_status = 'refunded'
                     cr.save()
                 # TODO email refund
+            elif errors == 'Previously refunded':  # we should remove them from the list anyway
+                response_dict['status'] = "SUCCESS"
             else:
                 response_dict['status'] = "ERROR"
             return Response(response_dict)
