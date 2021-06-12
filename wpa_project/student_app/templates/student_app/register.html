@@ -6,7 +6,16 @@
 
 
 {% block main %}
-    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <div class="row">
+        <div class="col">
+            Thank you for joining. The following information is required.
+        </div>
+    </div>
+
+    {% if message %}
+        <div class="row" message_text="{{ message }}" id="message"><h3>"{{ message }}"</h3></div>
+    {% endif %}
 
     <form method="post" action="{% url 'registration:student_register' %}" autocomplete="off" class="form">
     {% csrf_token %}
@@ -30,6 +39,6 @@
                 {{ form.phone }}
             </div>
         </div>
-    <button type="submit"> Sign Up</button>
+    <button class="btn btn-primary" type="submit"> Sign Up</button>
     </form>
 {% endblock %}

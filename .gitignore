@@ -2,5 +2,6 @@
 temp_tests.py
 venv/**
 .sqlite3
-/secrets.json
-*~
+secrets.json
+*~S
+temp*

@@ -3,6 +3,16 @@
 {% block title %} Index {% endblock %}
 
 {% block main %}
-        <h2> Index Page </h2>
-        <a class="nav-link" href="{% url 'account_signup' %}">Join</a>
+  <div class="row">
+    <div class="col"><h2> Index Page </h2></div>
+  </div>
+  {% if user.is_authenticated %}
+  {% else %}
+    <div class="row">
+      <a class="nav-link" href="{% url 'account_signup' %}">Join</a>
+    </div>
+    <div class="row">
+      <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+    </div>
+  {% endif %}
 {% endblock %}

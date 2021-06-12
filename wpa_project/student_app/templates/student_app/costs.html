@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %} Beginner Class {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <form method="post">
+        {% if cost_id %}
+            ID: {{ cost_id }}
+        {% endif %}
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input class="btn btn-primary" type="submit" value="Submit">
+    </form>
+    <hr/>
+    <div class="row pt-3">
+        {% if table %}
+            <form class="col" method="post">{% csrf_token %}
+                <input type="hidden" name="cost_table" value="on">
+                <div class="row table_head">
+                    <div class="col border text-center"><strong>Costs</strong></div>
+                </div>
+                <div class="row table_head">
+                    <div class="col-1 border d-flex align-items-center">ID</div>
+                    <div class="col-3 border d-flex align-items-center">Name</div>
+                    <div class="col border d-flex align-items-center">Member Cost</div>
+                    <div class="col border d-flex align-items-center">Nonmember Cost</div>
+                    <div class="col border d-flex align-items-center">Membership</div>
+                    <div class="col border d-flex align-items-center">Enabled</div>
+                </div>
+                {% for s in table %}
+                    <div class="row">
+                        <div class="col-1 border">
+                            <a class="nav-link" href="{% url 'registration:costs' s.id %}">
+                                {{ s.id }}
+                            </a>
+                        </div>
+                        <div class="col-3 border">{{ s.name }}</div>
+                        <div class="col-2 border">{{ s.member_cost }}</div>
+                        <div class="col-2 border">{{ s.standard_cost }}</div>
+                        <div class="col-2 border">{{ s.membership }}</div>
+                        <div class="col-2 border">{{ s.enabled }}</div>
+
+                    </div>
+                {% endfor %}
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}
+

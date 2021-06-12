@@ -1,85 +1,58 @@
 import logging
-from datetime import timedelta
+import uuid
 from django.conf import settings
-from django.shortcuts import render
-from django.utils.datetime_safe import date
+from django.shortcuts import render, redirect
+from django.utils.datetime_safe import datetime
 from django.views.generic.base import View
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-from ..models import ClassRegistration, PaymentLog, StudentFamily
-
-#
-# from registration.models import Joad_session_registration, Member, Payment_log, Membership
-# from registration.src.Email import Email
+from ..src.square_helper import SquareHelper
 
 logger = logging.getLogger(__name__)
 
 
-class ProcessPaymentView(View):
+class ProcessPaymentView(LoginRequiredMixin, View):
     """Shows a payment page for making purchases"""
 
+    def bypass_payment(self, request, table_rows):
+        sh = SquareHelper()
+        square_response = sh.comp_response(table_rows['note'], table_rows['total'])
+        sh.log_payment(request, square_response, create_date=datetime.now())
+        return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})
+
     def get(self, request):
+        # # TODO remove this as it is just to get square working
+        # request.session['idempotency_key'] = str(uuid.uuid4())
+        # request.session['line_items'] = [line_item(f"Class on None student id: 1", 1, 5), ]
+
         paydict = {}
         if settings.SQUARE_CONFIG['environment'] == "production":
             # paydict['production'] = True
-            paydict['pay_url'] = "https://js.squareup.com/v2/paymentform"
+            paydict['pay_url'] = '' # "https://js.squareup.com/v2/paymentform"
         else:
             # paydict['production'] = False
-            paydict['pay_url'] = "https://js.squareupsandbox.com/v2/paymentform"
+            paydict['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"  #"https://js.squareupsandbox.com/v2/paymentform"
         paydict['app_id'] = settings.SQUARE_CONFIG['application_id']
         paydict['location_id'] = settings.SQUARE_CONFIG['location_id']
-        rows, total = self.table_rows(request.session)
+        # rows, total = self.table_rows(request.session)
+        table_rows = self.table_rows(request.session)
+        if table_rows['total'] == 0:
+            # No payment necessary
+            self.bypass_payment(request, table_rows)
         bypass = False
-        if settings.DEBUG or request.user.is_authenticated:
+        if request.user.is_board: # TODO add comp group or colum
             bypass = True
         logging.debug(paydict)
-        context = {'paydict': paydict, 'rows': rows, 'total': total, 'bypass': bypass}
+        message = request.session.get('message', '')
+        context = {'paydict': paydict, 'rows': table_rows['rows'], 'total': table_rows['total'],
+                   'bypass': bypass, 'message': message}
         return render(request, 'student_app/square_pay.html', context)
-
-    def nonce(self, idempotency_key, nonce, line_items):
-        """Process payment with squares nonce"""
-        # Every payment you process with the SDK must have a unique idempotency key.
-        # If you're unsure whether a particular payment succeeded, you can reattempt
-        # it with the same idempotency key without worrying about double charging
-        # the buyer.
-        # idempotency_key = str(uuid.uuid1())
-
-        # get the amount form the line items
-        # also get line item name and add to notes
-        amt = 0
-        note = ""
-        for line in line_items:
-            amt += line['base_price_money']['amount'] * int(line['quantity'])
-            note += f" {line['name']},"
-
-        # Monetary amounts are specified in the smallest unit of the applicable currency.
-        amount = {'amount': amt, 'currency': 'USD'}
-
-        # To learn more about splitting payments with additional recipients,
-        # see the Payments API documentation on our [developer site]
-        # (https://developer.squareup.com/docs/payments-api/overview).
-        body = {'idempotency_key': idempotency_key, 'source_id': nonce, 'amount_money': amount}
-
-        # not sure if line items belongs in nonce
-        body['order'] = {}
-        body['order']['reference_id'] = idempotency_key
-        body['order']['line_items'] = line_items
-        body['note'] = note
-
-        # The SDK throws an exception if a Connect endpoint responds with anything besides
-        # a 200-level HTTP code. This block catches any exceptions that occur from the request.
-        api_response = self.client.payments.create_payment(body)
-        if api_response.is_success():
-            res = api_response.body['payment']
-        elif api_response.is_error():
-            res = "Exception when calling PaymentsApi->create_payment: {}".format(api_response.errors)
-
-        return res
 
     def table_rows(self, session):
         rows = []
         total = 0
+        note = ""
         if 'line_items' in session:
-            # line_items = session['line_items']
             for row in session['line_items']:
                 d = {'name': row['name'], 'quantity': int(row['quantity']),
                      'amount_each': int(row['base_price_money']['amount']) / 100,
@@ -87,45 +60,26 @@ class ProcessPaymentView(View):
                 logging.debug(f"amount {row['base_price_money']['amount']}, {int(row['base_price_money']['amount'])}")
                 rows.append(d)
                 total += int(d['amount_total'])
+                note += row['name']
 
-        return rows, total
+        return {'rows': rows, 'total': total, 'note': note}
 
     def post(self, request):
+        logging.debug(request.POST)
         idempotency_key = request.session.get('idempotency_key', None)
+        sq_token = request.POST.get('sq_token', None)
+        logging.debug(f'uuid = {idempotency_key}, sq_token = {sq_token}')
+        request.session['message'] = ''
+        if request.session.get('line_items', None) is None:
+            logging.debug('missing line items.')
+            return render(request, 'student_app/message.html', {'message': 'payment processing error'})
+        # get the amount form the line items
+        # also get line item name and add to notes
+        table_rows = self.table_rows(request.session)
 
-        if idempotency_key is None:
-            return render(request, 'registration/message.html', {'message': 'payment processing error'})
+        if request.POST.get('bypass', None) is not None:
+            return self.bypass_payment(request, table_rows)
 
-        if not settings.DEBUG and not settings.TESTING:
-            nonce = request.POST.get('nonce')
-
-            # environment = square_cfg['environment']
-            square_response = self.nonce(idempotency_key, nonce, request.session['line_items'])
-            if isinstance(square_response, str):
-                return render(request, 'registration/message.html', {'message': 'payment processing error'})
-            # if response.is_error():
-            logging.debug(f"response type = {type(square_response)} response = {square_response}")
         else:
-            square_response = {'created_at': date.today().isoformat(), 'id': "", 'order_id': '', 'location_id': '',
-                               'status': '', 'amount_money': {'amount': '12300'}, 'receipt_url': ''}
-
-        if request.session['payment_db'] == 'ClassRegistration':
-            class_registration = ClassRegistration.objects.filter(idempotency_key=idempotency_key)
-            for student in class_registration:
-                student.pay_status = 'paid'
-
-        description = request.session['line_items'][0]['name']
-        cd = date.fromisoformat(square_response['created_at'])
-        log = PaymentLog.objects.create(user=request.user,
-                                        student_family=StudentFamily.objects.filter(user=request.user)[0],
-                                        checkout_created_time=cd,
-                                        checkout_id=square_response['id'],
-                                        order_id=square_response['order_id'],
-                                        location_id=square_response['location_id'],
-                                        state=square_response['status'],
-                                        total_money=square_response['amount_money']['amount'],
-                                        description=description,
-                                        idempotency_key=idempotency_key,
-                                        receipt=square_response['receipt_url'])
-
-        return render(request, 'student_app/message.html', {'message': 'payment successful'})
+            logging.debug('payment processing error')
+            return render(request, 'student_app/message.html', {'message': 'payment processing error'})

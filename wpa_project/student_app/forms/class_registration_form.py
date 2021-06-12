@@ -42,4 +42,4 @@ class ClassRegistrationForm(forms.Form):
 
     class Meta:
         model = ClassRegistration
-        exclude = ['pay_status', 'idempotency_key', 'reg_time']
+        exclude = ['pay_status', 'order_id', 'reg_time']

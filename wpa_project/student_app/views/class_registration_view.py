@@ -12,17 +12,34 @@ import logging
 
 from ..forms import ClassRegistrationForm
 from ..models import BeginnerClass, ClassRegistration, Student, StudentFamily
-from ..src.square_helper import line_item
+from ..src.square_helper import SquareHelper
 
 logger = logging.getLogger(__name__)
 
 
+class ClassRegisteredTable(LoginRequiredMixin, View):
+    def get(self, request):
+        try:
+            students = StudentFamily.objects.get(user=request.user).student_set.all()
+        except StudentFamily.DoesNotExist:
+            request.session['message'] = 'Address form is required'
+            return HttpResponseRedirect(reverse('registration:profile'))
+        bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:3])
+        enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
+            pay_status='refunded')
+        logging.debug(enrolled_classes.values())
+        return render(request, 'student_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
+
+
 class ClassRegistrationView(LoginRequiredMixin, View):
     def get(self, request):
-        # classes = BeginnerClass.get_open_classes()
-        students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
+        try:
+            students = StudentFamily.objects.get(user=request.user).student_set.all()
+        except StudentFamily.DoesNotExist:
+            request.session['message'] = 'Address form is required'
+            logging.debug(request.session['message'])
+            return HttpResponseRedirect(reverse('registration:student_register'))
         form = ClassRegistrationForm(students)
-
         return render(request, 'student_app/class_registration.html', {'form': form})
 
     def post(self, request):
@@ -44,7 +61,8 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 if str(k).startswith('student_') and v:
                     i = int(str(k).split('_')[-1])
                     s = Student.objects.get(pk=i)
-                    if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s)) == 0:
+                    if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
+                            pay_status="refunded")) == 0:
                         if s.safety_class is None:
                             beginner += 1
                             students.append(s)
@@ -68,28 +86,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     logging.debug('to many returnee')
                     message += 'to many returnee'
                 if message == "":
-                    with transaction.atomic():
-                        uid = str(uuid.uuid4())
-                        if beginner_class.enrolled_beginners == beginner_class.beginner_limit and \
-                            beginner_class.enrolled_returnee == beginner_class.returnee_limit:
-                            beginner_class.state = 'full'
-                        beginner_class.save()
-                        logging.debug('save')
-                        request.session['idempotency_key'] = uid
-                        request.session['line_items'] = []
-                        request.session['payment_db'] = 'ClassRegistration'
-                        for s in students:
-                            if s.safety_class is None:
-                                n = True
-                            else:
-                                n = False
-                            ClassRegistration(beginner_class=beginner_class, student=s, new_student=n,
-                                              pay_status='start', idempotency_key=uid).save()
-                            logging.debug(s.id)
-                            request.session['line_items'].append(
-                                line_item(f"Class on {beginner_class.class_date} student id: {str(s.id)}", 1,
-                                          beginner_class.cost))
-                    return HttpResponseRedirect(reverse('registration:process_payment'))
+                    return self.transact(beginner_class, request, students)
 
                 else:
                     logging.debug(message)
@@ -100,3 +97,32 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             return render(request, 'student_app/class_registration.html', {'form': form})
 
         return HttpResponseRedirect(reverse('registration:profile'))
+
+    def transact(self, beginner_class, request, students):
+        with transaction.atomic():
+            uid = str(uuid.uuid4())
+            if beginner_class.enrolled_beginners == beginner_class.beginner_limit and \
+                    beginner_class.enrolled_returnee == beginner_class.returnee_limit:
+                beginner_class.state = 'full'
+            beginner_class.save()
+            logging.debug('save')
+            request.session['idempotency_key'] = uid
+            request.session['line_items'] = []
+            request.session['payment_db'] = 'ClassRegistration'
+            total_cost = 0
+            for s in students:
+                if s.safety_class is None:
+                    n = True
+                else:
+                    n = False
+                ClassRegistration(beginner_class=beginner_class, student=s, new_student=n,
+                                  pay_status='start', idempotency_key=uid).save()
+                logging.debug(s.id)
+                request.session['line_items'].append(
+                    SquareHelper().line_item(f"Class on {beginner_class.class_date} student id: {str(s.id)}", 1,
+                                             beginner_class.cost))
+                total_cost += beginner_class.cost
+        # if total_cost > 0:
+        return HttpResponseRedirect(reverse('registration:process_payment'))
+        # else:
+        #     return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})
