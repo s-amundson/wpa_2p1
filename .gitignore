@@ -4,4 +4,4 @@ venv/**
 .sqlite3
 secrets.json
 *~S
-temp*
+temp_*

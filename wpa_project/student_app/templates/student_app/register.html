@@ -17,28 +17,6 @@
         <div class="row" message_text="{{ message }}" id="message"><h3>"{{ message }}"</h3></div>
     {% endif %}
 
-    <form method="post" action="{% url 'registration:student_register' %}" autocomplete="off" class="form">
-    {% csrf_token %}
-        <div class="row">
-                <div class="input-group input-group-md">
-                    {{ form.street }}
-<!--                    <input type="text" name="id" hidden disabled value="{{ membership_id }}">-->
-                </div>
-        </div>
+    {% include "student_app/forms/student.html" %}
 
-        <div class="row">
-                <div class="input-group input-group-md">
-                    {{ form.city }}
-                    {{ form.state }}
-                    {{ form.post_code }}
-                </div>
-        </div>
-
-        <div class="row">
-            <div class="input-group input-group-md">
-                {{ form.phone }}
-            </div>
-        </div>
-    <button class="btn btn-primary" type="submit"> Sign Up</button>
-    </form>
 {% endblock %}

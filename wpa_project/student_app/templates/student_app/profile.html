@@ -32,10 +32,21 @@
             <h3> Address </h3>
         </div>
     </div>
-    <div class="row">
-        {{ student_family.street }} </br>
-        {{ student_family.city }} {{ student_family.state }} {{ student_family.post_code }} </br>
-        {{ student_family.phone }}
+    <div id="student-family-form" class="row"></div>
+    <div id="student-family-address" class="row"">
+        <div class="col">
+            <div id="address1" class="row">{{ student_family.street }} </div>
+            <div id="address2" class="row">
+                {{ student_family.city }} {{ student_family.state }} {{ student_family.post_code }}
+            </div>
+            <div id="phone" class="row">{{ student_family.phone }}</div>
+            <div class="row">
+                <button id="btn-address-edit" class="btn btn-primary" type="button" name="button"
+                        family_id="{{ student_family.id }}">
+                    Edit Address
+                </button>
+            </div>
+        </div>
     </div>
     {% if user.is_instructor %}
         <div class="row p-3 align-items-center mx-auto">

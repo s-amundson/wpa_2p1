@@ -1,3 +1,4 @@
 from .payment_serializers import PaymentSerializer
+from .student_family_serializers import StudentFamilySerializer
 from .student_serializers import StudentSerializer
 from .unregister_serializers import UnregisterSerializer
