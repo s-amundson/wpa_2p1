@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from ..serializers import PaymentSerializer
-from ..src.square_helper import SquareHelper
+from ..src import ClassRegistrationHelper, SquareHelper
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ class PaymentView(APIView):
 
     def __init__(self):
         self.square_helper = SquareHelper()
+        self.class_helper = ClassRegistrationHelper()
 
     def post(self, request, format=None):
         response_dict = {'status': 'ERROR', 'receipt_url': '', 'error': ''}
@@ -44,6 +45,11 @@ class PaymentView(APIView):
             amount = {'amount': amt, 'currency': 'USD'}
             message = ""
 
+            d = request.session.get('class_registration', None)
+            if d is not None:
+                if not self.class_helper.check_space(d, True):
+                    response_dict['error'] = 'not enough space in the class'
+                    return Response(response_dict)
             square_response = self.square_helper.process_payment(idempotency_key, sq_token, note, amount)
             logging.debug(square_response['error'])
             if len(square_response['error']) > 0:

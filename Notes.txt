@@ -9,7 +9,6 @@ Useful Commands:
 
 TODO
     Align auth templates with my templates - changed template inheritance need to check
-    edit address from profile
     instructors
     social accounts
     terms to class reg and signin

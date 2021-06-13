@@ -1,7 +1,11 @@
 "use strict";
 $.ajaxSetup({traditional: true});
 $(document).ready(function(){
-    $.get("class_registered_table", function(data, status){
+    get_reg_table();
+});
+
+async function get_reg_table() {
+    let data = await $.get("class_registered_table", function(data, status){
         $("#registered_table").html(data);
         if($(".unreg").length > 0) {
             $("#unreg_form").show();
@@ -11,12 +15,39 @@ $(document).ready(function(){
         }
         $("#unreg_form").submit(function(e){
             e.preventDefault();
-            myFunction()
+            post_unregister()
         });
     });
-});
 
-async function myFunction() {
+    $(".pay_status").each(pay_status_links)
+//    function(e){
+//        pay_status_links($(this))
+//    });
+}
+function pay_status_links(i, el) {
+    let e = $(el)
+    console.log(e.html().trim())
+
+    if (e.html().trim() == 'start') {
+        console.log('here')
+        var a = document.createElement('a');
+
+        // Create the text node for anchor element.
+        var link = document.createTextNode("Started");
+
+        // Append the text node to anchor element.
+        a.appendChild(link);
+
+        // Set the title.
+        a.title = "Started";
+
+        // Set the href property.
+        a.href = e.attr("curl");
+
+        e.html(a);
+    }
+}
+async function post_unregister() {
     console.log('on submit')
     let refund = 0;
     let unreg_list = [];
@@ -54,20 +85,7 @@ async function myFunction() {
 
         //      request new table from server
         console.log('get table from server')
-        $.get("class_registered_table", function(data, status){
-            $("#registered_table").html(data);
-
-            if($(".unreg").length > 0) {
-                $("#unreg_form").show();
-            }
-            else{
-                $("#unreg_form").hide();
-            }
-            $("#unreg_form").submit(function(e){
-                e.preventDefault();
-                myFunction()
-            });
-        });
+        get_reg_table();
     }
     else {
         console.log('canceled');

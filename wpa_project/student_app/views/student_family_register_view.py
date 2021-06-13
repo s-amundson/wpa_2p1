@@ -42,6 +42,6 @@ class StudentFamilyRegisterView(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse('registration:profile'))
         else:
             logging.debug(form.errors)
-        self.get_students(request)
+        self.get_students(request, family_id)
         return render(request, 'student_app/register.html', {'form': form})
 

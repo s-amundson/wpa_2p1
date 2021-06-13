@@ -1,6 +1,7 @@
 import logging
 
 from django.db import models
+from django.apps import apps
 from django.utils import timezone
 logger = logging.getLogger(__name__)
 
@@ -9,7 +10,7 @@ class BeginnerClass(models.Model):
     class_states = ['scheduled', 'open', 'full', 'closed', 'canceled', 'recorded']
     states = []
     for c in class_states:
-        states.append((c,c))
+        states.append((c, c))
     class_date = models.DateField()
     enrolled_beginners = models.IntegerField(default=0)
     beginner_limit = models.IntegerField()
@@ -19,6 +20,7 @@ class BeginnerClass(models.Model):
     #           ('canceled', 'canceled'), ('recorded', 'recorded')]
     state = models.CharField(max_length=20, null=True, choices=states)
     cost = models.IntegerField(default=5)
+
 
     def get_states(self):
         return self.class_states

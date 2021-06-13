@@ -4,6 +4,7 @@
         <div class="col border"> Class Date</div>
         <div class="col border"> First Name </div>
         <div class="col border"> Last Name </div>
+        <div class="col border">Payment Status</div>
         <div class="col border"> Cancel </div>
     </div>
     {% for class in enrolled_classes %}
@@ -14,6 +15,9 @@
                 <input type="hidden" id="cost_{{ class.id }}" value="{{ class.beginner_class.cost }}">
             </div>
             <div class="col border"> {{ class.student.last_name }} </div>
+            <div class="col border pay_status" curl="{% url 'registration:class_registration' class.id %}">
+                {{ class.pay_status }}
+            </div>
             <div class="col border">
                 <input type="checkbox" class_id={{ class.id }} class="m-2 unreg" id="check_{{ class.id }}">
             </div>

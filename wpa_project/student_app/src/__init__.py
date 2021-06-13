@@ -1,1 +1,2 @@
+from .class_registration_helper import ClassRegistrationHelper
 from .square_helper import SquareHelper
