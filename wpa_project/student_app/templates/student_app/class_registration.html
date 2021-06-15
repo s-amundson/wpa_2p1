@@ -14,28 +14,28 @@
             {% csrf_token %}
             <div class="row"><h4>Class Registration</h4></div>
             <div class="row p-1">
-                <div class="col-3">Select a class date:</div>
+                <div class="col-4 text-right">Select a class date:</div>
                 <div class="col-2 input-group input-group-md">
                         {{ form.beginner_class }}
                 </div>
-                <div class="col-2" id="class-availible"></div>
+                <div class="col" id="class-availible"></div>
             </div>
             <div class="row p-1">
-                <div class="col-3">
-                    Select students to enroll
+                <div class="col-4 text-right border">
+                    Select students to enroll:
                 </div>
-                <div class="col-4">
+                <div class="col">
                     {% for student in form.get_boxes %}
                         <div class="row">
-                            <div class="col input-group input-group-md">
+                            <div class="col input-group input-group-md border">
                                 {{ student }} {{ student.label }}
                             </div>
-                            <div class="col" id="is-new-student"></div>
+                            <div class="col border" id="is-new-student-{{ forloop.counter0 }}"></div>
                         </div>
                     {% endfor %}
                 </div>
-            <div class="row p-1"></div>
-            <div class="row p-1">
+
+            <div class="row pt-5">
                 <div class="col">
                     <div class="row"><h4>ACCIDENT WAIVER AND RELEASE OF LIABILITY (AWRL)</h4></div>
                     <div class="row p-1">

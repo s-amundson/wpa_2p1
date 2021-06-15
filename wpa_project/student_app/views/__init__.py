@@ -1,6 +1,6 @@
 from .student_view import AddStudentView, StudentApiView
 from .beginner_class_view import BeginnerClassView, BeginnerClassListView
-from .class_available_view import ClassAvailableView
+from .class_status_view import ClassStatusView
 from .class_registration_view import ClassRegisteredTable, ClassRegistrationView
 from .costs_view import CostsView
 from .index_view import IndexView

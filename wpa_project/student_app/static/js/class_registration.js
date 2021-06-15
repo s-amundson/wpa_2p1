@@ -1,10 +1,23 @@
 "use strict";
 $.ajaxSetup({traditional: true});
 $(document).ready(function(){
+    $(".student-check").each(show_new_student);
     get_reg_table();
+    $("#id_beginner_class").click(get_class_status);
 });
 
+async function get_class_status() {
+    // get the class status from the server. tells us how many openings there are in the class.
+    let d = $("#id_beginner_class").val();
+    if(d != "") {
+            let msg = "Class openings:</br> &nbsp;&nbsp; New Students: " +  data['beginner'] + " Returning: " + data['returnee'];
+            $("#class-availible").html(msg);
+        });
+    }
+}
+
 async function get_reg_table() {
+    // get the classes that this 'family' is registered for.
     let data = await $.get("class_registered_table", function(data, status){
         $("#registered_table").html(data);
         if($(".unreg").length > 0) {
@@ -19,17 +32,12 @@ async function get_reg_table() {
         });
     });
 
-    $(".pay_status").each(pay_status_links)
-//    function(e){
-//        pay_status_links($(this))
-//    });
+    $(".pay_status").each(pay_status_links);
 }
+
 function pay_status_links(i, el) {
     let e = $(el)
-    console.log(e.html().trim())
-
     if (e.html().trim() == 'start') {
-        console.log('here')
         var a = document.createElement('a');
 
         // Create the text node for anchor element.
@@ -47,7 +55,9 @@ function pay_status_links(i, el) {
         e.html(a);
     }
 }
+
 async function post_unregister() {
+    // to unregister student(s) from a class.
     console.log('on submit')
     let refund = 0;
     let unreg_list = [];
@@ -60,7 +70,6 @@ async function post_unregister() {
             refund += parseInt($("#cost_" + class_id).val());
             unreg_list.push(class_id);
         }
-        console.log(refund);
     });
     if(unreg_list.length == 1){
         getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
@@ -71,15 +80,12 @@ async function post_unregister() {
         refund + " to your card(s)");
         }
     if (getConfirm) {
-        console.log("submit");
-        console.log(unreg_list);
 
         //       Send the unregister request to the server
         let data = await $.post("unregister_class", {
             "class_list": unreg_list,
             csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
         }, function(data, status){
-            console.log(data)
             return data;
             }, "json");
 
@@ -90,4 +96,13 @@ async function post_unregister() {
     else {
         console.log('canceled');
     }
+}
+
+function show_new_student(i, el) {
+    // puts "New Student" next to a student's name if they have not been though the safety class.
+    let e = $(el)
+    if (e.attr("is_beginner") == "T") {
+        $("#is-new-student-" + i).html("New Student")
+    }
+
 }

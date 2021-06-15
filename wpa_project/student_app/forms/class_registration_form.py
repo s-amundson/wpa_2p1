@@ -24,7 +24,7 @@ class ClassRegistrationForm(forms.Form):
         #         widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=False,)
         for student in students:
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
-                attrs={'class': "m-2", 'is_beginner': 'T' if student.safety_class is None else 'F'}), required=False,
+                attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F'}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
             # TODO WISH set initial to student's last class state
             # student['checkbox'] = self.fields[f'student_{student["id"]}']
