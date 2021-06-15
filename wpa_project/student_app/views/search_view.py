@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class SearchView(LoginRequiredMixin, View):
-    """Shows a message page"""
     def get(self, request):
         if not (request.user.is_board or request.user.is_superuser):
             return HttpResponseForbidden()
@@ -33,7 +32,7 @@ class SearchView(LoginRequiredMixin, View):
                     return render(request, 'student_app/message.html', {'message': 'No email found'})
                 student_family = []
                 for u in user:
-                    student_family.append(StudentFamily.objects.filter(user=u.user))
+                    student_family.append(StudentFamily.objects.get(user__id=u.user_id))
                 return render(request, 'student_app/search_result.html', {'student_family': student_family})
         elif 'first_name' in request.POST:
             form = SearchNameForm(request.POST)
