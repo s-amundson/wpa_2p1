@@ -69,10 +69,6 @@ class UnregisterView(LoginRequiredMixin, APIView):
                 # update the number of enrolled students
                 for c in class_list:
                     cr = ClassRegistration.objects.get(pk=c)
-                    if cr.student.safety_class is None:
-                        cr.beginner_class.enrolled_beginners -= 1
-                    else:
-                        cr.beginner_class.enrolled_returnee -= 1
                     if cr.beginner_class.state == 'full':
                         cr.beginner_class.state = 'open'
                     cr.beginner_class.save()

@@ -18,17 +18,19 @@
                 <div class="col-2 input-group input-group-md">
                         {{ form.beginner_class }}
                 </div>
+                <div class="col-2" id="class-availible"></div>
             </div>
             <div class="row p-1">
                 <div class="col-3">
                     Select students to enroll
                 </div>
-                <div class="col-2">
+                <div class="col-4">
                     {% for student in form.get_boxes %}
                         <div class="row">
-                            <div class="input-group input-group-md">
+                            <div class="col input-group input-group-md">
                                 {{ student }} {{ student.label }}
                             </div>
+                            <div class="col" id="is-new-student"></div>
                         </div>
                     {% endfor %}
                 </div>

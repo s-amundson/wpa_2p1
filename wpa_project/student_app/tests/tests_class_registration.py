@@ -44,7 +44,7 @@ class TestsClassRegistration(TestCase):
 
         # add a user to the class with error
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06', 'student_1': 'on'}, secure=True)
+                         {'beginner_class': '2022-06', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
         cr = ClassRegistration.objects.all()
@@ -53,12 +53,12 @@ class TestsClassRegistration(TestCase):
     def test_class_register_good(self):
         # add a user to the class
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_1': 'on'}, secure=True)
+                         {'beginner_class': '2022-06-05', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
-        self.assertEqual(cr[0].beginner_class, bc[0])
+        self.assertEqual(cr[0].beginner_class, bc)
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          'Class on 2022-06-05 student id: 1')
         self.assertEqual(self.client.session['payment_db'], 'ClassRegistration')
@@ -69,7 +69,7 @@ class TestsClassRegistration(TestCase):
     def test_class_register_over_limit(self):
         # put a record in to the database
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_1': 'on'}, secure=True)
+                         {'beginner_class': '2022-06-05', 'student_1': 'on', 'terms': 'on'}, secure=True)
         cr = ClassRegistration.objects.get(pk=1)
         cr.pay_status = 'paid'
         cr.save()
@@ -77,7 +77,7 @@ class TestsClassRegistration(TestCase):
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(User.objects.get(pk=2))
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on'}, secure=True)
+                     {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
         cr = ClassRegistration.objects.all()
@@ -86,7 +86,7 @@ class TestsClassRegistration(TestCase):
 
     def test_class_register_readd(self):
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_1': 'on'}, secure=True)
+                         {'beginner_class': '2022-06-05', 'student_1': 'on', 'terms': 'on'}, secure=True)
         cr = ClassRegistration.objects.get(pk=1)
         cr.pay_status = 'paid'
         cr.save()
@@ -94,7 +94,7 @@ class TestsClassRegistration(TestCase):
         logging.debug('add user again')
         self.client.force_login(User.objects.get(pk=1))
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_1': 'on'}, secure=True)
+                         {'beginner_class': '2022-06-05', 'student_1': 'on', 'terms': 'on'}, secure=True)
 
         # self.assertContains(response, 'Student already enrolled')
         # self.assertEqual(response.context['message'] == "")
@@ -105,14 +105,14 @@ class TestsClassRegistration(TestCase):
 
     def test_class_register_add2(self):
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_1': 'on'}, secure=True)
+                         {'beginner_class': '2022-06-05', 'student_1': 'on', 'terms': 'on'}, secure=True)
         cr = ClassRegistration.objects.get(pk=1)
         cr.pay_status = 'paid'
         cr.save()
         # change user, then add 1 beginner students and 1 returnee.
         self.client.force_login(User.objects.get(pk=3))
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_4': 'on', 'student_5': 'on'}, secure=True)
+                         {'beginner_class': '2022-06-05', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         # self.assertEqual(bc.enrolled_beginners, 2)
         # self.assertEqual(bc.enrolled_returnee, 1)
@@ -124,7 +124,7 @@ class TestsClassRegistration(TestCase):
             c.save()
         # don't change user, try to add user not in family to class
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_6': 'on'}, secure=True)
+                         {'beginner_class': '2022-06-05', 'student_6': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         # self.assertEqual(bc.enrolled_beginners, 2)
         # self.assertEqual(bc.enrolled_returnee, 1)
@@ -135,7 +135,7 @@ class TestsClassRegistration(TestCase):
         # change user, then add 1 returnee.
         self.client.force_login(User.objects.get(pk=4))
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_6': 'on'}, secure=True)
+                         {'beginner_class': '2022-06-05', 'student_6': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.all()
         # self.assertEqual(bc[0].enrolled_beginners, 2)
         # self.assertEqual(bc[0].enrolled_returnee, 2)
@@ -151,7 +151,7 @@ class TestsClassRegistration(TestCase):
         bc.save()
         # add a user to the class
         response = self.client.post(reverse('registration:class_registration'),
-                                    {'beginner_class': '2022-06-05', 'student_1': 'on'}, secure=True)
+                                    {'beginner_class': '2022-06-05', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
         cr = ClassRegistration.objects.all()

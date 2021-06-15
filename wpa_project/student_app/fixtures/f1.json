@@ -21,10 +21,10 @@
    "email": "RicardoRHoyt@jourrapide.com", "is_staff": false, "is_active": true, "date_joined": "2021-05-31T19:08:19.410Z", "groups": [],
    "user_permissions": []}},
 
-  {"model": "student_app.beginnerclass", "pk": 1, "fields": {"class_date": "2022-06-05", "enrolled_beginners": 0,
-  "beginner_limit": 2, "enrolled_returnee": 0, "returnee_limit": 2, "state": "open"}},
-  {"model": "student_app.beginnerclass", "pk": 2, "fields": {"class_date": "2022-06-12", "enrolled_beginners": 0,
-  "beginner_limit": 20, "enrolled_returnee": 0, "returnee_limit": 20, "state": "scheduled"}},
+  {"model": "student_app.beginnerclass", "pk": 1, "fields": {"class_date": "2022-06-05",
+  "beginner_limit": 2, "returnee_limit": 2, "state": "open"}},
+  {"model": "student_app.beginnerclass", "pk": 2, "fields": {"class_date": "2022-06-12",
+  "beginner_limit": 20, "returnee_limit": 20, "state": "scheduled"}},
 
   {"model": "student_app.costsmodel", "pk": 1, "fields": {"name": "Beginner Class", "member_cost": 5, "standard_cost": 5, "membership": false, "enabled": true}},
 

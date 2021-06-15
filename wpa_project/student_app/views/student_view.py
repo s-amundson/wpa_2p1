@@ -47,8 +47,8 @@ class StudentApiView(LoginRequiredMixin, APIView):
                 f = serializer.save(student_family=sf)
             else:
                 f = serializer.update(student, serializer.validated_data)
-            request.session['student_family'] = f.student_family__id
-            logging.debug(f'id = {f.id}, fam = {f.student_family}')
+            request.session['student_family'] = f.student_family.id
+            logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,10 +83,10 @@ class AddStudentView(LoginRequiredMixin, View):
             else:
                 f = form.save(commit=False)
                 f.student_family = StudentFamily.objects.get(user=request.user)
-                request.session['student_family'] = f.sudent_family__id
+                request.session['student_family'] = f.student_family.id
                 f.save()
 
-            logging.debug(f'id = {f.id}, fam = {f.student_family}')
+            logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
             return HttpResponseRedirect(reverse('registration:profile'))
         else:
             logging.debug(form.errors)

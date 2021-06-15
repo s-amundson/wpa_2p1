@@ -88,7 +88,7 @@ class TestsUnregisterStudent(TestCase):
     #
     def test_refund_success_partial_purchase(self):
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on'}, secure=True)
+                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
 
         # process a good payment
         response = self.client.post(reverse('registration:payment'),

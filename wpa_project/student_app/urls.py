@@ -7,6 +7,7 @@ urlpatterns = [
         path('add_student', AddStudentView.as_view(), name='add_student'),
         path('beginner_class/<int:beginner_class>/', BeginnerClassView.as_view(), name='beginner_class'),
         path('beginner_class', BeginnerClassView.as_view(), name='beginner_class'),
+        path('class_available/<int:class_id>/', ClassAvailableView.as_view(), name='class_available'),
         path('class_list', BeginnerClassListView.as_view(), name='class_list'),
         path('class_registered_table', ClassRegisteredTable.as_view(), name='class_registered_table'),
         path('class_registration/<int:reg_id>', ClassRegistrationView.as_view(), name='class_registration'),

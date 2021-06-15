@@ -65,6 +65,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             request.session['class_registration'] = {'beginner_class': r.beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
             return HttpResponseRedirect(reverse('registration:process_payment'))
+
         form = ClassRegistrationForm(students)
         return render(request, 'student_app/class_registration.html', {'form': form})
 
