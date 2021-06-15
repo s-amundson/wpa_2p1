@@ -11,10 +11,10 @@ TODO
     Align auth templates with my templates - changed template inheritance need to check
     instructors
     social accounts
-    terms to class reg and signin
-    edit student after search
+    terms to class reg and signin - need to update the terms.
     remove step from signout process
     add something about class start time.
     remove class count, go off of class registration querys
     test beginner class canceled (square refunds)
     automate opening and closing of classes.
+    cookie law
