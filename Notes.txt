@@ -13,7 +13,6 @@ TODO
     social accounts
     terms to class reg and signin - need to update the terms.
     add something about class start time.
-    remove class count, go off of class registration querys
     test beginner class canceled (square refunds)
     automate opening and closing of classes.
     cookie law
