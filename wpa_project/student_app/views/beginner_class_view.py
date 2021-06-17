@@ -9,6 +9,7 @@ from django.views.generic import ListView
 from django.utils import timezone
 # from django.db.models import model
 # from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 
 from ..forms import BeginnerClassForm, ClassAttendanceForm
 from ..models import BeginnerClass, ClassRegistration, CostsModel
@@ -21,6 +22,8 @@ class BeginnerClassView(LoginRequiredMixin, View):
     def get(self, request, beginner_class=None):
         if not request.user.is_staff:
             return HttpResponseForbidden()
+        # messages.add_message(request, messages.INFO, 'Hello world.')
+        alert_message = ''
         logging.debug('staff')
         attendee_form = False
         if beginner_class is not None:
@@ -45,7 +48,8 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 logging.error('cost does not exist')
             form = BeginnerClassForm(initial={'class_date': c, 'beginner_limit': 20, 'returnee_limit': 20,
                                               'state': 'scheduled', 'cost': cost})
-        return render(request, 'student_app/beginner_class.html', {'form': form, 'attendee_form': attendee_form})
+        return render(request, 'student_app/beginner_class.html', {'form': form, 'attendee_form': attendee_form,
+                                                                   'alert_message': alert_message})
 
     def post(self, request, beginner_class=None):
 
@@ -69,7 +73,7 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 registration.student.save()
                 registration.save()
             logging.debug(new_count)
-            return HttpResponseRedirect(reverse('registration:index'))
+            return HttpResponseRedirect(reverse('registration:class_list'))
         if beginner_class is not None: # we are updating a record.
 
             bc = BeginnerClass.objects.get(pk=beginner_class)
@@ -83,6 +87,7 @@ class BeginnerClassView(LoginRequiredMixin, View):
             if len(BeginnerClass.objects.filter(class_date=form.cleaned_data['class_date'])) > 0 \
                     and beginner_class is None:
                 logging.debug('Class Exists')
+                messages.add_message(request, messages.ERROR, 'A class on this date already exists')
                 return render(request, 'student_app/form_as_p.html', {'form': form, 'message': 'Class Exists'})
 
             bc = form.save()
@@ -92,18 +97,23 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 logging.debug(f'beginners: {bc.enrolled_beginners}, returnees: {bc.enrolled_returnee}')
                 if bc.enrolled_beginners > 0 or bc.enrolled_returnee > 0:
                     cr = ClassRegistration.objects.filter(beginner_class__id=bc.id)
+                    cancel_error = False
                     for reg in cr.distinct('idempotency_key'):
                         qty = len(cr.filter(reg.idempotency_key))
                         square_response = square_helper.refund_payment(reg.idempotency_key, qty * reg.cost)
                         if square_response['status'] == 'error':
+                            cancel_error = True
                             logging.error(square_response)
+                            messages.add_message(request, messages.ERROR, square_response)
 
                     logging.debug(cr)
+                if not cancel_error:
+                    messages.add_message(request, messages.SUCCESS, 'Class was canceled')
 
-            return HttpResponseRedirect(reverse('registration:index'))
+            return HttpResponseRedirect(reverse('registration:class_list'))
         else:
             logging.debug(form.errors)
-            return render(request, 'student_app/form_as_p.html', {'form': form})
+            return render(request, 'student_app/beginner_class.html', {'form': form})
 
 
 class BeginnerClassListView(LoginRequiredMixin, ListView):

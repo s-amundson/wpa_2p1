@@ -9,6 +9,7 @@ Django>=3.2.3
 django-allauth>=0.44.0
 django-apscheduler>=0.5.2
 django-bootstrap-modal-forms>=1.4.1
+django-datatables-view>=1.19.1
 django-sslserver>=0.22
 djangorestframework>=3.12.4
 idna>=2.10

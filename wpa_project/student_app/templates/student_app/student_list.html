@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %} Student List {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+    <script src="{% static 'js/student_list.js' %}"></script>
+{% endblock %}
+
+{% block main %}
+  <div id="student_table" class="bg-light text-dark" curl="{% url 'registration:student_list_json' %}">
+    <table class="datatable text-black">
+        <thead>
+            <th p-2>"Last Name"</th>
+            <th p-2>"First Name"</th>
+            <th p-2>"Date of Birth"</th>
+            <th p-2>"Safety Class Date"</th>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+{% block right %}
+  <div id="login-div"></div>
+{% endblock %}

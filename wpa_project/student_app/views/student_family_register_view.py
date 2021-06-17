@@ -25,7 +25,7 @@ class StudentFamilyRegisterView(LoginRequiredMixin, View):
             self.form = StudentFamilyRegistrationForm(instance=student_family)
 
     def get(self, request, family_id=None):
-
+        logging.debug('here')
         self.get_students(request, family_id)
         message = request.session.get('message', '')
         logging.debug(message)

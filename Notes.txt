@@ -18,7 +18,6 @@ TODO
     cookie law
     combine StudentApiView and StudentView?
     add on screen instructions to add students
-    what happened to the classes that I just signed up for
     cost not comming up as default
     add age restriction
     on profile page add link to add class - add javascript once they have 1 student div shows with link to add class
@@ -27,9 +26,5 @@ TODO
     added an alert
     why is class not open after singing up students.
     popup error message when tried to sign up student that is already signed up
-    make costs superuser only
-    make update class redirect back to itself
     update search to search for first name or last name
-    fix edit student to show up on same page.
-    fix address format
     list users - be able to sort and filter

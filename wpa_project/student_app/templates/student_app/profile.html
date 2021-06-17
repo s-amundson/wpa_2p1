@@ -33,7 +33,7 @@
         </div>
     </div>
     <div id="student-family-form" class="row"></div>
-    <div id="student-family-address" class="row"">
+    <div id="student-family-address" class="row">
         <div class="col">
             <div id="address1" class="row">{{ student_family.street }} </div>
             <div id="address2" class="row">
@@ -47,6 +47,11 @@
                 </button>
             </div>
         </div>
+    </div>
+    <div id="can-register" class="row pt-3">
+        Now that you have added a student you can&nbsp;
+        <a href="{% url 'registration:class_registration' %}">register</a>
+        &nbsp;for a class. You can also click on class in the nav bar.
     </div>
     {% if user.is_instructor %}
         <div class="row p-3 align-items-center mx-auto">

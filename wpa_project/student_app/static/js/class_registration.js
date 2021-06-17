@@ -1,5 +1,6 @@
 "use strict";
 $.ajaxSetup({traditional: true});
+var started_status = false;
 $(document).ready(function(){
     $(".student-check").each(show_new_student);
     get_reg_table();
@@ -34,11 +35,17 @@ async function get_reg_table() {
     });
 
     $(".pay_status").each(pay_status_links);
+    if (started_status){
+        alert("You have an incomplete payment and are not registered for the class.\n" +
+        "If you wish to process the payment click on the 'Started' link. " +
+        "If can't attend please unregister by selecting the class(es) you wish to cancel and click the Unregister button')");
+    }
 }
 
 function pay_status_links(i, el) {
     let e = $(el)
     if (e.html().trim() == 'start') {
+        started_status = true;
         var a = document.createElement('a');
 
         // Create the text node for anchor element.
@@ -104,6 +111,9 @@ function show_new_student(i, el) {
     let e = $(el)
     if (e.attr("is_beginner") == "T") {
         $("#is-new-student-" + i).html("New Student")
+    }
+    else{
+        $("#is-new-student-" + i).html("Returning Student")
     }
 
 }

@@ -22,7 +22,7 @@
                 {% endfor %}
             </div>
         </div>
-        {% if user.is_board %}
+        {% if user.is_staff %}
             <div class="col input-group input-group-md">
                 <div class="row">Safety Class</div>
                 <div class="row mx-auto">
@@ -35,8 +35,11 @@
         {% endif %}
     </div>
     <div class="row">
-        <div class="col">
-            <button id="btn-student-form" class="btn btn-primary" type="submit">Add</button>
+        <div class="col-2">
+            <button id="btn-student-form-add" class="btn btn-primary" type="submit">Add</button>
+        </div>
+        <div class="col-2">
+            <button id="btn-student-form-close" class="btn btn-primary">Close</button>
         </div>
     </div>
 </form>

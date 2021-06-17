@@ -3,6 +3,8 @@ from ..models import StudentFamily
 
 
 class StudentFamilySerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+
     class Meta:
         model = StudentFamily
-        fields = ['street', 'street', 'state', 'post_code', 'phone']
+        fields = ['id', 'street', 'street', 'state', 'post_code', 'phone']

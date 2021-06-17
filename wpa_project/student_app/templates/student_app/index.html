@@ -4,10 +4,16 @@
 
 {% block main %}
   <div class="row">
-    <div class="col"><h2> Index Page </h2></div>
+    <div class="col"><h2> Class Registration </h2></div>
   </div>
-  {% if user.is_authenticated %}
-  {% else %}
+  <div class="row">
+    <div class="col">
+      <p>In order to sign up for a class you will need to create an account and provide some information.</p>
+      <p>The first step is to join. If you already have an account, please log in.</p>
+    </div>
+  </div>
+  {% if not user.is_authenticated %}
+
     <div class="row">
       <a class="nav-link" href="{% url 'account_signup' %}">Join</a>
     </div>

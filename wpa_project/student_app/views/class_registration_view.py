@@ -97,7 +97,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                             returnee += 1
                             students.append(s)
                     else:
-                        message += 'Student already enrolled'
+                        message += 'Student is already enrolled'
             logging.debug(f'Beginner = {beginner}, returnee = {returnee}')
             request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
@@ -107,19 +107,21 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 enrolled_count = ClassRegistrationHelper().enrolled_count(beginner_class)
                 logging.debug(enrolled_count)
                 if enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
-                    message += "to many beginners"
+                    message += "Not enough space available in this class"
                 if enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
-                    message += 'to many returnee'
+                    message += 'Not enough space available in this class'
                 if message == "":
                     return self.transact(beginner_class, request, students)
 
                 else:
                     logging.debug(message)
-                    return render(request, 'student_app/class_registration.html', {'form': form, 'message': message})
+                    return render(request, 'student_app/class_registration.html',
+                                  {'form': form, 'alert_message': message})
 
         else:
             logging.debug(form.errors)
-            return render(request, 'student_app/class_registration.html', {'form': form})
+            return render(request, 'student_app/class_registration.html',
+                          {'form': form, 'alert_message': 'This form has errors'})
 
         return HttpResponseRedirect(reverse('registration:profile'))
 

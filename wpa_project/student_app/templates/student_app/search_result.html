@@ -4,40 +4,44 @@
     Student Search
 {% endblock %}
 
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/search.js' %}"></script>
+{% endblock %}
+
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
 
     {% for sf in student_family %}
         <div class="row">
+            <div class="col-1"></div>
             <div class="col-3 font-weight-bold border" > First Name </div>
             <div class="col-3 font-weight-bold border"> Last Name </div>
-            <div class="col-3 font-weight-bold border"> Date of Birth </div>
+            <div class="col font-weight-bold border"> Date of Birth </div>
             <div class="col-3 font-weight-bold border"> Safety Class Date </div>
         </div>
         {% for student in sf.student_set.all %}
             <div class="row">
-                <div class="col-3 border">
-                    <a class="nav-link" href="{% url 'registration:add_student' student.id %}">
-                        {{ student.first_name }}
-                    </a>
+                <div class="col-1 p-1">
+                    <button id="btn-edit-{{ student.id }}" class="btn btn-primary" type="button" student-id="{{ student.id }}">
+                        Edit
+                    </button>
                 </div>
+                <div class="col-3 border"> {{ student.first_name }} </div>
                 <div class="col-3 border"> {{ student.last_name }} </div>
-                <div class="col-3 border"> {{ student.dob }} </div>
+                <div class="col border"> {{ student.dob }} </div>
                 <div class="col-3 border"> {{ student.safety_class }} </div>
             </div>
         {% endfor %}
+        <div class="row p-2" id="student_add_div"></div>
+        <div class="row pt-4">
+            <div class="col ">
+                <h4>Address</h4>
+                {{ sf.street }}</br>
+                {{ sf.city }} {{ sf.state }} {{ sf.post_code }}</br>
+                {{ sf.phone }}</br>
 
-        <div class="row pt-4">
-            <div class="col "><h4>Address</h4></div>
-        </div>
-        <div class="row">
-            <div class="col"> {{ sf.street }} </div>
-        </div>
-        <div class="row pt-4">
-            <div class="col"> {{ sf.city }} </div>
-            <div class="col"> {{ sf.state }} </div>
-            <div class="col"> {{ sf.post_code }} </div>
-            <div class="col"> {{ sf.phone }} </div>
+            </div>
         </div>
         <div class="row pt-4">
             <div class="col">Registration date: {{ sf.registration_date}} </div>

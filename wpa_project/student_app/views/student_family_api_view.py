@@ -42,7 +42,7 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
     def post(self, request, family_id=None):
         logging.debug(family_id)
         if family_id is None:
-            serializer = StudentFamilySerializer(request.data)
+            serializer = StudentFamilySerializer(data=request.data)
         else:
             student_family = get_object_or_404(StudentFamily, pk=family_id)
             logging.debug(student_family)

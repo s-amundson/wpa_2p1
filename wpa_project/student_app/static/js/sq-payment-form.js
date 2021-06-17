@@ -1,5 +1,4 @@
-const appId = 'sandbox-sq0idb-GT2r-GRa1mdpWUuMdTJZcw';
-const locationId = 'SVM1F73THA9W6';
+
 async function initializeCard(payments) {
  const card = await payments.card();
  await card.attach('#card-container');
@@ -11,7 +10,7 @@ $("#receipt").hide();
 if (!window.Square) {
   throw new Error('Square.js failed to load properly');
 }
-const payments = window.Square.payments(appId, locationId);
+const payments = window.Square.payments(window.applicationId, window.locationId);
 let card;
 try {
   card = await initializeCard(payments);
@@ -30,6 +29,7 @@ try {
      const token = await tokenize(paymentMethod);
      const paymentResults = await createPayment(token);
      displayPaymentResults('SUCCESS');
+     alert("Thank you for your purchase.\n Your payment was processed successfully.\n An email has been sent for confirmation. ")
 
      console.debug('Payment Success', paymentResults);
    } catch (e) {
