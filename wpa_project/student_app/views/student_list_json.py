@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q
 from django.shortcuts import render, get_list_or_404
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -21,7 +21,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.utils.html import escape
 
 
-class StudentListJson(LoginRequiredMixin, BaseDatatableView):
+class StudentListJson(UserPassesTestMixin, BaseDatatableView):
     # The model we're going to show
     model = Student
 
@@ -55,15 +55,8 @@ class StudentListJson(LoginRequiredMixin, BaseDatatableView):
             # qs = qs.filter(first_name__istartswith=search, last_name__istartswith=search)
             qs = qs.filter(Q(first_name__istartswith=search) | Q(last_name__istartswith=search))
 
-        # # more advanced example using extra parameters
-        # filter_customer = self.request.GET.get('customer', None)
-        #
-        # if filter_customer:
-        #     customer_parts = filter_customer.split(' ')
-        #     qs_params = None
-        #     for part in customer_parts:
-        #         q = Q(customer_firstname__istartswith=part)|Q(customer_lastname__istartswith=part)
-        #         qs_params = qs_params | q if qs_params else q
-        #     qs = qs.filter(qs_params)
+
         return qs
 
+    def test_func(self):
+        return self.request.user.is_board

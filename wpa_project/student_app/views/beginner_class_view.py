@@ -39,15 +39,16 @@ class BeginnerClassView(LoginRequiredMixin, View):
             except BeginnerClass.DoesNotExist:
                 c = timezone.now()
             try:
-                cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1] #[0].standard_cost
+                # cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1] #[0].standard_cost
                 costs = get_list_or_404(CostsModel, name='Beginner Class', enabled=True)
-                costs = cost[0]
-                logging.debug(costs)
+                # logging.debug(costs.items())
+                costs = costs[0]
+                logging.debug(costs.standard_cost)
             except CostsModel.DoesNotExist:
                 cost = 0
                 logging.error('cost does not exist')
             form = BeginnerClassForm(initial={'class_date': c, 'beginner_limit': 20, 'returnee_limit': 20,
-                                              'state': 'scheduled', 'cost': cost})
+                                              'state': 'scheduled', 'cost': costs.standard_cost})
         return render(request, 'student_app/beginner_class.html', {'form': form, 'attendee_form': attendee_form,
                                                                    'alert_message': alert_message})
 

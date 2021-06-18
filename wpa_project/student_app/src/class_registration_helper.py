@@ -1,5 +1,5 @@
 import logging
-
+from datetime import timedelta
 from django.apps import apps
 from ..models import BeginnerClass, ClassRegistration
 from django.utils import timezone
@@ -7,6 +7,10 @@ logger = logging.getLogger(__name__)
 
 
 class ClassRegistrationHelper:
+    def calc_age(self, student, date=timezone.now().date()):
+        logging.debug(date)
+        logging.debug(date.year - student.dob.year)
+        return date.year - student.dob.year
 
     def check_space(self, class_registration_dict, update=False):
         # {'beginner_class': beginner_class.id, 'beginner': beginner,
@@ -32,7 +36,7 @@ class ClassRegistrationHelper:
         records = ClassRegistration.objects.filter(beginner_class=beginner_class)
         pay_statuses = ['paid']
         for record in records:
-            logging.debug(f'safety_class {record.student.safety_class}, pay_status {record.pay_status}')
+            # logging.debug(f'safety_class {record.student.safety_class}, pay_status {record.pay_status}')
             if record.pay_status in pay_statuses:
                 if record.student.safety_class:
                     returnee += 1

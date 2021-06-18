@@ -8,4 +8,4 @@ class BeginnerClassForm(ModelForm):
 
     class Meta:
         model = BeginnerClass
-        exclude = ['enrolled_beginners', 'enrolled_returnee']
+        exclude = []

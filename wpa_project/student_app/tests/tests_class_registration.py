@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from ..src import ClassRegistrationHelper
-from ..models import BeginnerClass, ClassRegistration, Student, User
+from ..models import BeginnerClass, ClassRegistration, Student, StudentFamily, User
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class TestsClassRegistration(TestCase):
 
     def test_class_register_with_error(self):
         # Get the page
-        self.client.force_login(self.test_user)
+        # self.client.force_login(self.test_user)
 
         response = self.client.get(reverse('registration:class_registration'), secure=True)
         self.assertEqual(response.status_code, 200)
@@ -161,3 +161,17 @@ class TestsClassRegistration(TestCase):
                          'Class on 2022-06-05 student id: 1')
         self.assertEqual(self.client.session['payment_db'], 'ClassRegistration')
         # self.assertTemplateUsed(response, 'student_app/message.html')
+
+    def test_underage_student(self):
+        sf = StudentFamily.objects.get(user=1)
+        s = Student(student_family=sf,
+                    first_name='Brad',
+                    last_name='Conlan',
+                    dob='2014-06-30')
+        s.save()
+        logging.debug(s)
+        self.client.post(reverse('registration:class_registration'),
+                         {'beginner_class': '2022-06-05', 'student_1': 'on', f'student_{s.id}': 'on',
+                          'terms': 'on'}, secure=True)
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 0)

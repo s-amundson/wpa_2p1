@@ -7,6 +7,32 @@ $(document).ready(function(){
     $("#id_beginner_class").click(get_class_status);
 });
 
+function check_dob(i, el) {
+    if ($("#id_beginner_class").val() != "") {
+        let e = $(el);
+        console.log($("#id_beginner_class").val())
+        let dob = new Date(e.attr('dob'));;
+        console.log(dob)
+        let class_date = new Date($("#id_beginner_class").val());
+        let of_age = new Date(class_date.setFullYear(class_date.getFullYear() - 9));
+        console.log(of_age);
+        console.log(dob < of_age)
+        if (dob < of_age) {
+            e.attr("disabled", false);
+        }
+        else {
+            e.attr("disabled", true);
+            e.attr("checked", false);
+            if ($("#is-new-student-" + i).html() == "New Student") {
+                $("#is-new-student-" + i).html("New Student, Students must be 9 years or older to attend")
+            }
+            else if ($("#is-new-student-" + i).html() == "Returning Student") {
+                $("#is-new-student-" + i).html("Returning Student, Students must be 9 years or older to attend")
+            }
+        }
+    }
+}
+
 async function get_class_status() {
     // get the class status from the server. tells us how many openings there are in the class.
     let d = $("#id_beginner_class").val();
@@ -16,6 +42,7 @@ async function get_class_status() {
             $("#class-availible").html(msg);
         });
     }
+    $(".student-check").each(check_dob);
 }
 
 async function get_reg_table() {

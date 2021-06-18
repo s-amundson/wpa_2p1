@@ -107,5 +107,5 @@ async function post_family_function(family_id) {
     $("#student-family-form").hide();
     $("#student-family-address").show();
     $("#btn-add-student").prop('disabled', false);
-    $("#btn-address-edit").attr("family_id") = data.id
+    $("#btn-address-edit").attr("family_id", data.id)
 }

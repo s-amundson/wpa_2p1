@@ -18,13 +18,14 @@ TODO
     cookie law
     combine StudentApiView and StudentView?
     add on screen instructions to add students
-    cost not comming up as default
-    add age restriction
+    add age restriction - add notice when signing up
     on profile page add link to add class - add javascript once they have 1 student div shows with link to add class
     look into having class as a calendar
-    add congrats for signging up with class date - link to home
-    added an alert
+        done - add congrats for signging up with class date - link to home
+            added an alert
     why is class not open after singing up students.
-    popup error message when tried to sign up student that is already signed up
-    update search to search for first name or last name
-    list users - be able to sort and filter
+        done - popup error message when tried to sign up student that is already signed up
+        update search to search for first name or last name
+        list users - be able to sort and filter
+    when IDEMPOTENCY_KEY used make new one for rerunning payment.
+    after canceled class popup with finish payment instructions.

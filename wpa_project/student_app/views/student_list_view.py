@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q
 from django.shortcuts import render, get_list_or_404
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -18,7 +18,9 @@ from ..src import SquareHelper
 logger = logging.getLogger(__name__)
 
 
-class StudentList(LoginRequiredMixin, View):
+class StudentList(UserPassesTestMixin, View):
     def get(self, request):
         return render(request, 'student_app/student_list.html')
 
+    def test_func(self):
+        return self.request.user.is_board

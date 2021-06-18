@@ -5,6 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
 import logging
@@ -88,16 +89,21 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 if str(k).startswith('student_') and v:
                     i = int(str(k).split('_')[-1])
                     s = Student.objects.get(pk=i)
-                    if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
-                            pay_status="refunded")) == 0:
-                        if s.safety_class is None:
-                            beginner += 1
-                            students.append(s)
-                        else:
-                            returnee += 1
-                            students.append(s)
+                    if ClassRegistrationHelper().calc_age(s, beginner_class.class_date) < 9:
+                        messages.add_message(request, messages.ERROR, 'Student must be at least 9 years old to participate')
+                        message += 'Student must be at least 9 years old to participate'
+                        HttpResponseRedirect(reverse('registration:class_registration'))
                     else:
-                        message += 'Student is already enrolled'
+                        if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
+                                pay_status="refunded")) == 0:
+                            if s.safety_class is None:
+                                beginner += 1
+                                students.append(s)
+                            else:
+                                returnee += 1
+                                students.append(s)
+                        else:
+                            message += 'Student is already enrolled'
             logging.debug(f'Beginner = {beginner}, returnee = {returnee}')
             request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}

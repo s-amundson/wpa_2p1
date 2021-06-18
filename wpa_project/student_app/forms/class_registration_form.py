@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import TextInput, ModelForm
 from django.utils import timezone
-
+from ..src.class_registration_helper import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
 import logging
 
@@ -23,8 +23,11 @@ class ClassRegistrationForm(forms.Form):
         #     student['box'] = forms.BooleanField(
         #         widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=False,)
         for student in students:
+            # TODO check student age.
+
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
-                attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F'}), required=False,
+                attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
+                       'dob': f"{student.dob}"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
             # TODO WISH set initial to student's last class state
             # student['checkbox'] = self.fields[f'student_{student["id"]}']
