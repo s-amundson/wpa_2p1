@@ -127,6 +127,7 @@ async function post_unregister() {
         //      request new table from server
         console.log('get table from server')
         get_reg_table();
+        alert("You have successfully been unregistered from the class.")
     }
     else {
         console.log('canceled');

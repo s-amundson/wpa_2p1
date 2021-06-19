@@ -1,11 +1,17 @@
-<nav class="navbar navbar-expand-md navbar-dark bg-dark border fixed-top">
-    <a class="navbar-brand" href="/"> <span class="red">Class Registrtion Project</span></a>
+<nav class="navbar navbar-expand-md navbar-dark border">
+    <a class="navbar-brand" href="/"> <span class="red">Class <br> Registrtion</span></a>
+  {% load static %}
+
     <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
             data-target="#navbar" data-toggle="collapse" type="button">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbar">
         <ul class="navbar-nav ml-auto mt-2">
+          <li class="nav-item">
+            <img class="img-fluid" alt="Woodley Park Archers"
+              src="{% static 'WPAHeader4.jpg' %}" title="Woodley Park Archers">
+          </li>
             {% if user.is_authenticated %}
                 {% if user.is_board %}
                     <li class="nav-item dropdown">

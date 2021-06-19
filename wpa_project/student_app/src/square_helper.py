@@ -83,6 +83,27 @@ class SquareHelper:
                                  status=square_response.get('status', None)
                                  )
 
+    def payment_error(self, request):
+        """ reset idempotency_key and increment payment_error count"""
+
+        payment_error = request.session.get('payment_error', 0)
+        if payment_error >= 2:  # only allow 3 tries
+            return False
+        request.session['payment_error'] = payment_error + 1
+        # payment_db = request.session.get('payment_db', None)
+        # if payment_db is None:
+        #     return False
+
+        if request.session.get('payment_db', None) is not None:
+            ik = str(uuid.uuid4())
+            m = apps.get_model(app_label='student_app', model_name=request.session['payment_db'])
+            records = m.objects.filter(idempotency_key=request.session['idempotency_key'])
+            for record in records:
+                record.idempotency_key = ik
+                record.save()
+            request.session['idempotency_key'] = ik
+            logging.debug(f'ik = {ik}')
+
     def process_payment(self, idempotency_key, sq_token, note, amount):
         result = self.client.payments.create_payment(
             body={

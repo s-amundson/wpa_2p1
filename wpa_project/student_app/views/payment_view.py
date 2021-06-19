@@ -64,6 +64,7 @@ class PaymentView(APIView):
                         message += 'Other payment error'
                 logging.debug(message)
                 response_dict['error'] = message
+                self.square_helper.payment_error(request)
                 return Response(response_dict)
                 # return redirect('registration:process_payment')
             self.square_helper.log_payment(request, square_response, create_date=None)

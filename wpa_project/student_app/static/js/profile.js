@@ -24,23 +24,36 @@ $(document).ready(function() {
 async function add_student_function(student_id) {
     console.log('on submit')
     var url_string = "student_api"
+    let getConfirm = false;
     if(student_id) {
         url_string = "student_api/" + student_id + "/";
         $("#student-row-" + student_id).show();
     }
+    var of_age = new Date()
+    of_age.setFullYear(of_age.getFullYear() - 9)
+    console.log(of_age);
+    if (Date.parse($("#id_dob").val()) > of_age) {
+        getConfirm = confirm("Students under the age of 9 are not permitted to participate in classes.\n"
+          +  "Do you wish to continue to add this student?");
+    }
+    else {
+        getConfirm = true;
+    }
     console.log(url_string);
-    let data = await $.post(url_string, {
-            csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
-            'first_name': $("#id_first_name").val(),
-            'last_name' : $("#id_last_name").val(),
-            'dob': $("#id_dob").val()
-        }, function(data, status){
-            console.log(data)
-            return data;
-            }, "json");
-    $("#student_add_div").hide();
-    $("#btn-add-student").show();
-    load_student_table();
+    if (getConfirm) {
+        let data = await $.post(url_string, {
+                csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
+                'first_name': $("#id_first_name").val(),
+                'last_name' : $("#id_last_name").val(),
+                'dob': $("#id_dob").val()
+            }, function(data, status){
+                console.log(data)
+                return data;
+                }, "json");
+        $("#student_add_div").hide();
+        $("#btn-add-student").show();
+        load_student_table();
+    }
 }
 
 function load_student_family_form(family_id) {
@@ -70,7 +83,7 @@ function load_student_table() {
 
         if($(".student_row").length == 0) {
             //  no students therefore we need to load the student form
-            load_add_student_form();
+            load_student_form();
             $("#can-register").hide()
         }
         else {

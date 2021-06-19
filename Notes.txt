@@ -11,15 +11,13 @@ TODO
     Align auth templates with my templates - changed template inheritance need to check
     instructors - add to sign up for class but not count as.
     social accounts
-    terms to class reg and signin - need to update the terms.
+    terms to class reg and signup - need to update the terms.
     add something about class start time.
     test beginner class canceled (square refunds)
     automate opening and closing of classes.
     cookie law
     combine StudentApiView and StudentView?
     add on screen instructions to add students
-    add age restriction - add notice when signing up
-    on profile page add link to add class - add javascript once they have 1 student div shows with link to add class
     look into having class as a calendar
         done - add congrats for signging up with class date - link to home
             added an alert
@@ -27,5 +25,4 @@ TODO
         done - popup error message when tried to sign up student that is already signed up
         update search to search for first name or last name
         list users - be able to sort and filter
-    when IDEMPOTENCY_KEY used make new one for rerunning payment.
-    after canceled class popup with finish payment instructions.
+https://woodleyparkarchers.org/favicon.ico
