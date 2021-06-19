@@ -1,11 +1,15 @@
 "use strict";
+var new_family = false;
 $(document).ready(function() {
-    console.log('page loaded');
+
     $("#can-register").hide()
     if ($("#btn-address-edit").attr("family_id") == "") {
         console.log('new family');
+        new_family = true;
         $("#btn-add-student").prop('disabled', true);
+        $("#btn-add-student").hide();
         load_student_family_form($("#btn-address-edit").attr("family_id"));
+        $("#div-instruct").html("Please enter your address and phone number below");
     }
     else{
         load_student_table();
@@ -54,6 +58,7 @@ async function add_student_function(student_id) {
                 }, "json");
         $("#student_add_div").hide();
         $("#btn-add-student").show();
+        $("#div-instruct").html("");
         load_student_table();
     }
 }
@@ -92,7 +97,9 @@ function load_student_table() {
             $("[id^=btn-edit]").click(function(){
                 load_student_form($(this).attr("student-id"));
             });
-            $("#can-register").show()
+            if (new_family){
+                $("#can-register").show()
+            }
         }
     });
 }
@@ -122,7 +129,15 @@ async function post_family_function(family_id) {
     $("#student-family-form").hide();
     $("#student-family-address").show();
     $("#btn-add-student").prop('disabled', false);
-    $("#btn-address-edit").attr("family_id", data.id)
+    $("#btn-add-student").show();
+    $("#btn-address-edit").attr("family_id", data.id);
+    if (url_string == "student_family_api") {
+        $("#div-instruct").html("Please enter name and date of birth information for a student");
+        load_student_form();
+    }
+    else {
+        $("#div-instruct").html("");
+    }
 }
 
 async function theme_function(e) {

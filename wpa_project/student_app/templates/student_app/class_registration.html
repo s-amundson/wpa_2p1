@@ -9,8 +9,12 @@
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-    <div class="row"><h4>Class Registration</h4></div>
-    <div class="row p-2">
+    <div class="row p-2 justify-content-center">
+        <div class="col-3 text-center">
+            <h4>Class Registration</h4>
+        </div>
+    </div>
+    <div class="row p-2" id="registered_classes">
         <div class="col">
             <div class="row">You are registered for these upcoming classes.</div>
             <div class="row pt-1" id="registered_table"></div>

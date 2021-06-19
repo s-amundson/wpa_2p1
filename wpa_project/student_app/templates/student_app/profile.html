@@ -12,28 +12,15 @@
             <h2> Profile Page </h2>
         </div>
     </div>
-    <div class="row p-3 align-items-center mx-auto">
-        <div class="col-12">
-            <h3> Students </h3>
-        </div>
-    </div>
-    <div class="p-3" id="student-table-div"></div>
+    <div class="row px-3" id="div-instruct"></div>
 
-    <div class="row p-2" id="student_add_div"></div>
-
-    <div class="row p-3">
-        <button id="btn-add-student" class="btn btn-primary" type="button" name="button">
-            Add Student
-        </button>
-    </div>
-
-    <div class="row p-3 align-items-center mx-auto">
+    <div class="row px-3 align-items-center mx-auto">
         <div class="col-12">
             <h3> Address </h3>
         </div>
     </div>
-    <div id="student-family-form" class="row p-3"></div>
-    <div id="student-family-address" class="row p-3">
+    <div id="student-family-form" class="row px-3"></div>
+    <div id="student-family-address" class="row px-3">
         <div class="col">
             <div id="address1" class="row">{{ student_family.street }} </div>
             <div id="address2" class="row">
@@ -48,17 +35,33 @@
             </div>
         </div>
     </div>
+
+    <div class="row px-3 pt-3 align-items-center mx-auto">
+        <div class="col-12">
+            <h3> Students </h3>
+        </div>
+    </div>
+    <div class="px-3" id="student-table-div"></div>
+    <div class="row px-2" id="student_add_div"></div>
+    <div class="row px-3">
+        <button id="btn-add-student" class="btn btn-primary" type="button" name="button">
+            Add Student
+        </button>
+    </div>
+
+    <div id="can-register" class="row pt-3">
+        Now that you have added a student you can&nbsp;
+        <a href="{% url 'registration:class_registration' %}">register</a>
+        &nbsp;for a class. You can also click on Classes in the nav bar.
+    </div>
+
     <div class="row p-3" id="theme-div">
         <form method="post">{% csrf_token %}
             {{ theme_form.as_p }}
             <input id="theme-submit" class="btn btn-primary" type="submit" value="Update Theme">
         </form>
     </div>
-    <div id="can-register" class="row pt-3">
-        Now that you have added a student you can&nbsp;
-        <a href="{% url 'registration:class_registration' %}">register</a>
-        &nbsp;for a class. You can also click on Classes in the nav bar.
-    </div>
+
     {% if user.is_instructor %}
         <div class="row p-3 align-items-center mx-auto">
             <div class="col-12">

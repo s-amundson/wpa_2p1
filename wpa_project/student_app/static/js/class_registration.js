@@ -60,13 +60,19 @@ async function get_reg_table() {
             post_unregister()
         });
     });
-
-    $(".pay_status").each(pay_status_links);
-    if (started_status){
-        alert("You have an incomplete payment and are not registered for the class.\n" +
-        "If you wish to process the payment click on the 'Started' link. " +
-        "If can't attend please unregister by selecting the class(es) you wish to cancel and click the Unregister button')");
+    if ($(".pay_status").length == 0) {
+        $("#registered_classes").hide()
     }
+    else {
+        $(".pay_status").each(pay_status_links);
+        if (started_status){
+            alert("You have an incomplete payment and are not registered for the class.\n" +
+            "If you wish to process the payment click on the 'Started' link. " +
+            "If can't attend please unregister by selecting the class(es) you wish to cancel and click the Unregister button')");
+        }
+        $("#registered_classes").show()
+    }
+
 }
 
 function pay_status_links(i, el) {

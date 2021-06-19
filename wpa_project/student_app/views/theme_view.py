@@ -5,8 +5,6 @@ import logging
 from rest_framework.views import APIView
 from rest_framework import permissions, status
 from rest_framework.response import Response
-
-from ..models import User
 from ..serializers import ThemeSerializer
 
 logger = logging.getLogger(__name__)
@@ -25,14 +23,6 @@ class ThemeView(LoginRequiredMixin, APIView):
             # u = User.objects.get(request.user)
             request.user.dark_theme = serializer.validated_data['theme']
             request.user.save()
-            # if family_id is None:
-            #     f = serializer.save()
-            # else:
-            #     f = serializer.update(student_family, serializer.validated_data)
-            #
-            # f.user.add(request.user)
-            # # request.session['student_family'] = f.id
-            # logging.debug(f'id = {f.id}, user = {f.user}')
             return Response(serializer.data)
 
         else:
