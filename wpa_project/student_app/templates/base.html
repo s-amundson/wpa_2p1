@@ -32,9 +32,16 @@
         <title>Registration: {% block title %}{% endblock %}</title>
 
     </head>
-    <body padding-top="80px;">
+    <body>
         {% include "nav.html" %}
-        <div class="container-fluid p-4 m-3" style="margin-top:74px">
+
+        <div class="container-fluid p-4 m-3">
+            <div class="row justify-content-center">
+                <div class="col-6">
+                    <img class="img-fluid" alt="Woodley Park Archers"
+                        src="{% static 'WPAHeader4.jpg' %}" title="Woodley Park Archers">
+                </div>
+            </div>
             <input type="hidden" id="alert-message" value="{{ alert_message }}">
             <div class="row">
                 <div class="col-md-2">
@@ -47,7 +54,11 @@
                     {% endif %}
                     {% block left %}{% endblock %}
                 </div>
-                <div class="col-md bg-light">
+                {% if user.dark_theme %}
+                    <div class="col-md bg-dark text-white" id="block-main">
+                {% else %}
+                    <div class="col-md bg-light text-dark" id="block-main">
+                {% endif %}
                     {% block main %}{% endblock %}
                 </div>
                 <div class="col-md-2">

@@ -28,5 +28,6 @@ urlpatterns = [
         path('student_register/<int:family_id>/', StudentFamilyRegisterView.as_view(), name='student_register'),
         path('student_register', StudentFamilyRegisterView.as_view(), name='student_register'),
         path('student_table', StudentTableView.as_view(), name='student_table'),
+        path('theme', ThemeView.as_view(), name='theme'),
         path('unregister_class', UnregisterView.as_view(), name='unregister_class'),
 ]

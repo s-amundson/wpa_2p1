@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} Index {% endblock %}
+{% block title %} Profile {% endblock %}
 {% block script %}
     {% load static %}
     <script src="{% static 'js/profile.js' %}"></script>
@@ -17,11 +17,11 @@
             <h3> Students </h3>
         </div>
     </div>
-    <div id="student-table-div"></div>
+    <div class="p-3" id="student-table-div"></div>
 
     <div class="row p-2" id="student_add_div"></div>
 
-    <div class="row">
+    <div class="row p-3">
         <button id="btn-add-student" class="btn btn-primary" type="button" name="button">
             Add Student
         </button>
@@ -32,8 +32,8 @@
             <h3> Address </h3>
         </div>
     </div>
-    <div id="student-family-form" class="row"></div>
-    <div id="student-family-address" class="row">
+    <div id="student-family-form" class="row p-3"></div>
+    <div id="student-family-address" class="row p-3">
         <div class="col">
             <div id="address1" class="row">{{ student_family.street }} </div>
             <div id="address2" class="row">
@@ -47,6 +47,12 @@
                 </button>
             </div>
         </div>
+    </div>
+    <div class="row p-3" id="theme-div">
+        <form method="post">{% csrf_token %}
+            {{ theme_form.as_p }}
+            <input id="theme-submit" class="btn btn-primary" type="submit" value="Update Theme">
+        </form>
     </div>
     <div id="can-register" class="row pt-3">
         Now that you have added a student you can&nbsp;

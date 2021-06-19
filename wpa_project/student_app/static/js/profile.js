@@ -19,6 +19,8 @@ $(document).ready(function() {
         console.log($(this).attr("family_id"))
         load_student_family_form($(this).attr("family_id"));
     });
+
+    $("#theme-submit").click(theme_function);
 });
 
 async function add_student_function(student_id) {
@@ -121,4 +123,20 @@ async function post_family_function(family_id) {
     $("#student-family-address").show();
     $("#btn-add-student").prop('disabled', false);
     $("#btn-address-edit").attr("family_id", data.id)
+}
+
+async function theme_function(e) {
+    e.preventDefault();
+    console.log('theme update')
+    console.log($("#id_theme_1").prop('checked'))
+    let data = await $.post("theme", {
+                csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
+                theme: $("#id_theme_1").prop('checked')});
+    if ($("#id_theme_1").prop('checked')) {
+        $("#block-main").attr("class", "col-md bg-dark text-white")
+    }
+    else{
+        $("#block-main").attr("class", "col-md bg-light text-dark")
+    }
+
 }
