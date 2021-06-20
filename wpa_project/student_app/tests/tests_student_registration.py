@@ -2,7 +2,6 @@ import logging
 
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.contrib import auth
 
 from ..models import StudentFamily, User
 
@@ -26,9 +25,7 @@ class TestsRegisterStudent(TestCase):
     def test_login_required(self):
         def get_page(page, target):
             response = self.client.get(reverse(page), secure=True)
-            # self.assertRedirects(response, f'/accounts/login/?next=/{target}')
             self.assertTemplateUsed(f'student_app/{target}')
-
 
         get_page('registration:profile', 'profile.html')
         get_page('registration:student_register', 'register.html')
@@ -38,7 +35,6 @@ class TestsRegisterStudent(TestCase):
         # if student hasn't registered. we need to send them to registration starting with address
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('registration:profile'), secure=True)
-        # self.assertRedirects(response, reverse('registration:student_register'))
         self.assertTemplateUsed('student_app/register.html')
 
         response = self.client.get(reverse('registration:student_register'), secure=True)
@@ -87,7 +83,6 @@ class TestsRegisterStudent(TestCase):
         self.assertEqual(response.status_code, 200)
         d = {'first_name':'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
         response = self.client.post(reverse('registration:add_student'), d, secure=True)
-        # self.assertEqual(response.status_code, 200)
         sf = StudentFamily.objects.all()
         s = sf[0].student_set.all()
         self.assertEquals(len(s), 1)
@@ -130,8 +125,6 @@ class TestsRegisterStudent(TestCase):
         response = self.client.post(reverse('registration:student_register'), d, secure=True)
 
         # add a student
-        # response = self.client.get(reverse('registration:add_student'), secure=True)
-        # self.assertEqual(response.status_code, 200)
         d = {'first_name':'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
         response = self.client.post(reverse('registration:student_api'), d, secure=True)
         # self.assertEqual(response.status_code, 200)

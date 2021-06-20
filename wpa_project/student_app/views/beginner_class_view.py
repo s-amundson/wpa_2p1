@@ -13,7 +13,7 @@ from django.contrib import messages
 
 from ..forms import BeginnerClassForm, ClassAttendanceForm
 from ..models import BeginnerClass, ClassRegistration, CostsModel
-from ..src import SquareHelper
+from ..src import ClassRegistrationHelper, SquareHelper
 
 logger = logging.getLogger(__name__)
 
@@ -38,17 +38,19 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 c = c + timedelta(days=7)
             except BeginnerClass.DoesNotExist:
                 c = timezone.now()
+                logging.debug('class does not exist')
             try:
-                # cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1] #[0].standard_cost
-                costs = get_list_or_404(CostsModel, name='Beginner Class', enabled=True)
-                # logging.debug(costs.items())
-                costs = costs[0]
-                logging.debug(costs.standard_cost)
-            except CostsModel.DoesNotExist:
-                cost = 0
+                cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1] #[0].standard_cost
+                # costs = get_list_or_404(CostsModel, name='Beginner Class', enabled=True)
+                # logging.debug(cost.values())
+                costs = cost[0].standard_cost
+                logging.debug(costs)
+            except (CostsModel.DoesNotExist, IndexError) as e:
+                costs = 0
+                messages.add_message(request, messages.ERROR, 'cost does not exist')
                 logging.error('cost does not exist')
             form = BeginnerClassForm(initial={'class_date': c, 'beginner_limit': 20, 'returnee_limit': 20,
-                                              'state': 'scheduled', 'cost': costs.standard_cost})
+                                              'state': 'scheduled', 'cost': costs})
         return render(request, 'student_app/beginner_class.html', {'form': form, 'attendee_form': attendee_form,
                                                                    'alert_message': alert_message})
 
@@ -93,19 +95,29 @@ class BeginnerClassView(LoginRequiredMixin, View):
 
             bc = form.save()
             if bc.state == 'canceled':
+                ec = ClassRegistrationHelper().enrolled_count(bc)
                 square_helper = SquareHelper()
                 # need to refund students if any
-                logging.debug(f'beginners: {bc.enrolled_beginners}, returnees: {bc.enrolled_returnee}')
-                if bc.enrolled_beginners > 0 or bc.enrolled_returnee > 0:
+                logging.debug(f'beginners: {ec["beginner"]}, returnees: {ec["returnee"]}')
+                cancel_error = False
+                if ec["beginner"] > 0 or ec["returnee"] > 0:
                     cr = ClassRegistration.objects.filter(beginner_class__id=bc.id)
-                    cancel_error = False
-                    for reg in cr.distinct('idempotency_key'):
-                        qty = len(cr.filter(reg.idempotency_key))
-                        square_response = square_helper.refund_payment(reg.idempotency_key, qty * reg.cost)
-                        if square_response['status'] == 'error':
-                            cancel_error = True
-                            logging.error(square_response)
-                            messages.add_message(request, messages.ERROR, square_response)
+                    ik_list = []
+                    for reg in cr:
+                        if reg.idempotency_key not in ik_list:
+                        #     pass
+                        # else:
+                            ik_list.append(reg.idempotency_key)
+                            qty = len(cr.filter(idempotency_key=reg.idempotency_key))
+                            square_response = square_helper.refund_payment(reg.idempotency_key, qty * bc.cost)
+                            if square_response['status'] == 'error':
+                                cancel_error = True
+                                logging.error(square_response)
+                                messages.add_message(request, messages.ERROR, square_response)
+                            else:
+                                for c in cr.filter(idempotency_key=reg.idempotency_key):
+                                    c.pay_status = 'refund'
+                                    c.save()
 
                     logging.debug(cr)
                 if not cancel_error:

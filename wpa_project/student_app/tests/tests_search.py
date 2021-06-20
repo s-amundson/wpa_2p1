@@ -17,17 +17,20 @@ class TestsClassSearch(TestCase):
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
-        self.test_user = User.objects.get(pk=2)
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
 
-    def test_class_search(self):
+    def test_class_search_forbidden(self):
         # Get the page, if not super or board, page is forbidden
+        self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('registration:search'), secure=True)
         self.assertEqual(response.status_code, 403)
 
-        # Change user then Get the page
-        self.test_user = User.objects.get(pk=1)
-        self.client.force_login(self.test_user)
+        response = self.client.post(reverse('registration:search'), {'email': 'CharlesNWells@einrot.com'}, secure=True)
+        self.assertEqual(response.status_code, 403)
+
+    def test_class_search(self):
         response = self.client.get(reverse('registration:search'), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/student_search.html')

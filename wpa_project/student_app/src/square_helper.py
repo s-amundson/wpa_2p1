@@ -103,6 +103,7 @@ class SquareHelper:
                 record.save()
             request.session['idempotency_key'] = ik
             logging.debug(f'ik = {ik}')
+        return True
 
     def process_payment(self, idempotency_key, sq_token, note, amount):
         result = self.client.payments.create_payment(

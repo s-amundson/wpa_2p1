@@ -1,9 +1,11 @@
 import logging
+import time
+from django.db.models import Q
 from datetime import date
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import BeginnerClass, User
+from ..models import BeginnerClass, ClassRegistration, PaymentLog, User
 
 logger = logging.getLogger(__name__)
 
@@ -115,3 +117,79 @@ class TestsBeginnerClass(TestCase):
         self.assertTemplateUsed('student_app/class_list.html')
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 4)
+
+    def test_refund_success_class(self):
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        self.client.post(reverse('registration:class_registration'),
+                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'open')
+        bc.beginner_limit = 4  # make space for next students
+        bc.save()
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 2)
+
+        # process a good payment
+        response = self.client.post(reverse('registration:payment'),
+                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
+
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 2)
+        logging.debug(cr[0].pay_status)
+
+        #  Change user and make another payment
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        self.client.post(reverse('registration:class_registration'),
+                         {'beginner_class': '2022-06-05', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'},
+                         secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'open')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 4)
+
+        # process a good payment
+        response = self.client.post(reverse('registration:payment'),
+                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
+
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 4)
+        logging.debug(cr[0].pay_status)
+
+        # give square some time to process the payment got bad requests without it.
+        time.sleep(5)
+
+        #  Change user and then cancel the class another payment
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        response = self.client.post(reverse('registration:beginner_class', kwargs={'beginner_class': 1}),
+                                    {'class_date': '2022-06-05', 'beginner_limit': 4, 'returnee_limit': 2,
+                                     'state': 'canceled', 'cost': 5}, secure=True)
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 4)
+        for c in cr:
+            self.assertEqual(c.pay_status, 'refund')
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'canceled')
+        pl = PaymentLog.objects.filter(Q(idempotency_key=cr[0].idempotency_key) | Q(idempotency_key=cr[2].idempotency_key))
+        self.assertEqual(len(pl), 2)
+        for l in pl:
+            self.assertEqual(l.status, 'refund')
+
+
+class TestsBeginnerClass2(TestCase):
+    fixtures = ['f3']
+
+    def setUp(self):
+        # Every test needs a client.
+        self.client = Client()
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+
+    def test_get_no_records(self):
+        # allow user to access
+        response = self.client.get(reverse('registration:beginner_class'), secure=True)
+        self.assertEqual(response.context['form'].initial['beginner_limit'], 20)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'student_app/beginner_class.html')

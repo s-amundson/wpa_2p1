@@ -29,10 +29,15 @@ document.addEventListener('DOMContentLoaded', async function () {
          cardButton.disabled = true;
          const token = await tokenize(paymentMethod);
          const paymentResults = await createPayment(token);
-         displayPaymentResults('SUCCESS');
-         alert("Thank you for your purchase.\n Your payment was processed successfully.\n An email has been sent for confirmation. ")
+         if (paymentResults["status"] == "COMPLETED") {
+             displayPaymentResults('SUCCESS');
+             alert("Thank you for your purchase.\n Your payment was processed successfully.\n An email has been sent for confirmation. ")
 
-         console.debug('Payment Success', paymentResults);
+             console.debug('Payment Success', paymentResults);
+         }
+         else{
+            alert('Maximum payment tries exceeded. Unable to process payment.')
+         }
        } catch (e) {
          cardButton.disabled = false;
          displayPaymentResults('FAILURE');
@@ -67,6 +72,9 @@ async function createPayment(token) {
         $("#receipt").attr("href", paymentResponse["receipt_url"]);
         $("#index-link").show();
         }
+    else if (!paymentResponse["continue"]){
+        alert(paymentResponse["error"]);
+    }
     else {
         alert(paymentResponse["error"]);
         throw new Error(paymentResponse["error"]);

@@ -30,6 +30,7 @@ class TestsClassAttendance(TestCase):
         # logging.debug(response.content)
         self.assertContains(response, '<input type="hidden" name="attendee_form" value="on">', html=True)
         self.assertNotContains(response, 'Attending')
+
         # change user, then add 2 new.
         self.client.force_login(User.objects.get(pk=2))
         self.client.post(reverse('registration:class_registration'), {'beginner_class': '2022-06-05', 'student_2': 'on',

@@ -18,7 +18,7 @@ class PaymentView(APIView):
         self.class_helper = ClassRegistrationHelper()
 
     def post(self, request, format=None):
-        response_dict = {'status': 'ERROR', 'receipt_url': '', 'error': ''}
+        response_dict = {'status': 'ERROR', 'receipt_url': '', 'error': '', 'continue': False}
         serializer = PaymentSerializer(data=request.data)
         if serializer.is_valid():
             logging.debug(serializer.data)
@@ -66,13 +66,14 @@ class PaymentView(APIView):
                         message += 'Other payment error'
                 logging.debug(message)
                 response_dict['error'] = message
-                self.square_helper.payment_error(request)
+                response_dict['continue'] = self.square_helper.payment_error(request)
+                logging.debug(response_dict)
                 return Response(response_dict)
                 # return redirect('registration:process_payment')
             self.square_helper.log_payment(request, square_response, create_date=None)
 
             response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],
-                             'error': square_response['error']}
+                             'error': square_response['error'], 'continue': False}
             return Response(response_dict)
         else:
             logging.debug(serializer.errors)

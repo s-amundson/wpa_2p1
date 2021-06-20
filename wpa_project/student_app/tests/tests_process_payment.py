@@ -38,3 +38,16 @@ class TestsProcessPayment(TestCase):
         self.assertTemplateUsed('student_app/message.html')
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
+
+    def test_bypass_zero(self):
+        session = self.client.session
+        session['idempotency_key'] = str(uuid.uuid4())
+        session['line_items'] = [{'name': 'Class on None student id: 1',
+                                  'quantity': '1', 'base_price_money': {'amount': 0, 'currency': 'USD'}}]
+        session.save()
+        response = self.client.post(reverse('registration:process_payment'),
+                                    {'bypass': ''}, secure=True)
+        self.assertTemplateUsed('student_app/message.html')
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].status, 'paid')

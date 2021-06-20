@@ -1,5 +1,5 @@
 import logging
-
+import json
 from django.test import TestCase, Client
 from django.urls import reverse
 
@@ -32,6 +32,9 @@ class TestsClassRegistration(TestCase):
         self.assertTrue(ClassRegistrationHelper().check_space(d))
 
         d = {'beginner_class': 1, 'beginner': 3, 'returnee': 1}
+        self.assertFalse(ClassRegistrationHelper().check_space(d))
+
+        d = {'beginner_class': 1, 'beginner': 1, 'returnee': 3}
         self.assertFalse(ClassRegistrationHelper().check_space(d))
 
     def test_class_register_with_error(self):
@@ -82,7 +85,6 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(bc.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
-
 
     def test_class_register_readd(self):
         self.client.post(reverse('registration:class_registration'),
@@ -175,3 +177,65 @@ class TestsClassRegistration(TestCase):
                           'terms': 'on'}, secure=True)
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 0)
+
+    def test_check_space_full(self):
+        self.client.post(reverse('registration:class_registration'),
+                         {'beginner_class': '2022-06-05', 'student_1': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(id=1)
+        enrolled = ClassRegistrationHelper().enrolled_count(bc)
+        logging.debug(enrolled)
+
+        d = {'beginner_class': 1, 'beginner': 2, 'returnee': 2}
+        self.assertTrue(ClassRegistrationHelper().check_space(d))
+        bc = BeginnerClass.objects.get(id=1)
+        self.assertEqual(bc.state, 'open')
+
+        self.assertTrue(ClassRegistrationHelper().check_space(d, True))
+        bc = BeginnerClass.objects.get(id=1)
+        self.assertEqual(bc.state, 'full')
+
+    def test_get_no_student(self):
+        sf = StudentFamily.objects.get(pk=1)
+        sf.delete()
+
+        response = self.client.get(reverse('registration:class_registration'), secure=True)
+        self.assertEqual(self.client.session['message'], 'Address form is required')
+        # self.assertTemplateUsed(response, 'student_app/class_registration.html')
+
+        response = self.client.get(reverse('registration:class_registered_table'), secure=True)
+        self.assertEqual(self.client.session['message'], 'Address form is required')
+
+    def test_class_register_return_for_payment(self):
+        # add 1 beginner students and 1 returnee.
+        self.client.force_login(User.objects.get(pk=3))
+        self.client.post(reverse('registration:class_registration'),
+                         {'beginner_class': '2022-06-05', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
+
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 2)
+        response = self.client.get(reverse('registration:class_registration', kwargs={'reg_id': 1}), secure=True)
+        self.assertEqual(self.client.session['payment_db'], 'ClassRegistration')
+        self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
+
+    def test_class_status(self):
+        # add 1 beginner students and 1 returnee.
+        self.client.force_login(User.objects.get(pk=3))
+        response = self.client.get(reverse('registration:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
+        content = json.loads(response.content)
+        self.assertEqual(content['status'], 'open')
+        self.assertEqual(content['beginner'], 2)
+        self.assertEqual(content['returnee'], 2)
+
+        self.client.post(reverse('registration:class_registration'),
+                         {'beginner_class': '2022-06-05', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 2)
+        for c in cr:
+            c.pay_status = 'paid'
+            c.save()
+
+        response = self.client.get(reverse('registration:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
+        content = json.loads(response.content)
+        self.assertEqual(content['status'], 'open')
+        self.assertEqual(content['beginner'], 1)
+        self.assertEqual(content['returnee'], 1)

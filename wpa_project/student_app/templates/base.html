@@ -17,7 +17,7 @@
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
         <script src="{% static 'js/main.js' %}"></script>
 
-        <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
 
 <!--        For Datepicker-->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.css"
@@ -39,7 +39,7 @@
             <div class="row justify-content-center">
                 <div class="col-6">
                     <img class="img-fluid" alt="Woodley Park Archers"
-                        src="{% static 'WPAHeader4.jpg' %}" title="Woodley Park Archers">
+                        src="{% static 'images/WPAHeader4.jpg' %}" title="Woodley Park Archers">
                 </div>
             </div>
             <input type="hidden" id="alert-message" value="{{ alert_message }}">
@@ -48,7 +48,7 @@
                     {% if messages %}
                     <ul class="messages">
                         {% for message in messages %}
-                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
                         {% endfor %}
                     </ul>
                     {% endif %}

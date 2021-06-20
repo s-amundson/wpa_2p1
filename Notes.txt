@@ -25,4 +25,5 @@ TODO
         done - popup error message when tried to sign up student that is already signed up
         update search to search for first name or last name
         list users - be able to sort and filter
+    test payment tries exceeded js
 https://woodleyparkarchers.org/favicon.ico
