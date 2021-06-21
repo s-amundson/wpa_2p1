@@ -7,7 +7,7 @@
         <!-- documentation at http://getbootstrap.com/docs/4.1/, alternative themes at https://bootswatch.com/ -->
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
 
-        <link rel="shortcut icon" type="image/png" href="{% static 'target2.png' %}"/>
+        <link rel="shortcut icon" type="image/png" href="https://woodleyparkarchers.org/favicon.ico"/>
 
 
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -15,8 +15,9 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+        <script src="{% static 'js/main.js' %}"></script>
 
-        <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
 
 <!--        For Datepicker-->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.css"
@@ -28,17 +29,36 @@
         {% block script %}{% endblock %}
 
 
-        <title>Membership Project: {% block title %}{% endblock %}</title>
+        <title>Registration: {% block title %}{% endblock %}</title>
 
     </head>
-    <body class="bg-dark" padding-top="80px;">
+    <body>
         {% include "nav.html" %}
-        <div class="container-fluid p-4 m-3 bg-dark text-white" style="margin-top:74px">
+
+        <div class="container-fluid p-4 m-3">
+            <div class="row justify-content-center">
+                <div class="col-6">
+                    <img class="img-fluid" alt="Woodley Park Archers"
+                        src="{% static 'images/WPAHeader4.jpg' %}" title="Woodley Park Archers">
+                </div>
+            </div>
+            <input type="hidden" id="alert-message" value="{{ alert_message }}">
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
                     {% block left %}{% endblock %}
                 </div>
-                <div class="col-md-7">
+                {% if user.dark_theme %}
+                    <div class="col-md bg-dark text-white" id="block-main">
+                {% else %}
+                    <div class="col-md bg-light text-dark" id="block-main">
+                {% endif %}
                     {% block main %}{% endblock %}
                 </div>
                 <div class="col-md-2">

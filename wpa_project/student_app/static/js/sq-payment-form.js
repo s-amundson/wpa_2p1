@@ -1,5 +1,4 @@
-const appId = 'sandbox-sq0idb-GT2r-GRa1mdpWUuMdTJZcw';
-const locationId = 'SVM1F73THA9W6';
+
 async function initializeCard(payments) {
  const card = await payments.card();
  await card.attach('#card-container');
@@ -7,44 +6,51 @@ async function initializeCard(payments) {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-$("#receipt").hide();
-if (!window.Square) {
-  throw new Error('Square.js failed to load properly');
-}
-const payments = window.Square.payments(appId, locationId);
-let card;
-try {
-  card = await initializeCard(payments);
-} catch (e) {
-  console.error('Initializing Card failed', e);
-  return;
-}
+    $("#receipt").hide();
+    $("#index-link").hide();
+    if (!window.Square) {
+      throw new Error('Square.js failed to load properly');
+    }
+    const payments = window.Square.payments(window.applicationId, window.locationId);
+    let card;
+    try {
+      card = await initializeCard(payments);
+    } catch (e) {
+      console.error('Initializing Card failed', e);
+      return;
+    }
 
- async function handlePaymentMethodSubmission(event, paymentMethod) {
-   event.preventDefault();
+    async function handlePaymentMethodSubmission(event, paymentMethod) {
+       event.preventDefault();
 
-   try {
-     // disable the submit button as we await tokenization and make a
-     // payment request.
-     cardButton.disabled = true;
-     const token = await tokenize(paymentMethod);
-     const paymentResults = await createPayment(token);
-     displayPaymentResults('SUCCESS');
+       try {
+         // disable the submit button as we await tokenization and make a
+         // payment request.
+         cardButton.disabled = true;
+         const token = await tokenize(paymentMethod);
+         const paymentResults = await createPayment(token);
+         if (paymentResults["status"] == "COMPLETED") {
+             displayPaymentResults('SUCCESS');
+             alert("Thank you for your purchase.\n Your payment was processed successfully.\n An email has been sent for confirmation. ")
 
-     console.debug('Payment Success', paymentResults);
-   } catch (e) {
-     cardButton.disabled = false;
-     displayPaymentResults('FAILURE');
-     console.error(e.message);
-   }
+             console.debug('Payment Success', paymentResults);
+         }
+         else{
+            alert('Maximum payment tries exceeded. Unable to process payment.')
+         }
+       } catch (e) {
+         cardButton.disabled = false;
+         displayPaymentResults('FAILURE');
+         console.error(e.message);
+       }
  }
 
- const cardButton = document.getElementById(
-   'card-button'
- );
- cardButton.addEventListener('click', async function (event) {
-   await handlePaymentMethodSubmission(event, card);
- });
+    const cardButton = document.getElementById(
+        'card-button'
+    );
+    cardButton.addEventListener('click', async function (event) {
+        await handlePaymentMethodSubmission(event, card);
+    });
 
 });
 
@@ -64,7 +70,11 @@ async function createPayment(token) {
     if (paymentResponse["status"] == "COMPLETED") {
         $("#receipt").show();
         $("#receipt").attr("href", paymentResponse["receipt_url"]);
+        $("#index-link").show();
         }
+    else if (!paymentResponse["continue"]){
+        alert(paymentResponse["error"]);
+    }
     else {
         alert(paymentResponse["error"]);
         throw new Error(paymentResponse["error"]);

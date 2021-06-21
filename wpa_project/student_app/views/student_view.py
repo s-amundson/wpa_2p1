@@ -1,4 +1,3 @@
-from bootstrap_modal_forms.generic import BSModalCreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -23,7 +22,11 @@ class StudentApiView(LoginRequiredMixin, APIView):
     def get(self, request, student_id=None, format=None):
         if student_id is not None:
             student = get_object_or_404(Student, pk=student_id)
-            serializer = StudentSerializer(student)
+            students = StudentFamily.objects.get(user=request.user).student_set.all()
+            if request.user.is_staff or student in students:
+                serializer = StudentSerializer(student)
+            else:
+                return Response({'error': "Not Authorized"}, status=400)
         else:
             serializer = StudentSerializer()
         return Response(serializer.data)
@@ -32,11 +35,13 @@ class StudentApiView(LoginRequiredMixin, APIView):
         logging.debug(student_id)
         logging.debug(request.data)
         if student_id is not None:
-            try:
-                student = Student.objects.get(pk=student_id)
-                serializer = StudentSerializer(student, data=request.data)
-            except Student.DoesNotExist:
-                raise Http404
+            if request.user.is_staff:
+                student = get_object_or_404(Student, id=student_id)
+            else:
+                sf = StudentFamily.objects.get(user=request.user)
+                student = get_object_or_404(Student, id=student_id, student_family=sf)
+            serializer = StudentSerializer(student, data=request.data)
+
         else:
             serializer = StudentSerializer(data=request.data)
 
@@ -47,8 +52,8 @@ class StudentApiView(LoginRequiredMixin, APIView):
                 f = serializer.save(student_family=sf)
             else:
                 f = serializer.update(student, serializer.validated_data)
-            request.session['student_family'] = f.id
-            logging.debug(f'id = {f.id}, fam = {f.student_family}')
+            request.session['student_family'] = f.student_family.id
+            logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -78,35 +83,19 @@ class AddStudentView(LoginRequiredMixin, View):
             form = StudentForm(request.POST)
         if form.is_valid():
             logging.debug(form.cleaned_data)
-            f = form.save(commit=False)
-            f.student_family = StudentFamily.objects.filter(user=request.user)[0]
-            request.session['student_family'] = f.id
-            f.save()
-            logging.debug(f'id = {f.id}, fam = {f.student_family}')
+            if request.user.is_board:
+                f = form.save()
+            else:
+                f = form.save(commit=False)
+                sf = StudentFamily.objects.get(user=request.user)
+                logging.debug(sf.id)
+                f.student_family = sf
+                request.session['student_family'] = sf.id
+                f.save()
+
+            # logging.debug(f'id = {f.id}, fam = {f.student_family__id}')
             return HttpResponseRedirect(reverse('registration:profile'))
         else:
             logging.debug(form.errors)
 
         return render(request, 'student_app/student_page.html', {'form': form})
-# class AddStudentView(LoginRequiredMixin, BSModalCreateView):
-#     template_name = 'student_app/student.html'
-#     form_class = StudentForm
-#     success_message = 'Success: Student was added'
-#     success_url = reverse_lazy('registration:profile')
-#
-#     def post(self, request):
-#         logging.debug(request.cleaned_data)
-#         s = super().post(request)
-#         logging.debug(s)
-#
-#         return s
-        # student_family = StudentFamily.objects.filter(user=request.user)[0]
-        # form = StudentForm(request.POST)
-        # if form.is_valid():
-        #     s = form.save(commit=False)
-        #     s.student_family = student_family
-        #     s.save()
-        # else:
-        #     logging.debug(form.errors)
-        # return HttpResponseRedirect(reverse('registration:profile'))
-

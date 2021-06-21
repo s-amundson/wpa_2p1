@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from ..serializers import PaymentSerializer
-from ..src.square_helper import SquareHelper
+from ..src import ClassRegistrationHelper, SquareHelper
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +15,10 @@ class PaymentView(APIView):
 
     def __init__(self):
         self.square_helper = SquareHelper()
+        self.class_helper = ClassRegistrationHelper()
 
     def post(self, request, format=None):
-        response_dict = {'status': 'ERROR', 'receipt_url': '', 'error': ''}
+        response_dict = {'status': 'ERROR', 'receipt_url': '', 'error': '', 'continue': False}
         serializer = PaymentSerializer(data=request.data)
         if serializer.is_valid():
             logging.debug(serializer.data)
@@ -44,6 +45,11 @@ class PaymentView(APIView):
             amount = {'amount': amt, 'currency': 'USD'}
             message = ""
 
+            d = request.session.get('class_registration', None)
+            if d is not None:
+                if not self.class_helper.check_space(d, True):
+                    response_dict['error'] = 'not enough space in the class'
+                    return Response(response_dict)
             square_response = self.square_helper.process_payment(idempotency_key, sq_token, note, amount)
             logging.debug(square_response['error'])
             if len(square_response['error']) > 0:
@@ -54,16 +60,20 @@ class PaymentView(APIView):
                         message += 'Error with CVV, '
                     elif e['code'] == 'INVALID_EXPIRATION':
                         message += 'Invalid expiration date, '
+                    elif e['code'] == 'ADDRESS_VERIFICATION_FAILURE':
+                        message += 'Invalid zip code, '
                     else:
                         message += 'Other payment error'
                 logging.debug(message)
                 response_dict['error'] = message
+                response_dict['continue'] = self.square_helper.payment_error(request)
+                logging.debug(response_dict)
                 return Response(response_dict)
                 # return redirect('registration:process_payment')
             self.square_helper.log_payment(request, square_response, create_date=None)
 
             response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],
-                             'error': square_response['error']}
+                             'error': square_response['error'], 'continue': False}
             return Response(response_dict)
         else:
             logging.debug(serializer.errors)

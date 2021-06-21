@@ -52,30 +52,14 @@ main img
 }
 
 body {
-    padding-top: 80px;
+    /* padding-top: 100px; */
+    background-color: rgb(157, 180, 143)
 }
-/*body
-{
-    background-color:Black;
-}*/
-/*.collapse*/
-/*{*/
-/*    background-color:Black;*/
-/*    color:White;*/
-/*}*/
-/*.navbar
-{
-    background-color:Black;
-    color:White;
+
+hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+
 }
-.nav-link
-{
-    color:White;
-}
-.nav-item .navbar-light .navbar-nav {
-    color: rgba(250,250,250,.5);
-}
-.form-left
-{
-    float:left;
-}*/

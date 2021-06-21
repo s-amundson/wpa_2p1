@@ -9,13 +9,22 @@ Useful Commands:
 
 TODO
     Align auth templates with my templates - changed template inheritance need to check
-    edit address from profile
-    instructors
+    instructors - add to sign up for class but not count as.
     social accounts
-    terms to class reg and signin
-    edit student after search
-    fix add student form.
-    remove step from signout process
+    terms to class reg and signup - need to update the terms.
     add something about class start time.
-    check on class not going away when canceled - javascript is preforming the get before the respose comes back from the post.
-    remove class count, go off of class registration querys
+    test beginner class canceled (square refunds)
+    automate opening and closing of classes.
+    cookie law
+    combine StudentApiView and StudentView?
+    combine StudentFamilyApiView and StudentFamilyView?
+    add on screen instructions to add students
+    look into having class as a calendar
+        done - add congrats for signging up with class date - link to home
+            added an alert
+    why is class not open after singing up students.
+        done - popup error message when tried to sign up student that is already signed up
+        update search to search for first name or last name
+        list users - be able to sort and filter
+    test payment tries exceeded js
+https://woodleyparkarchers.org/favicon.ico

@@ -20,8 +20,8 @@ class PhoneField(models.CharField):
         if value is None:
             return value
 
-    def value_to_string(self, obj):
-        value = self.value_from_object(obj)
-        n = phonenumbers.format_number(value, phonenumbers.PhoneNumberFormat.NATIONAL)
-        logging.debug(f'unformatted phone number: {value}, formatted: n')
-        return n
+    # def value_to_string(self, obj):
+    #     value = self.value_from_object(obj)
+    #     n = phonenumbers.format_number(value, phonenumbers.PhoneNumberFormat.NATIONAL)
+    #     logging.debug(f'unformatted phone number: {value}, formatted: n')
+    #     return n

@@ -9,28 +9,63 @@
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-2 justify-content-center">
+        <div class="col-3 text-center">
+            <h4>Class Registration</h4>
+        </div>
+    </div>
+    <div class="row p-2" id="registered_classes">
+        <div class="col">
+            <div class="row">You are registered for these upcoming classes.</div>
+            <div class="row pt-1" id="registered_table"></div>
+        </div>
+    </div>
+    <hr>
+
     <div class="row p-2">
         <form class="col form" method="post" action="{% url 'registration:class_registration' %}" autocomplete="off">
             {% csrf_token %}
-            <div class="row">
-                <div class="input-group input-group-md">
+
+            <div class="row p-1">
+                <div class="col-4 text-right">Select a class date:</div>
+                <div class="col-2 input-group input-group-md">
                         {{ form.beginner_class }}
                 </div>
+                <div class="col" id="class-availible"></div>
             </div>
-            {% for student in form.get_boxes %}
-                <div class="row">
-                    <div class="input-group input-group-md">
-                        {{ student }} {{ student.label }}
-                    </div>
+            <div class="row p-1">
+                <div class="col-4 text-right border">
+                    Select students to enroll:
                 </div>
-            {% endfor %}
+                <div class="col">
+                    {% for student in form.get_boxes %}
+                        <div class="row">
+                            <div class="col input-group input-group-md border">
+                                {{ student }} {{ student.label }}
+                            </div>
+                            <div class="col border" id="is-new-student-{{ forloop.counter0 }}"></div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row pt-5">
+                <div class="col">
+                    <div class="row"><h4>ACCIDENT WAIVER AND RELEASE OF LIABILITY (AWRL)</h4></div>
+                    <div class="row p-1">
+I, the undersigned participant and/or parent/guardian of my minor participant under the age of 18 hereby give my permission to Woodley Park Archer’s (“WPA”), for my child or ward to participate in the Archery Instruction Program (the “Program”) and in consideration of his/her/my participation in the Woodley Park archery activity and instruction, agree to follow posted Archery Range Rules and direction of class instructors, (and as Parent/Guardian of a minor participant, to be and remain present at Archery Range during entire class activity) and further hereby acknowledge, understand and agree that:
+1) The sport of archery may involve risk of BODILY INJURY, INCLUDING PARALYSIS, DISMEMBERMENT, and DEATH, as well as LOSS OF or DAMAGE TO PROPERTY.
+2) I KNOWINGLY and FREELY ASSUME ALL SUCH RISK, and agree to waive, release, indemnify and hold harmless, the Woodley Park Archers, its officers, directors, instructors and volunteers, and the City of Los Angeles, and its employees and agents, of and from any and all actions and claims of whatever nature and kind resulting from participation in archery activities of the Woodley Park Archers on/at the Woodley Park Archery Range on and after the below date.
+                    </div>
+                    <div class="row">{{ form.terms }} {{ form.terms.label }}</div>
+                </div>
+            </div>
             <div class="row">
                 <button class="btn btn-primary" type="submit"> Sign Up</button>
             </div>
         </form>
     </div>
 
-    <div class="row p-2" id="registered_table">
 
-    </div>
+
+
 {% endblock %}

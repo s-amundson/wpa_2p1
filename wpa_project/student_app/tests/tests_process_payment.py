@@ -39,14 +39,15 @@ class TestsProcessPayment(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
 
-    # def test_refund_class_registration_payment(self):
-    #     session = self.client.session
-    #     del session['idempotency_key']
-    #     del session['line_items']
-    #     session.save()
-    #
-    #     ClassRegistration(beginner_class_id=1, student_id=2, new_student=True, pay_status='paid',
-    #                       idempotency_key='7cd7b257-d136-47f7-86a7-d9e34cba81ce', reg_time='2020-06-07').save()
-    #     cr = ClassRegistration.objects.all()
-    #     self.assertEqual(len(cr), 2)
-    #     # TODO this needs to be completed
+    def test_bypass_zero(self):
+        session = self.client.session
+        session['idempotency_key'] = str(uuid.uuid4())
+        session['line_items'] = [{'name': 'Class on None student id: 1',
+                                  'quantity': '1', 'base_price_money': {'amount': 0, 'currency': 'USD'}}]
+        session.save()
+        response = self.client.post(reverse('registration:process_payment'),
+                                    {'bypass': ''}, secure=True)
+        self.assertTemplateUsed('student_app/message.html')
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].status, 'paid')

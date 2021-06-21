@@ -1,4 +1,4 @@
-<form class="col form" method="post" action="{% url 'registration:add_student' %}" autocomplete="off" id="student_form">
+<form class="col form" method="post" autocomplete="off" id="student_form">
     {% csrf_token %}
     <div class="row">
         <div class="col input-group input-group-md">
@@ -22,10 +22,24 @@
                 {% endfor %}
             </div>
         </div>
+        {% if user.is_staff %}
+            <div class="col input-group input-group-md">
+                <div class="row">Safety Class</div>
+                <div class="row mx-auto">
+                    {{ form.safety_class }}
+                    {% for error in form.safety_class.errors %}
+                        <p class="help-block">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
     </div>
     <div class="row">
-        <div class="col">
-            <button id="btn-student-form" class="btn btn-primary" type="submit">Add</button>
+        <div class="col-2">
+            <button id="btn-student-form-add" class="btn btn-primary" type="submit">Add</button>
+        </div>
+        <div class="col-2">
+            <button id="btn-student-form-close" class="btn btn-primary">Close</button>
         </div>
     </div>
 </form>
