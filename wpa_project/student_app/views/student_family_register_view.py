@@ -34,17 +34,17 @@ class StudentFamilyRegisterView(LoginRequiredMixin, View):
         logging.debug(message)
         return render(request, 'student_app/forms/student_family_form.html', {'form': self.form, 'message': message})
 
-    def post(self, request, family_id=None):
-        form = StudentFamilyRegistrationForm(request.POST)
-        if form.is_valid():
-
-            f = form.save()
-            f.user.add(request.user)
-            # request.session['student_family'] = f.id
-            logging.debug(f'id = {f.id}, user = {f.user}')
-            return HttpResponseRedirect(reverse('registration:profile'))
-        else:
-            logging.debug(form.errors)
-        self.get_students(request, family_id)
-        return render(request, 'student_app/register.html', {'form': form})
+    # def post(self, request, family_id=None):
+    #     form = StudentFamilyRegistrationForm(request.POST)
+    #     if form.is_valid():
+    #
+    #         f = form.save()
+    #         f.user.add(request.user)
+    #         # request.session['student_family'] = f.id
+    #         logging.debug(f'id = {f.id}, user = {f.user}')
+    #         return HttpResponseRedirect(reverse('registration:profile'))
+    #     else:
+    #         logging.debug(form.errors)
+    #     self.get_students(request, family_id)
+    #     return render(request, 'student_app/register.html', {'form': form})
 

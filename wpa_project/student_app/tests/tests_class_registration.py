@@ -239,3 +239,10 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(content['status'], 'open')
         self.assertEqual(content['beginner'], 1)
         self.assertEqual(content['returnee'], 1)
+
+    def test_get_class_registered_table(self):
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('registration:class_registered_table'), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'student_app/tables/class_registered_table.html')

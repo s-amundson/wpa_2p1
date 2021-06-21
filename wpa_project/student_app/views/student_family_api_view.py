@@ -36,7 +36,8 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
 
         message = request.session.get('message', '')
         logging.debug(message)
-        return render(request, 'student_app/forms/student_family_form.html', {'form': serializer, 'message': message})
+        return Response(serializer.data)
+        # return render(request, 'student_app/forms/student_family_form.html', {'form': serializer, 'message': message})
 
     def post(self, request, family_id=None):
         logging.debug(family_id)

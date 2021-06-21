@@ -17,6 +17,7 @@ TODO
     automate opening and closing of classes.
     cookie law
     combine StudentApiView and StudentView?
+    combine StudentFamilyApiView and StudentFamilyView?
     add on screen instructions to add students
     look into having class as a calendar
         done - add congrats for signging up with class date - link to home

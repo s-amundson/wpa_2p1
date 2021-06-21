@@ -42,15 +42,15 @@ class TestsRegisterStudent(TestCase):
 
         # add a student family with error
         d = {'street': '123 main', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        response = self.client.post(reverse('registration:student_register'), d, secure=True)
-        self.assertTemplateUsed('student_app/register.html')
-        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
+        # self.assertTemplateUsed('student_app/register.html')
+        self.assertEqual(response.status_code, 400)
         sf = StudentFamily.objects.all()
         self.assertEquals(len(sf), 0)
 
         # add a student family
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        response = self.client.post(reverse('registration:student_register'), d, secure=True)
+        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
         self.assertTemplateUsed('student_app/profile.html')
         # self.assertRedirects(response, reverse('registration:profile'))
         self.assertTemplateUsed('student_app/profile.html')
@@ -65,7 +65,7 @@ class TestsRegisterStudent(TestCase):
         self.client.force_login(self.test_user)
         # add a student family
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        response = self.client.post(reverse('registration:student_register'), d, secure=True)
+        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
         sf = StudentFamily.objects.all()
         self.assertEquals(len(sf), 1)
         d['city'] = 'smallville'
@@ -76,7 +76,7 @@ class TestsRegisterStudent(TestCase):
     def test_add_student(self):
         self.client.force_login(self.test_user)
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        response = self.client.post(reverse('registration:student_register'), d, secure=True)
+        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
 
         # add a student
         response = self.client.get(reverse('registration:add_student'), secure=True)
@@ -102,7 +102,7 @@ class TestsRegisterStudent(TestCase):
     def test_add_student_error(self):
         self.client.force_login(self.test_user)
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        response = self.client.post(reverse('registration:student_register'), d, secure=True)
+        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
 
         # add student with error
         d = {'first_name': 'Tom', 'last_name': 'Smith', 'dob': '2020/02/02'}
@@ -122,7 +122,7 @@ class TestsRegisterStudent(TestCase):
 
         self.client.force_login(self.test_user)
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        response = self.client.post(reverse('registration:student_register'), d, secure=True)
+        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
 
         # add a student
         d = {'first_name':'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}

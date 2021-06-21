@@ -39,7 +39,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
         except StudentFamily.DoesNotExist:
             request.session['message'] = 'Address form is required'
             logging.debug(request.session['message'])
-            return HttpResponseRedirect(reverse('registration:student_register'))
+            return HttpResponseRedirect(reverse('registration:profile'))
         if reg_id:  # to regain an interrupted payment
             cr = get_object_or_404(ClassRegistration, pk=reg_id)
             logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
@@ -129,7 +129,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             return render(request, 'student_app/class_registration.html',
                           {'form': form, 'alert_message': 'This form has errors'})
 
-        return HttpResponseRedirect(reverse('registration:profile'))
+        # return HttpResponseRedirect(reverse('registration:profile'))
 
     def transact(self, beginner_class, request, students):
         with transaction.atomic():
