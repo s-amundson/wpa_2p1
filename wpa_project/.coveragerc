@@ -3,4 +3,4 @@
 omit=
     wpa_project/*
     manage.py
-    temp_tests.py
+    *temp_tests.py

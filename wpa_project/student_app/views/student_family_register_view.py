@@ -21,7 +21,10 @@ class StudentFamilyRegisterView(LoginRequiredMixin, View):
             else:
                 self.form = StudentFamilyRegistrationForm()
         else:
-            student_family = get_object_or_404(StudentFamily, pk=family_id)
+            if request.user.is_staff:
+                student_family = get_object_or_404(StudentFamily, pk=family_id)
+            else:
+                student_family = get_object_or_404(StudentFamily, pk=family_id, user=request.user)
             self.form = StudentFamilyRegistrationForm(instance=student_family)
 
     def get(self, request, family_id=None):

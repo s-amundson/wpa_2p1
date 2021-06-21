@@ -7,4 +7,4 @@ class StudentFamilySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentFamily
-        fields = ['id', 'street', 'street', 'state', 'post_code', 'phone']
+        fields = ['id', 'street', 'city', 'state', 'post_code', 'phone']

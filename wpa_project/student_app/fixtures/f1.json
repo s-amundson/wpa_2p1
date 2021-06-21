@@ -3,6 +3,7 @@
   {"model": "account.emailaddress", "pk": 2, "fields": {"user": 2, "email": "RosalvaAHall@superrito.com", "verified": true, "primary": true}},
   {"model": "account.emailaddress", "pk": 3, "fields": {"user": 3, "email": "CharlesNWells@einrot.com", "verified": true, "primary": true}},
   {"model": "account.emailaddress", "pk": 4, "fields": {"user": 4, "email": "RicardoRHoyt@jourrapide.com", "verified": true, "primary": true}},
+  {"model": "account.emailaddress", "pk": 5, "fields": {"user": 5, "email": "RicardoRHoyt@Ricardo.com", "verified": true, "primary": true}},
 
   {"model": "student_app.user", "pk": 1, "fields": {"password": "pbkdf2_sha256$260000$ROw6CmqzGsq0kNB65s1Oh4$C1kWtYvUcIGpLeW7JeJpo+rbJ/1hADr83gZEA5nr/FM=",
    "last_login": "2021-05-31T19:09:22.396Z", "is_superuser": true, "username": "EmilyNConlan", "first_name": "", "last_name": "",
@@ -19,6 +20,10 @@
   {"model": "student_app.user", "pk": 4, "fields": {"password": "pbkdf2_sha256$260000$ROw6CmqzGsq0kNB65s1Oh4$C1kWtYvUcIGpLeW7JeJpo+rbJ/1hADr83gZEA5nr/FM=",
    "last_login": "2021-05-31T19:09:22.396Z", "is_superuser": false, "username": "RicardoRHoyt", "first_name": "", "last_name": "",
    "email": "RicardoRHoyt@jourrapide.com", "is_staff": false, "is_active": true, "date_joined": "2021-05-31T19:08:19.410Z", "groups": [],
+   "user_permissions": [], "dark_theme": false}},
+  {"model": "student_app.user", "pk": 5, "fields": {"password": "pbkdf2_sha256$260000$ROw6CmqzGsq0kNB65s1Oh4$C1kWtYvUcIGpLeW7JeJpo+rbJ/1hADr83gZEA5nr/FM=",
+   "last_login": "2021-05-31T19:09:22.396Z", "is_superuser": false, "username": "RicardoBHoyt", "first_name": "", "last_name": "",
+   "email": "RicardoRHoyt@Ricardo.com", "is_staff": false, "is_active": true, "date_joined": "2021-05-31T19:08:19.410Z", "groups": [],
    "user_permissions": [], "dark_theme": false}},
 
   {"model": "student_app.beginnerclass", "pk": 1, "fields": {"class_date": "2022-06-05",

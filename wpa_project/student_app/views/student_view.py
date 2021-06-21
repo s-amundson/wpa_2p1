@@ -22,7 +22,11 @@ class StudentApiView(LoginRequiredMixin, APIView):
     def get(self, request, student_id=None, format=None):
         if student_id is not None:
             student = get_object_or_404(Student, pk=student_id)
-            serializer = StudentSerializer(student)
+            students = StudentFamily.objects.get(user=request.user).student_set.all()
+            if request.user.is_staff or student in students:
+                serializer = StudentSerializer(student)
+            else:
+                return Response({'error': "Not Authorized"}, status=400)
         else:
             serializer = StudentSerializer()
         return Response(serializer.data)
@@ -31,11 +35,13 @@ class StudentApiView(LoginRequiredMixin, APIView):
         logging.debug(student_id)
         logging.debug(request.data)
         if student_id is not None:
-            try:
-                student = Student.objects.get(pk=student_id)
-                serializer = StudentSerializer(student, data=request.data)
-            except Student.DoesNotExist:
-                raise Http404
+            if request.user.is_staff:
+                student = get_object_or_404(Student, id=student_id)
+            else:
+                sf = StudentFamily.objects.get(user=request.user)
+                student = get_object_or_404(Student, id=student_id, student_family=sf)
+            serializer = StudentSerializer(student, data=request.data)
+
         else:
             serializer = StudentSerializer(data=request.data)
 
@@ -81,11 +87,13 @@ class AddStudentView(LoginRequiredMixin, View):
                 f = form.save()
             else:
                 f = form.save(commit=False)
-                f.student_family = StudentFamily.objects.get(user=request.user)
-                request.session['student_family'] = f.student_family.id
+                sf = StudentFamily.objects.get(user=request.user)
+                logging.debug(sf.id)
+                f.student_family = sf
+                request.session['student_family'] = sf.id
                 f.save()
 
-            logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
+            # logging.debug(f'id = {f.id}, fam = {f.student_family__id}')
             return HttpResponseRedirect(reverse('registration:profile'))
         else:
             logging.debug(form.errors)

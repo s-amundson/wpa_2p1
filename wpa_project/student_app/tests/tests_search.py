@@ -69,3 +69,4 @@ class TestsClassSearch(TestCase):
         response = self.client.post(reverse('registration:search'), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/student_search.html')
+

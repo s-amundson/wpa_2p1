@@ -1,17 +1,13 @@
-from bootstrap_modal_forms.generic import BSModalCreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
-from django.urls import reverse_lazy
 import logging
-from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse
-from django.views.generic.base import View
+from django.http import HttpResponseBadRequest
+
 from rest_framework.views import APIView
 from rest_framework import permissions, status
 from rest_framework.response import Response
 
-from ..forms import StudentForm
-from ..models import Student, StudentFamily
+from ..models import StudentFamily
 from ..serializers import StudentFamilySerializer
 
 logger = logging.getLogger(__name__)
@@ -20,33 +16,50 @@ logger = logging.getLogger(__name__)
 class StudentFamilyApiView(LoginRequiredMixin, APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_students(self, request, family_id):
-        logging.debug(family_id)
+    def get(self, request, family_id=None):
         if family_id is None:
             student_family = StudentFamily.objects.filter(user=request.user)
             if student_family.exists():
-                self.serializer = StudentFamilySerializer(instance=student_family[0])
+                serializer = StudentFamilySerializer(instance=student_family[0])
             else:
-                self.serializer = StudentFamilySerializer()
+                serializer = StudentFamilySerializer()
         else:
-            student_family = get_object_or_404(StudentFamily, pk=family_id)
-            self.serializer = StudentFamilySerializer(instance=student_family)
+            student_family = get_object_or_404(StudentFamily, user=request.user)
+            if student_family.id == family_id:
+                serializer = StudentFamilySerializer(instance=student_family)
+            elif request.user.is_staff:
+                student_family = get_object_or_404(StudentFamily, pk=family_id)
+                serializer = StudentFamilySerializer(instance=student_family)
+            else:
+                logging.debug('Unauthorized')
+                return HttpResponseBadRequest()
 
-    def get(self, request, family_id=None):
-
-        self.get_students(request, family_id)
         message = request.session.get('message', '')
         logging.debug(message)
-        return render(request, 'student_app/forms/student_family_form.html', {'form': self.serializer, 'message': message})
+        return render(request, 'student_app/forms/student_family_form.html', {'form': serializer, 'message': message})
 
     def post(self, request, family_id=None):
         logging.debug(family_id)
         if family_id is None:
-            serializer = StudentFamilySerializer(data=request.data)
+            # check if user is part of family so that we don't make duplicate enteries
+            student_family = StudentFamily.objects.filter(user=request.user)
+            if student_family.exists():
+                student_family = student_family[0]
+                family_id = student_family.id
+                serializer = StudentFamilySerializer(student_family, data=request.data)
+            else:
+                serializer = StudentFamilySerializer(data=request.data)
         else:
-            student_family = get_object_or_404(StudentFamily, pk=family_id)
-            logging.debug(student_family)
-            serializer = StudentFamilySerializer(student_family, data=request.data)
+            student_family = get_object_or_404(StudentFamily, user=request.user)
+            if student_family.id == family_id:
+                serializer = StudentFamilySerializer(student_family, data=request.data)
+            elif request.user.is_staff:
+                student_family = get_object_or_404(StudentFamily, pk=family_id)
+                logging.debug(student_family)
+                serializer = StudentFamilySerializer(student_family, data=request.data)
+            else:
+                logging.debug('Unauthorized')
+                return HttpResponseBadRequest()
 
         if serializer.is_valid():
             logging.debug('valid')
@@ -56,8 +69,8 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
                 f = serializer.update(student_family, serializer.validated_data)
 
             f.user.add(request.user)
-            # request.session['student_family'] = f.id
-            logging.debug(f'id = {f.id}, user = {f.user}')
+            f.save()
+
             return Response(serializer.data)
 
         else:
