@@ -20,7 +20,8 @@ nav .navbar-brand .yellow
 }
 nav .navbar-brand .green
 {
-    color: #2e944b;
+    /* color: #2e944b; */
+    color: rgb(157, 180, 143)
 }
 
 main .form-control
