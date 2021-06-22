@@ -32,7 +32,7 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
                 serializer = StudentFamilySerializer(instance=student_family)
             else:
                 return HttpResponseBadRequest()
-        return Response({'serializer': serializer})
+        return Response(serializer.data)
 
 
     def post(self, request, family_id=None):
