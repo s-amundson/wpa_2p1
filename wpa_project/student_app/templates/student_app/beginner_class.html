@@ -4,13 +4,16 @@
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input class="btn btn-primary" type="submit" value="Submit">
-    </form>
-    <hr/>
-    <div class="row pt-3">
+    {% if user.is_board %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input class="btn btn-primary" type="submit" value="Submit">
+        </form>
+        <hr/>
+    {% endif %}
+
+    <div class="row p-2">
         {% if attendee_form %}
             <form class="col" method="post">{% csrf_token %}
                 <input type="hidden" name="attendee_form" value="on">

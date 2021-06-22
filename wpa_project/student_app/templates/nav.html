@@ -12,22 +12,23 @@
                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{% url 'registration:class_list'%}">Beginner Class</a>
                         <a class="dropdown-item" href="{% url 'registration:search'%}">Search</a>
+                        <a class="dropdown-item" href="{% url 'registration:student_list'%}">Search</a>
                         <div class="dropdown-divider"></div>
                         {% if user.is_superuser %}
-                          <a class="dropdown-item" href="{% url 'registration:costs'%}">Costs</a>
+<!--                          <a class="dropdown-item" href="{% url 'registration:costs'%}">Costs</a>-->
                         {% endif %}
                       </div>
                     </li>
                 {% endif %}
-                {% if user.is_instructor %}
+                {% if user.is_staff %}
                     <li class="nav-item dropdown">
                       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Instructor Links
+                        Staff Links
                       </a>
                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{% url 'registration:class_list'%}">class list</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
+                        <a class="dropdown-item" href="{% url 'registration:search'%}">Search</a>
                       </div>
                     </li>
                 {% endif %}

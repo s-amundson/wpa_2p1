@@ -3,9 +3,9 @@
 {% block title %} Beginner Class List {% endblock %}
 
 {% block main %}
-    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-2" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
 
-    <div class="row">
+    <div class="row p-2">
         <div class="col">
             Date
         </div>
@@ -21,7 +21,7 @@
     </div>
 
     {% for c in object_list %}
-        <div class="row">
+        <div class="row p-2">
             <div class="col">
                 <a class="nav-link" href="{% url 'registration:beginner_class' c.id %}">
                     {{ c.class_date }}
@@ -39,7 +39,7 @@
         </div>
     {% endfor %}
 
-    <div class="row">
+    <div class="row p-2">
         {% if user.is_board %}
             <a class="nav-link" href="{% url 'registration:beginner_class' %}">
                 Add

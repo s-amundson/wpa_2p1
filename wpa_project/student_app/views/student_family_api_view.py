@@ -31,13 +31,9 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
                 student_family = get_object_or_404(StudentFamily, pk=family_id)
                 serializer = StudentFamilySerializer(instance=student_family)
             else:
-                logging.debug('Unauthorized')
                 return HttpResponseBadRequest()
+        return Response({'serializer': serializer})
 
-        message = request.session.get('message', '')
-        logging.debug(message)
-        return Response(serializer.data)
-        # return render(request, 'student_app/forms/student_family_form.html', {'form': serializer, 'message': message})
 
     def post(self, request, family_id=None):
         logging.debug(family_id)
@@ -56,10 +52,8 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
                 serializer = StudentFamilySerializer(student_family, data=request.data)
             elif request.user.is_staff:
                 student_family = get_object_or_404(StudentFamily, pk=family_id)
-                logging.debug(student_family)
                 serializer = StudentFamilySerializer(student_family, data=request.data)
             else:
-                logging.debug('Unauthorized')
                 return HttpResponseBadRequest()
 
         if serializer.is_valid():
