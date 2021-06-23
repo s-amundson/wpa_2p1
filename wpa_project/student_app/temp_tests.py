@@ -1,6 +1,6 @@
 # from .tests.tests_beginner_class import TestsBeginnerClass
 # from .tests.tests_class_attendance import TestsClassAttendance
-from .tests.tests_class_registration import TestsClassRegistration
+# from .tests.tests_class_registration import TestsClassRegistration
 # from .tests.tests_costs import TestsCosts
 # from .tests.tests_index import TestsIndex
 # from .tests.tests_payment import TestsPayment
@@ -14,7 +14,7 @@ from .tests.tests_class_registration import TestsClassRegistration
 # from .tests.tests_student_list import TestsSearchList
 # from .tests.tests_student_registration import TestsRegisterStudent
 # from .tests.tests_theme import TestsTheme
-# from .tests.tests_unregister import TestsUnregisterStudent
+from .tests.tests_unregister import TestsUnregisterStudent
 # import json
 # import logging
 # import time
