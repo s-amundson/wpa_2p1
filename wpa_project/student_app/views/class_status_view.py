@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.http import  HttpResponseForbidden
@@ -16,5 +17,8 @@ class ClassStatusView(LoginRequiredMixin, View):
         bc = BeginnerClass.objects.get(class_date=class_date)
         ec = ClassRegistrationHelper().enrolled_count(bc)
         return JsonResponse({'beginner': bc.beginner_limit - ec['beginner'],
-                             'returnee': bc.returnee_limit - ec['returnee'], 'status': bc.state})
+                             'beginner_time': bc.class_date.strftime("%I %p"),
+                             'returnee': bc.returnee_limit - ec['returnee'],
+                             'returnee_time': (bc.class_date + timedelta(hours=2)).strftime("%I %p"),
+                             'status': bc.state})
 

@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-
+from datetime import datetime, timedelta
 from django.test import TestCase, Client
 from django.urls import reverse
 from ..models import BeginnerClass, ClassRegistration, PaymentLog, RefundLog, Student, User
@@ -130,3 +130,15 @@ class TestsUnregisterStudent2(TestCase):
                                         {'class_list': ['1', '2']}, secure=True)
             logging.debug(response.data)
             self.assertEqual(response.data['status'], 'ERROR')
+
+    def test_unregister_expired(self):
+        # set the time of the class within 24 hours.
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_date = datetime.now() + timedelta(hours=20)
+        bc.save()
+
+        response = self.client.post(reverse('registration:unregister_class'),
+                                    {'class_list': ['1', '2']}, secure=True)
+        logging.debug(response.data)
+        self.assertEqual(response.data['status'], 'ERROR')
+        self.assertEqual(response.data['error'], 'Time to unregister has passed.')

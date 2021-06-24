@@ -38,7 +38,9 @@ async function get_class_status() {
     let d = $("#id_beginner_class").val();
     if(d != "") {
         let data = await $.get("class_status/" + $("#id_beginner_class").val() +"/", function(data, status){
-            let msg = "Class openings:</br> &nbsp;&nbsp; New Students: " +  data['beginner'] + " Returning: " + data['returnee'];
+            let msg = "Class openings:</br> &nbsp;&nbsp; ";
+            msg += "New Students: " +  data['beginner'] + ", starting at " + data['beginner_time'];
+            msg += "</br> &nbsp;&nbsp; Returning: " + data['returnee'] + ", starting at " + data['returnee_time'];
             $("#class-availible").html(msg);
         });
     }

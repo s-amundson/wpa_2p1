@@ -1,5 +1,6 @@
 import logging
 
+from django.core.mail import EmailMessage
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import permissions
@@ -67,6 +68,8 @@ class PaymentView(APIView):
                 return Response(response_dict)
                 # return redirect('registration:process_payment')
             self.square_helper.log_payment(request, square_response, create_date=None)
+            logging.debug(self.request.session.get("account_verified_email"))
+
 
             response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],
                              'error': square_response['error'], 'continue': False}

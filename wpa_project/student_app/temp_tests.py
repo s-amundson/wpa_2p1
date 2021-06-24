@@ -14,7 +14,8 @@
 # from .tests.tests_student_list import TestsSearchList
 # from .tests.tests_student_registration import TestsRegisterStudent
 # from .tests.tests_theme import TestsTheme
-from .tests.tests_unregister import TestsUnregisterStudent
+# from .tests.tests_unregister import TestsUnregisterStudent
+from .tests.tests_unregister import TestsUnregisterStudent2
 # import json
 # import logging
 # import time

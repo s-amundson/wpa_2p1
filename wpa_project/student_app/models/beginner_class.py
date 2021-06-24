@@ -9,7 +9,7 @@ class BeginnerClass(models.Model):
     states = []
     for c in class_states:
         states.append((c, c))
-    class_date = models.DateField()
+    class_date = models.DateTimeField()
     beginner_limit = models.IntegerField()
     returnee_limit = models.IntegerField()
     state = models.CharField(max_length=20, null=True, choices=states)

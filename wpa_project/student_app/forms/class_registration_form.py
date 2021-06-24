@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django import forms
 from django.forms import TextInput, ModelForm
 from django.utils import timezone
@@ -23,8 +24,6 @@ class ClassRegistrationForm(forms.Form):
         #     student['box'] = forms.BooleanField(
         #         widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=False,)
         for student in students:
-            # TODO check student age.
-
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
                        'dob': f"{student.dob}"}), required=False,
@@ -41,9 +40,12 @@ class ClassRegistrationForm(forms.Form):
         classes = BeginnerClass.objects.filter(class_date__gt=timezone.now(), state__exact='open')
         d = [("", "None")]
         for c in classes:
-            d.append((str(c.class_date), str(c.class_date)))
-        return d
+            cr = c.class_date + timedelta(hours=2)
+            s = f'{c.class_date.strftime("%d %b, %Y %I %p")} / {cr.strftime("%I %p")}'
+            logging.debug(s)
 
+            d.append((str(c.class_date), s))
+        return d
 
     class Meta:
         model = ClassRegistration

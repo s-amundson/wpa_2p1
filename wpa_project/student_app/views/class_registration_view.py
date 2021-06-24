@@ -1,4 +1,6 @@
 import uuid
+from allauth.account.managers import EmailAddressManager
+from django.apps import apps
 
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
@@ -13,7 +15,7 @@ import logging
 
 from ..forms import ClassRegistrationForm
 from ..models import BeginnerClass, ClassRegistration, Student, StudentFamily
-from ..src import ClassRegistrationHelper, SquareHelper
+from ..src import ClassRegistrationHelper, EmailMessage, SquareHelper
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +36,14 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
 
 class ClassRegistrationView(LoginRequiredMixin, View):
     def get(self, request, reg_id=None):
+        # # logging.debug(EmailAddressManager().get_primary(request.user))
+        # m = apps.get_model(app_label='account', model_name='EmailAddress')
+        # er = m.objects.get_primary(request.user)
+        # note = 'some class reg'
+        # logging.debug(er.email)
+        email = EmailMessage().payment_email_user(user=request.user)
+        logging.debug(email)
+
         try:
             students = StudentFamily.objects.get(user=request.user).student_set.all()
         except StudentFamily.DoesNotExist:
