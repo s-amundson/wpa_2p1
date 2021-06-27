@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from ..serializers import UnregisterSerializer
-from ..src.square_helper import SquareHelper
+from ..src import EmailMessage, SquareHelper
 from ..models import BeginnerClass, ClassRegistration, StudentFamily
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class UnregisterView(LoginRequiredMixin, APIView):
                     cr.beginner_class.save()
                     cr.pay_status = 'refunded'
                     cr.save()
-                # TODO email refund
+                EmailMessage().refund_email(request.user)
             elif errors == 'Previously refunded':  # we should remove them from the list anyway
                 response_dict['status'] = "SUCCESS"
             else:

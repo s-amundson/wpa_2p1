@@ -4,7 +4,15 @@
 
 {% block script %}
     {% load static %}
-    <script src="{% static 'js/class_registration.js' %}"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+    <link type="text/css" href="{% static 'css/jquery.signature.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="{% static 'js/jquery.signature.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/sign_in.js' %}"></script>
+    <style>
+        .kbw-signature { width: 400px; height: 200px; }
+    </style>
 {% endblock %}
 
 {% block main %}
@@ -14,42 +22,15 @@
             <h4>Class Registration</h4>
         </div>
     </div>
-    <div class="row p-2" id="registered_classes">
-        <div class="col">
-            <div class="row">You are registered for these upcoming classes.</div>
-            <div class="row pt-1" id="registered_table"></div>
-        </div>
+    <div class="row p-2">
+        <div class="col">First Name: {{ student.first_name }}</div>
+        <div class="col">Last Name: {{ student.last_name }}</div>
     </div>
-    <hr>
 
     <div class="row p-2">
-        <form class="col form" method="post" action="{% url 'registration:class_registration' %}" autocomplete="off">
+        <form class="col form" id="sign_in_form" method="post"  autocomplete="off">
             {% csrf_token %}
-
-            <div class="row p-3">
-                <div class="col-2 text-right">Select a class date:</div>
-                <div class="col">
-                    <div class="row input-group input-group-md">
-                        {{ form.beginner_class }}
-                    </div>
-                </div>
-                <div class="col" id="class-availible"></div>
-            </div>
-            <div class="row p-1">
-                <div class="col-4 text-right border">
-                    Select students to enroll:
-                </div>
-                <div class="col">
-                    {% for student in form.get_boxes %}
-                        <div class="row">
-                            <div class="col input-group input-group-md border">
-                                {{ student }} {{ student.label }}
-                            </div>
-                            <div class="col border" id="is-new-student-{{ forloop.counter0 }}"></div>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
+            {{ form.signature }}
             <div class="row pt-5">
                 <div class="col">
                     <div class="row"><h4>ACCIDENT WAIVER AND RELEASE OF LIABILITY (AWRL)</h4></div>
@@ -58,15 +39,17 @@ I, the undersigned participant and/or parent/guardian of my minor participant un
 1) The sport of archery may involve risk of BODILY INJURY, INCLUDING PARALYSIS, DISMEMBERMENT, and DEATH, as well as LOSS OF or DAMAGE TO PROPERTY.
 2) I KNOWINGLY and FREELY ASSUME ALL SUCH RISK, and agree to waive, release, indemnify and hold harmless, the Woodley Park Archers, its officers, directors, instructors and volunteers, and the City of Los Angeles, and its employees and agents, of and from any and all actions and claims of whatever nature and kind resulting from participation in archery activities of the Woodley Park Archers on/at the Woodley Park Archery Range on and after the below date.
                     </div>
-                    <div class="row">{{ form.terms }} {{ form.terms.label }}</div>
-                    <div class="row pt-3"><h4>Cancellation Policy</h4></div>
-                    <div class="row p-1">
-Cancellations and rescheduling must be made more than 24 hours prior to the booked service. No refunds are given if a service is canceled with less than 24 hour notice of the scheduled service.
-                    </div>
                 </div>
             </div>
+            <div class="row p-2" id="sig"></div>
             <div class="row p-2">
-                <button class="btn btn-primary" type="submit"> Sign Up</button>
+                <div class="col">
+                    <button class="btn btn-primary" id="clear">Clear</button>
+                </div>
+                <div class="col"></div>
+                <div class="col">
+                    <button class="btn btn-primary" type="submit"> Sign Up</button>
+                </div>
             </div>
         </form>
     </div>
