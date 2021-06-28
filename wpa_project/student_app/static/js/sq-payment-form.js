@@ -51,7 +51,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     cardButton.addEventListener('click', async function (event) {
         await handlePaymentMethodSubmission(event, card);
     });
-
+    var cost_no_donation = parseFloat($("#total-div").html());
+    $("#donation").change(function () {
+        console.log($("#donation").val())
+        if ($("#donation").val() < 0 ){
+            $("#donation").val(0)
+        }
+        $("#total-div").html(cost_no_donation + parseFloat($("#donation").val()));
+    });
 });
 
 // Call this function to send a payment token, buyer name, and other details
@@ -63,7 +70,8 @@ async function createPayment(token) {
 
     var paymentResponse = await $.post("payment", {
         sq_token: token,
-        csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
+        csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
+        donation: $("#donation").val()
         }, function(data, status){
             return data;
             }, "json");

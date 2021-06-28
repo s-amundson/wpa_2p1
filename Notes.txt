@@ -18,7 +18,6 @@ TODO
     cookie law
     combine StudentApiView and StudentView?
     combine StudentFamilyApiView and StudentFamilyView?
-    add on screen instructions to add students
     look into having class as a calendar
         done - add congrats for signging up with class date - link to home
             added an alert
@@ -32,9 +31,5 @@ TODO
     Wish: add classes that a student has attended.
     on refund = takes 5 to 10 business days.
     give option to donate refund value on cancellation.
-    add donation input on registration.
+    add donation input on process payment - need to update testing and verify.
     Wish; add students to class by admin.
-
-    Cancellations and rescheduling must be made more than 24 hours prior to the booked service. No refunds are given if a service is canceled with less than 24 hour notice of the scheduled service.
-
-https://woodleyparkarchers.org/favicon.ico

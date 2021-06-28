@@ -33,6 +33,11 @@ class PaymentView(APIView):
                 response_dict['error'] = 'missing line items.'
                 return Response(response_dict)
 
+            # if user donated money add it to the line itmes.
+            donation = serializer.data.get('donation', None)
+            if donation is not None:
+                request.session['line_items'].append(self.square_helper.line_item('donation', 1, float(donation)))
+
             # get the amount form the line items and get line item name and add to notes
             amt = 0
             note = ""
@@ -69,7 +74,6 @@ class PaymentView(APIView):
                 # return redirect('registration:process_payment')
             self.square_helper.log_payment(request, square_response, create_date=None)
             logging.debug(self.request.session.get("account_verified_email"))
-
 
             response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],
                              'error': square_response['error'], 'continue': False}
