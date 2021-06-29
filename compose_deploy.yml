@@ -16,8 +16,8 @@ services:
     container_name: django
     build: .
 #    command: python manage.py runserver 0.0.0.0:8000
-    command: python manage.py runsslserver 0.0.0.0:8000
-#    command: gunicorn wpa_project.wsgi:application --bind 0.0.0.0:8000 --workers=4
+#    command: python manage.py runsslserver 0.0.0.0:8000
+    command: gunicorn wpa_project.wsgi:application --bind 0.0.0.0:8000 --workers=4
 #    command: ls
 #    volumes:
 #      - ./wpa_project:/code
@@ -27,18 +27,19 @@ services:
       - db
     volumes:
       - staticfiles:/home/app/web/staticfiles
-      - ./wpa_project: /home/app/web
-#  nginx:
-#    container_name: nginx
-#    image: nginx:mainline-alpine
-#    restart: 'no' #always
-#    ports:
-#      - 1337:80
-#    volumes:
-#      - ./nginx:/etc/nginx/conf.d
-#      - staticfiles:/home/app/web/staticfiles
-#    depends_on:
-#      - web
+
+  nginx:
+    container_name: nginx
+#    build: ./nginx
+    image: nginx:mainline-alpine
+    restart: 'no' #always
+    ports:
+      - 1337:80
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - staticfiles:/home/app/web/staticfiles
+    depends_on:
+      - web
 
 volumes:
   postgres-data:

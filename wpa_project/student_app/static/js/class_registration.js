@@ -116,11 +116,11 @@ async function post_unregister() {
     });
     if(unreg_list.length == 1){
         getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
-        refund + " to your card");
+        refund + " to your card in 5 to 10 business days");
         }
     else if (unreg_list.length > 1) {
         getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be refunded " +
-        refund + " to your card(s)");
+        refund + " to your card(s) in 5 to 10 business days");
         }
     if (getConfirm) {
 
@@ -135,7 +135,7 @@ async function post_unregister() {
         //      request new table from server
         console.log('get table from server')
         get_reg_table();
-        alert("You have successfully been unregistered from the class.")
+        alert("You have successfully been unregistered from the class.\n")
     }
     else {
         console.log('canceled');
