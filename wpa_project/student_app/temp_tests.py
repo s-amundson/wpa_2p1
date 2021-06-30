@@ -1,7 +1,10 @@
 # from .tests.tests_beginner_class import TestsBeginnerClass
+# from .tests.tests_beginner_class import TestsBeginnerClass2
 # from .tests.tests_class_attendance import TestsClassAttendance
 # from .tests.tests_class_registration import TestsClassRegistration
+# from .tests.tests_class_sign_in import TestsClassSignIn
 # from .tests.tests_costs import TestsCosts
+# from .tests.tests_email import TestsEmail
 # from .tests.tests_index import TestsIndex
 # from .tests.tests_payment import TestsPayment
 # from .tests.tests_process_payment import TestsProcessPayment
@@ -16,6 +19,7 @@
 # from .tests.tests_theme import TestsTheme
 # from .tests.tests_unregister import TestsUnregisterStudent
 # from .tests.tests_unregister import TestsUnregisterStudent2
+
 import json
 import logging
 import time
@@ -39,31 +43,25 @@ class TestsTemp(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.email_dict = {'total': 5, 'receipt': 'https://example.com',
-                           'line_items': [{'name': 'Class on None student id: 1',
-                                           'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]}
+        # self.email_dict = {'total': 5, 'receipt': 'https://example.com',
+        #                    'line_items': [{'name': 'Class on None student id: 1',
+        #                                    'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]}
 
-    def test_payment_email(self):
-        EmailMessage().payment_email_user(self.test_user, self.email_dict)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Payment Confirmation')
-        self.assertTrue(mail.outbox[0].body.find('Thank you for your purchase with Woodley Park Archers.') > 0)
+    # def test_class_get(self):
+    #     response = self.client.get(reverse('registration:class_registration'), secure=True)
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertTemplateUsed(response, 'student_app/class_registration.html')
+    #
+    # def test_class_register_good(self):
+    #     # add a user to the class<option value="2022-06-05 09:00:00+00:00">05 Jun, 2022 09 AM / 11 AM</option>
+    #     self.client.post(reverse('registration:class_registration'),
+    #                      {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
+    #     bc = BeginnerClass.objects.get(pk=1)
+    #     self.assertEqual(bc.state, 'open')
+    #     cr = ClassRegistration.objects.all()
+    #     self.assertEqual(len(cr), 1)
+    #     self.assertEqual(cr[0].beginner_class, bc)
+    #     self.assertEqual(self.client.session['line_items'][0]['name'],
+    #                      'Class on 2022-06-05 student id: 1')
+    #     self.assertEqual(self.client.session['payment_db'], 'ClassRegistration')
 
-    def test_refund_email(self):
-        EmailMessage().refund_email(self.test_user)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Refund Confirmation')
-        s = 'Your refund with Woodley Park Archers has successfully been sent to square for processing. '
-            # 'Please allow 5 to 10 business days for the refund to process.'
-        self.assertTrue(mail.outbox[0].body.find(s) > 0)
-        self.assertTrue(mail.outbox[0].body.find('Thank you for your purchase with Woodley Park Archers.') < 0)
-#     def get_index(self):
-#         # Get the page, if not super or board, page is forbidden
-#         response = self.client.get(reverse('registration:index'), secure=True)
-#         self.assertEqual(response.status_code, 200)
-#         self.assertTemplateUsed('student_app/index.html')
-#
-#     def test_square_helper_refund_payment(self):
-#         sh = SquareHelper()
-#         square_response = sh.comp_response('testing', 1000)
-#         sh.log_payment(request, square_response, create_date=datetime.now())

@@ -27,7 +27,7 @@ services:
       - db
     volumes:
       - staticfiles:/home/app/web/staticfiles
-      - ./wpa_project: /home/app/web
+      - ./wpa_project:/home/app/web
 #  nginx:
 #    container_name: nginx
 #    image: nginx:mainline-alpine

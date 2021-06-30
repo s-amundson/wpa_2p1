@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class ClassStatusView(LoginRequiredMixin, View):
-    def get(self, request, class_date):
-        bc = BeginnerClass.objects.get(class_date=class_date)
+    def get(self, request, class_id):
+        bc = BeginnerClass.objects.get(pk=class_id)
         ec = ClassRegistrationHelper().enrolled_count(bc)
         return JsonResponse({'beginner': bc.beginner_limit - ec['beginner'],
                              'beginner_time': bc.class_date.strftime("%I %p"),

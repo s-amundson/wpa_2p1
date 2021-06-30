@@ -19,10 +19,7 @@ class ClassRegistrationForm(forms.Form):
                 attrs={'class': "m-2"}), required=True, label=f'I agree to the terms of the AWRL',
                 initial=False)
         self.students = list(students.values())
-        # logging.debug(self.students)
-        # for student in self.students:
-        #     student['box'] = forms.BooleanField(
-        #         widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=False,)
+
         for student in students:
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
@@ -44,7 +41,7 @@ class ClassRegistrationForm(forms.Form):
             s = f'{c.class_date.strftime("%d %b, %Y %I %p")} / {cr.strftime("%I %p")}'
             logging.debug(s)
 
-            d.append((str(c.class_date), s))
+            d.append((str(c.id), s))
         return d
 
     class Meta:

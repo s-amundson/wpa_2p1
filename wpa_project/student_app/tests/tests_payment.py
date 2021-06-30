@@ -72,7 +72,7 @@ class TestsPayment(TestCase):
     def test_payment_retries(self):
         #  Register student for class so we can check square_helper.payment_error
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'},
+                         {'beginner_class': 1, 'student_2': 'on', 'student_3': 'on', 'terms': 'on'},
                          secure=True)
         ik = self.client.session['idempotency_key']
 

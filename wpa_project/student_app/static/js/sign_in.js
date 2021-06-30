@@ -1,12 +1,20 @@
 $(document).ready(function() {
     console.log('loaded')
 	var sig = $('#sig').signature();
-	$('#disable').click(function() {
-		var disable = $(this).text() === 'Disable';
-		$(this).text(disable ? 'Enable' : 'Disable');
-		sig.signature(disable ? 'disable' : 'enable');
-	});
-	$('#clear').click(function() {
+
+    $("#btn-submit").prop('disabled', true);
+    sig.signature({
+    change: function(event, ui) {
+        if (sig.signature('isEmpty')) {
+            console.log('sig empty');
+            $("#btn-submit").prop('disabled', true);
+        }
+        else {
+            $("#btn-submit").prop('disabled', false);
+        }
+    }});
+	$('#clear').click(function(e) {
+	    e.preventDefault();
 		sig.signature('clear');
 	});
 	$('#json').click(function() {
@@ -15,11 +23,14 @@ $(document).ready(function() {
 	$('#svg').click(function() {
 		alert(sig.signature('toSVG'));
 	});
-	$("#sign_in_form").submit(function(e){
-        e.preventDefault();
-        console.log('submit')
-        $("#id_signature").val(sig.signature('toDataURL', 'image/jpeg', 0.8));
-        $(this).unbind();
-        $(this).submit();
-    });
+	$("#sign_in_form").submit(function(e) {
+	    e.preventDefault();
+	    if (!sig.signature('isEmpty')) {
+            console.log('submit')
+            $("#id_signature").val(sig.signature('toDataURL', 'image/jpeg', 0.8));
+            $(this).unbind();
+            $(this).submit();
+            }
+        });
+//	$("#btn-submit").click(form_submit);
 });

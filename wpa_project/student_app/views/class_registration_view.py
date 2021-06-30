@@ -57,8 +57,9 @@ class ClassRegistrationView(LoginRequiredMixin, View):
 
             for r in registrations:
                 # logging.debug(r.student.id)
+                logging.debug(r.beginner_class.class_date)
                 request.session['line_items'].append(
-                    SquareHelper().line_item(f"Class on {r.beginner_class.class_date} student id: {str(r.student.id)}", 1,
+                    SquareHelper().line_item(f"Class on {r.beginner_class.class_date[:10]} student id: {str(r.student.id)}", 1,
                                              r.beginner_class.cost))
                 if r.student.safety_class is None:
                     beginner += 1
@@ -74,10 +75,10 @@ class ClassRegistrationView(LoginRequiredMixin, View):
 
     def post(self, request):
         students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
-
+        logging.debug(request.POST)
         form = ClassRegistrationForm(students, request.POST)
         if form.is_valid():
-            beginner_class = BeginnerClass.objects.get(class_date=form.cleaned_data['beginner_class'])
+            beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
             beginner = 0
             returnee = 0
             students = []
@@ -141,8 +142,8 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 ClassRegistration(beginner_class=beginner_class, student=s, new_student=n,
                                   pay_status='start', idempotency_key=uid).save()
                 request.session['line_items'].append(
-                    SquareHelper().line_item(f"Class on {beginner_class.class_date} student id: {str(s.id)}", 1,
-                                             beginner_class.cost))
+                    SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
+                                             1, beginner_class.cost))
 
         return HttpResponseRedirect(reverse('registration:process_payment'))
 
