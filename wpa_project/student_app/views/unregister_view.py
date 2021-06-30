@@ -1,11 +1,15 @@
 import logging
+from datetime import datetime, timedelta
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
+# from django.utils.datetime_safe import datetime
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from ..serializers import UnregisterSerializer
-from ..src.square_helper import SquareHelper
+from ..src import EmailMessage, SquareHelper
 from ..models import BeginnerClass, ClassRegistration, StudentFamily
 logger = logging.getLogger(__name__)
 
@@ -52,11 +56,17 @@ class UnregisterView(LoginRequiredMixin, APIView):
             errors = ""
             for c in class_list:
                 cr = get_object_or_404(ClassRegistration, pk=c)
+                dt = timezone.now() + timedelta(hours=24)
+
                 if cr.beginner_class.state in BeginnerClass().get_states()[3:]:
                     logging.error(f'beginner class state is {cr.beginner_class.state}')
                     return Response(response_dict)
-                elif cr.student.student_family.id not in student_list:
+                if cr.student.student_family.id not in student_list:
                     logging.error('not authorized')
+                    return Response(response_dict)
+                if cr.beginner_class.class_date < dt:
+                    logging.debug('Time to unregister has passed.')
+                    response_dict['error'] = 'Time to unregister has passed.'
                     return Response(response_dict)
                 else:
                     self.add_key(cr.idempotency_key)
@@ -76,7 +86,7 @@ class UnregisterView(LoginRequiredMixin, APIView):
                     cr.beginner_class.save()
                     cr.pay_status = 'refunded'
                     cr.save()
-                # TODO email refund
+                EmailMessage().refund_email(request.user)
             elif errors == 'Previously refunded':  # we should remove them from the list anyway
                 response_dict['status'] = "SUCCESS"
             else:

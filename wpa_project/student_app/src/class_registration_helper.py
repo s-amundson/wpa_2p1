@@ -8,8 +8,6 @@ logger = logging.getLogger(__name__)
 
 class ClassRegistrationHelper:
     def calc_age(self, student, date=timezone.now().date()):
-        logging.debug(date)
-        logging.debug(date.year - student.dob.year)
         return date.year - student.dob.year
 
     def check_space(self, class_registration_dict, update=False):

@@ -1,34 +1,45 @@
 version: "3.3"
 
 services:
-#  db:
-##    image: postgres
-##    environment:
-##      - POSTGRES_DB=postgres
-##      - POSTGRES_USER=postgres
-##      - POSTGRES_PASSWORD=postgres
-#    image: mysql
-#    command: --default-authentication-plugin=mysql_native_password
-#    volumes:
-#      - ./mysql:/var/lib/mysql
-#    restart: always
-#    environment:
-#      MYSQL_ROOT_PASSWORD: Mob6ymP9PK2rDrzFHL8j
-#      MYSQL_USER: tester
-#      MYSQL_PASSWORD: Plus6494
-#    ports:
-#      - 3306:3306
-#    expose:
-#      # Opens port 3306 on the container
-#      - 3306
+  db:
+    container_name: postgresdb
+    image: postgres:latest
+    restart: 'no' #always
+    env_file:
+      - project.env
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   web:
+    container_name: django
     build: .
+#    command: python manage.py runserver 0.0.0.0:8000
     command: python manage.py runsslserver 0.0.0.0:8000
-    volumes:
-      - ./wpa_project:/code
+#    command: gunicorn wpa_project.wsgi:application --bind 0.0.0.0:8000 --workers=4
+#    command: ls
+#    volumes:
+#      - ./wpa_project:/code
     ports:
       - 8000:8000
+    depends_on:
+      - db
+    volumes:
+      - staticfiles:/home/app/web/staticfiles
+      - ./wpa_project:/home/app/web
+#  nginx:
+#    container_name: nginx
+#    image: nginx:mainline-alpine
+#    restart: 'no' #always
+#    ports:
+#      - 1337:80
+#    volumes:
+#      - ./nginx:/etc/nginx/conf.d
+#      - staticfiles:/home/app/web/staticfiles
 #    depends_on:
-#      - db
+#      - web
 
+volumes:
+  postgres-data:
+  staticfiles:

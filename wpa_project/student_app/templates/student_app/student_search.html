@@ -6,10 +6,10 @@
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-    <div class="row">
+    <div class="row p-3">
         <form method="post" autocomplete="off" class="form">
         {% csrf_token %}
-            <div class="row">
+            <div class="row m-1">
                 <h4>
                     Search by Email
                 </h4>
@@ -25,10 +25,10 @@
         </form>
     </div>
 
-    <div class="row">
+    <div class="row p-3">
         <form method="post" autocomplete="off" class="form">
         {% csrf_token %}
-            <div class="row">
+            <div class="row m-1">
                 <h4>
                     Search by Name
                 </h4>
@@ -51,10 +51,10 @@
         </form>
     </div>
 
-    <div class="row">
+    <div class="row p-3">
         <form method="post" autocomplete="off" class="form">
         {% csrf_token %}
-            <div class="row">
+            <div class="row m-1">
                 <h4>
                     Search by Phone
                 </h4>

@@ -90,9 +90,6 @@ class SquareHelper:
         if payment_error >= 2:  # only allow 3 tries
             return False
         request.session['payment_error'] = payment_error + 1
-        # payment_db = request.session.get('payment_db', None)
-        # if payment_db is None:
-        #     return False
 
         if request.session.get('payment_db', None) is not None:
             ik = str(uuid.uuid4())
@@ -118,10 +115,8 @@ class SquareHelper:
         )
         square_response = result.body.get('payment', {'payment': None})
         if result.is_success():
-            logging.debug(result.body)
             square_response['error'] = []
         elif result.is_error():
-            logging.debug(result.errors)
             square_response['error'] = result.errors
 
         return square_response
@@ -132,9 +127,7 @@ class SquareHelper:
             log = PaymentLog.objects.get(idempotency_key=idempotency_key)
         except PaymentLog.DoesNotExist:
             return {'status': "FAIL"}
-        # if(len(log)) == 0:
-        #
-        logging.debug(log.status)
+
         if log.status == 'comped':  # payment was comped therefore no refund
             log.status = 'refund'
             log.save()
@@ -154,13 +147,11 @@ class SquareHelper:
                   })
         square_response = result.body.get('refund', {'refund': None})
         if result.is_success():
-            logging.debug(result.body)
             square_response['error'] = ""
             log.status = 'refund'
             log.save()
             self.log_refund(square_response, log)
         elif result.is_error():
-            logging.debug(result.errors)
             square_response['status'] = 'error'
             square_response['error'] = result.errors
         return square_response

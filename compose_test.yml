@@ -1,6 +1,6 @@
 version: "3.3"
 services:
   web:
-    command: bash -c "coverage run --source='.' manage.py test student_app && coverage html"
-
+#    command: bash -c "coverage run --source='.' manage.py test student_app && coverage html"
+    command: bash -c "python manage.py test student_app --pattern temp_tests.py"
 

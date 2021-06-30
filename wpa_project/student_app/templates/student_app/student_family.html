@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load rest_framework %}
+
+{% block title %}
+    Student Family
+{% endblock %}
+
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row">
+    <form class="col bg-dark" method="post" action="">
+        {% csrf_token %}
+    <div class="row">
+            <div class="input-group input-group-md">
+                {{ serializer.street }}
+            </div>
+    </div>
+
+    <div class="row">
+            <div class="input-group input-group-md">
+                {{ serializer.city }}
+                {{ serializer.state }}
+                {{ serializer.post_code }}
+            </div>
+    </div>
+
+    <div class="row">
+        <div class="input-group input-group-md">
+            {{ serializer.phone }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="input-group input-group-md">
+            <input type="submit" value="Save">
+        </div>
+    </div>
+    </form>
+    </div>
+{% endblock %}

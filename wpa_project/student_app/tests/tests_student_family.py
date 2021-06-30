@@ -39,7 +39,7 @@ class TestsStudentFamily(TestCase):
         self.client.force_login(self.test_user)
         response = self.client.get(reverse(self.url_string, kwargs={'family_id': 4}), secure=True)
         self.assertEqual(response.status_code, 200)
-    #
+
     # def test_post_student_family_exists(self):
     #     d = {"street": "1948 Jones Avenue", "city": "Bays", "state": "NC",
     #      "post_code": "28636", "phone": "336-696-6307"}
@@ -88,7 +88,7 @@ class TestsStudentFamily(TestCase):
     #     d = {"street": "1948 Jones Avenue", "city": "Bays", "state": "NC",
     #      "post_code": "28636", "phone": "336-696-6307"}
     #     response = self.client.post(reverse(self.url_string, kwargs={'family_id': 2}), d, secure=True)
-    #     self.assertEqual(response.status_code, 400)
+    #     self.assertEqual(response.status_code, 405)
     #
     #     sf = StudentFamily.objects.get(pk=2)
     #     self.assertNotEqual(sf.street, d['street'])

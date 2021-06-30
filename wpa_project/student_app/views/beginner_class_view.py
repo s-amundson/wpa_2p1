@@ -66,7 +66,7 @@ class BeginnerClassView(LoginRequiredMixin, View):
             for registration in class_registration:
                 if f'check_{registration.student.id}' in request.POST:
                     registration.attended = True
-                    registration.student.safety_class = str(c.class_date)
+                    registration.student.safety_class = str(c.class_date)[:10]
                     new_count += 1
 
                 elif registration.attended: # if registration was unchecked remove safety class date.

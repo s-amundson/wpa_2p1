@@ -35,7 +35,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_FORMS = {'signup': 'student_app.forms.SignUpForm'}
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_USERNAME_REQUIRED = False
 
@@ -73,8 +73,14 @@ AUTHENTICATION_BACKENDS = (
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 
@@ -86,6 +92,16 @@ DEBUG = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_DEBUG = True
+EMAIL_DEBUG_ADDRESSES = get_secret('EMAIL_DEBUG_ADDRESSES')
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = get_secret('DEFAULT_FROM_EMAIL')
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = '587'
+EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Application definition
@@ -156,6 +172,10 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'student_app', 'media')
+MEDIA_URL = '/media/'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -185,7 +205,7 @@ ROOT_URLCONF = 'wpa_project.urls'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
 
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 
 SITE_ID = 1
 
@@ -198,6 +218,7 @@ SQUARE_CONFIG = get_secret('SQUARE_CONFIG')
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 TEMPLATES = [
     {
@@ -223,7 +244,7 @@ WSGI_APPLICATION = 'wpa_project.wsgi.application'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Los_Angeles'
 
 USE_I18N = True
 

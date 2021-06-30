@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class SearchView(LoginRequiredMixin, View):
     def get(self, request):
-        if not (request.user.is_board or request.user.is_superuser):
+        if not (request.user.is_board or request.user.is_staff):
             return HttpResponseForbidden()
         email_form = SearchEmailForm()
         name_form = SearchNameForm()
@@ -22,7 +22,7 @@ class SearchView(LoginRequiredMixin, View):
                       {'email_form': email_form, 'name_form': name_form, 'phone_form': phone_form})
 
     def post(self, request):
-        if not (request.user.is_board or request.user.is_superuser):
+        if not (request.user.is_board or request.user.is_staff):
             return HttpResponseForbidden()
         if 'email' in request.POST:
             form = SearchEmailForm(request.POST)

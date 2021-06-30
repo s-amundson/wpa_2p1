@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-
+from datetime import datetime, timedelta
 from django.test import TestCase, Client
 from django.urls import reverse
 from ..models import BeginnerClass, ClassRegistration, PaymentLog, RefundLog, Student, User
@@ -32,7 +32,7 @@ class TestsUnregisterStudent(TestCase):
 
     def test_refund_success_entire_purchase(self):
         self.client.post(reverse('registration:class_registration'),
-                     {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+                     {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
         cr = ClassRegistration.objects.all()
@@ -77,7 +77,7 @@ class TestsUnregisterStudent(TestCase):
 
     def test_refund_success_partial_purchase(self):
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+                         {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
 
         # process a good payment
         response = self.client.post(reverse('registration:payment'),
@@ -89,7 +89,7 @@ class TestsUnregisterStudent(TestCase):
         time.sleep(5)
 
         response = self.client.post(reverse('registration:unregister_class'),
-                                    {'class_list': ['2']}, secure=True)
+                                    {'class_list': [cr[1].id]}, secure=True)
         logging.debug(response.data)
         self.assertEqual(response.data['status'], 'SUCCESS')
         rl = RefundLog.objects.all()
@@ -130,3 +130,15 @@ class TestsUnregisterStudent2(TestCase):
                                         {'class_list': ['1', '2']}, secure=True)
             logging.debug(response.data)
             self.assertEqual(response.data['status'], 'ERROR')
+
+    def test_unregister_expired(self):
+        # set the time of the class within 24 hours.
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_date = datetime.now() + timedelta(hours=20)
+        bc.save()
+
+        response = self.client.post(reverse('registration:unregister_class'),
+                                    {'class_list': ['1', '2']}, secure=True)
+        logging.debug(response.data)
+        self.assertEqual(response.data['status'], 'ERROR')
+        self.assertEqual(response.data['error'], 'Time to unregister has passed.')

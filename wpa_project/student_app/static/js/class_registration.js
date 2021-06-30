@@ -8,29 +8,29 @@ $(document).ready(function(){
 });
 
 function check_dob(i, el) {
-    if ($("#id_beginner_class").val() != "") {
-        let e = $(el);
-        console.log($("#id_beginner_class").val())
-        let dob = new Date(e.attr('dob'));;
-        console.log(dob)
-        let class_date = new Date($("#id_beginner_class").val());
-        let of_age = new Date(class_date.setFullYear(class_date.getFullYear() - 9));
-        console.log(of_age);
-        console.log(dob < of_age)
-        if (dob < of_age) {
-            e.attr("disabled", false);
-        }
-        else {
-            e.attr("disabled", true);
-            e.attr("checked", false);
-            if ($("#is-new-student-" + i).html() == "New Student") {
-                $("#is-new-student-" + i).html("New Student, Students must be 9 years or older to attend")
-            }
-            else if ($("#is-new-student-" + i).html() == "Returning Student") {
-                $("#is-new-student-" + i).html("Returning Student, Students must be 9 years or older to attend")
-            }
-        }
-    }
+//    if ($("#id_beginner_class").val() != "") {
+//        let e = $(el);
+//        console.log($("#id_beginner_class").val())
+//        let dob = new Date(e.attr('dob'));;
+//        console.log(dob)
+//        let class_date = new Date($("#id_beginner_class").val());
+//        let of_age = new Date(class_date.setFullYear(class_date.getFullYear() - 9));
+//        console.log(of_age);
+//        console.log(dob < of_age)
+//        if (dob < of_age) {
+//            e.attr("disabled", false);
+//        }
+//        else {
+//            e.attr("disabled", true);
+//            e.attr("checked", false);
+//            if ($("#is-new-student-" + i).html() == "New Student") {
+//                $("#is-new-student-" + i).html("New Student, Students must be 9 years or older to attend")
+//            }
+//            else if ($("#is-new-student-" + i).html() == "Returning Student") {
+//                $("#is-new-student-" + i).html("Returning Student, Students must be 9 years or older to attend")
+//            }
+//        }
+//    }
 }
 
 async function get_class_status() {
@@ -38,7 +38,9 @@ async function get_class_status() {
     let d = $("#id_beginner_class").val();
     if(d != "") {
         let data = await $.get("class_status/" + $("#id_beginner_class").val() +"/", function(data, status){
-            let msg = "Class openings:</br> &nbsp;&nbsp; New Students: " +  data['beginner'] + " Returning: " + data['returnee'];
+            let msg = "Class openings:</br> &nbsp;&nbsp; ";
+            msg += "New Students: " +  data['beginner'] + ", starting at " + data['beginner_time'];
+            msg += "</br> &nbsp;&nbsp; Returning: " + data['returnee'] + ", starting at " + data['returnee_time'];
             $("#class-availible").html(msg);
         });
     }
@@ -114,11 +116,11 @@ async function post_unregister() {
     });
     if(unreg_list.length == 1){
         getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
-        refund + " to your card");
+        refund + " to your card in 5 to 10 business days");
         }
     else if (unreg_list.length > 1) {
         getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be refunded " +
-        refund + " to your card(s)");
+        refund + " to your card(s) in 5 to 10 business days");
         }
     if (getConfirm) {
 
@@ -133,7 +135,7 @@ async function post_unregister() {
         //      request new table from server
         console.log('get table from server')
         get_reg_table();
-        alert("You have successfully been unregistered from the class.")
+        alert("You have successfully been unregistered from the class.\n")
     }
     else {
         console.log('canceled');

@@ -6,19 +6,22 @@ Useful Commands:
     python manage.py startapp
     python manage.py dumpdata student_app[.ModelName]
 
+    for docker
+    docker exec -it \django python manage.py test student_app --pattern temp_tests.py --keepdb
+    docker exec -it \django coverage run --source='.' manage.py test student_app --keepdb && coverage html
+
 
 TODO
     Align auth templates with my templates - changed template inheritance need to check
     instructors - add to sign up for class but not count as.
     social accounts
-    terms to class reg and signup - need to update the terms.
+    terms to signup - need to update the terms.
     add something about class start time.
-    test beginner class canceled (square refunds)
+    test beginner class canceled (square refunds) - refund needs to check for prior refund amount
     automate opening and closing of classes.
     cookie law
     combine StudentApiView and StudentView?
     combine StudentFamilyApiView and StudentFamilyView?
-    add on screen instructions to add students
     look into having class as a calendar
         done - add congrats for signging up with class date - link to home
             added an alert
@@ -27,4 +30,12 @@ TODO
         update search to search for first name or last name
         list users - be able to sort and filter
     test payment tries exceeded js
-https://woodleyparkarchers.org/favicon.ico
+    need to have each individual that is an adult check in.
+        can have each student by adding an address.
+    Wish: add classes that a student has attended.
+    on refund = takes 5 to 10 business days.
+    give option to donate refund value on cancellation.
+    add donation input on process payment - need to update testing and verify.
+    Wish; add students to class by admin.
+
+    For deployment need to add SSL Certs started ssl per: https://stackify.com/how-to-configure-https-for-an-nginx-docker-container/

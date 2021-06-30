@@ -1,9 +1,9 @@
 import logging
-
+import time
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import StudentFamily, User
+from ..models import Student, StudentFamily, User
 
 logger = logging.getLogger(__name__)
 
@@ -75,28 +75,29 @@ class TestsRegisterStudent(TestCase):
 
     def test_add_student(self):
         self.client.force_login(self.test_user)
-        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
+        # d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
+        # response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
+        sf = StudentFamily.objects.create(street='123 main', city='city', state='ca', post_code=12345,
+                                          phone='123.123.1234')
+        sf.save()
+        sf.user.add(self.test_user)
+        sf.save()
 
-        # add a student
-        response = self.client.get(reverse('registration:add_student'), secure=True)
-        self.assertEqual(response.status_code, 200)
-        d = {'first_name':'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
-        response = self.client.post(reverse('registration:add_student'), d, secure=True)
-        sf = StudentFamily.objects.all()
-        s = sf[0].student_set.all()
-        self.assertEquals(len(s), 1)
+        student = Student(student_family=sf, first_name='Christy', last_name='Smith', dob='2020-02-02')
+        student.save()
+        logging.debug(student.id)
 
-        #update the record
-        d['first_name'] = 'Chris'
-        response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 1}),  d, secure=True)
+        # update the record
+        d = {'first_name': 'Chris', 'last_name': 'Smith', 'dob': '2020-02-02'}
+        response = self.client.post(reverse('registration:add_student', kwargs={'student_id': student.id}), d,
+                                    secure=True)
         sf = StudentFamily.objects.all()
         s = sf[0].student_set.all()
         self.assertEquals(len(s), 1)
         self.assertEqual(s[0].first_name, 'Chris')
 
         # check that when we get a page with a student the student shows up.
-        response = self.client.get(reverse('registration:add_student', kwargs={'student_id': 1}), secure=True)
+        response = self.client.get(reverse('registration:add_student', kwargs={'student_id': student.id}), secure=True)
         self.assertContains(response, 'Chris')
 
     def test_add_student_error(self):
@@ -119,16 +120,14 @@ class TestsRegisterStudent(TestCase):
         self.assertContains(response, '123 main')
 
     def test_add_student_api(self):
-
         self.client.force_login(self.test_user)
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
         response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
 
         # add a student
-        d = {'first_name':'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
+        d = {'first_name': 'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
         response = self.client.post(reverse('registration:student_api'), d, secure=True)
         # self.assertEqual(response.status_code, 200)
         sf = StudentFamily.objects.all()
         s = sf[0].student_set.all()
         self.assertEquals(len(s), 1)
-

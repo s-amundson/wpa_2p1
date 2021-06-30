@@ -16,3 +16,4 @@ class ClassRegistration(models.Model):
     idempotency_key = models.UUIDField()
     reg_time = models.DateField(default=timezone.now)
     attended = models.BooleanField(default=False)
+    signature = models.ImageField(upload_to="signatures/%Y/%m/%d/", null=True )

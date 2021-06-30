@@ -17,59 +17,70 @@
     <script src="{% static 'js/sq-payment-form.js' %}"></script>
 
     <!-- link to the custom styles for SqPaymentForm -->
-    <link rel="stylesheet" type="text/css" href="{% static 'sq-payment-form.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/sq-payment-form.css' %}">
 {% endblock %}
 
 {% block main %}
   <div class="row hidden">
     <div class="col" id="message"> {{ message }}</div>
   </div>
-  <div class="row table_head border">
-    <div class="col-md">
-      <strong>Item</strong>
+  <div class="p-1">
+    <div class="row"><h4>Purchase Items</h4></div>
+    <div class="row table_head">
+      <div class="col-md">
+        <strong>Item</strong>
+      </div>
+      <div class="col-md-2">
+        <strong>Quanity</strong>
+      </div>
+      <div class="col-md-2">
+        <strong>Amount each</strong>
+      </div>
+      <div class="col-md-2">
+        <strong>Amount</strong>
+      </div>
     </div>
-    <div class="col-md-2">
-      Quanity
-    </div>
-    <div class="col-md-2">
-      <strong>Amount each</strong>
-    </div>
-    <div class="col-md-2">
-      <strong>Amount</strong>
-    </div>
+
+    {% for row in rows %}
+      <div class="row table_row border">
+        <div class="col-md">
+          {{ row.name }}
+        </div>
+        <div class="col-md-2">
+          {{ row.quantity }}
+        </div>
+        <div class="col-md-2">
+          {{ row.amount_each }}
+        </div>
+        <div class="col-md-2">
+          {{ row.amount_total }}
+        </div>
+      </div>
+    {% endfor %}
+      <div class="row table_row border border-top-0">
+        <div class="col-md">
+          Donation
+        </div>
+        <div class="col-md-2"></div>
+        <div class="col-md-2"></div>
+        <div class="col-md-2">
+          <input type="number" value="0" id="donation">
+        </div>
+      </div>
+      <div class="row table_row border border-top-0">
+        <div class="col-md">
+          Total
+        </div>
+        <div class="col-md-2"></div>
+        <div class="col-md-2"></div>
+        <div class="col-md-2" id="total-div">
+          {{ total }}
+        </div>
+      </div>
   </div>
 
-  {% for row in rows %}
-    <div class="row table_row border border-top-0">
-      <div class="col-md">
-        {{ row.name }}
-      </div>
-      <div class="col-md-2">
-        {{ row.quantity }}
-      </div>
-      <div class="col-md-2">
-        {{ row.amount_each }}
-      </div>
-      <div class="col-md-2">
-        {{ row.amount_total }}
-      </div>
-    </div>
-  {% endfor %}
-
-    <div class="row table_row border border-top-0">
-      <div class="col-md">
-        Total
-      </div>
-      <div class="col-md-2"></div>
-      <div class="col-md-2"></div>
-      <div class="col-md-2">
-        {{ total }}
-      </div>
-    </div>
-
-
   {% if bypass %}
-    <div class="row">
+    <div class="row p-2">
       <form method="post" autocomplete="off" class="form">
         {% csrf_token %}
         <input type="hidden" id="bypass" name="bypass" value="">
@@ -77,7 +88,7 @@
       </form>
     </div>
   {% endif %}
-  <div class="row">
+  <div class="row p-3">
     Payments are processed with Square. Your credit card information is not stored on our servers.
   </div>
   <div class="row">
@@ -85,10 +96,10 @@
         {% csrf_token %}
         <input type="hidden" id="sq_token" name="sq_token" url="{% url 'registration:payment' %}" value="">
         <div id="card-container"></div>
-        <button id="card-button" type="button"> Pay Now </button>
+        <button class="btn btn-primary m-2" id="card-button" type="button"> Pay Now </button>
       </form>
   </div>
-  <div class="row">
+  <div class="row p-3">
     <div class="col" id="payment-status-container"></div>
     <div class="col" >
       <a id="receipt" href=""> Reciept </a>

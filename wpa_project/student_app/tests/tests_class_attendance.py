@@ -33,19 +33,19 @@ class TestsClassAttendance(TestCase):
 
         # change user, then add 2 new.
         self.client.force_login(User.objects.get(pk=2))
-        self.client.post(reverse('registration:class_registration'), {'beginner_class': '2022-06-05', 'student_2': 'on',
+        self.client.post(reverse('registration:class_registration'), {'beginner_class': 1, 'student_2': 'on',
                                                                       'student_3': 'on', 'terms': 'on'}, secure=True)
         # change user, then add 1 returnee.
         self.client.force_login(User.objects.get(pk=4))
         self.client.post(reverse('registration:class_registration'),
-                         {'beginner_class': '2022-06-05', 'student_6': 'on', 'terms': 'on'}, secure=True)
+                         {'beginner_class': 1, 'student_6': 'on', 'terms': 'on'}, secure=True)
 
         self.client.force_login(User.objects.get(pk=1))
         self.client.get(reverse('registration:beginner_class', kwargs={'beginner_class': 1}), secure=True)
 
         # close the class
         response = self.client.post(reverse('registration:beginner_class', kwargs={'beginner_class': 1}),
-                                    {'class_date': '2022-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
+                                    {'class_date': "2022-06-05", 'beginner_limit': 2, 'returnee_limit': 2,
                                      'state': 'closed', 'cost': 5}, secure=True)
         self.assertEqual(response.status_code, 302)
         # TODO check payment status

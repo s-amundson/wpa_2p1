@@ -1,4 +1,6 @@
 import uuid
+from allauth.account.managers import EmailAddressManager
+from django.apps import apps
 
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
@@ -13,7 +15,7 @@ import logging
 
 from ..forms import ClassRegistrationForm
 from ..models import BeginnerClass, ClassRegistration, Student, StudentFamily
-from ..src import ClassRegistrationHelper, SquareHelper
+from ..src import ClassRegistrationHelper, EmailMessage, SquareHelper
 
 logger = logging.getLogger(__name__)
 
@@ -38,13 +40,13 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             students = StudentFamily.objects.get(user=request.user).student_set.all()
         except StudentFamily.DoesNotExist:
             request.session['message'] = 'Address form is required'
-            logging.debug(request.session['message'])
+            # logging.debug(request.session['message'])
             return HttpResponseRedirect(reverse('registration:profile'))
         if reg_id:  # to regain an interrupted payment
             cr = get_object_or_404(ClassRegistration, pk=reg_id)
-            logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
+            # logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
             if cr.student.student_family != students[0].student_family:
-                logging.error('registration mismatch')
+                # logging.error('registration mismatch')
                 return Http404("registration mismatch")
             registrations = ClassRegistration.objects.filter(idempotency_key=cr.idempotency_key)
             request.session['idempotency_key'] = str(cr.idempotency_key)
@@ -54,9 +56,10 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             returnee = 0
 
             for r in registrations:
-                logging.debug(r.student.id)
+                # logging.debug(r.student.id)
+                logging.debug(r.beginner_class.class_date)
                 request.session['line_items'].append(
-                    SquareHelper().line_item(f"Class on {r.beginner_class.class_date} student id: {str(r.student.id)}", 1,
+                    SquareHelper().line_item(f"Class on {r.beginner_class.class_date[:10]} student id: {str(r.student.id)}", 1,
                                              r.beginner_class.cost))
                 if r.student.safety_class is None:
                     beginner += 1
@@ -71,16 +74,11 @@ class ClassRegistrationView(LoginRequiredMixin, View):
         return render(request, 'student_app/class_registration.html', {'form': form})
 
     def post(self, request):
-        logging.debug(request.POST)
         students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
-
+        logging.debug(request.POST)
         form = ClassRegistrationForm(students, request.POST)
-        logging.debug(form.data)
         if form.is_valid():
-            logging.debug('valid')
-            logging.debug(form.cleaned_data)
-
-            beginner_class = BeginnerClass.objects.get(class_date=form.cleaned_data['beginner_class'])
+            beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
             beginner = 0
             returnee = 0
             students = []
@@ -104,14 +102,12 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                                 students.append(s)
                         else:
                             message += 'Student is already enrolled'
-            logging.debug(f'Beginner = {beginner}, returnee = {returnee}')
             request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
 
             # logging.debug(list(c))
             if beginner_class.state == 'open':  # in case it changed since user got the form.
                 enrolled_count = ClassRegistrationHelper().enrolled_count(beginner_class)
-                logging.debug(enrolled_count)
                 if enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
                     message += "Not enough space available in this class"
                 if enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
@@ -120,7 +116,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     return self.transact(beginner_class, request, students)
 
                 else:
-                    logging.debug(message)
+                    # logging.debug(message)
                     return render(request, 'student_app/class_registration.html',
                                   {'form': form, 'alert_message': message})
 
@@ -146,8 +142,8 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 ClassRegistration(beginner_class=beginner_class, student=s, new_student=n,
                                   pay_status='start', idempotency_key=uid).save()
                 request.session['line_items'].append(
-                    SquareHelper().line_item(f"Class on {beginner_class.class_date} student id: {str(s.id)}", 1,
-                                             beginner_class.cost))
+                    SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
+                                             1, beginner_class.cost))
 
         return HttpResponseRedirect(reverse('registration:process_payment'))
 

@@ -13,26 +13,23 @@ logger = logging.getLogger(__name__)
 class StudentFamilyRegisterView(LoginRequiredMixin, View):
     """To register a student"""
 
-    def get_students(self, request, family_id):
+    def get(self, request, family_id=None):
+        logging.debug('here')
         if family_id is None:
             student_family = StudentFamily.objects.filter(user=request.user)
             if student_family.exists():
-                self.form = StudentFamilyRegistrationForm(instance=student_family[0])
+                form = StudentFamilyRegistrationForm(instance=student_family[0])
             else:
-                self.form = StudentFamilyRegistrationForm()
+                form = StudentFamilyRegistrationForm()
         else:
             if request.user.is_staff:
                 student_family = get_object_or_404(StudentFamily, pk=family_id)
             else:
                 student_family = get_object_or_404(StudentFamily, pk=family_id, user=request.user)
-            self.form = StudentFamilyRegistrationForm(instance=student_family)
-
-    def get(self, request, family_id=None):
-        logging.debug('here')
-        self.get_students(request, family_id)
+            form = StudentFamilyRegistrationForm(instance=student_family)
         message = request.session.get('message', '')
         logging.debug(message)
-        return render(request, 'student_app/forms/student_family_form.html', {'form': self.form, 'message': message})
+        return render(request, 'student_app/forms/student_family_form.html', {'form': form, 'message': message})
 
     # def post(self, request, family_id=None):
     #     form = StudentFamilyRegistrationForm(request.POST)
