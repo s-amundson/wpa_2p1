@@ -38,9 +38,9 @@ class EmailMessage(EmailMultiAlternatives):
         self.attach_alternative(get_template('student_app/email/payment_email.html').render(pay_dict), 'text/html')
         self.send()
 
-    def refund_email(self, user):
+    def refund_email(self, user, donation=False):
         self.get_email_address(user)
-        d = {'name': user.first_name}
+        d = {'name': user.first_name, 'donation': donation}
         self.subject = 'Woodley Park Archers Refund Confirmation'
         self.body = get_template('student_app/email/refund_email.txt').render(d)
         self.attach_alternative(get_template('student_app/email/refund_email.html').render(d), 'text/html')

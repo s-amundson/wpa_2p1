@@ -14,5 +14,6 @@ from .student_list_view import StudentList
 from .student_list_json import StudentListJson
 from .student_table_view import StudentTableView
 from .student_view import AddStudentView, StudentApiView
+from .terms_view import TermsView
 from .theme_view import ThemeView
 from .unregister_view import UnregisterView

@@ -32,10 +32,10 @@ def my_job():
     # create class day after tomorrow and open
     d = date.today() + timedelta(days=2)
     d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
-    bc = m.create(class_date=d, beginner_limit=10, returnee_limit=0, state='open')
+    bc = m.create(class_date=d, beginner_limit=10, returnee_limit=10, state='open')
     bc.save()
-    bc = m.create(class_date=d + timedelta(hours=2), beginner_limit=0, returnee_limit=10, state='open')
-    bc.save()
+    # bc = m.create(class_date=d + timedelta(hours=2), beginner_limit=0, returnee_limit=10, state='open')
+    # bc.save()
 
 
 # The `ensure_old_connections_are_closed` decorator ensures that database connections, that

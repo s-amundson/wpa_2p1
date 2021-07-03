@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+import uuid
 from datetime import datetime, timedelta
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -98,6 +99,20 @@ class TestsUnregisterStudent(TestCase):
         pl = PaymentLog.objects.filter(payment_id=rl[0].payment_id)
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].status, 'refund')
+
+    def test_donate_refund(self):
+        # put a record in to the database
+        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
+                               student=Student.objects.get(pk=1),
+                               new_student=True,
+                               pay_status='paid',
+                               idempotency_key=str(uuid.uuid4()))
+        cr.save()
+
+        response = self.client.post(reverse('registration:unregister_class'),
+                                    {'class_list': [cr.id], 'donation': True}, secure=True)
+        cr = ClassRegistration.objects.get(pk=cr.id)
+        self.assertEqual(cr.pay_status, 'refund donated')
 
 
 class TestsUnregisterStudent2(TestCase):

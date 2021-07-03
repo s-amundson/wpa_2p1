@@ -53,6 +53,7 @@ class UnregisterView(LoginRequiredMixin, APIView):
             # idempotency_key = uuid.uuid4()
             self.ik_list = []
             class_list = serializer.data['class_list']
+            donation = serializer.data.get('donation', False)
             errors = ""
             for c in class_list:
                 cr = get_object_or_404(ClassRegistration, pk=c)
@@ -70,11 +71,12 @@ class UnregisterView(LoginRequiredMixin, APIView):
                     return Response(response_dict)
                 else:
                     self.add_key(cr.idempotency_key)
-            for ik in self.ik_list:
-                square_response = self.square_helper.refund_payment(ik.idempotency_key, ik.amount * ik.count)
-                if square_response['status'] == 'error':
-                    logging.error(square_response)
-                    errors += square_response['error']
+            if not donation:
+                for ik in self.ik_list:
+                    square_response = self.square_helper.refund_payment(ik.idempotency_key, ik.amount * ik.count)
+                    if square_response['status'] == 'error':
+                        logging.error(square_response)
+                        errors += square_response['error']
             logging.debug(errors)
             if errors == '':
                 response_dict['status'] = "SUCCESS"
@@ -84,9 +86,12 @@ class UnregisterView(LoginRequiredMixin, APIView):
                     if cr.beginner_class.state == 'full':
                         cr.beginner_class.state = 'open'
                     cr.beginner_class.save()
-                    cr.pay_status = 'refunded'
+                    if donation:
+                        cr.pay_status = 'refund donated'
+                    else:
+                        cr.pay_status = 'refunded'
                     cr.save()
-                EmailMessage().refund_email(request.user)
+                EmailMessage().refund_email(request.user, donation)
             elif errors == 'Previously refunded':  # we should remove them from the list anyway
                 response_dict['status'] = "SUCCESS"
             else:

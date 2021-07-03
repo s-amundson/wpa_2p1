@@ -114,16 +114,29 @@ async function post_unregister() {
             unreg_list.push(class_id);
         }
     });
-    if(unrge_list.length == 0){
+    if(unreg_list.length == 0){
         alert("Please select a class to unregister")
         }
     if(unreg_list.length == 1){
-        getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
-        refund + " to your card in 5 to 10 business days");
+        if ($("#donation").prop('checked') == true) {
+            getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be donating " +
+            refund + " to the club");
+            }
+        else {
+            getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
+            refund + " to your card in 5 to 10 business days");
+            }
+
         }
     else if (unreg_list.length > 1) {
-        getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be refunded " +
-        refund + " to your card(s) in 5 to 10 business days");
+        if ($("#donation").prop('checked') == true) {
+            getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be donating " +
+            refund + " to the club");
+            }
+        else {
+            getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be refunded " +
+            refund + " to your card(s) in 5 to 10 business days");
+            }
         }
     if (getConfirm) {
 

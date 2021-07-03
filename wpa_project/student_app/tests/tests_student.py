@@ -162,6 +162,6 @@ class TestsStudent(TestCase):
         self.assertEqual(len(student), 6)
 
     def test_get_student_table(self):
-        response = self.client.get(reverse('registrtion:student_table'), secure=True)
+        response = self.client.get(reverse('registration:student_table'), secure=True)
         self.assertEqual(response.status_code, 200)
 

@@ -15,8 +15,6 @@ TODO
     Align auth templates with my templates - changed template inheritance need to check
     instructors - add to sign up for class but not count as.
     social accounts
-    terms to signup - need to update the terms.
-    add something about class start time.
     test beginner class canceled (square refunds) - refund needs to check for prior refund amount
     automate opening and closing of classes.
     cookie law
