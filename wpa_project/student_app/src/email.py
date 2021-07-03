@@ -1,11 +1,9 @@
 from allauth.account.models import EmailAddress
-from allauth.account.managers import EmailAddressManager
 from django.conf import settings
-from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 import logging
 
-from ..models import Student
 logger = logging.getLogger(__name__)
 
 
