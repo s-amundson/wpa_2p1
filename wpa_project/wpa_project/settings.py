@@ -17,7 +17,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-with open(os.path.join(BASE_DIR,'wpa_project', 'secrets.json')) as secrets_file:
+with open(os.path.join(BASE_DIR, 'wpa_project', 'secrets.json')) as secrets_file:
     secret_settings = json.load(secrets_file)
 
 
@@ -28,6 +28,7 @@ def get_secret(setting, secrets=secret_settings):
     except KeyError:
         raise ImproperlyConfigured("Set the {} setting".format(setting))
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -35,7 +36,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_FORMS = {'signup': 'student_app.forms.SignUpForm'}
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
+ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS')
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_USERNAME_REQUIRED = False
 
@@ -76,25 +77,26 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': get_secret('DB_NAME'),
-        'USER': get_secret('DB_USER'),
-        'PASSWORD': get_secret('DB_PASSWORD'),
-        'HOST': get_secret('DB_HOST'),
-        'PORT': 5432,
+        'NAME': get_secret("DATABASE_NAME"),
+        'USER': get_secret("DATABASE_USER"),
+        'PASSWORD': get_secret("DATABASE_PASSWORD"),
+        'HOST': get_secret("DATABASE_HOST"),
+        'PORT': get_secret("DATABASE_PORT"),
+
     }
 }
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_secret("DEBUG")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_FROM_EMAIL = get_secret('DEFAULT_FROM_EMAIL')
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_DEBUG = True
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_DEBUG = get_secret("EMAIL_DEBUG")
 EMAIL_DEBUG_ADDRESSES = get_secret('EMAIL_DEBUG_ADDRESSES')
 EMAIL_USE_TLS = True
 

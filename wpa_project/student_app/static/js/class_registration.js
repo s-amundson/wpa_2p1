@@ -114,6 +114,9 @@ async function post_unregister() {
             unreg_list.push(class_id);
         }
     });
+    if(unrge_list.length == 0){
+        alert("Please select a class to unregister")
+        }
     if(unreg_list.length == 1){
         getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
         refund + " to your card in 5 to 10 business days");

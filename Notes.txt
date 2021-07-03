@@ -37,6 +37,6 @@ TODO
     give option to donate refund value on cancellation.
     add donation input on process payment - need to update testing and verify.
     Wish; add students to class by admin.
-    add alert in unregister if no student is selected.
+    add alert in unregister if no student is selected. - need to check
 
     For deployment need to add SSL Certs started ssl per: https://stackify.com/how-to-configure-https-for-an-nginx-docker-container/

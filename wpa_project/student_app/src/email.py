@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class EmailMessage(EmailMultiAlternatives):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.from_email = 'from@example.com'
+        self.from_email = settings.DEFAULT_FROM_EMAIL
 
     def get_email_address(self, user):
         if settings.EMAIL_DEBUG:
