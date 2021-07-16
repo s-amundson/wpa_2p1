@@ -30,7 +30,6 @@ class TestsUnregisterStudent(TestCase):
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
 
-
     def test_refund_success_entire_purchase(self):
         self.client.post(reverse('registration:class_registration'),
                      {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)

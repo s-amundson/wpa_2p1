@@ -38,3 +38,4 @@ TODO
     add alert in unregister if no student is selected. - need to check
 
     For deployment need to add SSL Certs started ssl per: https://stackify.com/how-to-configure-https-for-an-nginx-docker-container/
+    https://docs.djangoproject.com/en/3.2/howto/outputting-pdf/
