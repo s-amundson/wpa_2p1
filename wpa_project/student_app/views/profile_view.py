@@ -1,12 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
 from django.views.generic.base import View
 import logging
 
 from ..forms import ThemeForm
-from ..models import StudentFamily, Student
+from ..models import StudentFamily
 logger = logging.getLogger(__name__)
 
 

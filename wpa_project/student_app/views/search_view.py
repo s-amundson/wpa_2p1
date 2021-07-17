@@ -1,8 +1,7 @@
 from allauth.account.models import EmailAddress
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseForbidden
 from django.shortcuts import render
-from django.urls import reverse
 from django.views.generic.base import View
 import logging
 

@@ -15,8 +15,6 @@ TODO
     Align auth templates with my templates - changed template inheritance need to check
     instructors - add to sign up for class but not count as.
     social accounts
-    terms to signup - need to update the terms.
-    add something about class start time.
     test beginner class canceled (square refunds) - refund needs to check for prior refund amount
     automate opening and closing of classes.
     cookie law
@@ -37,5 +35,7 @@ TODO
     give option to donate refund value on cancellation.
     add donation input on process payment - need to update testing and verify.
     Wish; add students to class by admin.
+    add alert in unregister if no student is selected. - need to check
 
     For deployment need to add SSL Certs started ssl per: https://stackify.com/how-to-configure-https-for-an-nginx-docker-container/
+    https://docs.djangoproject.com/en/3.2/howto/outputting-pdf/

@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.7"
 
 services:
   db:
@@ -14,13 +14,11 @@ services:
 
   web:
     container_name: django
-    build: .
-#    command: python manage.py runserver 0.0.0.0:8000
-#    command: python manage.py runsslserver 0.0.0.0:8000
+    build:
+      context: ..
+      dockerfile: docker_deploy/Dockerfile
     command: gunicorn wpa_project.wsgi:application --bind 0.0.0.0:8000 --workers=4
-#    command: ls
-#    volumes:
-#      - ./wpa_project:/code
+
     ports:
       - 8000:8000
     depends_on:
@@ -30,16 +28,21 @@ services:
 
   nginx:
     container_name: nginx
-#    build: ./nginx
+
     image: nginx:mainline-alpine
     restart: 'no' #always
     ports:
-      - 1337:80
+      - 80:80
+      - 443:443
     volumes:
-      - ./nginx:/etc/nginx/conf.d
-      - staticfiles:/home/app/web/staticfiles
+      - ../nginx:/etc/nginx/conf.d
+      - staticfiles:/app/static/
     depends_on:
       - web
+
+networks:
+  default:
+    name: my-app-net
 
 volumes:
   postgres-data:

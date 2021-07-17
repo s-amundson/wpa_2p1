@@ -1,18 +1,16 @@
 from allauth.account.models import EmailAddress
-from allauth.account.managers import EmailAddressManager
 from django.conf import settings
-from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 import logging
 
-from ..models import Student
 logger = logging.getLogger(__name__)
 
 
 class EmailMessage(EmailMultiAlternatives):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.from_email = 'from@example.com'
+        self.from_email = settings.DEFAULT_FROM_EMAIL
 
     def get_email_address(self, user):
         if settings.EMAIL_DEBUG:
@@ -40,9 +38,9 @@ class EmailMessage(EmailMultiAlternatives):
         self.attach_alternative(get_template('student_app/email/payment_email.html').render(pay_dict), 'text/html')
         self.send()
 
-    def refund_email(self, user):
+    def refund_email(self, user, donation=False):
         self.get_email_address(user)
-        d = {'name': user.first_name}
+        d = {'name': user.first_name, 'donation': donation}
         self.subject = 'Woodley Park Archers Refund Confirmation'
         self.body = get_template('student_app/email/refund_email.txt').render(d)
         self.attach_alternative(get_template('student_app/email/refund_email.html').render(d), 'text/html')

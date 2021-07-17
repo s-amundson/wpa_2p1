@@ -5,3 +5,4 @@ venv/**
 secrets.json
 *~S
 temp_*
+*.env
