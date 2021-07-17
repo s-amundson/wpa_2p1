@@ -1,0 +1,4 @@
+to overwrite local files with files from repository
+
+git fetch --all
+git reset --hard origin/master
