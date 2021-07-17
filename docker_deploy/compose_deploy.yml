@@ -37,8 +37,16 @@ services:
     volumes:
       - ../nginx:/etc/nginx/conf.d
       - staticfiles:/app/static/
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
     depends_on:
       - web
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
 
 networks:
   default:
