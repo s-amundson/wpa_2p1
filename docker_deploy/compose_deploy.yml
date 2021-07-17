@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.7"
 
 services:
   db:
@@ -39,6 +39,10 @@ services:
       - staticfiles:/app/static/
     depends_on:
       - web
+
+networks:
+  default:
+    name: my-app-net
 
 volumes:
   postgres-data:

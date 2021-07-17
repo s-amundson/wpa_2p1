@@ -34,7 +34,6 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
                 return HttpResponseBadRequest()
         return Response(serializer.data)
 
-
     def post(self, request, family_id=None):
         logging.debug(family_id)
         if family_id is None:

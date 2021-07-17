@@ -32,7 +32,7 @@ def my_job():
     # create class day after tomorrow and open
     d = date.today() + timedelta(days=2)
     d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
-    bc = m.create(class_date=d, beginner_limit=10, returnee_limit=10, state='open')
+    bc = m.objects.create(class_date=d, beginner_limit=10, returnee_limit=10, state='open')
     bc.save()
     # bc = m.create(class_date=d + timedelta(hours=2), beginner_limit=0, returnee_limit=10, state='open')
     # bc.save()
@@ -63,25 +63,25 @@ class Command(BaseCommand):
 
         scheduler.add_job(
             my_job,
-            trigger=CronTrigger(hour="00", minute="10"),  # Every day at midnight
+            trigger=CronTrigger(hour="06", minute="25"),  # Every day at midnight
             id="my_job",  # The `id` assigned to each job MUST be unique
             max_instances=1,
             replace_existing=True,
         )
         logger.info("Added job 'my_job'.")
 
-        scheduler.add_job(
-            delete_old_job_executions,
-            trigger=CronTrigger(
-                day_of_week="mon", hour="00", minute="00"
-            ),  # Midnight on Monday, before start of the next work week.
-            id="delete_old_job_executions",
-            max_instances=1,
-            replace_existing=True,
-        )
-        logger.info(
-            "Added weekly job: 'delete_old_job_executions'."
-        )
+        # scheduler.add_job(
+        #     delete_old_job_executions,
+        #     trigger=CronTrigger(
+        #         day_of_week="mon", hour="00", minute="00"
+        #     ),  # Midnight on Monday, before start of the next work week.
+        #     id="delete_old_job_executions",
+        #     max_instances=1,
+        #     replace_existing=True,
+        # )
+        # logger.info(
+        #     "Added weekly job: 'delete_old_job_executions'."
+        # )
 
         try:
             logger.info("Starting scheduler...")
