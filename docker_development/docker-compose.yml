@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.7"
 
 services:
   db:
@@ -30,6 +30,10 @@ services:
       - db
 #    env_file:
 #      - ../wpa_project/wpa_project.env
+
+networks:
+  default:
+    name: my-app-net
 
 volumes:
   postgres-data:
