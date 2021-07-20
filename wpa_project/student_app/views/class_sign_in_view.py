@@ -1,16 +1,20 @@
 import logging
 import base64
-from binascii import a2b_base64
-from django.core.files.base import ContentFile
+import os
+
+from django.conf import settings
+from django.core.files.base import File
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.http import HttpResponseForbidden
 from django.views.generic.base import View
 from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
 from ..forms import ClassSignInForm
-from ..models import BeginnerClass, ClassRegistration
-from ..src import ClassRegistrationHelper
+from ..models import ClassRegistration
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import Paragraph, Frame, Image, Spacer
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,7 +40,33 @@ class ClassSignInView(LoginRequiredMixin, View):
             image_b64 = form.cleaned_data['signature']
             img_format, imgstr = image_b64.split(';base64,')
             ext = img_format.split('/')[-1]
-            cr.signature = ContentFile(base64.b64decode(imgstr), name=f'{reg_id}.{ext}')
+            with open('img.jpg', 'wb') as f:
+                f.write(base64.b64decode(imgstr))
+
+            styles = getSampleStyleSheet()
+            # styleN = styles['Normal']
+            # styleH = styles['Heading4']
+            path = os.path.join(settings.BASE_DIR, 'student_app', 'static', 'images', 'WPAHeader4.jpg')
+            story = [Image(path, width=5 * inch, height=5 * inch / 8), Spacer(1, 0.2 * inch)]
+
+            with open(os.path.join(settings.BASE_DIR, 'student_app', 'templates', 'awrl.txt'), 'r') as f:
+                story.append(Paragraph(f.readline(), styles['Normal']))
+                story.append(Spacer(1, 0.2 * inch))
+                story.append(Paragraph(f.readline(), styles['Normal']))
+                story.append(Spacer(1, 0.1 * inch))
+                for line in f.readlines():
+                    story.append(Paragraph(line, styles['Bullet']))
+                    story.append(Spacer(1, 0.1 * inch))
+
+            story.append(Image('img.jpg', width=3 * inch, height=1 * inch))
+            story.append(Paragraph("Signed on Date: YYYY-MM-DD. By first_name last_name"))
+            c = Canvas('mydoc.pdf')
+            f = Frame(inch / 2, inch, 7 * inch, 9 * inch, showBoundary=1)
+            f.addFromList(story, c)
+            c.save()
+
+            # cr.signature = ContentFile(self.awrl_from_signature(), name=f'{reg_id}.pdf')
+            cr.signature = File(open('mydoc.pdf', 'rb'), name=f'{reg_id}.pdf')
             cr.attended = True
             cr.save()
 
