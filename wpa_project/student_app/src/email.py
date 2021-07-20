@@ -2,6 +2,8 @@ from allauth.account.models import EmailAddress
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
+
+from ..models import ClassRegistration
 import logging
 
 logger = logging.getLogger(__name__)
@@ -45,3 +47,11 @@ class EmailMessage(EmailMultiAlternatives):
         self.body = get_template('student_app/email/refund_email.txt').render(d)
         self.attach_alternative(get_template('student_app/email/refund_email.html').render(d), 'text/html')
         self.send()
+
+    # def release_email(self, registration, pdf):
+    #     cr = ClassRegistration.objects.get(pk=registration)
+    #     users = cr.student.student_family.user.all()
+    #     logging.debug(users)
+    #     self.get_email_address(users[0])
+    #     # TODO set to student if student is user.
+    #     self.subject = ""
