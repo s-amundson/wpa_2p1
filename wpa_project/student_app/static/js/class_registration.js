@@ -143,7 +143,8 @@ async function post_unregister() {
         //       Send the unregister request to the server
         let data = await $.post("unregister_class", {
             "class_list": unreg_list,
-            csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
+            csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
+            'donation': $("#donation").prop('checked')
         }, function(data, status){
             return data;
             }, "json");

@@ -12,7 +12,6 @@ Useful Commands:
 
 
 TODO
-    Align auth templates with my templates - changed template inheritance need to check
     instructors - add to sign up for class but not count as.
     social accounts
     test beginner class canceled (square refunds) - refund needs to check for prior refund amount
@@ -24,18 +23,8 @@ TODO
         done - add congrats for signging up with class date - link to home
             added an alert
     why is class not open after singing up students.
-        done - popup error message when tried to sign up student that is already signed up
-        update search to search for first name or last name
-        list users - be able to sort and filter
-    test payment tries exceeded js
-    need to have each individual that is an adult check in.
-        can have each student by adding an address.
     Wish: add classes that a student has attended.
-    on refund = takes 5 to 10 business days.
-    give option to donate refund value on cancellation.
-    add donation input on process payment - need to update testing and verify.
     Wish; add students to class by admin.
-    add alert in unregister if no student is selected. - need to check
 
     For deployment need to add SSL Certs started ssl per: https://stackify.com/how-to-configure-https-for-an-nginx-docker-container/
     https://docs.djangoproject.com/en/3.2/howto/outputting-pdf/

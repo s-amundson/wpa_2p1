@@ -7,3 +7,5 @@ docker-compose restart worker
 
 for container logs
 docker logs django
+
+docker exec -it nginx ./init-letsencrypt.sh

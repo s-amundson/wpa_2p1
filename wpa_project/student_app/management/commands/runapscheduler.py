@@ -23,6 +23,7 @@ def my_job():
     d = date.today() + timedelta(days=1)
     bc = m.objects.filter(class_date__lte=d, state__in=states[:3])
     bc.state = states[3]  # 'closed'
+    bc.save()
 
     # # open next weeks class
     # d = date.today() + timedelta(days=6)
