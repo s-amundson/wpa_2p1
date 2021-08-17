@@ -22,7 +22,8 @@ TODO
     look into having class as a calendar
         done - add congrats for signging up with class date - link to home
             added an alert
-    why is class not open after singing up students.
+
+Wish:
     Wish: add classes that a student has attended.
     Wish; add students to class by admin.
 
