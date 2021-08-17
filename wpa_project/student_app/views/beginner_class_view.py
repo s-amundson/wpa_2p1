@@ -111,9 +111,10 @@ class BeginnerClassView(LoginRequiredMixin, View):
                             qty = len(cr.filter(idempotency_key=reg.idempotency_key))
                             square_response = square_helper.refund_payment(reg.idempotency_key, qty * bc.cost)
                             if square_response['status'] == 'error':
-                                cancel_error = True
-                                logging.error(square_response)
-                                messages.add_message(request, messages.ERROR, square_response)
+                                if square_response['error'] != 'Previously refunded':
+                                    cancel_error = True
+                                    logging.error(square_response)
+                                    messages.add_message(request, messages.ERROR, square_response)
                             else:
                                 for c in cr.filter(idempotency_key=reg.idempotency_key):
                                     c.pay_status = 'refund'

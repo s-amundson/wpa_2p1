@@ -16,6 +16,7 @@ urlpatterns = [
         path('costs/<int:cost_id>', CostsView.as_view(), name='costs'),
         path('costs', CostsView.as_view(), name='costs'),
         path('payment', PaymentView.as_view(), name='payment'),
+        path('privacy', PrivacyView.as_view(), name='privacy'),
         path('process_payment', ProcessPaymentView.as_view(), name='process_payment'),
         path('process_payment/<str:message>/', ProcessPaymentView.as_view(), name='process_payment'),
         path('profile', ProfileView.as_view(), name='profile'),

@@ -1,0 +1,11 @@
+to overwrite local files with files from repository
+git fetch --all
+git reset --hard origin/master
+
+to restart a single container
+docker-compose restart worker
+
+for container logs
+docker logs django
+
+docker exec -it nginx ./init-letsencrypt.sh

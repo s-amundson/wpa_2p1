@@ -3,6 +3,12 @@
 
     <div class="navbar-expand-sm" id="navbar">
         <ul class="navbar-nav ml-auto mt-2">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'registration:terms' %}">Terms</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'registration:privacy' %}">Privacy</a>
+            </li>
             {% if user.is_authenticated %}
                 {% if user.is_board %}
                     <li class="nav-item dropdown">

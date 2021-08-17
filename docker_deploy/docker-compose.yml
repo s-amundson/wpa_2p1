@@ -1,0 +1,69 @@
+version: "3.7"
+
+services:
+  db:
+    container_name: postgresdb
+    image: postgres:latest
+    restart: unless-stopped #always
+    env_file:
+      - project.env
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  web:
+    container_name: django
+    build:
+      context: ..
+      dockerfile: docker_deploy/Dockerfile
+#    command: gunicorn wpa_project.wsgi:application --bind 0.0.0.0:8000 --workers=4
+    command:
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    volumes:
+      - staticfiles:/home/app/web/staticfiles
+
+  nginx:
+    container_name: nginx
+
+    image: nginx:mainline-alpine
+    restart: unless-stopped #always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ../nginx:/etc/nginx
+      - staticfiles:/app/static/
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+      - photo-static:/photo_app/static
+      - photo-media:/photo_media/media
+    depends_on:
+      - web
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+networks:
+  default:
+    name: my-app-net
+
+volumes:
+  postgres-data:
+  staticfiles:
+  photo-media:
+    name: photo-media
+    external: true
+  photo-static:
+    name: photo-static
+    external: true
