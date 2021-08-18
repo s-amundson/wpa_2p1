@@ -2,8 +2,9 @@ import logging
 import uuid
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.apps import apps
 
-from ..models import ClassRegistration, PaymentLog, User
+from ..models import PaymentLog
 from ..src import SquareHelper
 
 logger = logging.getLogger(__name__)
@@ -14,11 +15,12 @@ class TestsSquareHelper(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.User = apps.get_model(app_label='student_app', model_name='User')
 
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
-        self.test_user = User.objects.get(pk=2)
+        self.test_user = self.User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         session = self.client.session
         session['idempotency_key'] = str(uuid.uuid4())
@@ -27,7 +29,7 @@ class TestsSquareHelper(TestCase):
         session.save()
 
     def test_refund_bypass(self):
-        response = self.client.post(reverse('registration:process_payment'),
+        response = self.client.post(reverse('payment:process_payment'),
                                     {'bypass': ''}, secure=True)
         self.assertTemplateUsed('student_app/message.html')
         pl = PaymentLog.objects.all()

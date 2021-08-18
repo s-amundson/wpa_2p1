@@ -15,7 +15,8 @@ import logging
 
 from ..forms import ClassRegistrationForm
 from ..models import BeginnerClass, ClassRegistration, Student, StudentFamily
-from ..src import ClassRegistrationHelper, EmailMessage, SquareHelper
+from ..src import ClassRegistrationHelper
+from payment.src import SquareHelper, EmailMessage
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 # logging.debug(r.student.id)
                 logging.debug(r.beginner_class.class_date)
                 request.session['line_items'].append(
-                    SquareHelper().line_item(f"Class on {r.beginner_class.class_date[:10]} student id: {str(r.student.id)}", 1,
+                    SquareHelper().line_item(f"Class on {str(r.beginner_class.class_date)[:10]} student id: {str(r.student.id)}", 1,
                                              r.beginner_class.cost))
                 if r.student.safety_class is None:
                     beginner += 1
@@ -68,7 +69,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
 
             request.session['class_registration'] = {'beginner_class': r.beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
-            return HttpResponseRedirect(reverse('registration:process_payment'))
+            return HttpResponseRedirect(reverse('payment:process_payment'))
 
         form = ClassRegistrationForm(students)
         return render(request, 'student_app/class_registration.html', {'form': form})
@@ -145,5 +146,5 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
                                              1, beginner_class.cost))
 
-        return HttpResponseRedirect(reverse('registration:process_payment'))
+        return HttpResponseRedirect(reverse('payment:process_payment'))
 

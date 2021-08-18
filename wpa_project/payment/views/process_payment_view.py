@@ -1,7 +1,6 @@
 import logging
-import uuid
 from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.utils.datetime_safe import datetime
 from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin

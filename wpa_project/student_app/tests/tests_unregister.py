@@ -5,8 +5,8 @@ import uuid
 from datetime import datetime, timedelta
 from django.test import TestCase, Client
 from django.urls import reverse
-from ..models import BeginnerClass, ClassRegistration, PaymentLog, RefundLog, Student, User
-
+from ..models import BeginnerClass, ClassRegistration, Student, User
+from payment.models import PaymentLog, RefundLog
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +39,7 @@ class TestsUnregisterStudent(TestCase):
         self.assertEqual(len(cr), 2)
 
         # process a good payment
-        response = self.client.post(reverse('registration:payment'),
+        response = self.client.post(reverse('registration:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
         self.eval_content(json.loads(response.content), 'COMPLETED', [], 1)
         cr = ClassRegistration.objects.all()
@@ -80,7 +80,7 @@ class TestsUnregisterStudent(TestCase):
                          {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
 
         # process a good payment
-        response = self.client.post(reverse('registration:payment'),
+        response = self.client.post(reverse('registration:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
         self.eval_content(json.loads(response.content), 'COMPLETED', [], 1)
         cr = ClassRegistration.objects.all()
@@ -102,7 +102,7 @@ class TestsUnregisterStudent(TestCase):
     def test_donate_refund(self):
         # put a record in to the database
         cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
-                               student=Student.objects.get(pk=1),
+                               student=Student.objects.get(pk=2),
                                new_student=True,
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))

@@ -68,7 +68,7 @@ async function createPayment(token) {
 //    $("#sq_token").val(token);
 //    $('#payment-form').submit();
 
-    var paymentResponse = await $.post("payment", {
+    var paymentResponse = await $.post($("#pay_url").val(), {
         sq_token: token,
         csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
         donation: $("#donation").val()

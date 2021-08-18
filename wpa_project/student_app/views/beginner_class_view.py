@@ -13,7 +13,8 @@ from django.contrib import messages
 
 from ..forms import BeginnerClassForm, ClassAttendanceForm
 from ..models import BeginnerClass, ClassRegistration, CostsModel
-from ..src import ClassRegistrationHelper, SquareHelper
+from ..src import ClassRegistrationHelper
+from payment.src import SquareHelper
 
 logger = logging.getLogger(__name__)
 

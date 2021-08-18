@@ -6,8 +6,8 @@ from django.db import models
 from django.utils.datetime_safe import datetime
 from square.client import Client
 
-from ..models import PaymentLog, RefundLog, StudentFamily
-
+from ..models import PaymentLog, RefundLog
+from student_app.models import StudentFamily
 logger = logging.getLogger(__name__)
 
 

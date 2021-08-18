@@ -6,7 +6,6 @@ from .costs_view import CostsView
 from .index_view import IndexView
 from .payment_view import PaymentView
 from .privacy_view import PrivacyView
-from .process_payment_view import ProcessPaymentView
 from .profile_view import ProfileView
 from .search_view import SearchView
 from .student_family_api_view import StudentFamilyApiView

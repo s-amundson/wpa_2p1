@@ -110,7 +110,9 @@ EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 
 # Application definition
 INSTALLED_APPS = [
+    'payment',
     'student_app',
+
     "django_apscheduler",
     'django.contrib.admin',
     'django.contrib.auth',

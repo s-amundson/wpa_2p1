@@ -3,7 +3,7 @@ import logging
 from django.core import mail
 from django.test import TestCase, Client
 from django.urls import reverse
-from ..src import EmailMessage
+from payment.src import EmailMessage
 from ..models import ClassRegistration, User
 
 logger = logging.getLogger(__name__)

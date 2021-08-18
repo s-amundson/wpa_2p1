@@ -6,7 +6,7 @@ from django.views.generic.base import View
 import logging
 
 from ..forms import SearchEmailForm, SearchNameForm, SearchPhoneForm
-from ..models import StudentFamily, Student, User
+from ..models import StudentFamily, Student
 logger = logging.getLogger(__name__)
 
 

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 
-from ..models import ClassRegistration
+# from wpa_project.student_app.models import ClassRegistration
 import logging
 
 logger = logging.getLogger(__name__)

@@ -5,7 +5,8 @@ from datetime import date
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import BeginnerClass, ClassRegistration, PaymentLog, User
+from ..models import BeginnerClass, ClassRegistration, User
+from payment.models import PaymentLog
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +119,7 @@ class TestsBeginnerClass(TestCase):
         self.assertEqual(len(cr), 2)
 
         # process a good payment
-        response = self.client.post(reverse('registration:payment'),
+        response = self.client.post(reverse('registration:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
 
         cr = ClassRegistration.objects.all()
@@ -137,7 +138,7 @@ class TestsBeginnerClass(TestCase):
         self.assertEqual(len(cr), 4)
 
         # process a good payment
-        response = self.client.post(reverse('registration:payment'),
+        response = self.client.post(reverse('registration:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
 
         cr = ClassRegistration.objects.all()

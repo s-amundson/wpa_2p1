@@ -13,7 +13,7 @@ from django.utils import timezone
 
 from ..forms import BeginnerClassForm, ClassAttendanceForm
 from ..models import Student, BeginnerClass, ClassRegistration, CostsModel
-from ..src import SquareHelper
+# from ..src import SquareHelper
 
 logger = logging.getLogger(__name__)
 
