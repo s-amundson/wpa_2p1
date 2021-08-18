@@ -1,8 +1,6 @@
 from datetime import timedelta
 from django import forms
-from django.forms import TextInput, ModelForm
 from django.utils import timezone
-from ..src.class_registration_helper import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
 import logging
 

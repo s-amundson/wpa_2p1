@@ -1,6 +1,4 @@
 import uuid
-from allauth.account.managers import EmailAddressManager
-from django.apps import apps
 
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
@@ -9,7 +7,6 @@ from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
-from django.utils import timezone
 import logging
 
 

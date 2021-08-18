@@ -7,8 +7,6 @@ from django.urls import reverse
 from django.views.generic.base import View
 from django.views.generic import ListView
 from django.utils import timezone
-# from django.db.models import model
-# from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 
 from ..forms import BeginnerClassForm, ClassAttendanceForm

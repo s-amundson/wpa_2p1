@@ -1,13 +1,9 @@
-from django.contrib.auth.forms import UserCreationForm
-from django.forms import forms, CheckboxInput, BooleanField, ModelForm, TextInput
+from django.forms import ModelForm, TextInput
 
 from ..models import StudentFamily
 
 
 class StudentFamilyRegistrationForm(ModelForm):
-
-    # terms = BooleanField(widget=CheckboxInput(attrs={'class': "form-control m-2 custom-control-input"}),
-    #                            required=True)
 
     class Meta:
         model = StudentFamily

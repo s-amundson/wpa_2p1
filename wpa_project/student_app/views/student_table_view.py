@@ -3,8 +3,7 @@ from django.shortcuts import render, get_object_or_404
 import logging
 from django.views.generic.base import View
 
-
-from ..models import Student, StudentFamily
+from ..models import StudentFamily
 
 logger = logging.getLogger(__name__)
 

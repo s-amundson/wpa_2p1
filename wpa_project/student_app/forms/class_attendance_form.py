@@ -1,8 +1,5 @@
 from django import forms
-from django.forms import TextInput, ModelForm
-from django.utils import timezone
 
-from ..models import BeginnerClass, ClassRegistration
 import logging
 
 logger = logging.getLogger(__name__)

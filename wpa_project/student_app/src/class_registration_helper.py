@@ -1,6 +1,4 @@
 import logging
-from datetime import timedelta
-from django.apps import apps
 from ..models import BeginnerClass, ClassRegistration
 from django.utils import timezone
 logger = logging.getLogger(__name__)

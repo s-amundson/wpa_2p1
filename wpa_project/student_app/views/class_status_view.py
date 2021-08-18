@@ -1,12 +1,8 @@
 import logging
 from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
-from django.http import  HttpResponseForbidden
 from django.views.generic.base import View
-from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from ..forms import CostsForm
 from ..models import BeginnerClass
 from ..src import ClassRegistrationHelper
 logger = logging.getLogger(__name__)

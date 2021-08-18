@@ -1,5 +1,4 @@
-from django import forms
-from django.forms import TextInput, ModelForm, DateField, IntegerField, ChoiceField
+from django.forms import ModelForm
 
 from ..models import BeginnerClass
 

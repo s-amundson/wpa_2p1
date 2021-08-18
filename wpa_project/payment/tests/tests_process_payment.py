@@ -2,10 +2,8 @@ import logging
 import uuid
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.conf import settings
 from django.apps import apps
 
-# from ..models import  User
 from ..models import PaymentLog
 logger = logging.getLogger(__name__)
 

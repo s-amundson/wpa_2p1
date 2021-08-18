@@ -2,7 +2,6 @@ import uuid
 import logging
 from django.apps import apps
 from django.conf import settings
-from django.db import models
 from django.utils.datetime_safe import datetime
 from square.client import Client
 

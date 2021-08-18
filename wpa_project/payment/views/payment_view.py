@@ -6,7 +6,6 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from ..serializers import PaymentSerializer
 from ..src import SquareHelper, EmailMessage
-# from ..src import ClassRegistrationHelper, EmailMessage, SquareHelper
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,6 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from ..models import BeginnerClass, ClassRegistration, Student, User
-# from payment.src import SquareHelper
 from payment.models import PaymentLog
 
 logger = logging.getLogger(__name__)

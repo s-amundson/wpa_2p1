@@ -1,5 +1,4 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
 import logging
 
 from rest_framework.views import APIView
@@ -12,9 +11,6 @@ logger = logging.getLogger(__name__)
 
 class ThemeView(LoginRequiredMixin, APIView):
     permission_classes = [permissions.IsAuthenticated]
-
-    # def get(self, request):
-    #     return Http404('nothing to get')
 
     def post(self, request):
 

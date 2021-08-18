@@ -1,9 +1,8 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, get_object_or_404
-# from django.utils.datetime_safe import datetime
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework import permissions
