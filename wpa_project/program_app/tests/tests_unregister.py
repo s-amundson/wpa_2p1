@@ -5,7 +5,8 @@ import uuid
 from datetime import datetime, timedelta
 from django.test import TestCase, Client
 from django.urls import reverse
-from ..models import BeginnerClass, ClassRegistration, Student, User
+from ..models import BeginnerClass, ClassRegistration
+from student_app.models import Student, User
 from payment.models import PaymentLog, RefundLog
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class TestsUnregisterStudent(TestCase):
         self.client.force_login(self.test_user)
 
     def test_refund_success_entire_purchase(self):
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                      {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
@@ -39,7 +40,7 @@ class TestsUnregisterStudent(TestCase):
         self.assertEqual(len(cr), 2)
 
         # process a good payment
-        response = self.client.post(reverse('registration:class_payment'),
+        response = self.client.post(reverse('programs:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
         self.eval_content(json.loads(response.content), 'COMPLETED', [], 1)
         cr = ClassRegistration.objects.all()
@@ -57,7 +58,7 @@ class TestsUnregisterStudent(TestCase):
         bc.state = 'full'
         bc.save()
 
-        response = self.client.post(reverse('registration:unregister_class'),
+        response = self.client.post(reverse('programs:unregister_class'),
                                     {'class_list': ['1', '2']}, secure=True)
         logging.debug(response.data)
         self.assertEqual(response.data['status'], 'SUCCESS')
@@ -76,11 +77,11 @@ class TestsUnregisterStudent(TestCase):
         self.assertEqual(cr[1].pay_status, 'refunded')
 
     def test_refund_success_partial_purchase(self):
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
 
         # process a good payment
-        response = self.client.post(reverse('registration:class_payment'),
+        response = self.client.post(reverse('programs:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
         self.eval_content(json.loads(response.content), 'COMPLETED', [], 1)
         cr = ClassRegistration.objects.all()
@@ -88,7 +89,7 @@ class TestsUnregisterStudent(TestCase):
         logging.debug(cr[0].pay_status)
         time.sleep(5)
 
-        response = self.client.post(reverse('registration:unregister_class'),
+        response = self.client.post(reverse('programs:unregister_class'),
                                     {'class_list': [cr[1].id]}, secure=True)
         logging.debug(response.data)
         self.assertEqual(response.data['status'], 'SUCCESS')
@@ -108,7 +109,7 @@ class TestsUnregisterStudent(TestCase):
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
 
-        response = self.client.post(reverse('registration:unregister_class'),
+        response = self.client.post(reverse('programs:unregister_class'),
                                     {'class_list': [cr.id], 'donation': True}, secure=True)
         cr = ClassRegistration.objects.get(pk=cr.id)
         self.assertEqual(cr.pay_status, 'refund donated')
@@ -130,7 +131,7 @@ class TestsUnregisterStudent2(TestCase):
     def test_refund_invalid_student(self):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
-        response = self.client.post(reverse('registration:unregister_class'),
+        response = self.client.post(reverse('programs:unregister_class'),
                                     {'class_list': ['1', '2']}, secure=True)
         logging.debug(response.data)
         self.assertEqual(response.data['status'], 'ERROR')
@@ -140,7 +141,7 @@ class TestsUnregisterStudent2(TestCase):
         for state in ['closed', 'canceled', 'recorded']:
             bc.state = state
             bc.save()
-            response = self.client.post(reverse('registration:unregister_class'),
+            response = self.client.post(reverse('programs:unregister_class'),
                                         {'class_list': ['1', '2']}, secure=True)
             logging.debug(response.data)
             self.assertEqual(response.data['status'], 'ERROR')
@@ -151,7 +152,7 @@ class TestsUnregisterStudent2(TestCase):
         bc.class_date = datetime.now() + timedelta(hours=20)
         bc.save()
 
-        response = self.client.post(reverse('registration:unregister_class'),
+        response = self.client.post(reverse('programs:unregister_class'),
                                     {'class_list': ['1', '2']}, secure=True)
         logging.debug(response.data)
         self.assertEqual(response.data['status'], 'ERROR')

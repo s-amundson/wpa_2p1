@@ -24,7 +24,7 @@ class ClassSignInView(LoginRequiredMixin, View):
         form = ClassSignInForm(initial={'signature': cr.signature})
         logging.debug(bool(cr.signature))
         logging.debug(cr.signature is not None)
-        return render(request, 'student_app/class_sign_in.html',
+        return render(request, 'program_app/class_sign_in.html',
                       {'form': form, 'student': cr.student, 'Img': cr.signature, 'is_signed': bool(cr.signature)})
 
     def post(self, request, reg_id):
@@ -72,7 +72,7 @@ class ClassSignInView(LoginRequiredMixin, View):
 
             return render(request, 'student_app/message.html', {'message': ' Thank You'})
         else:
-            return render(request, 'student_app/class_sign_in.html',
+            return render(request, 'program_app/class_sign_in.html',
                           {'form': form, 'student': cr.student, 'Img': cr.signature,
                            'is_signed': bool(cr.signature), 'message': 'invalid signature'})
 

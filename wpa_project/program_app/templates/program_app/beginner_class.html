@@ -47,7 +47,7 @@
                                     </div>
                                 {% endif %}
                                 <div class="row">
-                                    <a class="nav-link" href="{% url 'registration:class_sign_in' s.cr_id %}">
+                                    <a class="nav-link" href="{% url 'programs:class_sign_in' s.cr_id %}">
                                         {% if s.signature %}
                                             Update Signature
                                         {% else %}
@@ -77,7 +77,7 @@
                                 {% endif %}
                             {% endif %}
                             <div class="row">
-                                <a class="nav-link" href="{% url 'registration:class_sign_in' rs.cr_id %}">
+                                <a class="nav-link" href="{% url 'programs:class_sign_in' rs.cr_id %}">
                                     {% if rs.signature %}
                                         Update Signature
                                     {% else %}

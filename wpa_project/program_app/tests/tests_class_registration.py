@@ -7,7 +7,8 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from ..src import ClassRegistrationHelper
-from ..models import BeginnerClass, ClassRegistration, Student, StudentFamily, User
+from ..models import BeginnerClass, ClassRegistration
+from student_app.models import Student, StudentFamily, User
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +26,13 @@ class TestsClassRegistration(TestCase):
         self.client.force_login(self.test_user)
 
     def test_class_get(self):
-        response = self.client.get(reverse('registration:class_registration'), secure=True)
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'student_app/class_registration.html')
+        self.assertTemplateUsed(response, 'program_app/class_registration.html')
 
     def test_class_register_good(self):
         # add a user to the class<option value="2022-06-05 09:00:00+00:00">05 Jun, 2022 09 AM / 11 AM</option>
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
@@ -46,12 +47,12 @@ class TestsClassRegistration(TestCase):
         # Get the page
         # self.client.force_login(self.test_user)
 
-        response = self.client.get(reverse('registration:class_registration'), secure=True)
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'student_app/class_registration.html')
+        self.assertTemplateUsed(response, 'program_app/class_registration.html')
 
         # add a user to the class with error
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '2022-06 ', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
@@ -69,7 +70,7 @@ class TestsClassRegistration(TestCase):
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(User.objects.get(pk=2))
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                      {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         time.sleep(1)
         bc = BeginnerClass.objects.get(pk=1)
@@ -89,7 +90,7 @@ class TestsClassRegistration(TestCase):
         # try to add first user to class again.
         logging.debug('add user again')
         self.client.force_login(User.objects.get(pk=1))
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         time.sleep(1)
         # self.assertContains(response, 'Student already enrolled')
@@ -110,7 +111,7 @@ class TestsClassRegistration(TestCase):
 
         # change user, then add 1 beginner students and 1 returnee.
         self.client.force_login(User.objects.get(pk=3))
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
 
@@ -121,7 +122,7 @@ class TestsClassRegistration(TestCase):
             c.pay_status = 'paid'
             c.save()
         # don't change user, try to add user not in family to class
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_6': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         # self.assertEqual(bc.enrolled_beginners, 2)
@@ -132,7 +133,7 @@ class TestsClassRegistration(TestCase):
 
         # change user, then add 1 returnee.
         self.client.force_login(User.objects.get(pk=4))
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_6': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.all()
         # self.assertEqual(bc[0].enrolled_beginners, 2)
@@ -148,7 +149,7 @@ class TestsClassRegistration(TestCase):
         bc.cost = 0
         bc.save()
         # add a user to the class
-        response = self.client.post(reverse('registration:class_registration'),
+        response = self.client.post(reverse('programs:class_registration'),
                                     {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
@@ -168,14 +169,14 @@ class TestsClassRegistration(TestCase):
                     dob='2014-06-30')
         s.save()
         logging.debug(s)
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_1': 'on', f'student_{s.id}': 'on',
                           'terms': 'on'}, secure=True)
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 0)
 
     def test_check_space_full(self):
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_1': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(id=1)
         enrolled = ClassRegistrationHelper().enrolled_count(bc)
@@ -194,36 +195,36 @@ class TestsClassRegistration(TestCase):
         sf = StudentFamily.objects.get(pk=1)
         sf.delete()
 
-        response = self.client.get(reverse('registration:class_registration'), secure=True)
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
         self.assertEqual(self.client.session['message'], 'Address form is required')
         # self.assertTemplateUsed(response, 'student_app/class_registration.html')
 
-        response = self.client.get(reverse('registration:class_registered_table'), secure=True)
+        response = self.client.get(reverse('programs:class_registered_table'), secure=True)
         self.assertEqual(self.client.session['message'], 'Address form is required')
 
     def test_class_register_return_for_payment(self):
         # add 1 beginner students and 1 returnee.
         self.client.force_login(User.objects.get(pk=3))
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
 
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
-        response = self.client.get(reverse('registration:class_registration', kwargs={'reg_id': 1}), secure=True)
+        response = self.client.get(reverse('programs:class_registration', kwargs={'reg_id': 1}), secure=True)
         self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
 
     def test_class_status(self):
         # add 1 beginner students and 1 returnee.
         self.client.force_login(User.objects.get(pk=3))
-        # response = self.client.get(reverse('registration:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
-        response = self.client.get(reverse('registration:class_status', kwargs={'class_id': '1'}), secure=True)
+        # response = self.client.get(reverse('programs:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
+        response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
         content = json.loads(response.content)
         self.assertEqual(content['status'], 'open')
         self.assertEqual(content['beginner'], 2)
         self.assertEqual(content['returnee'], 2)
 
-        self.client.post(reverse('registration:class_registration'),
+        self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
@@ -231,8 +232,8 @@ class TestsClassRegistration(TestCase):
             c.pay_status = 'paid'
             c.save()
 
-        # response = self.client.get(reverse('registration:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
-        response = self.client.get(reverse('registration:class_status', kwargs={'class_id': '1'}), secure=True)
+        # response = self.client.get(reverse('programs:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
+        response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
         content = json.loads(response.content)
         self.assertEqual(content['status'], 'open')
         self.assertEqual(content['beginner'], 1)
@@ -241,6 +242,6 @@ class TestsClassRegistration(TestCase):
     def test_get_class_registered_table(self):
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
-        response = self.client.get(reverse('registration:class_registered_table'), secure=True)
+        response = self.client.get(reverse('programs:class_registered_table'), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'student_app/tables/class_registered_table.html')
+        self.assertTemplateUsed(response, 'program_app/tables/class_registered_table.html')

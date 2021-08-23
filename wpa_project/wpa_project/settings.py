@@ -112,6 +112,7 @@ EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 INSTALLED_APPS = [
     'payment',
     'student_app',
+    'program_app',
     'membership',
 
     "django_apscheduler",

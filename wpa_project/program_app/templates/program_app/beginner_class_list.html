@@ -23,7 +23,7 @@
     {% for c in object_list %}
         <div class="row p-2">
             <div class="col">
-                <a class="nav-link" href="{% url 'registration:beginner_class' c.id %}">
+                <a class="nav-link" href="{% url 'programs:beginner_class' c.id %}">
                     {{ c.class_date }}
                 </a>
             </div>
@@ -41,7 +41,7 @@
 
     <div class="row p-2">
         {% if user.is_board %}
-            <a class="nav-link" href="{% url 'registration:beginner_class' %}">
+            <a class="nav-link" href="{% url 'programs:beginner_class' %}">
                 Add
             </a>
         {% endif %}

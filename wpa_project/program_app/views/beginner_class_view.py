@@ -1,7 +1,7 @@
 import logging
 from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, get_list_or_404
+from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.urls import reverse
 from django.views.generic.base import View
@@ -11,9 +11,9 @@ from django.contrib import messages
 
 from ..forms import BeginnerClassForm, ClassAttendanceForm
 from ..models import BeginnerClass, ClassRegistration
-from payment.models import CostsModel
 from ..src import ClassRegistrationHelper
 from payment.src import SquareHelper
+from payment.models import CostsModel
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 logging.error('cost does not exist')
             form = BeginnerClassForm(initial={'class_date': c, 'beginner_limit': 20, 'returnee_limit': 20,
                                               'state': 'scheduled', 'cost': costs})
-        return render(request, 'student_app/beginner_class.html', {'form': form, 'attendee_form': attendee_form,
+        return render(request, 'program_app/beginner_class.html', {'form': form, 'attendee_form': attendee_form,
                                                                    'alert_message': alert_message})
 
     def post(self, request, beginner_class=None):
@@ -76,7 +76,7 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 registration.student.save()
                 registration.save()
             logging.debug(new_count)
-            return HttpResponseRedirect(reverse('registration:class_list'))
+            return HttpResponseRedirect(reverse('programs:class_list'))
         if beginner_class is not None: # we are updating a record.
 
             bc = BeginnerClass.objects.get(pk=beginner_class)
@@ -124,14 +124,14 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 if not cancel_error:
                     messages.add_message(request, messages.SUCCESS, 'Class was canceled')
 
-            return HttpResponseRedirect(reverse('registration:class_list'))
+            return HttpResponseRedirect(reverse('programs:class_list'))
         else:
             logging.debug(form.errors)
-            return render(request, 'student_app/beginner_class.html', {'form': form})
+            return render(request, 'program_app/beginner_class.html', {'form': form})
 
 
 class BeginnerClassListView(LoginRequiredMixin, ListView):
-    template_name = 'student_app/beginner_class_list.html'
+    template_name = 'program_app/beginner_class_list.html'
     queryset = BeginnerClass.objects.filter(class_date__gt=timezone.now())
 
     #     class_date = models.DateField()

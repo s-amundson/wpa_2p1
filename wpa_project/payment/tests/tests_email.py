@@ -1,11 +1,12 @@
 import logging
 
+from django.apps import apps
 from django.core import mail
 from django.test import TestCase, Client
 
-from payment.src import EmailMessage
-from ..models import  User
+from ..src import EmailMessage
 
+User = apps.get_model('student_app', 'User')
 logger = logging.getLogger(__name__)
 
 

@@ -1,15 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import BeginnerClass, Student, StudentFamily, User
-
-
-@admin.register(BeginnerClass)
-class BeginnerClassAdmin(admin.ModelAdmin):
-    list_display = ['id', 'class_date', 'state']
-
-
-
+from .models import Student, StudentFamily, User
 
 
 @admin.register(Student)

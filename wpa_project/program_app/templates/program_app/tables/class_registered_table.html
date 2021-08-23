@@ -1,4 +1,4 @@
-<form class="col form" id="unreg_form" method="post" action="{% url 'registration:class_registered_table' %}" autocomplete="off">
+<form class="col form" id="unreg_form" method="post" action="{% url 'programs:class_registered_table' %}" autocomplete="off">
     {% csrf_token %}
     <div class="row">
         <div class="col border"> Class Date</div>
@@ -15,7 +15,7 @@
                 <input type="hidden" id="cost_{{ class.id }}" value="{{ class.beginner_class.cost }}">
             </div>
             <div class="col border"> {{ class.student.last_name }} </div>
-            <div class="col border pay_status" curl="{% url 'registration:class_registration' class.id %}">
+            <div class="col border pay_status" curl="{% url 'programs:class_registration' class.id %}">
                 {{ class.pay_status }}
             </div>
             <div class="col border">

@@ -7,15 +7,18 @@ from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
+from django.apps import apps
 import logging
 
 
 from ..forms import ClassRegistrationForm
-from ..models import BeginnerClass, ClassRegistration, Student, StudentFamily
+from ..models import BeginnerClass, ClassRegistration
 from ..src import ClassRegistrationHelper
-from payment.src import SquareHelper, EmailMessage
+from payment.src import SquareHelper
 
 logger = logging.getLogger(__name__)
+Student = apps.get_model(app_label='student_app', model_name='Student')
+StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamily')
 
 
 class ClassRegisteredTable(LoginRequiredMixin, View):
@@ -29,7 +32,7 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
         enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
             pay_status='refunded')
         logging.debug(enrolled_classes.values())
-        return render(request, 'student_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
+        return render(request, 'program_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
 
 
 class ClassRegistrationView(LoginRequiredMixin, View):
@@ -49,7 +52,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             registrations = ClassRegistration.objects.filter(idempotency_key=cr.idempotency_key)
             request.session['idempotency_key'] = str(cr.idempotency_key)
             request.session['line_items'] = []
-            request.session['payment_db'] = ['student_app', 'ClassRegistration']
+            request.session['payment_db'] = ['program_app', 'ClassRegistration']
             beginner = 0
             returnee = 0
 
@@ -69,7 +72,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse('payment:process_payment'))
 
         form = ClassRegistrationForm(students)
-        return render(request, 'student_app/class_registration.html', {'form': form})
+        return render(request, 'program_app/class_registration.html', {'form': form})
 
     def post(self, request):
         students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
@@ -88,7 +91,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     if ClassRegistrationHelper().calc_age(s, beginner_class.class_date) < 9:
                         messages.add_message(request, messages.ERROR, 'Student must be at least 9 years old to participate')
                         message += 'Student must be at least 9 years old to participate'
-                        HttpResponseRedirect(reverse('registration:class_registration'))
+                        HttpResponseRedirect(reverse('programs:class_registration'))
                     else:
                         if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
                                 pay_status="refunded")) == 0:
@@ -115,12 +118,12 @@ class ClassRegistrationView(LoginRequiredMixin, View):
 
                 else:
                     # logging.debug(message)
-                    return render(request, 'student_app/class_registration.html',
+                    return render(request, 'program_app/class_registration.html',
                                   {'form': form, 'alert_message': message})
 
         else:
             logging.debug(form.errors)
-            return render(request, 'student_app/class_registration.html',
+            return render(request, 'program_app/class_registration.html',
                           {'form': form, 'alert_message': 'This form has errors'})
 
         # return HttpResponseRedirect(reverse('registration:profile'))
@@ -130,7 +133,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             uid = str(uuid.uuid4())
             request.session['idempotency_key'] = uid
             request.session['line_items'] = []
-            request.session['payment_db'] = ['student_app', 'ClassRegistration']
+            request.session['payment_db'] = ['program_app', 'ClassRegistration']
 
             for s in students:
                 if s.safety_class is None:

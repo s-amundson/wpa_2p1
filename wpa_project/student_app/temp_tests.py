@@ -1,15 +1,5 @@
-# from .tests.tests_beginner_class import TestsBeginnerClass
-# from .tests.tests_beginner_class import TestsBeginnerClass2
-# from .tests.tests_class_attendance import TestsClassAttendance
-# from .tests.tests_class_registration import TestsClassRegistration
-# from .tests.tests_class_sign_in import TestsClassSignIn
-# from .tests.tests_costs import TestsCosts
-# from .tests.tests_email import TestsEmail
 # from .tests.tests_index import TestsIndex
-# from .tests.tests_payment import TestsPayment
-# from payment.tests.tests_process_payment import TestsProcessPayment
-# from .tests.tests_search import TestsClassSearch
-# from payment.tests.tests_square_helper import TestsSquareHelper
+# from .tests.tests_search import TestsSearch
 # from .tests.tests_student import TestsStudent
 # from .tests.tests_student import TestsStudentAPI
 # from .tests.tests_student_family import TestsStudentFamily
@@ -17,8 +7,7 @@
 # from .tests.tests_student_list import TestsSearchList
 # from .tests.tests_student_registration import TestsRegisterStudent
 # from .tests.tests_theme import TestsTheme
-# from .tests.tests_unregister import TestsUnregisterStudent
-# from .tests.tests_unregister import TestsUnregisterStudent2
+
 
 # import json
 # import logging
