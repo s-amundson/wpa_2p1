@@ -6,9 +6,10 @@ Useful Commands:
     python manage.py startapp
     python manage.py dumpdata student_app[.ModelName]
 
-    for docker
+    for docker:
     docker exec -it \django python manage.py test student_app --pattern temp_tests.py --keepdb
     docker exec -it \django coverage run --source='.' manage.py test student_app --keepdb && coverage html
+    docker exec -it \django_dev python manage.py dumpdata membership > wpa_project/membership/fixtures/level.json
 
 
 TODO

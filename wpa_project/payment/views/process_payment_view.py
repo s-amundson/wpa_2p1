@@ -45,7 +45,7 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         message = request.session.get('message', '')
         context = {'paydict': paydict, 'rows': table_rows['rows'], 'total': table_rows['total'],
                    'bypass': bypass, 'message': message}
-        return render(request, 'student_app/square_pay.html', context)
+        return render(request, 'payment/square_pay.html', context)
 
     def table_rows(self, session):
         rows = []

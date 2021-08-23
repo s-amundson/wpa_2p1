@@ -3,17 +3,19 @@
 {% block title %} Beginner Class {% endblock %}
 
 {% block main %}
-    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-    <form method="post">
-        {% if cost_id %}
-            ID: {{ cost_id }}
-        {% endif %}
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input class="btn btn-primary" type="submit" value="Submit">
-    </form>
+    <div class="row p-3" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-3">
+        <form method="post">
+            {% if cost_id %}
+                ID: {{ cost_id }}
+            {% endif %}
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input class="btn btn-primary" type="submit" value="Submit">
+        </form>
+    </div>
     <hr/>
-    <div class="row pt-3">
+    <div class="row p-3">
         {% if table %}
             <form class="col" method="post">{% csrf_token %}
                 <input type="hidden" name="cost_table" value="on">
@@ -31,7 +33,7 @@
                 {% for s in table %}
                     <div class="row">
                         <div class="col-1 border">
-                            <a class="nav-link" href="{% url 'registration:costs' s.id %}">
+                            <a class="nav-link" href="{% url 'payment:costs' s.id %}">
                                 {{ s.id }}
                             </a>
                         </div>

@@ -64,7 +64,8 @@ class SquareHelper:
         # TODO email receipt if exists
 
         if request.session.get('payment_db', None) is not None:
-            m = apps.get_model(app_label='student_app', model_name=request.session['payment_db'])
+            pdb = request.session['payment_db']
+            m = apps.get_model(app_label=pdb[0], model_name=pdb[1])
             records = m.objects.filter(idempotency_key=request.session['idempotency_key'])
             for record in records:
                 record.pay_status = 'paid'
@@ -92,7 +93,8 @@ class SquareHelper:
 
         if request.session.get('payment_db', None) is not None:
             ik = str(uuid.uuid4())
-            m = apps.get_model(app_label='student_app', model_name=request.session['payment_db'])
+            pdb = request.session['payment_db']
+            m = apps.get_model(app_label=pdb[0], model_name=pdb[1])
             records = m.objects.filter(idempotency_key=request.session['idempotency_key'])
             for record in records:
                 record.idempotency_key = ik

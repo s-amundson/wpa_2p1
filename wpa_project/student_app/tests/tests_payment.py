@@ -30,7 +30,7 @@ class TestsPayment(TestCase):
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         session = self.client.session
-        session['payment_db'] = 'ClassRegistration'
+        session['payment_db'] = ['student_app', 'ClassRegistration']
         session['idempotency_key'] = str(uuid.uuid4())
         session['line_items'] = [{'name': 'Class on None student id: 1',
                                   'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]

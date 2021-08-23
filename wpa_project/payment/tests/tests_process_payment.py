@@ -30,7 +30,7 @@ class TestsProcessPayment(TestCase):
         # Get the payment page
         response = self.client.get(reverse('payment:process_payment'), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('student_app/square_pay.html')
+        self.assertTemplateUsed('payment/square_pay.html')
 
     def test_bypass(self):
         response = self.client.post(reverse('payment:process_payment'),

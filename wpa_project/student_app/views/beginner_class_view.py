@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.contrib import messages
 
 from ..forms import BeginnerClassForm, ClassAttendanceForm
-from ..models import BeginnerClass, ClassRegistration, CostsModel
+from ..models import BeginnerClass, ClassRegistration
+from payment.models import CostsModel
 from ..src import ClassRegistrationHelper
 from payment.src import SquareHelper
 

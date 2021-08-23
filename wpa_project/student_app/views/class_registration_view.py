@@ -49,7 +49,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             registrations = ClassRegistration.objects.filter(idempotency_key=cr.idempotency_key)
             request.session['idempotency_key'] = str(cr.idempotency_key)
             request.session['line_items'] = []
-            request.session['payment_db'] = 'ClassRegistration'
+            request.session['payment_db'] = ['student_app', 'ClassRegistration']
             beginner = 0
             returnee = 0
 
@@ -130,7 +130,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             uid = str(uuid.uuid4())
             request.session['idempotency_key'] = uid
             request.session['line_items'] = []
-            request.session['payment_db'] = 'ClassRegistration'
+            request.session['payment_db'] = ['student_app', 'ClassRegistration']
 
             for s in students:
                 if s.safety_class is None:

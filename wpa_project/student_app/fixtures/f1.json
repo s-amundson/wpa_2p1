@@ -31,7 +31,7 @@
   {"model": "student_app.beginnerclass", "pk": 2, "fields": {"class_date": "2022-06-12",
   "beginner_limit": 20, "returnee_limit": 20, "state": "scheduled"}},
 
-  {"model": "student_app.costsmodel", "pk": 1, "fields": {"name": "Beginner Class", "member_cost": 5, "standard_cost": 5, "membership": false, "enabled": true}},
+  {"model": "payment.costsmodel", "pk": 1, "fields": {"name": "Beginner Class", "member_cost": 5, "standard_cost": 5, "membership": false, "enabled": true}},
 
   {"model": "student_app.student", "pk": 1, "fields": { "student_family": 1, "first_name": "Emily", "last_name": "Conlan",
   "dob": "1995-12-03", "safety_class": null}},

@@ -23,6 +23,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('', include('student_app.urls', namespace='registration')),
     path('payment/', include('payment.urls', namespace='payment')),
+    path('membership/', include('membership.urls', namespace='membership')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

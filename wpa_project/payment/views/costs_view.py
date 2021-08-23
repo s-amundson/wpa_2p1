@@ -25,7 +25,7 @@ class CostsView(LoginRequiredMixin, View):
             c = None
         form = CostsForm(instance=c)
 
-        return render(request, 'student_app/costs.html', {'form': form, 'cost_id': cost_id, 'table': self.table})
+        return render(request, 'payment/costs.html', {'form': form, 'cost_id': cost_id, 'table': self.table})
 
     def post(self, request, cost_id=None):
         if cost_id is not None:
@@ -40,5 +40,5 @@ class CostsView(LoginRequiredMixin, View):
         else:
             logging.debug(form.errors)
             message = 'Errors on form'
-        return render(request, 'student_app/costs.html',
+        return render(request, 'payment/costs.html',
                       {'form': form, 'table': self.table, 'cost_id': cost_id, 'message': message})

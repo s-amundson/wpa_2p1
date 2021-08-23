@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import CostsModel
+
+
+@admin.register(CostsModel)
+class CostModelAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'enabled']
