@@ -4,6 +4,7 @@ from django.apps import apps
 from django.conf import settings
 from django.utils.datetime_safe import datetime
 from square.client import Client
+import django.dispatch
 
 from ..models import PaymentLog, RefundLog
 from student_app.models import StudentFamily
@@ -19,6 +20,8 @@ class SquareHelper:
             access_token=settings.SQUARE_CONFIG['access_token'],
             environment=settings.SQUARE_CONFIG['environment'],
         )
+
+        error_signal = django.dispatch.Signal()
 
     def comp_response(self, note, amount):
         payment = {'approved_money': {'amount': amount},
@@ -47,10 +50,11 @@ class SquareHelper:
     def log_payment(self, request, square_response, create_date=None):
         if create_date is None:
             create_date = datetime.strptime(square_response['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        pdb = request.session.get('payment_db', [None, None])
         log = PaymentLog.objects.create(user=request.user,
                                         student_family=StudentFamily.objects.filter(user=request.user)[0],
                                         checkout_created_time=create_date,
-                                        db_model=request.session.get('payment_db', None),
+                                        db_model=pdb[1],
                                         description=square_response['note'],
                                         location_id=square_response['location_id'],
                                         idempotency_key=request.session['idempotency_key'],
@@ -63,13 +67,13 @@ class SquareHelper:
                                         )
         # TODO email receipt if exists
 
-        if request.session.get('payment_db', None) is not None:
-            pdb = request.session['payment_db']
-            m = apps.get_model(app_label=pdb[0], model_name=pdb[1])
-            records = m.objects.filter(idempotency_key=request.session['idempotency_key'])
-            for record in records:
-                record.pay_status = 'paid'
-                record.save()
+        # if request.session.get('payment_db', None) is not None:
+        #     pdb = request.session['payment_db']
+        #     m = apps.get_model(app_label=pdb[0], model_name=pdb[1])
+        #     records = m.objects.filter(idempotency_key=request.session['idempotency_key'])
+        #     for record in records:
+        #         record.pay_status = 'paid'
+        #         record.save()
 
     def log_refund(self, square_response, payment_log):
         # refund = square_response['refund']

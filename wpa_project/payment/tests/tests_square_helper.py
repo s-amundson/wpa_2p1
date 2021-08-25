@@ -34,10 +34,11 @@ class TestsSquareHelper(TestCase):
         self.assertTemplateUsed('student_app/message.html')
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
+        logging.debug(pl[0].id)
 
         sh = SquareHelper()
         rp = sh.refund_payment(pl[0].idempotency_key, 500)
-        pl = PaymentLog.objects.get(pk=1)
+        pl = PaymentLog.objects.get(pk=pl[0].id)
         self.assertEqual(pl.status, 'refund')
         self.assertEqual(rp, {'status': "SUCCESS", 'error': ''})
         logging.debug(pl.total_money)

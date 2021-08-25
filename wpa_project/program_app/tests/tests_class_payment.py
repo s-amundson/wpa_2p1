@@ -71,6 +71,11 @@ class TestsClassPayment(TestCase):
         self.eval_content(json.loads(response.content), 'ERROR', 'payment processing error', False, 0)
 
     def test_payment_retries(self):
+        def check_ik(ik):
+            cr = ClassRegistration.objects.all()
+            logging.debug(len(cr))
+            for c in cr:
+                self.assertNotEqual(ik, c.idempotency_key)
         #  Register student for class so we can check square_helper.payment_error
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': 1, 'student_2': 'on', 'student_3': 'on', 'terms': 'on'},
@@ -80,20 +85,19 @@ class TestsClassPayment(TestCase):
         response = self.client.post(reverse('programs:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-rejected-cvv'}, secure=True)
         self.eval_content(json.loads(response.content), 'ERROR', 'Error with CVV, ', True, 0)
-        cr = ClassRegistration.objects.get(pk=1)
-        self.assertNotEqual(ik, cr.idempotency_key)
+        check_ik(ik)
 
         response = self.client.post(reverse('programs:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-rejected-cvv'}, secure=True)
         self.eval_content(json.loads(response.content), 'ERROR', 'Error with CVV, ', True, 0)
-        cr = ClassRegistration.objects.get(pk=1)
-        self.assertNotEqual(ik, cr.idempotency_key)
+        check_ik(ik)
 
         response = self.client.post(reverse('programs:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-rejected-expiration'}, secure=True)
         self.eval_content(json.loads(response.content), 'ERROR', 'Invalid expiration date, ', False, 0)
-        cr = ClassRegistration.objects.get(pk=1)
-        self.assertNotEqual(ik, cr.idempotency_key)
+        check_ik(ik)
+        cr = ClassRegistration.objects.filter(idempotency_key=ik)
+        self.assertEqual(len(cr), 0)
 
     def test_payment_without_line_items(self):
         session = self.client.session

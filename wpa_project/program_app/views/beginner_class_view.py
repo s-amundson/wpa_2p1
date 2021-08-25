@@ -8,6 +8,7 @@ from django.views.generic.base import View
 from django.views.generic import ListView
 from django.utils import timezone
 from django.contrib import messages
+from django.forms import model_to_dict
 
 from ..forms import BeginnerClassForm, ClassAttendanceForm
 from ..models import BeginnerClass, ClassRegistration
@@ -131,13 +132,11 @@ class BeginnerClassView(LoginRequiredMixin, View):
 
 
 class BeginnerClassListView(LoginRequiredMixin, ListView):
+    crh = ClassRegistrationHelper()
     template_name = 'program_app/beginner_class_list.html'
-    queryset = BeginnerClass.objects.filter(class_date__gt=timezone.now())
-
-    #     class_date = models.DateField()
-    #     enrolled_beginners = models.IntegerField(default=0)
-    #     beginner_limit = models.IntegerField()
-    #     enrolled_returnee = models.IntegerField(default=0)
-    #     returnee_limit = models.IntegerField()
-    #     c = [('scheduled', 'scheduled'), ('open', 'open'), ('full', 'full'), ('closed', 'closed'), ('canceled', 'canceled')]
-    #     state = models.CharField(max_length=20, null=True, choices=c)
+    bc = BeginnerClass.objects.filter(class_date__gt=timezone.now())
+    queryset = []
+    for c in bc:
+        d = model_to_dict(c)
+        d = {**d, **crh.enrolled_count(c)}
+        queryset.append(d)

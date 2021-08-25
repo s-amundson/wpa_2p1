@@ -97,7 +97,6 @@ class MembershipView(LoginRequiredMixin, View):
             membership.students.add(m)
 
         request.session['idempotency_key'] = uid
-        request.session['line_items'] = [SquareHelper().line_item(f"{membership.level.name} Membership",
-                                         1, cost)]
+        request.session['line_items'] = [SquareHelper().line_item(f"{membership.level.name} Membership", 1, cost)]
         request.session['payment_db'] = ['membership', 'Membership']
         membership.save()

@@ -95,7 +95,7 @@
       <form class="col" id="payment-form" novalidate action="/payment/process_payment" method="post">
         {% csrf_token %}
         <input type="hidden" id="sq_token" name="sq_token" value="">
-        <input type="hidden" id="pay_url" value="{% url 'registration:class_payment' %}">
+        <input type="hidden" id="pay_url" value="{% url 'programs:class_payment' %}">
         <div id="card-container"></div>
         <button class="btn btn-primary m-2" id="card-button" type="button"> Pay Now </button>
       </form>
