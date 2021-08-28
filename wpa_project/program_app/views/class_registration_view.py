@@ -53,6 +53,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             request.session['idempotency_key'] = str(cr.idempotency_key)
             request.session['line_items'] = []
             request.session['payment_db'] = ['program_app', 'ClassRegistration']
+            request.session['action_url'] = reverse('programs:class_payment')
             beginner = 0
             returnee = 0
 
@@ -134,6 +135,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             request.session['idempotency_key'] = uid
             request.session['line_items'] = []
             request.session['payment_db'] = ['program_app', 'ClassRegistration']
+            request.session['action_url'] = reverse('programs:class_payment')
 
             for s in students:
                 if s.safety_class is None:

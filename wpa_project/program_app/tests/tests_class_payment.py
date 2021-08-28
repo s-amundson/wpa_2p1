@@ -36,80 +36,31 @@ class TestsClassPayment(TestCase):
         session['line_items'] = [{'name': 'Class on None student id: 1',
                                   'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]
         session.save()
-
-        ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
-                          student=Student.objects.get(pk=2), new_student=True, pay_status="start",
-                          idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f", reg_time="2021-06-09", attended=False)
-
-    def test_payment_success(self):
-        # process a good payment
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
-        self.eval_content(json.loads(response.content), 'COMPLETED', [], False, 1)
-
-    def test_payment_card_decline(self):
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-declined'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'Card was declined, ', True, 0)
+        ClassRegistration.objects.create(
+            beginner_class=BeginnerClass.objects.get(pk=1),
+            student=Student.objects.get(pk=4), new_student=True, pay_status="start",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f", reg_time="2021-06-09", attended=False
+        )
 
     def test_payment_card_bad_cvv(self):
         response = self.client.post(reverse('programs:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-rejected-cvv'}, secure=True)
         self.eval_content(json.loads(response.content), 'ERROR', 'Error with CVV, ', True, 0)
 
-    def test_payment_card_bad_expire_date(self):
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-rejected-expiration'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'Invalid expiration date, ', True, 0)
+    def test_payment_class_full(self):
 
-    def test_payment_without_uuid(self):
-        session = self.client.session
-        del session['idempotency_key']
-        session.save()
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'payment processing error', False, 0)
-
-    def test_payment_retries(self):
-        def check_ik(ik):
-            cr = ClassRegistration.objects.all()
-            logging.debug(len(cr))
-            for c in cr:
-                self.assertNotEqual(ik, c.idempotency_key)
-        #  Register student for class so we can check square_helper.payment_error
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': 1, 'student_2': 'on', 'student_3': 'on', 'terms': 'on'},
                          secure=True)
-        ik = self.client.session['idempotency_key']
 
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-rejected-cvv'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'Error with CVV, ', True, 0)
-        check_ik(ik)
+        # add a student to the class so that when payment is processed class will be full
+        ClassRegistration.objects.create(
+            beginner_class=BeginnerClass.objects.get(pk=1),
+            student=Student.objects.get(pk=1), new_student=True, pay_status="paid",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f", reg_time="2021-06-09", attended=False
+        )
 
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-rejected-cvv'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'Error with CVV, ', True, 0)
-        check_ik(ik)
-
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-rejected-expiration'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'Invalid expiration date, ', False, 0)
-        check_ik(ik)
-        cr = ClassRegistration.objects.filter(idempotency_key=ik)
-        self.assertEqual(len(cr), 0)
-
-    def test_payment_without_line_items(self):
-        session = self.client.session
-        del session['line_items']
-        session.save()
+        # process a good payment
         response = self.client.post(reverse('programs:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'missing line items.', False, 0)
-
-    def test_payment_invalid_post(self):
-        session = self.client.session
-        session.save()
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'token': 'cnon:card-nonce-ok'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'payment processing error', False, 0)
+        self.eval_content(json.loads(response.content), 'ERROR', 'not enough space in the class', False, 0)

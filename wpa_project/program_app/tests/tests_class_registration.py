@@ -156,8 +156,10 @@ class TestsClassRegistration(TestCase):
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].beginner_class, bc)
+
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          'Class on 2022-06-05 student id: 1')
+        self.assertEqual(self.client.session['line_items'][0]['base_price_money']['amount'], 0)
         self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
         # self.assertTemplateUsed(response, 'student_app/message.html')
 

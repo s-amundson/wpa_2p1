@@ -13,7 +13,7 @@ def registration_update(sender, instance, created, **kwargs):
     if instance.db_model == 'ClassRegistration':
         cr = ClassRegistration.objects.filter(idempotency_key=instance.idempotency_key)
         logging.debug(instance.status)
-        if instance.status == "SUCCESS":
+        if instance.status in ["SUCCESS", "COMPLETED"]:
             for c in cr:
                 c.pay_status = 'paid'
                 c.save()

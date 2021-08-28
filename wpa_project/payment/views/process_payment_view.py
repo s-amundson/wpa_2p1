@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.utils.datetime_safe import datetime
 from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse
 
 from ..src.square_helper import SquareHelper
 
@@ -20,9 +21,6 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})
 
     def get(self, request):
-        # # TODO remove this as it is just to get square working
-        # request.session['idempotency_key'] = str(uuid.uuid4())
-        # request.session['line_items'] = [line_item(f"Class on None student id: 1", 1, 5), ]
 
         paydict = {}
         if settings.SQUARE_CONFIG['environment'] == "production":
@@ -33,6 +31,7 @@ class ProcessPaymentView(LoginRequiredMixin, View):
             paydict['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"  #"https://js.squareupsandbox.com/v2/paymentform"
         paydict['app_id'] = settings.SQUARE_CONFIG['application_id']
         paydict['location_id'] = settings.SQUARE_CONFIG['location_id']
+        paydict['action_url'] = request.session.get('action_url', reverse('payment:payment'))
         # rows, total = self.table_rows(request.session)
         table_rows = self.table_rows(request.session)
         if table_rows['total'] == 0:

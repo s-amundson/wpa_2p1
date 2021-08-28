@@ -25,17 +25,18 @@ class SquareHelper:
 
     def comp_response(self, note, amount):
         payment = {'approved_money': {'amount': amount},
-                    'created_at': '2021-06-06T00:24:48.978Z',
+                    'created_at': '2021-06-06T00:24:48.978Z', #TODO change to current time?
                     'id': None,
                     'location_id': 'SVM1F73THA9W6',
                     'note': note,
                     'order_id': None,  # datetime.now().format('%Y%m%d%H%M%S%f'),
                     'receipt_url': None,
-                    'source_type': None,
-                    'status': 'comped',
+                    'source_type': 'comped',
+                    'status': 'COMPLETED',
                     'total_money': amount}
         if amount == 0:
-            payment['status'] = 'paid'
+            payment['source_type'] = 'no-pay'
+        payment['error'] = []
         return payment
 
     def line_item(self, name, quantity, amount):
@@ -133,7 +134,7 @@ class SquareHelper:
         except PaymentLog.DoesNotExist:
             return {'status': "FAIL"}
 
-        if log.status == 'comped':  # payment was comped therefore no refund
+        if log.source_type == 'comped' and log.status == 'COMPLETED':  # payment was comped therefore no refund
             log.status = 'refund'
             log.save()
             return {'status': "SUCCESS", 'error': ''}
