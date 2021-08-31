@@ -1,0 +1,17 @@
+<div class="row business-div" id="business-div">
+    {% csrf_token %}
+    <input type="hidden" id="business-id" value="{{ business.id }}">
+    {{ business.form.minutes }}
+    <div class="col">
+        {{ business.form.business }}
+    </div>
+    <div class="col-2">
+        <div class="row">
+            {{ business.form.added_date }}
+        </div>
+        <div class="row">
+            {{ business.form.resolved }} {{ business.form.resolved.label }}
+        </div>
+    </div>
+
+</div>

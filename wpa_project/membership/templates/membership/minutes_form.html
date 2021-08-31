@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %} Class Sign up {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/minutes.js' %}"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form id="minutes-form" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="minutes-id" value="{{ minutes_id }}">
+        <input type="hidden" id="url-business" value="{% url 'membership:minutes_business' %}">
+        <input type="hidden" id="url-report" value="{% url 'membership:minutes_report' %}">
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.meeting_date.label }}
+            </div>
+            <div class="col">
+                {{ form.meeting_date }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.attending.label }}
+            </div>
+            <div class="col">
+                {{ form.attending }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.start_time.label }}
+            </div>
+            <div id="div-start-input" class="col">
+                {{ form.start_time }}
+            </div>
+            <div id="div-start-btn" class="col">
+                <button id="btn-start" class="btn btn-primary" type="submit">Start Meeting Now</button>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.minutes.label }}
+            </div>
+            <div class="col">
+                {{ form.minutes }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                President's report
+            </div>
+            <div class="col">
+                <div id="div-president">
+                    <input type="hidden" id="president-report-count" class="report-count" value="{{ reports.president|length }}">
+                    {% for report in reports.president %}
+                        <input type="hidden" id="report-count" value="{{ forloop.counter }}">
+                        {% include "membership/forms/minutes_report_form.html" %}
+                    {% endfor %}
+                </div>
+                <div class="row">
+                    <button id="btn-president-report" class="btn btn-primary">Add Report Item</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                Vice President's report
+            </div>
+            <div class="col">
+                <div id="div-vp">
+                    <input type="hidden" id="vice-report-count" class="report-count" value="{{ reports.vice|length }}">
+                    {% for report in reports.vice %}
+                        {% include "membership/forms/minutes_report_form.html" %}
+                    {% endfor %}
+                </div>
+                <div class="row">
+                    <button id="btn-vice-report" class="btn btn-primary">Add Report Item</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                Secretary's report
+            </div>
+            <div class="col">
+                <div id="div-secretary">
+                    <input type="hidden" id="secretary-report-count" class="report-count" value="{{ reports.secretary|length }}">
+                    {% for report in reports.secretary %}
+                        {% include "membership/forms/minutes_report_form.html" %}
+                    {% endfor %}
+                </div>
+                <div class="row">
+                    <button id="btn-secretary-report" class="btn btn-primary">Add Report Item</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                Treasure's report
+            </div>
+            <div class="col">
+                <div id="div-treasure">
+                    <input type="hidden" id="treasure-report-count" class="report-count" value="{{ reports.treasure|length }}">
+                    {% for report in reports.treasure %}
+                        {% include "membership/forms/minutes_report_form.html" %}
+                    {% endfor %}
+                </div>
+                <div class="row">
+                    <button id="btn-treasure-report" class="btn btn-primary">Add Report Item</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.balance.label }}
+            </div>
+            <div class="col">
+                {{ form.balance }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.memberships.label }}
+            </div>
+            <div class="col">
+                {{ form.memberships }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                Old Business
+            </div>
+            <div class="col">
+                <div id="div-old-business">
+                    {% for business in old_business %}
+                        {% include "membership/forms/minutes_business_form.html" %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                New Business
+            </div>
+            <div class="col">
+                <div id="div-new-business">
+                    <input type="hidden" id="new-business-count" value="{{ business.new|length }}">
+                </div>
+                <div class="row">
+                    <button id="btn-new-business" class="btn btn-primary">Add New Business</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.discussion.label }}
+            </div>
+            <div class="col">
+                {{ form.discussion }}
+            </div>
+        </div>
+
+    </form>
+
+{% endblock %}
