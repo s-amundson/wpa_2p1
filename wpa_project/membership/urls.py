@@ -12,6 +12,7 @@ urlpatterns = [
     path('minutes_business_update/<int:update_id>', MinutesBusinessUpdateView.as_view(), name='minutes_business_update'),
     path('minutes_form', MinutesFormView.as_view(), name='minutes_form'),
     path('minutes_form/<int:minutes_id>', MinutesFormView.as_view(), name='minutes_form'),
+    path('minutes_list', MinutesListView.as_view(), name='minutes_list'),
     path('minutes_report', MinutesReportView.as_view(), name='minutes_report'),
     path('minutes_report/<int:report_id>', MinutesReportView.as_view(), name='minutes_report'),
     # path('process_payment/<str:message>/', ProcessPaymentView.as_view(), name='process_payment'),
