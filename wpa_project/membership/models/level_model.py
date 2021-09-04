@@ -4,7 +4,7 @@ from django.db import models
 logger = logging.getLogger(__name__)
 
 
-class LevelModel(models.Model):
+class Level(models.Model):
     name = models.CharField(max_length=40)
     cost = models.IntegerField()
     description = models.TextField()

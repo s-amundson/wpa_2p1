@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.apps import apps
 
-from ..models import MembershipModel
+from ..models import Membership
 
 logger = logging.getLogger(__name__)
 

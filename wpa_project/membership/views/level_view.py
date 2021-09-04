@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from django.forms import model_to_dict
 
 from ..forms import LevelForm
-from ..models import LevelModel
+from ..models import Level
 from ..serializers import LevelSerializer
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class LevelApiView(APIView):
     def get(self, request):
-        levels = LevelModel.objects.filter(enabled=True)
+        levels = Level.objects.filter(enabled=True)
         ls = LevelSerializer(levels, many=True)
         return Response(ls.data)
 
@@ -26,13 +26,13 @@ class LevelApiView(APIView):
 class LevelView(LoginRequiredMixin, View):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.table = LevelModel.objects.all()
+        self.table = Level.objects.all()
 
     def get(self, request, level_id=None):
         if not request.user.is_staff:
             return HttpResponseForbidden()
         if level_id is not None:
-            c = get_object_or_404(LevelModel, pk=level_id)
+            c = get_object_or_404(Level, pk=level_id)
         else:
             c = None
         form = LevelForm(instance=c)
@@ -41,7 +41,7 @@ class LevelView(LoginRequiredMixin, View):
 
     def post(self, request, level_id=None):
         if level_id is not None:
-            c = get_object_or_404(LevelModel, pk=level_id)
+            c = get_object_or_404(Level, pk=level_id)
         else:
             c = None
         form = LevelForm(request.POST, instance=c)

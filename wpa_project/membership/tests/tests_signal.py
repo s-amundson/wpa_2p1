@@ -6,7 +6,7 @@ from django.apps import apps
 from django.utils import timezone
 from datetime import date, timedelta
 
-from ..models import MemberModel, MembershipModel, LevelModel
+from ..models import Member, Membership, Level
 from payment.models import PaymentLog
 from student_app.models import Student, StudentFamily
 logger = logging.getLogger(__name__)
@@ -32,8 +32,8 @@ class TestsSignal(TestCase):
         self.assertEqual(response.status_code, 200)
         sf = self.test_user.studentfamily_set.all()
         uid = uuid.uuid4()
-        membership = MembershipModel.objects.create(
-            level=LevelModel.objects.get(pk=1),
+        membership = Membership.objects.create(
+            level=Level.objects.get(pk=1),
             pay_status='started',
             idempotency_key=uid
         )
@@ -56,7 +56,7 @@ class TestsSignal(TestCase):
                                         )
         log.save()
 
-        members = MemberModel.objects.all()
+        members = Member.objects.all()
         self.assertEqual(len(members), 2)
 
     def test_membership_signal_different_db(self):
@@ -66,8 +66,8 @@ class TestsSignal(TestCase):
         self.assertEqual(response.status_code, 200)
         sf = self.test_user.studentfamily_set.all()
         uid = uuid.uuid4()
-        membership = MembershipModel.objects.create(
-            level=LevelModel.objects.get(pk=1),
+        membership = Membership.objects.create(
+            level=Level.objects.get(pk=1),
             pay_status='started',
             idempotency_key=uid
         )
@@ -90,7 +90,7 @@ class TestsSignal(TestCase):
                                         )
         log.save()
 
-        members = MemberModel.objects.all()
+        members = Member.objects.all()
         self.assertEqual(len(members), 0)
 
     def test_membership_signal_good_renew(self):
@@ -101,18 +101,18 @@ class TestsSignal(TestCase):
         sf = self.test_user.studentfamily_set.all()
         uid = uuid.uuid4()
         logging.debug(date.today() + timedelta(days=30))
-        MemberModel.objects.create(
+        Member.objects.create(
             student=Student.objects.get(pk=2),
             expire_date=(date.today() + timedelta(days=30)).isoformat(),
-            level=LevelModel.objects.get(pk=1)
+            level=Level.objects.get(pk=1)
         ).save()
-        MemberModel.objects.create(
+        Member.objects.create(
             student=Student.objects.get(pk=3),
             expire_date=date.today() + timedelta(days=30),
-            level=LevelModel.objects.get(pk=1)
+            level=Level.objects.get(pk=1)
         ).save()
-        membership = MembershipModel.objects.create(
-            level=LevelModel.objects.get(pk=1),
+        membership = Membership.objects.create(
+            level=Level.objects.get(pk=1),
             pay_status='started',
             idempotency_key=uid
         )
@@ -135,6 +135,6 @@ class TestsSignal(TestCase):
                                         )
         log.save()
 
-        members = MemberModel.objects.all()
+        members = Member.objects.all()
         self.assertEqual(len(members), 2)
         self.assertTrue(members[0].expire_date > date.today() + timedelta(days=380))

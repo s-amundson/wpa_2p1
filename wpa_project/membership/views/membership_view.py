@@ -11,7 +11,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.forms import model_to_dict
 from ..forms import MembershipForm
-from ..models import LevelModel, MemberModel, MembershipModel
+from ..models import Level, Member, Membership
 from payment.src import SquareHelper
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ class MembershipView(LoginRequiredMixin, View):
         forms = []
         for f in sf:
             forms.append(MembershipForm(students=f.student_set.all()))
-        levels = LevelModel.objects.filter(enabled=True)
+        levels = Level.objects.filter(enabled=True)
         return render(request, 'membership/membership.html', {'forms': forms, 'levels': levels})
 
     def post(self, request):
@@ -84,7 +84,7 @@ class MembershipView(LoginRequiredMixin, View):
 
         else:
             logging.debug(form.errors)
-        levels = LevelModel.objects.filter(enabled=True)
+        levels = Level.objects.filter(enabled=True)
         return render(request, 'membership/membership.html', {'forms': [form], 'levels': levels})
 
     def transact(self, form, request, members, cost):

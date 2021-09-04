@@ -1,12 +1,12 @@
 from django.forms import ModelForm
 
-from ..models import LevelModel
+from ..models import Level
 
 
 class LevelForm(ModelForm):
 
     class Meta:
-        model = LevelModel
+        model = Level
         exclude = []
         optional_fields = ['min_age', 'max_age', 'is_family', 'additional_cost']
 

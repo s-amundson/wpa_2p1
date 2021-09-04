@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.apps import apps
 
-from ..models import LevelModel
+from ..models import Level
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class TestsLevel(TestCase):
         d = {'name': 'Test Level', 'cost': 50, 'description': "a level for testing", 'enabled': True}
 
         response = self.client.post(reverse('membership:level'), d, secure=True)
-        levels = LevelModel.objects.all()
+        levels = Level.objects.all()
         self.assertEqual(len(levels), 5)
 
     def test_level_post_exists(self):
@@ -60,5 +60,5 @@ class TestsLevel(TestCase):
         d = {'name': 'Test Level', 'cost': 50, 'description': "a level for testing", 'enabled': True}
 
         response = self.client.post(reverse('membership:level', kwargs={'level_id': 2}), d, secure=True)
-        levels = LevelModel.objects.all()
+        levels = Level.objects.all()
         self.assertEqual(len(levels), 4)

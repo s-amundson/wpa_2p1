@@ -13,7 +13,7 @@ def make_choices(choice_list):
     return choices
 
 
-class MinutesModel(models.Model):
+class Minutes(models.Model):
     meeting_date = models.DateField(default=timezone.now)
     start_time = models.TimeField(default=timezone.now)
     attending = models.CharField(max_length=250)
@@ -24,14 +24,20 @@ class MinutesModel(models.Model):
     end_time = models.TimeField(null=True)
 
 
-class MinutesReportModel(models.Model):
-    minutes = models.ForeignKey(MinutesModel, on_delete=models.SET_NULL, null=True)
+class MinutesReport(models.Model):
+    minutes = models.ForeignKey(Minutes, on_delete=models.SET_NULL, null=True)
     owner = models.CharField(max_length=50, choices=make_choices(REPORT_CHOICES))
     report = models.TextField()
 
 
-class MinutesBusinessModel(models.Model):
-    minutes = models.ForeignKey(MinutesModel, on_delete=models.SET_NULL, null=True)
+class MinutesBusiness(models.Model):
+    minutes = models.ForeignKey(Minutes, on_delete=models.SET_NULL, null=True)
     added_date = models.DateField(default=timezone.now)
     business = models.TextField()
-    resolved = models.BooleanField(default=False) # TODO make resolve date, have checkbox to set
+    resolved = models.DateField(default=None, null=True)
+
+
+class MinutesBusinessUpdate(models.Model):
+    business = models.ForeignKey(MinutesBusiness, on_delete=models.CASCADE)
+    update_date = models.DateField(default=timezone.now)
+    update_text = models.TextField()

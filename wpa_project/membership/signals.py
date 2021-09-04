@@ -3,7 +3,7 @@ import logging
 from django.utils import timezone, datetime_safe
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from .models import MemberModel, MembershipModel
+from .models import Member, Membership
 from payment.models import PaymentLog
 
 logger = logging.getLogger(__name__)
@@ -25,12 +25,12 @@ def add_years(d, years):
 @receiver(post_save, sender=PaymentLog)
 def member_update(sender, instance, created, **kwargs):
     if instance.db_model == 'Membership':
-        membership = MembershipModel.objects.get(idempotency_key=instance.idempotency_key)
+        membership = Membership.objects.get(idempotency_key=instance.idempotency_key)
         logging.debug(instance.status)
         if instance.status == "SUCCESS":
             membership.pay_status = 'paid'
             for student in membership.students.all():
-                member, created = MemberModel.objects.update_or_create(student=student)
+                member, created = Member.objects.update_or_create(student=student)
                 member.level = membership.level
                 try:
                     member.expire_date = member.expire_date.date()

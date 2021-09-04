@@ -2,14 +2,14 @@ from django.forms import BooleanField, CheckboxInput, ModelForm, MultipleChoiceF
 from django.utils.datetime_safe import date
 import logging
 
-from ..models import MembershipModel, LevelModel
+from ..models import Membership, Level
 logger = logging.getLogger(__name__)
 
 
 class MembershipForm(ModelForm):
 
     class Meta:
-        model = MembershipModel
+        model = Membership
         fields = ['level']
         hidden_fields = []
         optional_fields = []
@@ -24,7 +24,7 @@ class MembershipForm(ModelForm):
                 label=f'{student.first_name} {student.last_name}', initial=False)
 
         choices = []
-        levels = LevelModel.objects.filter(enabled=True)
+        levels = Level.objects.filter(enabled=True)
         for level in levels:
             choices.append((level.id, level.name))
         logging.debug(choices)

@@ -1,4 +1,4 @@
-from .level_model import LevelModel
-from .member_model import MemberModel
-from .membership_model import MembershipModel
-from .minutes_models import MinutesModel, MinutesBusinessModel, MinutesReportModel
+from .level_model import Level
+from .member_model import Member
+from .membership_model import Membership
+from .minutes_models import Minutes, MinutesBusiness, MinutesBusinessUpdate, MinutesReport

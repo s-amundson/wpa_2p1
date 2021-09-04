@@ -135,6 +135,7 @@ class BeginnerClassListView(LoginRequiredMixin, ListView):
     crh = ClassRegistrationHelper()
     template_name = 'program_app/beginner_class_list.html'
     bc = BeginnerClass.objects.filter(class_date__gt=timezone.now())
+    logging.debug(bc)
     queryset = []
     for c in bc:
         d = model_to_dict(c)

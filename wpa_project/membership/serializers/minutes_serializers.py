@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import LevelModel
+from ..models import Level
 
 
 # class MinutesBusinessSerializer(serializers.ModelSerializer):
