@@ -31,7 +31,8 @@ class SearchView(LoginRequiredMixin, View):
                     return render(request, 'student_app/message.html', {'message': 'No email found'})
                 student_family = []
                 for u in user:
-                    student_family.append(StudentFamily.objects.get(user__id=u.user_id))
+                    # student_family.append(StudentFamily.objects.get(user__id=u.user_id))
+                    student_family.append(Student.objects.get(user__id=u.user_id).student_family)
                 return render(request, 'student_app/search_result.html', {'student_family': student_family})
         elif 'first_name' in request.POST:
             form = SearchNameForm(request.POST)

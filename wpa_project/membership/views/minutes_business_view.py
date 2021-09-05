@@ -1,14 +1,11 @@
 import logging
-import uuid
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
+from django.http import JsonResponse
 from django.views.generic.base import View
 from django.utils import timezone
-from django.utils.datetime_safe import date
-from django.contrib import messages
-from django.forms import model_to_dict
+
 from ..forms import MinutesBusinessForm, MinutesBusinessUpdateForm
 from ..models import MinutesBusiness, MinutesBusinessUpdate
 

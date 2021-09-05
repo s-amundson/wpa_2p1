@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from ..serializers import UnregisterSerializer
 from payment.src import EmailMessage, SquareHelper
 from ..models import BeginnerClass, ClassRegistration
-from student_app.models import StudentFamily
+from student_app.models import Student
 logger = logging.getLogger(__name__)
 
 
@@ -46,8 +46,8 @@ class UnregisterView(LoginRequiredMixin, APIView):
         serializer = UnregisterSerializer(data=request.data)
         if serializer.is_valid():
             student_list = []
-            sf = StudentFamily.objects.filter(user=request.user)
-            for s in sf:
+            sf = Student.objects.get(user=request.user).student_family
+            for s in sf.student_set.all():
                 student_list.append(s.id)
             logging.debug(serializer.data)
             # idempotency_key = uuid.uuid4()

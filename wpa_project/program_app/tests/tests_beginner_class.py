@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 class TestsBeginnerClass(TestCase):
-    fixtures = ['f1']
+    fixtures = ['f1', 'f3']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -168,7 +168,7 @@ class TestsBeginnerClass(TestCase):
 
 
 class TestsBeginnerClass2(TestCase):
-    fixtures = ['f3']
+    fixtures = ['f1']
 
     def setUp(self):
         # Every test needs a client.

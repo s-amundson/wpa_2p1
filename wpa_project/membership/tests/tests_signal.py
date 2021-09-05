@@ -30,18 +30,18 @@ class TestsSignal(TestCase):
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('membership:membership'), secure=True)
         self.assertEqual(response.status_code, 200)
-        sf = self.test_user.studentfamily_set.all()
+        sf = Student.objects.get(user=self.test_user).student_family
         uid = uuid.uuid4()
         membership = Membership.objects.create(
             level=Level.objects.get(pk=1),
             pay_status='started',
             idempotency_key=uid
         )
-        membership.students.set(sf[0].student_set.all())
+        membership.students.set(sf.student_set.all())
         membership.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=StudentFamily.objects.filter(user=self.test_user)[0],
+                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
                                         db_model='Membership',
                                         description="square_response",
@@ -64,18 +64,18 @@ class TestsSignal(TestCase):
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('membership:membership'), secure=True)
         self.assertEqual(response.status_code, 200)
-        sf = self.test_user.studentfamily_set.all()
+        sf = Student.objects.get(user=self.test_user).student_family
         uid = uuid.uuid4()
         membership = Membership.objects.create(
             level=Level.objects.get(pk=1),
             pay_status='started',
             idempotency_key=uid
         )
-        membership.students.set(sf[0].student_set.all())
+        membership.students.set(sf.student_set.all())
         membership.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=StudentFamily.objects.filter(user=self.test_user)[0],
+                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
                                         db_model='Test',
                                         description="square_response",
@@ -98,7 +98,7 @@ class TestsSignal(TestCase):
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('membership:membership'), secure=True)
         self.assertEqual(response.status_code, 200)
-        sf = self.test_user.studentfamily_set.all()
+        sf = Student.objects.get(user=self.test_user).student_family
         uid = uuid.uuid4()
         logging.debug(date.today() + timedelta(days=30))
         Member.objects.create(
@@ -116,11 +116,11 @@ class TestsSignal(TestCase):
             pay_status='started',
             idempotency_key=uid
         )
-        membership.students.set(sf[0].student_set.all())
+        membership.students.set(sf.student_set.all())
         membership.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=StudentFamily.objects.filter(user=self.test_user)[0],
+                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
                                         db_model='Membership',
                                         description="square_response",

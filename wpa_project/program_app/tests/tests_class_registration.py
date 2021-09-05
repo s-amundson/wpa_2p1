@@ -132,7 +132,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 3)
 
         # change user, then add 1 returnee.
-        self.client.force_login(User.objects.get(pk=4))
+        self.client.force_login(User.objects.get(pk=5))
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_6': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.all()
@@ -164,7 +164,7 @@ class TestsClassRegistration(TestCase):
         # self.assertTemplateUsed(response, 'student_app/message.html')
 
     def test_underage_student(self):
-        sf = StudentFamily.objects.get(user=1)
+        sf = StudentFamily.objects.get(pk=1)
         s = Student(student_family=sf,
                     first_name='Brad',
                     last_name='Conlan',

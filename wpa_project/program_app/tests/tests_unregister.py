@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestsUnregisterStudent(TestCase):
-    fixtures = ['f1']
+    fixtures = ['f1', 'f3']
     # fixtures = ['f1', 'f2']
 
     def __init__(self, *args, **kwargs):
@@ -116,8 +116,7 @@ class TestsUnregisterStudent(TestCase):
 
 
 class TestsUnregisterStudent2(TestCase):
-    # fixtures = ['f1']
-    fixtures = ['f1', 'f2']
+    fixtures = ['f1', 'f2', 'f3']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

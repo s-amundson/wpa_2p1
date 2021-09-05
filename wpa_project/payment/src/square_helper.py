@@ -7,7 +7,7 @@ from square.client import Client
 import django.dispatch
 
 from ..models import PaymentLog, RefundLog
-from student_app.models import StudentFamily
+from student_app.models import Student
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +53,7 @@ class SquareHelper:
             create_date = datetime.strptime(square_response['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
         pdb = request.session.get('payment_db', [None, None])
         log = PaymentLog.objects.create(user=request.user,
-                                        student_family=StudentFamily.objects.filter(user=request.user)[0],
+                                        student_family=Student.objects.get(user=request.user).student_family,
                                         checkout_created_time=create_date,
                                         db_model=pdb[1],
                                         description=square_response['note'],

@@ -84,5 +84,3 @@ class PaymentView(APIView):
             logging.debug(serializer.errors)
             response_dict['error'] = 'payment processing error'
             return JsonResponse(response_dict)
-
-

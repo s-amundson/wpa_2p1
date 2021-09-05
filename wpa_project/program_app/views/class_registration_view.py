@@ -24,8 +24,8 @@ StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamil
 class ClassRegisteredTable(LoginRequiredMixin, View):
     def get(self, request):
         try:
-            students = StudentFamily.objects.get(user=request.user).student_set.all()
-        except StudentFamily.DoesNotExist:
+            students = Student.objects.get(user=request.user).student_family.student_set.all()
+        except (Student.DoesNotExist, AttributeError):
             request.session['message'] = 'Address form is required'
             return HttpResponseRedirect(reverse('registration:profile'))
         bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:3])
@@ -38,8 +38,8 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
 class ClassRegistrationView(LoginRequiredMixin, View):
     def get(self, request, reg_id=None):
         try:
-            students = StudentFamily.objects.get(user=request.user).student_set.all()
-        except StudentFamily.DoesNotExist:
+            students = Student.objects.get(user=request.user).student_family.student_set.all()
+        except (Student.DoesNotExist, AttributeError):
             request.session['message'] = 'Address form is required'
             # logging.debug(request.session['message'])
             return HttpResponseRedirect(reverse('registration:profile'))
@@ -76,7 +76,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
         return render(request, 'program_app/class_registration.html', {'form': form})
 
     def post(self, request):
-        students = StudentFamily.objects.filter(user=request.user)[0].student_set.all()
+        students = Student.objects.get(user=request.user).student_family.student_set.all()
         logging.debug(request.POST)
         form = ClassRegistrationForm(students, request.POST)
         if form.is_valid():
@@ -85,13 +85,17 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             returnee = 0
             students = []
             message = ""
+            logging.debug(form.cleaned_data)
             for k,v in form.cleaned_data.items():
+                logging.debug(k)
                 if str(k).startswith('student_') and v:
                     i = int(str(k).split('_')[-1])
                     s = Student.objects.get(pk=i)
+                    logging.debug(s)
                     if ClassRegistrationHelper().calc_age(s, beginner_class.class_date) < 9:
                         messages.add_message(request, messages.ERROR, 'Student must be at least 9 years old to participate')
                         message += 'Student must be at least 9 years old to participate'
+                        logging.debug(message)
                         HttpResponseRedirect(reverse('programs:class_registration'))
                     else:
                         if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
@@ -107,7 +111,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
 
-            # logging.debug(list(c))
+            logging.debug(beginner_class.state)
             if beginner_class.state == 'open':  # in case it changed since user got the form.
                 enrolled_count = ClassRegistrationHelper().enrolled_count(beginner_class)
                 if enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
@@ -115,12 +119,14 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 if enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
                     message += 'Not enough space available in this class'
                 if message == "":
+                    logging.debug(message)
                     return self.transact(beginner_class, request, students)
 
                 else:
-                    # logging.debug(message)
+                    logging.debug(message)
                     return render(request, 'program_app/class_registration.html',
                                   {'form': form, 'alert_message': message})
+                logging.debug(message)
 
         else:
             logging.debug(form.errors)
@@ -136,17 +142,18 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             request.session['line_items'] = []
             request.session['payment_db'] = ['program_app', 'ClassRegistration']
             request.session['action_url'] = reverse('programs:class_payment')
-
+            logging.debug(students)
             for s in students:
                 if s.safety_class is None:
                     n = True
                 else:
                     n = False
-                ClassRegistration(beginner_class=beginner_class, student=s, new_student=n,
+                cr = ClassRegistration(beginner_class=beginner_class, student=s, new_student=n,
                                   pay_status='start', idempotency_key=uid).save()
                 request.session['line_items'].append(
                     SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
                                              1, beginner_class.cost))
+                logging.debug(cr)
 
         return HttpResponseRedirect(reverse('payment:process_payment'))
 

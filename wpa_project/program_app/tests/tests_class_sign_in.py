@@ -10,7 +10,7 @@ User = apps.get_model('student_app', 'User')
 
 
 class TestsClassSignIn(TestCase):
-    fixtures = ['f1', 'f2']
+    fixtures = ['f1', 'f2', 'f3']
 
     def setUp(self):
         # Every test needs a client.

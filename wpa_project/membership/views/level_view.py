@@ -5,9 +5,7 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views.generic.base import View
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
-from django.http import JsonResponse
 from rest_framework.response import Response
-from django.forms import model_to_dict
 
 from ..forms import LevelForm
 from ..models import Level

@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
 import logging
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic.base import View
 from rest_framework.views import APIView
@@ -21,8 +21,8 @@ class StudentApiView(LoginRequiredMixin, APIView):
     def get(self, request, student_id=None, format=None):
         if student_id is not None:
             student = get_object_or_404(Student, pk=student_id)
-            students = StudentFamily.objects.get(user=request.user).student_set.all()
-            if request.user.is_staff or student in students:
+            # students = StudentFamily.objects.get(user=request.user).student_set.all()
+            if request.user.is_staff or student_id == request.user.id:
                 serializer = StudentSerializer(student)
             else:
                 return Response({'error': "Not Authorized"}, status=400)
@@ -37,7 +37,7 @@ class StudentApiView(LoginRequiredMixin, APIView):
             if request.user.is_staff:
                 student = get_object_or_404(Student, id=student_id)
             else:
-                sf = StudentFamily.objects.get(user=request.user)
+                sf = get_object_or_404(Student, user=request.user).student_family
                 student = get_object_or_404(Student, id=student_id, student_family=sf)
             serializer = StudentSerializer(student, data=request.data)
 
@@ -47,12 +47,12 @@ class StudentApiView(LoginRequiredMixin, APIView):
         if serializer.is_valid():
             logging.debug(serializer.validated_data)
             if student_id is None:
-                sf = get_object_or_404(StudentFamily, user=request.user)
-                f = serializer.save(student_family=sf)
+                # sf = get_object_or_404(Student, user=request.user).student_family
+                f = serializer.save(user=request.user)
             else:
                 f = serializer.update(student, serializer.validated_data)
-            request.session['student_family'] = f.student_family.id
-            logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
+            # request.session['student_family'] = f.student_family.id
+            # logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -63,7 +63,7 @@ class AddStudentView(LoginRequiredMixin, View):
             if request.user.is_board:
                 g = get_object_or_404(Student, pk=student_id)
             else:
-                sf = StudentFamily.objects.get(user=request.user)
+                sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
             form = StudentForm(instance=g)
         else:
@@ -75,7 +75,7 @@ class AddStudentView(LoginRequiredMixin, View):
             if request.user.is_board:
                 g = get_object_or_404(Student, pk=student_id)
             else:
-                sf = StudentFamily.objects.get(user=request.user)
+                sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
             form = StudentForm(request.POST, instance=g)
         else:
@@ -86,7 +86,7 @@ class AddStudentView(LoginRequiredMixin, View):
                 f = form.save()
             else:
                 f = form.save(commit=False)
-                sf = StudentFamily.objects.get(user=request.user)
+                sf = Student.objects.get(user=request.user).student_family
                 logging.debug(sf.id)
                 f.student_family = sf
                 request.session['student_family'] = sf.id

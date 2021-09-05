@@ -23,8 +23,9 @@ class TestsSignal(TestCase):
         self.test_user = self.User.objects.get(pk=2)
         self.client.force_login(self.test_user)
 
-    def test_membership_signal_good_new(self):
-        sf = self.test_user.studentfamily_set.all()
+    def test_registration_signal_good_new(self):
+        # sf = self.test_user.studentfamily_set.all()
+        # sf = Student.objects.get(user=sef.user).student_family
         uid = uuid.uuid4()
         cr = ClassRegistration.objects.create(
             beginner_class=BeginnerClass.objects.get(pk=1),
@@ -36,7 +37,7 @@ class TestsSignal(TestCase):
         cr.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=StudentFamily.objects.filter(user=self.test_user)[0],
+                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
                                         db_model='ClassRegistration',
                                         description="square_response",
@@ -56,7 +57,7 @@ class TestsSignal(TestCase):
         self.assertEqual(cr[0].pay_status, "paid")
 
     def test_membership_signal_different_db(self):
-        sf = self.test_user.studentfamily_set.all()
+        # sf = self.test_user.studentfamily_set.all()
         uid = uuid.uuid4()
         cr = ClassRegistration.objects.create(
             beginner_class=BeginnerClass.objects.get(pk=1),
@@ -68,7 +69,7 @@ class TestsSignal(TestCase):
         cr.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=StudentFamily.objects.filter(user=self.test_user)[0],
+                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
                                         db_model='Test',
                                         description="square_response",

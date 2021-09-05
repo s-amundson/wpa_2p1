@@ -23,10 +23,10 @@ class ProcessPaymentView(LoginRequiredMixin, View):
     def get(self, request):
 
         paydict = {}
-        if settings.SQUARE_CONFIG['environment'] == "production":
+        if settings.SQUARE_CONFIG['environment'] == "production":   # pragma: no cover
             # paydict['production'] = True
             paydict['pay_url'] = '' # "https://js.squareup.com/v2/paymentform"
-        else:
+        else:  # pragma: no cover
             # paydict['production'] = False
             paydict['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"  #"https://js.squareupsandbox.com/v2/paymentform"
         paydict['app_id'] = settings.SQUARE_CONFIG['application_id']
@@ -78,6 +78,6 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         if request.POST.get('bypass', None) is not None:
             return self.bypass_payment(request, table_rows)
 
-        else:
+        else:  # pragma: no cover
             logging.debug('payment processing error')
             return render(request, 'student_app/message.html', {'message': 'payment processing error'})

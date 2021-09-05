@@ -3,16 +3,14 @@ import uuid
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.views.generic.base import View
 from django.utils.datetime_safe import date
 from django.contrib import messages
-from django.db import transaction
-from django.shortcuts import get_object_or_404
-from django.forms import model_to_dict
 from ..forms import MembershipForm
-from ..models import Level, Member, Membership
+from ..models import Level
 from payment.src import SquareHelper
+from student_app.models import Student
 
 logger = logging.getLogger(__name__)
 
@@ -23,17 +21,16 @@ class MembershipView(LoginRequiredMixin, View):
     #     self.table = LevelModel.objects.all()
 
     def get(self, request):
-        sf = request.user.studentfamily_set.all()
+        sf = Student.objects.get(user=request.user).student_family
         forms = []
-        for f in sf:
-            forms.append(MembershipForm(students=f.student_set.all()))
+        forms.append(MembershipForm(students=sf.student_set.all()))
         levels = Level.objects.filter(enabled=True)
         return render(request, 'membership/membership.html', {'forms': forms, 'levels': levels})
 
     def post(self, request):
         logging.debug(request.POST)
-        sf = request.user.studentfamily_set.all()
-        students = sf[0].student_set.all()
+        sf = Student.objects.get(user=request.user).student_family
+        students = sf.student_set.all()
         form = MembershipForm(students, request.POST)
         if form.is_valid():
             logging.debug(form.cleaned_data)
