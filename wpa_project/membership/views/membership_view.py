@@ -54,7 +54,7 @@ class MembershipView(LoginRequiredMixin, View):
                     logging.debug('multiple members not family')
                     messages.add_message(request, messages.ERROR, 'incorrect membership selected')
                 else:
-                    self.transact(form, request, members, level.cost)
+                    self.transact(form, request, members, cost)
                     return HttpResponseRedirect(reverse('payment:process_payment'))
 
             else:
@@ -79,8 +79,9 @@ class MembershipView(LoginRequiredMixin, View):
                     self.transact(form, request, members, level.cost)
                     return HttpResponseRedirect(reverse('payment:process_payment'))
 
-        else:
+        else:  # pragma: no cover
             logging.debug(form.errors)
+            messages.add_message(request, messages.ERROR, 'other membership error')
         levels = Level.objects.filter(enabled=True)
         return render(request, 'membership/membership.html', {'forms': [form], 'levels': levels})
 

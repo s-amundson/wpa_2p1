@@ -45,7 +45,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse('registration:profile'))
         if reg_id:  # to regain an interrupted payment
             cr = get_object_or_404(ClassRegistration, pk=reg_id)
-            # logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
+            logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
             if cr.student.student_family != students[0].student_family:
                 # logging.error('registration mismatch')
                 return Http404("registration mismatch")

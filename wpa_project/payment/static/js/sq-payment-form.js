@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     $("#payment-form").submit(function(e){
         e.preventDefault();
         createPayment('no-payment')
-    }
+    });
 });
 
 // Call this function to send a payment token, buyer name, and other details
@@ -136,11 +136,3 @@ if (status === 'SUCCESS') {
 
 statusContainer.style.visibility = 'visible';
 }
-
-
-//$(document).ready(function() {
-//    if ($('#message').html() != "") {
-//        alert($('#message').html());
-//    };
-//
-//});

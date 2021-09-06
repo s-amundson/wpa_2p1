@@ -1,10 +1,14 @@
 import logging
+import time
 import uuid
+from datetime import datetime
+
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.apps import apps
 
-from ..models import PaymentLog
+from student_app.models import Student
+from ..models import PaymentLog, RefundLog
 from ..src import SquareHelper
 
 logger = logging.getLogger(__name__)
@@ -56,3 +60,36 @@ class TestsSquareHelper(TestCase):
     def test_square_helper_refund_payment_error(self):
         rp = SquareHelper().refund_payment(str(uuid.uuid4()), 1000)
         self.assertEqual(rp, {'status': "FAIL"})
+
+    def test_square_helper_refund_payment(self):
+
+        uid = str(uuid.uuid4())
+        sh = SquareHelper()
+        square_response = sh.process_payment(uid, 'cnon:card-nonce-ok', 'test payment', {'amount': 1000, 'currency': 'USD'})
+        logging.debug(square_response)
+        log = PaymentLog.objects.create(
+            user=self.test_user,
+            student_family=Student.objects.get(user=self.test_user).student_family,
+            checkout_created_time=datetime.strptime(square_response['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ'),
+            db_model='test',
+            description=square_response['note'],
+            location_id=square_response['location_id'],
+            idempotency_key=uid,
+            order_id=square_response['order_id'],
+            payment_id=square_response['id'],
+            receipt=square_response['receipt_url'],
+            source_type=square_response['source_type'],
+            status=square_response['status'],
+            total_money=square_response['approved_money']['amount'],
+            )
+        log.save()
+        self.assertEqual(PaymentLog.objects.count(), 1)
+        # give square some time to process the payment got bad requests without it.
+        time.sleep(5)
+
+        logging.debug(sh.refund_payment(uid, 5))
+        self.assertEqual(RefundLog.objects.count(), 1)
+        time.sleep(5)
+
+        logging.debug(sh.refund_payment(uid, 1))
+        self.assertEqual(RefundLog.objects.count(), 2)

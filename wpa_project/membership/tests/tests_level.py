@@ -38,6 +38,14 @@ class TestsLevel(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('membership/level.html')
 
+    def test_level_get_no_auth(self):
+        # Get the page, if not super or board, page is forbidden
+        self.client.force_login(self.User.objects.get(pk=5))
+        response = self.client.get(reverse('membership:level'), secure=True)
+        # messages = list(response.context['messages'])
+        self.assertIn(response.status_code, [403, 404])
+        # self.assertTemplateUsed('membership/level.html')
+
     def test_level_get_existing(self):
         # Get the page, if not super or board, page is forbidden
         self.client.force_login(self.test_user)
@@ -60,5 +68,14 @@ class TestsLevel(TestCase):
         d = {'name': 'Test Level', 'cost': 50, 'description': "a level for testing", 'enabled': True}
 
         response = self.client.post(reverse('membership:level', kwargs={'level_id': 2}), d, secure=True)
+        levels = Level.objects.all()
+        self.assertEqual(len(levels), 4)
+
+    def test_level_post_error(self):
+        # Get the page, if not super or board, page is forbidden
+        self.client.force_login(self.test_user)
+        d = {'name': 'Test Level', 'cost': 'fifty', 'description': "a level for testing", 'enabled': True}
+
+        response = self.client.post(reverse('membership:level'), d, secure=True)
         levels = Level.objects.all()
         self.assertEqual(len(levels), 4)

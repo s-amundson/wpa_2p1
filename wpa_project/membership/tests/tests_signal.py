@@ -138,3 +138,37 @@ class TestsSignal(TestCase):
         members = Member.objects.all()
         self.assertEqual(len(members), 2)
         self.assertTrue(members[0].expire_date > date.today() + timedelta(days=380))
+
+    def test_membership_signal_bad_new(self):
+        # Get the page, if not super or board, page is forbidden
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('membership:membership'), secure=True)
+        self.assertEqual(response.status_code, 200)
+        sf = Student.objects.get(user=self.test_user).student_family
+        uid = uuid.uuid4()
+        membership = Membership.objects.create(
+            level=Level.objects.get(pk=1),
+            pay_status='started',
+            idempotency_key=uid
+        )
+        membership.students.set(sf.student_set.all())
+        membership.save()
+
+        log = PaymentLog.objects.create(user=self.test_user,
+                                        student_family=Student.objects.get(user=self.test_user).student_family,
+                                        checkout_created_time=timezone.now(),
+                                        db_model='Membership',
+                                        description="square_response",
+                                        location_id='location_id',
+                                        idempotency_key=uid,
+                                        order_id='order_id',
+                                        payment_id='id',
+                                        receipt='receipt_url',
+                                        source_type='source_type',
+                                        status='ERROR',
+                                        total_money=500,
+                                        )
+        log.save()
+
+        members = Member.objects.all()
+        self.assertEqual(len(members), 0)

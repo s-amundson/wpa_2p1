@@ -63,9 +63,9 @@ class PaymentView(APIView):
                             message += 'Error with CVV, '
                         elif e['code'] == 'INVALID_EXPIRATION':
                             message += 'Invalid expiration date, '
-                        elif e['code'] == 'ADDRESS_VERIFICATION_FAILURE':
+                        elif e['code'] == 'ADDRESS_VERIFICATION_FAILURE':  # pragma: no cover
                             message += 'Invalid zip code, '
-                        else:
+                        else:  # pragma: no cover
                             message += 'Other payment error'
                     # logging.debug(message)
                     response_dict['error'] = message

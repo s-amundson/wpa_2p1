@@ -18,7 +18,7 @@ def add_years(d, years):
     """
     try:
         return d.replace(year = d.year + years)
-    except ValueError:
+    except ValueError:  # pragma: no cover
         return d + (datetime_safe.date(d.year + years, 1, 1) - datetime_safe.date(d.year, 1, 1))
 
 

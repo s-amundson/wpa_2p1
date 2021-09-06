@@ -100,3 +100,39 @@ class TestsPayment(TestCase):
         response = self.client.post(reverse('payment:payment'),
                                     {'token': 'cnon:card-nonce-ok'}, secure=True)
         self.eval_content(json.loads(response.content), 'ERROR', 'payment processing error', False, 0)
+
+    def test_payment_bypass(self):
+        # process a bypass payment
+        self.client.force_login(User.objects.get(pk=1))
+
+        # have to redo session because changed user.
+        session = self.client.session
+        session['payment_db'] = ['program_app', 'ClassRegistration']
+        session['idempotency_key'] = str(uuid.uuid4())
+        session['line_items'] = [{'name': 'Class on None student id: 1',
+                                  'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]
+        session.save()
+
+        response = self.client.post(reverse('payment:payment'),
+                                    {'sq_token': 'bypass'}, secure=True)
+        self.eval_content(json.loads(response.content), 'COMPLETED', [], False, 1)
+
+    def test_cost_zero(self):
+        session = self.client.session
+        session['idempotency_key'] = str(uuid.uuid4())
+        session['line_items'] = [{'name': 'Class on None student id: 1',
+                                  'quantity': '1', 'base_price_money': {'amount': 0, 'currency': 'USD'}}]
+        session.save()
+        response = self.client.post(reverse('payment:payment'),
+                                    {'sq_token': 'no-payment', 'donation': 0}, secure=True)
+        # self.assertTemplateUsed('student_app/message.html')
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].status, 'COMPLETED')
+
+    def test_payment(self):
+        response = self.client.post(reverse('payment:payment'),
+                                    {'sq_token': 'cnon:card-nonce-ok', 'donation': 0}, secure=True)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].status, 'COMPLETED')

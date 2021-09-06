@@ -37,7 +37,7 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 c = BeginnerClass.objects.latest('class_date').class_date
                 logging.debug(f'c = str(c), type = {type(c)}')
                 c = c + timedelta(days=7)
-            except BeginnerClass.DoesNotExist:
+            except BeginnerClass.DoesNotExist:  # pragma: no cover
                 c = timezone.now()
                 logging.debug('class does not exist')
             try:
@@ -46,7 +46,7 @@ class BeginnerClassView(LoginRequiredMixin, View):
                 # logging.debug(cost.values())
                 costs = cost[0].standard_cost
                 logging.debug(costs)
-            except (CostsModel.DoesNotExist, IndexError) as e:
+            except (CostsModel.DoesNotExist, IndexError) as e:  # pragma: no cover
                 costs = 0
                 messages.add_message(request, messages.ERROR, 'cost does not exist')
                 logging.error('cost does not exist')
@@ -106,13 +106,11 @@ class BeginnerClassView(LoginRequiredMixin, View):
                     ik_list = []
                     for reg in cr:
                         if reg.idempotency_key not in ik_list:
-                        #     pass
-                        # else:
                             ik_list.append(reg.idempotency_key)
                             qty = len(cr.filter(idempotency_key=reg.idempotency_key))
                             square_response = square_helper.refund_payment(reg.idempotency_key, qty * bc.cost)
                             if square_response['status'] == 'error':
-                                if square_response['error'] != 'Previously refunded':
+                                if square_response['error'] != 'Previously refunded':  # pragma: no cover
                                     cancel_error = True
                                     logging.error(square_response)
                                     messages.add_message(request, messages.ERROR, square_response)

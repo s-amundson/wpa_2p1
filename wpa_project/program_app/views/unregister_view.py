@@ -74,7 +74,7 @@ class UnregisterView(LoginRequiredMixin, APIView):
             if not donation:
                 for ik in self.ik_list:
                     square_response = self.square_helper.refund_payment(ik.idempotency_key, ik.amount * ik.count)
-                    if square_response['status'] == 'error':
+                    if square_response['status'] == 'error':  # pragma: no cover
                         logging.error(square_response)
                         errors += square_response['error']
             logging.debug(errors)
@@ -92,13 +92,13 @@ class UnregisterView(LoginRequiredMixin, APIView):
                         cr.pay_status = 'refunded'
                     cr.save()
                 EmailMessage().refund_email(request.user, donation)
-            elif errors == 'Previously refunded':  # we should remove them from the list anyway
+            elif errors == 'Previously refunded':  # pragma: no cover  # we should remove them from the list anyway
                 response_dict['status'] = "SUCCESS"
-            else:
+            else:  # pragma: no cover
                 response_dict['status'] = "ERROR"
             return Response(response_dict)
 
-        else:
+        else:  # pragma: no cover
             logging.debug(serializer.errors)
             response_dict['error'] = 'unregister processing error'
             return Response(response_dict)

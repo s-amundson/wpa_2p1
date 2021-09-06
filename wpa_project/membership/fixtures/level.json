@@ -1,6 +1,8 @@
 [
 {"model": "membership.level", "pk": 1, "fields": {"name": "Adult", "cost": 20, "description": "For anyone of 18 years of age and over.", "enabled": true, "min_age": 18, "max_age": null, "is_family": false}},
 {"model": "membership.level", "pk": 2, "fields": {"name": "Junior", "cost": 18, "description": "For anyone under the age of 18.", "enabled": true, "min_age": null, "max_age": 18, "is_family": false}},
-{"model": "membership.level", "pk": 3, "fields": {"name": "Family", "cost": 40, "description": "Family Membership shall be granted to families members, including husband, wife, domestic partners, and dependents, under 18 years of age.  Four family members are covered under the basic family membership fee with an additional nominal cost per  member over four members. Family members may be participants in the Woodley Park Archers JOAD.  Full time students may remain under family membership through their 20th year of age", "enabled": true, "min_age": null, "max_age": null, "is_family": true}},
+{"model": "membership.level", "pk": 3, "fields": {"name": "Family", "cost": 40,
+  "description": "Family Membership shall be granted to families members, including husband, wife, domestic partners, and dependents, under 18 years of age.  Four family members are covered under the basic family membership fee with an additional nominal cost per  member over four members. Family members may be participants in the Woodley Park Archers JOAD.  Full time students may remain under family membership through their 20th year of age",
+  "enabled": true, "min_age": null, "max_age": null, "is_family": true, "additional_cost": 10 }},
 {"model": "membership.level", "pk": 4, "fields": {"name": "Senior", "cost": 18, "description": "For anyone of 55 years of age and over.", "enabled": true, "min_age": 55, "max_age": null, "is_family": false}}
 ]

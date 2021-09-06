@@ -19,7 +19,7 @@ class EmailMessage(EmailMultiAlternatives):
     def get_email_address(self, user):
         if settings.EMAIL_DEBUG:
             self.to = settings.EMAIL_DEBUG_ADDRESSES
-        else:
+        else:  # pragma: no cover
             self.to = [EmailAddress.objects.get_primary(user)]
             if self.to in self.test_emails:
                 self.to = settings.EMAIL_DEBUG_ADDRESSES

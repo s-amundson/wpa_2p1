@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.apps import apps
 
 from ..models import Membership
-
+from student_app.models import Student
 logger = logging.getLogger(__name__)
 
 
@@ -58,8 +58,31 @@ class TestsMembership(TestCase):
         # self.assertEqual(response.status_code, 200)
         self.assertEqual(self.client.session['payment_db'][1], 'Membership')
 
+    def test_membership_family_large(self):
+        students = Student.objects.filter(pk__gt=1)
+        sf = students[0].student_family
+        for s in students:
+            s.student_family = sf;
+            s.save()
+
+        d = {'student_2': 'on', 'student_3': 'on', 'student_4': 'on', 'student_5': 'on', 'student_6': 'on', 'level': '3'}
+        response = self.client.post(reverse('membership:membership'), d, secure=True)
+        # self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session['payment_db'][1], 'Membership')
+        self.assertEqual(self.client.session['line_items'][0]['base_price_money']['amount'], 5000)
+        self.assertEqual(len(Membership.objects.all()), 1)
+        self.assertEqual(Membership.objects.last().students.count(), 5)
+
     def test_membership_no_student(self):
         response = self.client.post(reverse('membership:membership'), {'level': '3'}, secure=True)
         # self.assertEqual(response.status_code, 200)
         messages = list(response.context['messages'])
         self.assertEqual(len(messages), 1)
+
+    def test_membership_multiple_not_family(self):
+        response = self.client.post(reverse('membership:membership'), {'student_2': 'on', 'student_3': 'on', 'level': '1'},
+                                    secure=True)
+        # self.assertEqual(response.status_code, 200)
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(len(Membership.objects.all()), 0)

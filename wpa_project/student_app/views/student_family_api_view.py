@@ -21,7 +21,7 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
             try:
                 student_family = Student.objects.get(user=request.user).student_family
                 serializer = StudentFamilySerializer(instance=student_family)
-            except Student.DoesNotExist:
+            except Student.DoesNotExist:  # pragma: no cover
                 serializer = StudentFamilySerializer()
         else:
             student_family = get_object_or_404(Student, user=request.user).student_family
@@ -40,7 +40,7 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
             # check if user is part of family so that we don't make duplicate enteries
             try:
                 student_family = Student.objects.get(user=request.user).student_family
-            except Student.DoesNotExist:
+            except Student.DoesNotExist:  # pragma: no cover
                 student_family = None
             if student_family is not None:
                 family_id = student_family.id

@@ -6,8 +6,10 @@ omit=
     *temp_tests.py
     student_app/management/commands/*
 
-    membership/*
-    payment/*
-    program_app/*
-    student_app/*
+    # minutes/*
+    # membership/*
+    # payment/*
+    # program_app/*
+    # student_app/*
 
+  # pragma: no cover

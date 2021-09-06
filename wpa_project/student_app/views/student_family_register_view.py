@@ -19,7 +19,7 @@ class StudentFamilyRegisterView(LoginRequiredMixin, View):
             try:
                 student_family = Student.objects.get(user=request.user).student_family
                 form = StudentFamilyRegistrationForm(instance=student_family)
-            except Student.DoesNotExist:
+            except Student.DoesNotExist:  # pragma: no cover
                 form = StudentFamilyRegistrationForm()
         else:
             if request.user.is_staff:
