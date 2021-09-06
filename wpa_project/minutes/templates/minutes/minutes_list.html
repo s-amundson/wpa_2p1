@@ -14,7 +14,7 @@
     {% for minutes in minutes_list %}
         <div class="row">
             <div class="col">
-                <a href="{% url 'membership:minutes_form' minutes.id %}">{{ minutes.meeting_date }}</a>
+                <a href="{% url 'minutes:minutes_form' minutes.id %}">{{ minutes.meeting_date }}</a>
             </div>
         </div>
     {% endfor %}

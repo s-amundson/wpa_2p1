@@ -114,6 +114,7 @@ INSTALLED_APPS = [
     'student_app',
     'program_app',
     'membership',
+    'minutes',
 
     "django_apscheduler",
     'django.contrib.admin',

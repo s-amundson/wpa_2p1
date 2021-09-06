@@ -13,9 +13,9 @@
     <form id="minutes-form" method="post" action="minutes_form">
         {% csrf_token %}
         <input type="hidden" id="minutes-id" value="{{ minutes_id }}">
-        <input type="hidden" id="url-business" value="{% url 'membership:minutes_business' %}">
-        <input type="hidden" id="url-business-update" value="{% url 'membership:minutes_business_update' %}">
-        <input type="hidden" id="url-report" value="{% url 'membership:minutes_report' %}">
+        <input type="hidden" id="url-business" value="{% url 'minutes:business' %}">
+        <input type="hidden" id="url-business-update" value="{% url 'minutes:business_update' %}">
+        <input type="hidden" id="url-report" value="{% url 'minutes:report' %}">
         <div class="row p-3">
             <div class="col-2">
                 {{ form.meeting_date.label }}
@@ -62,7 +62,7 @@
                     <input type="hidden" id="president-report-count" class="report-count" value="{{ reports.president|length }}">
                     {% for report in reports.president %}
                         <input type="hidden" id="report-count" value="{{ forloop.counter }}">
-                        {% include "membership/forms/minutes_report_form.html" %}
+                        {% include "minutes/forms/report_form.html" %}
                     {% endfor %}
                 </div>
                 {% if user.is_board %}
@@ -81,7 +81,7 @@
                 <div id="div-vp">
                     <input type="hidden" id="vice-report-count" class="report-count" value="{{ reports.vice|length }}">
                     {% for report in reports.vice %}
-                        {% include "membership/forms/minutes_report_form.html" %}
+                        {% include "minutes/forms/report_form.html" %}
                     {% endfor %}
                 </div>
                 {% if user.is_board %}
@@ -100,7 +100,7 @@
                 <div id="div-secretary">
                     <input type="hidden" id="secretary-report-count" class="report-count" value="{{ reports.secretary|length }}">
                     {% for report in reports.secretary %}
-                        {% include "membership/forms/minutes_report_form.html" %}
+                        {% include "minutes/forms/report_form.html" %}
                     {% endfor %}
                 </div>
                 {% if user.is_board %}
@@ -119,7 +119,7 @@
                 <div id="div-treasure">
                     <input type="hidden" id="treasure-report-count" class="report-count" value="{{ reports.treasure|length }}">
                     {% for report in reports.treasure %}
-                        {% include "membership/forms/minutes_report_form.html" %}
+                        {% include "minutes/forms/report_form.html" %}
                     {% endfor %}
                 </div>
                 {% if user.is_board %}
@@ -155,7 +155,7 @@
             <div class="col">
                 <div id="div-old-business">
                     {% for business in old_business %}
-                        {% include "membership/forms/minutes_business_form.html" %}
+                        {% include "minutes/forms/business_form.html" %}
                     {% endfor %}
                 </div>
             </div>
@@ -169,7 +169,7 @@
                 <div id="div-new-business">
 <!--                    <input type="hidden" id="new-business-count" value="{{ business.new|length }}">-->
                     {% for business in new_business %}
-                        {% include "membership/forms/minutes_business_form.html" %}
+                        {% include "minutes/forms/business_form.html" %}
                     {% endfor %}
                 </div>
                 {% if user.is_board %}

@@ -5,38 +5,38 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.generic.base import View
 
-from ..forms import MinutesReportForm
-from ..models import MinutesReport
+from ..forms import ReportForm
+from ..models import Report
 
 
 logger = logging.getLogger(__name__)
 
 
-class MinutesReportView(LoginRequiredMixin, View):
+class ReportView(LoginRequiredMixin, View):
     def get(self, request, report_id=None):
         logging.debug(request.GET)
         if report_id:
-            report = MinutesReport.objects.get(pk=report_id)
-            form = MinutesReportForm(instance=report)
+            report = Report.objects.get(pk=report_id)
+            form = ReportForm(instance=report)
         else:
-            form = MinutesReportForm()
+            form = ReportForm()
         r = {'form': form, 'id': report_id}
-        return render(request, 'membership/forms/minutes_report_form.html', {'report': r})
+        return render(request, 'minutes/forms/report_form.html', {'report': r})
 
     def post(self, request, report_id=None):
         logging.debug(request.POST)
         if report_id:
-            report = MinutesReport.objects.get(pk=report_id)
-            form = MinutesReportForm(request.POST, instance=report)
+            report = Report.objects.get(pk=report_id)
+            form = ReportForm(request.POST, instance=report)
         else:
-            form = MinutesReportForm(request.POST)
+            form = ReportForm(request.POST)
 
         if form.is_valid():
             logging.debug(form.cleaned_data)
             report = form.save()
             report_id = report.id
             success = True
-        else:
+        else:  # pragma: no cover
             logging.error(form.errors)
             success = False
         return JsonResponse({'report_id': report_id, 'success': success})

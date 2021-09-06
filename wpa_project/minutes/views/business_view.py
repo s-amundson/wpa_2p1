@@ -6,32 +6,30 @@ from django.http import JsonResponse
 from django.views.generic.base import View
 from django.utils import timezone
 
-from ..forms import MinutesBusinessForm, MinutesBusinessUpdateForm
-from ..models import MinutesBusiness, MinutesBusinessUpdate
-
+from ..forms import BusinessForm, BusinessUpdateForm
+from ..models import Business, BusinessUpdate
 
 logger = logging.getLogger(__name__)
 
 
-class MinutesBusinessView(LoginRequiredMixin, View):
+class BusinessView(LoginRequiredMixin, View):
     def get(self, request, business_id=None):
-        logging.debug(request.GET)
         if business_id:
-            report = MinutesBusiness.objects.get(pk=business_id)
-            form = MinutesBusinessForm(instance=report)
+            report = Business.objects.get(pk=business_id)
+            form = BusinessForm(instance=report)
         else:
-            form = MinutesBusinessForm()
+            form = BusinessForm()
         b = {'form': form, 'id': business_id}
-        return render(request, 'membership/forms/minutes_business_form.html', {'business': b})
+        return render(request, 'minutes/forms/business_form.html', {'business': b})
 
     def post(self, request, business_id=None):
         logging.debug(request.POST)
         resolved = False
         if business_id:
-            report = MinutesBusiness.objects.get(pk=business_id)
-            form = MinutesBusinessForm(request.POST, instance=report)
+            report = Business.objects.get(pk=business_id)
+            form = BusinessForm(request.POST, instance=report)
         else:
-            form = MinutesBusinessForm(request.POST)
+            form = BusinessForm(request.POST)
 
         if form.is_valid():
             logging.debug(form.cleaned_data)
@@ -46,37 +44,37 @@ class MinutesBusinessView(LoginRequiredMixin, View):
             report.save()
             business_id = report.id
             success = True
-        else:
+        else:  # pragma: no cover
             logging.error(form.errors)
             success = False
         return JsonResponse({'business_id': business_id, 'success': success, 'resolved': resolved})
 
 
-class MinutesBusinessUpdateView(LoginRequiredMixin, View):
+class BusinessUpdateView(LoginRequiredMixin, View):
     def get(self, request, update_id=None):
         logging.debug(request.GET)
         if update_id:
-            report = MinutesBusinessUpdate.objects.get(pk=update_id)
-            form = MinutesBusinessUpdateForm(instance=report)
+            report = BusinessUpdate.objects.get(pk=update_id)
+            form = BusinessUpdateForm(instance=report)
         else:
-            form = MinutesBusinessUpdateForm()
+            form = BusinessUpdateForm()
         b = {'form': form, 'id': update_id}
-        return render(request, 'membership/forms/minutes_business_update_form.html', {'update': b})
+        return render(request, 'minutes/forms/business_update_form.html', {'update': b})
 
     def post(self, request, update_id=None):
         logging.debug(request.POST)
         if update_id:
-            report = MinutesBusinessUpdate.objects.get(pk=update_id)
-            form = MinutesBusinessUpdateForm(request.POST, instance=report)
+            report = BusinessUpdate.objects.get(pk=update_id)
+            form = BusinessUpdateForm(request.POST, instance=report)
         else:
-            form = MinutesBusinessUpdateForm(request.POST)
+            form = BusinessUpdateForm(request.POST)
 
         if form.is_valid():
             logging.debug(form.cleaned_data)
             report = form.save()
             update_id = report.id
             success = True
-        else:
+        else:  # pragma: no cover
             logging.error(form.errors)
             success = False
         return JsonResponse({'update_id': update_id, 'success': success})

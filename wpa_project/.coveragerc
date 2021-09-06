@@ -4,3 +4,10 @@ omit=
     wpa_project/*
     manage.py
     *temp_tests.py
+    student_app/management/commands/*
+
+    membership/*
+    payment/*
+    program_app/*
+    student_app/*
+

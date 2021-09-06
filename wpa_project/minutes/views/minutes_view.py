@@ -6,8 +6,8 @@ from django.shortcuts import render, reverse
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views.generic.base import View
 from django.utils import timezone
-from ..forms import MinutesForm, MinutesBusinessForm, MinutesBusinessUpdateForm, MinutesReportForm
-from ..models import MinutesBusiness, Minutes
+from ..forms import MinutesForm, BusinessForm, BusinessUpdateForm, ReportForm
+from ..models import Business, Minutes
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +18,10 @@ class MinutesFormView(LoginRequiredMixin, View):
         for b in business:
             logging.debug(b.id)
             update_list =[]
-            for update in b.minutesbusinessupdate_set.all():
+            for update in b.businessupdate_set.all():
                 o = timezone.localtime(timezone.now()).date() > update.update_date
-                update_list.append({'form': MinutesBusinessUpdateForm(instance=update, old=o), 'id': update.id})
-            bl.append({'form': MinutesBusinessForm(instance=b, old=old), 'id': b.id, 'updates': update_list})
+                update_list.append({'form': BusinessUpdateForm(instance=update, old=o), 'id': update.id})
+            bl.append({'form': BusinessForm(instance=b, old=old), 'id': b.id, 'updates': update_list})
         return bl
 
     def get(self, request, minutes_id=None):
@@ -35,9 +35,9 @@ class MinutesFormView(LoginRequiredMixin, View):
             form = MinutesForm(instance=minutes, edit=request.user.is_board)
             for owner in owners:
                 reports[owner] = self.report_forms(minutes, owner, request.user.is_board)
-            ob = MinutesBusiness.objects.filter(Q(resolved=None, added_date__lt=minutes.meeting_date) |
+            ob = Business.objects.filter(Q(resolved=None, added_date__lt=minutes.meeting_date) |
                                             Q(resolved__gte=minutes.meeting_date, added_date__lt=minutes.meeting_date))
-            nb = MinutesBusiness.objects.filter(Q(resolved=None, added_date=minutes.meeting_date) |
+            nb = Business.objects.filter(Q(resolved=None, added_date=minutes.meeting_date) |
                                             Q(resolved__gte=minutes.meeting_date, added_date=minutes.meeting_date))
             logging.debug(ob)
 
@@ -46,7 +46,7 @@ class MinutesFormView(LoginRequiredMixin, View):
             for owner in owners:
                 reports[owner] = []
 
-            ob = MinutesBusiness.objects.filter(resolved__lt=timezone.now())
+            ob = Business.objects.filter(resolved__lt=timezone.now())
             nb = []
 
         old_business = self.business_list(ob, True)
@@ -55,7 +55,7 @@ class MinutesFormView(LoginRequiredMixin, View):
         context = {'form': form, 'minutes_id': minutes_id, 'reports': reports, 'old_business': old_business,
                    'new_business': new_business}
 
-        return render(request, 'membership/minutes_form.html', context)
+        return render(request, 'minutes/minutes_form.html', context)
 
     def post(self, request, minutes_id=None):
         logging.debug(request.POST)
@@ -74,13 +74,13 @@ class MinutesFormView(LoginRequiredMixin, View):
                 minutes.save()
             else:
                 minutes = form.save()
-            return HttpResponseRedirect(reverse('membership:minutes_form', kwargs={'minutes_id': minutes.id}))
-        else:
+            return HttpResponseRedirect(reverse('minutes:minutes_form', kwargs={'minutes_id': minutes.id}))
+        else:  # pragma: no cover
             logging.debug(form.errors)
-            return render(request, 'membership/minutes_form.html', {'form': form})
+            return render(request, 'minutes/minutes_form.html', {'form': form})
 
     def report_forms(self, minutes, owner, is_board):
         forms = []
-        for report in minutes.minutesreport_set.filter(owner=owner):
-            forms.append({'form': MinutesReportForm(instance=report, edit=is_board), 'id': report.id})
+        for report in minutes.report_set.filter(owner=owner):
+            forms.append({'form': ReportForm(instance=report, edit=is_board), 'id': report.id})
         return forms
