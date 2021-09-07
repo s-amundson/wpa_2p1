@@ -9,11 +9,17 @@
 {% block main %}
     <div class="row p-3 align-items-center mx-auto">
         <div class="col-12">
-            <h2> Profile Page </h2>
+            {% if this_student %}
+                <h2> {{ this_student.first_name }} {{ this_student.last_name }}'s Profile Page</h2>
+            {% else %}
+                <h2> Profile Page </h2>
+            {% endif %}
         </div>
     </div>
     <div class="row px-3" id="div-instruct"></div>
-
+    {% if this_student is None %}
+        <div class="row px-2" id="this-student-div"></div>
+    {% endif %}
     <div class="row px-3 align-items-center mx-auto">
         <div class="col-12">
             <h3> Address </h3>
@@ -39,6 +45,7 @@
     <div class="row px-3 pt-3 align-items-center mx-auto">
         <div class="col-12">
             <h3> Students </h3>
+            <input type="hidden" id="this-student" value="{{ this_student }}">
         </div>
     </div>
     <div class="px-3" id="student-table-div"></div>

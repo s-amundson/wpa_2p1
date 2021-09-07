@@ -8,15 +8,22 @@ $(document).ready(function() {
         new_family = true;
         $("#btn-add-student").prop('disabled', true);
         $("#btn-add-student").hide();
-        load_student_family_form($("#btn-address-edit").attr("family_id"));
-        $("#div-instruct").html("Please enter your address and phone number below");
+        if ($("#this-student").val() == 'None') {
+            $("#btn-address-edit").prop('disabled', true);
+            load_student_form($("#this-student-div"));
+            $("#div-instruct").html("Please enter your name and date of birth below");
+        }
+        else {
+            load_student_family_form($("#btn-address-edit").attr("family_id"));
+            $("#div-instruct").html("Please enter your address and phone number below");
+        }
     }
     else{
         load_student_table();
     }
 
     $("#btn-add-student").click(function(){
-        load_student_form();
+        load_student_form($("#student_add_div"));
     });
 
     $("#btn-address-edit").click(function(){
@@ -57,8 +64,20 @@ async function add_student_function(student_id) {
                 return data;
                 }, "json");
         $("#student_add_div").hide();
-        $("#btn-add-student").show();
-        $("#div-instruct").html("");
+        if ($("#this-student").val() == 'None') {
+            $("#btn-address-edit").prop('disabled', false);
+            $("#this-student").val(data.id)
+            $("h2").html(data.first_name + data.last_name + "'s Profile Page")
+        }
+
+        if ($("#btn-address-edit").attr("family_id") == "") {
+            load_student_family_form($("#btn-address-edit").attr("family_id"));
+            $("#div-instruct").html("Please enter your address and phone number below");
+        }
+        else {
+            $("#btn-add-student").show();
+            $("#div-instruct").html("");
+        }
         load_student_table();
     }
 }
@@ -90,12 +109,12 @@ function load_student_table() {
 
         if($(".student_row").length == 0) {
             //  no students therefore we need to load the student form
-            load_student_form();
+            load_student_form($("#student_add_div"));
             $("#can-register").hide()
         }
         else {
             $("[id^=btn-edit]").click(function(){
-                load_student_form($(this).attr("student-id"));
+                load_student_form($("#student_add_div"), $(this).attr("student-id"));
             });
             if (new_family){
                 $("#can-register").show()
@@ -133,7 +152,7 @@ async function post_family_function(family_id) {
     $("#btn-address-edit").attr("family_id", data.id);
     if (url_string == "student_family_api") {
         $("#div-instruct").html("Please enter name and date of birth information for a student");
-        load_student_form();
+        load_student_form($("#student_add_div"));
     }
     else {
         $("#div-instruct").html("");
