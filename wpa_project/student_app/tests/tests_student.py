@@ -54,7 +54,7 @@ class TestsStudentAPI(TestCase):
         self.assertEqual(student.last_name, d['last_name'])
 
     def test_post_student_id(self):
-        self.test_user = User.objects.get(pk=4)
+        self.test_user = User.objects.get(pk=5)
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
         response = self.client.post(reverse('registration:student_api', kwargs={'student_id': 6}), d, secure=True)
@@ -120,12 +120,13 @@ class TestsStudent(TestCase):
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
         response = self.client.post(reverse('registration:add_student'), d, secure=True)
+        logging.debug(len(Student.objects.all()))
         student = Student.objects.get(pk=7)
         self.assertEqual(student.first_name, d['first_name'])
         self.assertEqual(student.last_name, d['last_name'])
 
     def test_post_student_id(self):
-        self.test_user = User.objects.get(pk=4)
+        self.test_user = User.objects.get(pk=5)
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
         response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 6}), d, secure=True)

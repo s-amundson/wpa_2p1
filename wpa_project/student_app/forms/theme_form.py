@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import TextInput, Form
+from django.forms import Form
 
 import logging
 logger = logging.getLogger(__name__)

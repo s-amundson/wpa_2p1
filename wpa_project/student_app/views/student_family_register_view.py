@@ -1,11 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
+from django.http import Http404
+
 from django.views.generic.base import View
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 import logging
 
-from ..models import StudentFamily
+from ..models import Student, StudentFamily
 from ..forms import StudentFamilyRegistrationForm
 logger = logging.getLogger(__name__)
 
@@ -16,32 +16,20 @@ class StudentFamilyRegisterView(LoginRequiredMixin, View):
     def get(self, request, family_id=None):
         logging.debug('here')
         if family_id is None:
-            student_family = StudentFamily.objects.filter(user=request.user)
-            if student_family.exists():
-                form = StudentFamilyRegistrationForm(instance=student_family[0])
-            else:
+            try:
+                student_family = Student.objects.get(user=request.user).student_family
+                form = StudentFamilyRegistrationForm(instance=student_family)
+            except Student.DoesNotExist:  # pragma: no cover
                 form = StudentFamilyRegistrationForm()
         else:
             if request.user.is_staff:
                 student_family = get_object_or_404(StudentFamily, pk=family_id)
             else:
-                student_family = get_object_or_404(StudentFamily, pk=family_id, user=request.user)
+                # student_family = get_object_or_404(StudentFamily, pk=family_id, user=request.user)
+                student_family = get_object_or_404(Student, user=request.user).student_family
+                if student_family.id != family_id:
+                    raise Http404("No MyModel matches the given query.")
             form = StudentFamilyRegistrationForm(instance=student_family)
         message = request.session.get('message', '')
         logging.debug(message)
         return render(request, 'student_app/forms/student_family_form.html', {'form': form, 'message': message})
-
-    # def post(self, request, family_id=None):
-    #     form = StudentFamilyRegistrationForm(request.POST)
-    #     if form.is_valid():
-    #
-    #         f = form.save()
-    #         f.user.add(request.user)
-    #         # request.session['student_family'] = f.id
-    #         logging.debug(f'id = {f.id}, user = {f.user}')
-    #         return HttpResponseRedirect(reverse('registration:profile'))
-    #     else:
-    #         logging.debug(form.errors)
-    #     self.get_students(request, family_id)
-    #     return render(request, 'student_app/register.html', {'form': form})
-

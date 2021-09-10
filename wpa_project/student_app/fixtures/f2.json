@@ -1,6 +1,6 @@
 [
   {
-    "model": "student_app.classregistration",
+    "model": "program_app.classregistration",
     "pk": 1,
     "fields": {
       "beginner_class": 1,
@@ -13,7 +13,7 @@
     }
   },
   {
-    "model": "student_app.classregistration",
+    "model": "program_app.classregistration",
     "pk": 2,
     "fields": {
       "beginner_class": 1,

@@ -17,7 +17,7 @@ class StudentForm(ModelForm):
 
     class Meta:
         model = Student
-        exclude = ['student_family']
+        exclude = ['student_family', 'user']
         widgets = {'first_name': TextInput(attrs={'placeholder': 'First Name', 'autocomplete': 'off',
                                                   'class': "form-control m-2 member-required"}),
                    'last_name': TextInput(attrs={'placeholder': 'Last Name', 'autocomplete': 'off',

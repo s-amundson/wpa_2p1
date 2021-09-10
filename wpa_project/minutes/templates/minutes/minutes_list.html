@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %} Class Sign up {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/minutes.js' %}"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="row p-3">
+        <h3>Minutes List</h3>
+    </div>
+    {% for minutes in minutes_list %}
+        <div class="row">
+            <div class="col">
+                <a href="{% url 'minutes:minutes_form' minutes.id %}">{{ minutes.meeting_date }}</a>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

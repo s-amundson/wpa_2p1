@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %} Membership Levels {% endblock %}
+
+{% block main %}
+    <div class="row p-3" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-3">
+        <div class="col">
+            {% for form in forms %}
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row p-3">
+                        <div class="col-3 text-right">
+                            Select students to join:
+                        </div>
+                        <div class="col">
+                            {% for student in form.get_boxes %}
+                                <div class="row">
+                                    <div class="col input-group input-group-md">
+                                        {{ student }} {{ student.label }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row p-3">
+                        <div class="col">
+                            <div class="row">
+                                <div class="col-2 border">
+                                    Membership Level
+                                </div>
+                                <div class="col-1 border">
+                                    Cost
+                                </div>
+                                <div class="col border">
+                                    Description
+                                </div>
+                            </div>
+
+                            {% for l in levels %}
+                                <div class="row">
+                                    <div class="col-2 input-group input-group-md border">
+                                        <label for="id_level_{{ l.id }}">
+                                            <input type="radio" name="level" value="{{ l.id }}" id="id_level_{{ l.id }}" required="">
+                                            {{ l.name }}
+                                        </label>
+                                    </div>
+                                    <div class="col-1 input-group input-group-md border">
+                                        ${{ l.cost }}
+                                    </div>
+                                    <div class="col input-group input-group-md border">
+                                        {{ l.description }}
+                                        <input type="hidden" id="max_age_{{l.id}}" value="{{ l.max_age }}">
+                                        <input type="hidden" id="min_age_{{l.id}}" value="{{ l.min_age }}">
+                                        <input type="hidden" id="family_{{l.id}}" value="{{ l.is_family }}">
+                                        <input type="hidden" id="additional_cost_{{l.id}}" value="{{ l.additional_cost }}">
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <input class="btn btn-primary" type="submit" value="Submit">
+                    </div>
+                </form>
+            {% endfor %}
+        </div>
+    </div>
+    <hr/>
+    <div class="row p-3">
+
+    </div>
+{% endblock %}
+

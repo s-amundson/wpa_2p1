@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %} Beginner Class List {% endblock %}
+
+{% block main %}
+    <div class="row p-2" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <div class="row p-2">
+        <div class="col">
+            Date
+        </div>
+        <div class="col">
+            Beginners
+        </div>
+        <div class="col">
+            Returnees
+        </div>
+        <div class="col">
+            State
+        </div>
+    </div>
+
+    {% for c in object_list %}
+        <div class="row p-2">
+            <div class="col">
+                <a class="nav-link" href="{% url 'programs:beginner_class' c.id %}">
+                    {{ c.class_date }}
+                </a>
+            </div>
+            <div class="col">
+                {{ c.beginner }}/{{ c.beginner_limit }}
+            </div>
+            <div class="col">
+                {{ c.returnee }}/{{ c.returnee_limit }}
+            </div>
+            <div class="col">
+                {{ c.state }}
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="row p-2">
+        {% if user.is_board %}
+            <a class="nav-link" href="{% url 'programs:beginner_class' %}">
+                Add
+            </a>
+        {% endif %}
+    </div>
+
+{% endblock %}
+

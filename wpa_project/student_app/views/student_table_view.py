@@ -3,14 +3,13 @@ from django.shortcuts import render, get_object_or_404
 import logging
 from django.views.generic.base import View
 
-
-from ..models import Student, StudentFamily
+from ..models import Student
 
 logger = logging.getLogger(__name__)
 
 
 class StudentTableView(LoginRequiredMixin, View):
     def get(self, request):
-        student_family = get_object_or_404(StudentFamily, user=request.user)
+        student_family = get_object_or_404(Student, user=request.user).student_family
         students = student_family.student_set.all()
         return render(request, 'student_app/tables/student_table.html', {'students': students})

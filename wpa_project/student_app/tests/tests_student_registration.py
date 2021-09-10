@@ -1,5 +1,4 @@
 import logging
-import time
 from django.test import TestCase, Client
 from django.urls import reverse
 
@@ -32,6 +31,8 @@ class TestsRegisterStudent(TestCase):
         get_page('registration:add_student', 'student.html')
 
     def test_register(self):
+        s = Student(first_name="Emily", last_name="Conlan", dob="1995-12-03", safety_class=None, user=self.test_user)
+        s.save()
         # if student hasn't registered. we need to send them to registration starting with address
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('registration:profile'), secure=True)
@@ -63,11 +64,14 @@ class TestsRegisterStudent(TestCase):
 
     def test_update_student_family(self):
         self.client.force_login(self.test_user)
+        s = Student(first_name="Emily", last_name="Conlan", dob="1995-12-03", safety_class=None, user=self.test_user)
+        s.save()
         # add a student family
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
         response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
         sf = StudentFamily.objects.all()
         self.assertEquals(len(sf), 1)
+        logging.debug(sf.values())
         d['city'] = 'smallville'
         response = self.client.post(reverse('registration:student_family_api', kwargs={'family_id': 1}), d, secure=True)
         sf = StudentFamily.objects.all()
@@ -80,10 +84,11 @@ class TestsRegisterStudent(TestCase):
         sf = StudentFamily.objects.create(street='123 main', city='city', state='ca', post_code=12345,
                                           phone='123.123.1234')
         sf.save()
-        sf.user.add(self.test_user)
-        sf.save()
+        # sf.user.add(self.test_user)
+        # sf.save()
 
-        student = Student(student_family=sf, first_name='Christy', last_name='Smith', dob='2020-02-02')
+        student = Student(student_family=sf, first_name='Christy', last_name='Smith', dob='2020-02-02',
+                          user=self.test_user)
         student.save()
         logging.debug(student.id)
 
@@ -101,6 +106,9 @@ class TestsRegisterStudent(TestCase):
         self.assertContains(response, 'Chris')
 
     def test_add_student_error(self):
+        student = Student(student_family=None, first_name='Christy', last_name='Smith', dob='2020-02-02',
+                          user=self.test_user)
+        student.save()
         self.client.force_login(self.test_user)
         d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
         response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
@@ -110,7 +118,7 @@ class TestsRegisterStudent(TestCase):
         response = self.client.post(reverse('registration:add_student'), d, secure=True)
         sf = StudentFamily.objects.all()
         s = sf[0].student_set.all()
-        self.assertEquals(len(s), 0)
+        self.assertEquals(len(s), 1)
         self.assertEqual(response.status_code, 200)
         logging.debug(response.status_code)
 
@@ -121,12 +129,13 @@ class TestsRegisterStudent(TestCase):
 
     def test_add_student_api(self):
         self.client.force_login(self.test_user)
-        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
-
         # add a student
         d = {'first_name': 'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
         response = self.client.post(reverse('registration:student_api'), d, secure=True)
+
+        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
+        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
+
         # self.assertEqual(response.status_code, 200)
         sf = StudentFamily.objects.all()
         s = sf[0].student_set.all()

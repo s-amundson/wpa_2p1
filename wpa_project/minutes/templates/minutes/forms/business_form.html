@@ -1,0 +1,35 @@
+<div class="row business-div">
+    <div class="col">
+        <div class="row">
+            {% csrf_token %}
+            <input type="hidden" class="business-id" value="{{ business.id }}">
+            {{ business.form.minutes }}
+            <div class="col">
+                {{ business.form.business }}
+            </div>
+            <div class="col-2">
+                {{ business.form.added_date.label }} {{ business.form.added_date }}
+            </div>
+        </div>
+        <div class="div-business-update" id="div-business-update">
+            {% for update in business.updates%}
+                {% include "minutes/forms/business_update_form.html" %}
+            {% endfor %}
+        </div>
+
+        <div class="row">
+            <div class="col">
+                {% if user.is_board %}
+                    <button id="btn-add-update" class="btn btn-primary">Add Update</button>
+                {% endif %}
+            </div>
+            <div class="col"></div>
+            <div class="col">
+                <div class="row">
+                    Resolved: {{ business.form.resolved_bool }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
