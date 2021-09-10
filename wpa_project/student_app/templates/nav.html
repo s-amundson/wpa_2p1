@@ -14,17 +14,21 @@
             </li>
 
             {% if user.is_authenticated %}
-                {% if user.is_member %}
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMember" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Membership
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{% url 'membership:membership' %}">Membership</a>
-                            <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
+                            {% if user.is_member %}
+                                <a class="dropdown-item" href="{% url 'membership:membership' %}">Membership</a>
+                                <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
+                            {% else %}
+                                <a class="dropdown-item" href="{% url 'membership:membership' %}">Join</a>
+                            {% endif %}
                         </div>
                     </li>
-                {% endif %}
+
 
                 {% if user.is_board %}
                     <li class="nav-item dropdown">

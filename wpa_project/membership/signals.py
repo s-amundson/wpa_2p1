@@ -42,6 +42,10 @@ def member_update(sender, instance, created, **kwargs):
                     member.expire_date = add_years(datetime_safe.date.today(), 1)
                 logging.debug(member.expire_date)
                 member.save()
+
+                # set is_member in user
+                if student.user is not None:
+                    student.user.is_member = True
         else:
             membership.pay_status = 'error'
 
