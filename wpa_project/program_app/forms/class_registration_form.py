@@ -35,10 +35,8 @@ class ClassRegistrationForm(forms.Form):
         classes = BeginnerClass.objects.filter(class_date__gt=timezone.now(), state__exact='open')
         d = [("", "None")]
         for c in classes:
-            cr = c.class_date + timedelta(hours=2)
-            s = f'{c.class_date.strftime("%d %b, %Y %I %p")} / {cr.strftime("%I %p")}'
-            logging.debug(s)
-
+            cd = timezone.localtime(c.class_date)
+            s = cd.strftime("%d %b, %Y %I:%M %p")
             d.append((str(c.id), s))
         return d
 

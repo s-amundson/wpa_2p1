@@ -5,6 +5,8 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/class_registration.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/calendar.css' %}">
+    <script> var month = {{ this_month }}</script>
 {% endblock %}
 
 {% block main %}
@@ -21,9 +23,37 @@
         </div>
     </div>
     <hr>
-
+    <div class="row p-2 justify-content-center">
+        <div class="col-3 text-center">
+            <h5>Select a Class</h5>
+        </div>
+    </div>
     <div class="row p-2">
-        <form class="col form" method="post" action="{% url 'programs:class_registration' %}" autocomplete="off">
+<!--        <div class="col"></div>-->
+        <div id="div-calendar" class="col"></div>
+<!--        <div class="col"></div>-->
+    </div>
+    <div id="div-calendar-btn" class="row p-2">
+        <div class="col">
+            <button id="calendar-prev-btn" class="btn btn-primary m-1" type="button">
+                Previous Month
+            </button>
+        </div>
+        <div class="col"></div>
+        <div class="col">
+            <button id="calendar-show-btn" class="btn btn-primary m-1" type="button">
+                Show Calendar
+            </button>
+        </div>
+        <div class="col"></div>
+        <div class="col">
+            <button id="calendar-next-btn" class="btn btn-primary m-1" type="button">
+                Next Month
+            </button>
+        </div>
+    </div>
+    <div class="row p-2">
+        <form id="beginner-class-form" class="col form" method="post" action="{% url 'programs:class_registration' %}" autocomplete="off">
             {% csrf_token %}
 
             <div class="row p-3">

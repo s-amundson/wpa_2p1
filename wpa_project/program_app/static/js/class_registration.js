@@ -5,6 +5,25 @@ $(document).ready(function(){
     $(".student-check").each(show_new_student);
     get_reg_table();
     $("#id_beginner_class").click(get_class_status);
+
+    get_calendar();
+    $("#beginner-class-form").hide()
+    $("#calendar-show-btn").hide()
+    $("#calendar-prev-btn").hide()
+    $("#calendar-show-btn").click(function (){
+        $("#div-calendar").show()
+    });
+
+    $("#calendar-prev-btn").click(function () {
+        month = month - 1;
+        get_calendar();
+    });
+
+    $("#calendar-next-btn").click(function () {
+        month = month + 1;
+        get_calendar();
+    });
+
 });
 
 function check_dob(i, el) {
@@ -31,6 +50,23 @@ function check_dob(i, el) {
 //            }
 //        }
 //    }
+}
+
+async function get_calendar() {
+    await $.get("class_calendar/" + month, function(data, status){
+        $("#div-calendar").html(data);
+        console.log(status);
+        $(".bc-btn").click(select_class)
+        let d = new Date().getMonth() + 1 // Jan is 0 in javascript
+        console.log(d)
+        if (month == d) {
+            $("#calendar-prev-btn").hide();
+        }
+        else {
+            $("#calendar-prev-btn").show()
+        }
+    });
+
 }
 
 async function get_class_status() {
@@ -157,6 +193,16 @@ async function post_unregister() {
     else {
         console.log('canceled');
     }
+}
+
+function select_class() {
+    $("#div-calendar").hide()
+    console.log($(this).attr('bc_id'))
+    $("#id_beginner_class").val($(this).attr('bc_id'))
+    $("#beginner-class-form").show()
+    $("#calendar-show-btn").show()
+    $("#calendar-next-btn").hide()
+    $("#calendar-prev-btn").hide()
 }
 
 function show_new_student(i, el) {

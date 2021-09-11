@@ -1,13 +1,14 @@
 import uuid
-
-from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
-from django.views.generic.base import View
+from django.apps import apps
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
-from django.apps import apps
+from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.safestring import mark_safe
+from django.views.generic.base import View
 import logging
 
 
@@ -73,7 +74,8 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse('payment:process_payment'))
 
         form = ClassRegistrationForm(students)
-        return render(request, 'program_app/class_registration.html', {'form': form})
+        tm = timezone.localtime(timezone.now()).month
+        return render(request, 'program_app/class_registration.html', {'form': form, 'this_month': tm})
 
     def post(self, request):
         students = Student.objects.get(user=request.user).student_family.student_set.all()
