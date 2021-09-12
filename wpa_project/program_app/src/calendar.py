@@ -8,7 +8,8 @@ class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None):
         self.year = year
         self.month = month
-        self.events = BeginnerClass.objects.filter(class_date__year=self.year,
+        self.events = BeginnerClass.objects.filter(class_date__gt=timezone.now(),
+                                                   class_date__year=self.year,
                                                    class_date__month=self.month,
                                                    state='open')
         super(Calendar, self).__init__()

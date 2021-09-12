@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Student(models.Model):
-    student_family = models.ForeignKey(StudentFamily, on_delete=models.SET_NULL, null=True)
+    student_family = models.ForeignKey(StudentFamily, on_delete=models.SET_NULL, null=True, default=None)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, default=None)
 
     # user fields

@@ -47,8 +47,12 @@ class StudentApiView(LoginRequiredMixin, APIView):
         if serializer.is_valid():
             logging.debug(serializer.validated_data)
             if student_id is None:
-                # sf = get_object_or_404(Student, user=request.user).student_family
-                f = serializer.save(user=request.user)
+                owner = Student.objects.filter(user=request.user)
+                if owner.count() == 0:
+                    f = serializer.save(user=request.user)
+                else:
+                    f = serializer.save(student_family=owner[0].student_family)
+
             else:
                 f = serializer.update(student, serializer.validated_data)
             # request.session['student_family'] = f.student_family.id
