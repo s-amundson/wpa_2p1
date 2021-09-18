@@ -14,13 +14,10 @@
             {% endfor %}
         </div>
         <div class="col input-group input-group-md">
-            <div class="row">Date of Birth (YYYY-MM-DD)</div>
-            <div class="row">
-                {{ form.dob }}
-                {% for error in form.dob.errors %}
-                    <p class="help-block">{{ error }}</p>
-                {% endfor %}
-            </div>
+            {{ form.dob }}
+            {% for error in form.dob.errors %}
+                <p class="help-block">{{ error }}</p>
+            {% endfor %}
         </div>
         {% if user.is_staff %}
             <div class="col input-group input-group-md">
@@ -33,6 +30,26 @@
                 </div>
             </div>
         {% endif %}
+    </div>
+    {% if not student_is_user %}
+        <div class="row">
+            <div class="col pt-2 ml-2">
+                If you add an email below we will email them asking them to join, and they will be associated with this account.
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            {{ form.email }}
+            {% for error in form.email.errors %}
+                <p class="help-block">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class="col-2 m-2 d-flex align-items-center">
+            {% if student_this_user %}
+                <a href="{% url 'account_email' %}">Edit Email</a>
+            {% endif %}
+        </div>
     </div>
     <div class="row">
         <div class="col-2">

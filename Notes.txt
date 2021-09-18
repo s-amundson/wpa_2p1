@@ -7,22 +7,16 @@ Useful Commands:
     python manage.py dumpdata student_app[.ModelName]
 
     for docker:
-    docker exec -it \django python manage.py test student_app --pattern temp_tests.py --keepdb
-    docker exec -it \django_dev coverage run --source='.' manage.py test student_app --keepdb && coverage html
-    docker exec -it \django_dev coverage run --source='.' manage.py test student_app, membership, payment
-    docker exec -it \django_dev python manage.py dumpdata membership > wpa_project/membership/fixtures/level.json
-
+    docker exec -it django_dev python manage.py test student_app --pattern temp_tests.py --keepdb
+    docker exec -it django_dev coverage run --source='.' manage.py test student_app --keepdb && coverage html
+    docker exec -it django_dev coverage run --source='.' manage.py test student_app membership minutes payment program_app
+    docker exec -it django_dev python manage.py dumpdata membership > wpa_project/membership/fixtures/level.json
 
 TODO
     instructors - add to sign up for class but not count as.
     social accounts
     test beginner class canceled (square refunds) - refund needs to check for prior refund amount
-    automate opening and closing of classes.
     cookie law
-    combine StudentApiView and StudentView?
-    combine StudentFamilyApiView and StudentFamilyView?
-    look into having class as a calendar
-
 
 Wish:
     Wish: add classes that a student has attended.

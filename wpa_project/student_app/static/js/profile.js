@@ -58,7 +58,8 @@ async function add_student_function(student_id) {
                 csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
                 'first_name': $("#id_first_name").val(),
                 'last_name' : $("#id_last_name").val(),
-                'dob': $("#id_dob").val()
+                'dob': $("#id_dob").val(),
+                'email': $("#id_email").val()
             }, function(data, status){
                 console.log(data)
                 return data;

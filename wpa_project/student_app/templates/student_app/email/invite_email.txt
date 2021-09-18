@@ -1,0 +1,7 @@
+Hi {{ add_name }},
+
+{{ send_name }} has added you to their account and has invited you to join Woodly Park Archers and access the account.
+
+
+http://woodleyparkarchers.org/">WoodleyParkArchers.org
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

@@ -1,6 +1,7 @@
 from allauth.account.models import EmailAddress
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
+from django.template.loader import get_template
 
 # from wpa_project.student_app.models import ClassRegistration
 import logging
@@ -22,3 +23,11 @@ class EmailMessage(EmailMultiAlternatives):
             self.to = [EmailAddress.objects.get_primary(user)]
             if self.to in self.test_emails:
                 self.to = settings.EMAIL_DEBUG_ADDRESSES
+
+    def invite_user_email(self, send_student, add_student):
+        self.get_email_address(add_student.email)
+        d = {'add_name': add_student.first_name, 'send_name': send_student.first_name}
+        self.subject = 'Woodley Park Archers Invitation'
+        self.body = get_template('student_app/email/invite_email.txt').render(d)
+        self.attach_alternative(get_template('student_app/email/invite_email.html').render(d), 'text/html')
+        self.send()
