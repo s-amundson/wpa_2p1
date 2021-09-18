@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from ..forms import StudentForm
 from ..models import Student, StudentFamily
 from ..serializers import StudentSerializer
-
+from ..src import EmailMessage
 logger = logging.getLogger(__name__)
 
 
@@ -33,12 +33,14 @@ class StudentApiView(LoginRequiredMixin, APIView):
     def post(self, request, student_id=None, format=None):
         logging.debug(student_id)
         logging.debug(request.data)
+        old_email = None
         if student_id is not None:
             if request.user.is_staff:
                 student = get_object_or_404(Student, id=student_id)
             else:
                 sf = get_object_or_404(Student, user=request.user).student_family
                 student = get_object_or_404(Student, id=student_id, student_family=sf)
+                old_email = student.email
             serializer = StudentSerializer(student, data=request.data)
 
         else:
@@ -49,12 +51,19 @@ class StudentApiView(LoginRequiredMixin, APIView):
             if student_id is None:
                 owner = Student.objects.filter(user=request.user)
                 if owner.count() == 0:
+                    logging.debug('student is user')
                     f = serializer.save(user=request.user)
                 else:
                     f = serializer.save(student_family=owner[0].student_family)
 
             else:
                 f = serializer.update(student, serializer.validated_data)
+
+            if f.user is None:
+                logging.debug('student is not user')
+                if f.email != old_email:
+                    logging.debug('email updated')
+                    EmailMessage().invite_user_email(f, request.user)
             # request.session['student_family'] = f.student_family.id
             # logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
             return Response(serializer.data)
@@ -63,16 +72,28 @@ class StudentApiView(LoginRequiredMixin, APIView):
 
 class AddStudentView(LoginRequiredMixin, View):
     def get(self, request, student_id=None):
+        student_is_user = False
+        student_this_user = False
         if student_id is not None:
             if request.user.is_board:
                 g = get_object_or_404(Student, pk=student_id)
             else:
                 sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
-            form = StudentForm(instance=g)
+                student_is_user = (g.user is not None)
+                student_this_user = (g.user == request.user)
+            form = StudentForm(instance=g, student_is_user=student_is_user)
         else:
-            form = StudentForm()
-        return render(request, 'student_app/forms/student.html', {'form': form})
+            s = Student.objects.filter(user=request.user)
+            if s.count() == 0:
+                form = StudentForm(initial={'email': request.user.email}, student_is_user=True)
+                student_is_user = True
+                student_this_user = True
+            else:
+                form = StudentForm()
+        logging.debug(student_is_user)
+        d = {'form': form, 'student_is_user': student_is_user, 'student_this_user': student_this_user}
+        return render(request, 'student_app/forms/student.html', d)
 
     def post(self, request, student_id=None):
         if student_id is not None:

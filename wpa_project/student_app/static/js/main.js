@@ -28,9 +28,17 @@ function load_student_form(student_div, student_id) {
         $("#student_form").submit(function(e){
             e.preventDefault();
             add_student_function(student_id)
+            try {
+                load_student_table();
+            } catch (e) {
+            }
         });
         $("#btn-student-form-close").click(function() {
             student_div.html("");
+            try {
+                load_student_table();
+            } catch (e) {
+            }
         });
     });
 }
