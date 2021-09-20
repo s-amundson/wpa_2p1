@@ -2,7 +2,7 @@ import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views.generic.base import View
 from django.utils import timezone
 
@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 class BusinessView(LoginRequiredMixin, View):
     def get(self, request, business_id=None):
+        if not request.user.is_member:
+            return HttpResponseForbidden()
         if business_id:
             report = Business.objects.get(pk=business_id)
             form = BusinessForm(instance=report)
@@ -23,6 +25,8 @@ class BusinessView(LoginRequiredMixin, View):
         return render(request, 'minutes/forms/business_form.html', {'business': b})
 
     def post(self, request, business_id=None):
+        if not request.user.is_board:
+            return HttpResponseForbidden()
         logging.debug(request.POST)
         resolved = False
         if business_id:

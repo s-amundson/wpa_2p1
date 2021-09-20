@@ -13,6 +13,7 @@ class ProfileView(LoginRequiredMixin, View):
     def get(self, request):
         try:
             s = Student.objects.get(user=request.user)
+            logging.debug(s)
             student_family = s.student_family
             this_student = s
         except Student.DoesNotExist:  # pragma: no cover
@@ -22,7 +23,7 @@ class ProfileView(LoginRequiredMixin, View):
         if student_family is not None:
             students = student_family.student_set.all()
             d = {'students': students, 'theme_form': theme, 'student_family': student_family,
-                 this_student: 'this_student'}
+                 'this_student': this_student}
             return render(request, 'student_app/profile.html', d)
         else:
             # return HttpResponseRedirect(reverse('registration:student_register'))

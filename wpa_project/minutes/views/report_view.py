@@ -2,7 +2,7 @@ import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views.generic.base import View
 
 from ..forms import ReportForm
@@ -14,16 +14,20 @@ logger = logging.getLogger(__name__)
 
 class ReportView(LoginRequiredMixin, View):
     def get(self, request, report_id=None):
+        if not request.user.is_member:
+            return HttpResponseForbidden()
         logging.debug(request.GET)
         if report_id:
             report = Report.objects.get(pk=report_id)
-            form = ReportForm(instance=report)
+            form = ReportForm(instance=report, edit=request.user.is_board)
         else:
-            form = ReportForm()
+            form = ReportForm(edit=request.user.is_board)
         r = {'form': form, 'id': report_id}
         return render(request, 'minutes/forms/report_form.html', {'report': r})
 
     def post(self, request, report_id=None):
+        if not request.user.is_board:
+            return HttpResponseForbidden()
         logging.debug(request.POST)
         if report_id:
             report = Report.objects.get(pk=report_id)

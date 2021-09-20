@@ -8,12 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class StudentForm(MyModelForm):
-    # dob = forms.DateField(
-    #     error_messages={'invalid': "Enter a valid date in YYYY-MM-DD format"}
-    # )
-    # safety_class = forms.DateField(required=False,
-    #     error_messages={'invalid': "Enter a valid date in YYYY-MM-DD format"}
-    # )
 
     class Meta(MyModelForm.Meta):
         # def __init__(self, *args, **kwargs):

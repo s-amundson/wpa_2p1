@@ -27,7 +27,7 @@ def member_update(sender, instance, created, **kwargs):
     if instance.db_model == 'Membership':
         membership = Membership.objects.get(idempotency_key=instance.idempotency_key)
         logging.debug(instance.status)
-        if instance.status == "SUCCESS":
+        if instance.status in ["SUCCESS", 'COMPLETED']:
             membership.pay_status = 'paid'
             for student in membership.students.all():
                 member, created = Member.objects.update_or_create(student=student)
@@ -46,6 +46,7 @@ def member_update(sender, instance, created, **kwargs):
                 # set is_member in user
                 if student.user is not None:
                     student.user.is_member = True
+                    student.user.save()
         else:
             membership.pay_status = 'error'
 
