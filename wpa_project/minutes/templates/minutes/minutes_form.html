@@ -16,7 +16,11 @@
         <input type="hidden" id="minutes-id" value="{{ minutes_id }}">
         <input type="hidden" id="url-business" value="{% url 'minutes:business' %}">
         <input type="hidden" id="url-business-update" value="{% url 'minutes:business_update' %}">
-        <input type="hidden" id="url-minutes" value="{% url 'minutes:minutes_form' minutes_id %}">
+        {% if minutes_id %}
+            <input type="hidden" id="url-minutes" value="{% url 'minutes:minutes_form' minutes_id %}">
+        {% else %}
+            <input type="hidden" id="url-minutes" value="{% url 'minutes:minutes_form' %}">
+        {% endif %}
         <input type="hidden" id="url-report" value="{% url 'minutes:report' %}">
         <div class="row p-3">
             <div class="col-2">

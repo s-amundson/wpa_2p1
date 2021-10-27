@@ -18,6 +18,9 @@ TODO
     social accounts
     test beginner class canceled (square refunds) - refund needs to check for prior refund amount
     cookie law
+    member events
+    add field for vaccination.
+    add verbage about vaccination status or covid test. and thier accompaning adult
 
 Wish:
     Wish: add classes that a student has attended.
