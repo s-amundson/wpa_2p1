@@ -2,6 +2,11 @@
 
 {% block title %} Beginner Class {% endblock %}
 
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/class_attendance.js' %}"></script>
+{% endblock %}
+
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
     {% if user.is_board %}
@@ -15,7 +20,8 @@
 
     <div class="row p-2">
         {% if attendee_form %}
-            <form class="col" method="post">{% csrf_token %}
+            <form id="attendance_form" class="col" method="post">
+                {% csrf_token %}
                 <input type="hidden" name="attendee_form" value="on">
                 <div class="row">
                     <div class="col border"> New Students </div>
@@ -24,11 +30,16 @@
                     <div class="col-1 border">ID</div>
                     <div class="col-3 border">First Name</div>
                     <div class="col-3 border">Last Name</div>
-                    <div class="col-3 border">Date of Birth</div>
+                    <div class="col border">Date of Birth</div>
 
                     <div class="col-2 border">
                         {% if attendee_form.is_closed %}
                             Attending
+                        {% endif %}
+                    </div>
+                    <div class="col border">
+                        {% if attendee_form.is_closed %}
+                            Covid-19 Vaccination
                         {% endif %}
                     </div>
                 </div>
@@ -37,7 +48,7 @@
                         <div class="col-1 border">{{ s.id }}</div>
                         <div class="col-3 border">{{ s.first_name }}</div>
                         <div class="col-3 border">{{ s.last_name }}</div>
-                        <div class="col-3 border">{{ s.dob }}</div>
+                        <div class="col border">{{ s.dob }}</div>
                         <div class="col-2 border">
                             {% if attendee_form.is_closed %}
                                 {% if s.signature %}
@@ -55,6 +66,12 @@
                                         {% endif %}
                                     </a>
                                 </div>
+                            {% endif %}
+                        </div>
+                        <div class="col border">
+                            {% if attendee_form.is_closed %}
+                                <input type="checkbox" class="m-2" id="{{ s.covid_vax_check }}"
+                                {% if s.covid_vax %} checked="" {% endif %}>
                             {% endif %}
                         </div>
                     </div>

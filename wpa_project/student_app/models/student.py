@@ -23,6 +23,7 @@ class Student(models.Model):
 
     # hidden fields
     safety_class = models.DateField(null=True)
+    covid_vax = models.BooleanField(default=False)
     # __original_email = None
     #
     # def __init__(self, *args, **kwargs):
