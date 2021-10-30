@@ -47,10 +47,8 @@ services:
       - 8080:80
       - 8081:443
     restart: always
-    environment:
-      WORDPRESS_DB_HOST: mysql:3306
-      WORDPRESS_DB_USER: wordpress_user
-      WORDPRESS_DB_PASSWORD: wordpress_password
+    env_file:
+      - ./wordpress.env
     volumes:
       - ../wordpress:/var/www/html
 
@@ -58,7 +56,7 @@ services:
     container_name: nginx
 
     image: nginx:mainline-alpine
-#    restart: unless-stopped #always
+    restart: unless-stopped #always
     ports:
       - 80:80
       - 443:443
@@ -67,8 +65,7 @@ services:
       - staticfiles:/app/static/
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-#      - photo-static:/photo_app/static
-#      - photo-media:/photo_media/media
+
     depends_on:
       - web
       - wordpress
@@ -90,9 +87,3 @@ networks:
 volumes:
   postgres-data:
   staticfiles:
-#  photo-media:
-#    name: photo-media
-#    external: true
-#  photo-static:
-#    name: photo-static
-#    external: true

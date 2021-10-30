@@ -21,10 +21,11 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             {% if user.is_member %}
-                                <a class="dropdown-item" href="{% url 'membership:membership' %}">Membership</a>
+                                Membership coming soon.
                                 <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
                             {% else %}
-                                <a class="dropdown-item" href="{% url 'membership:membership' %}">Join</a>
+                                Membership coming soon.
+
                             {% endif %}
                         </div>
                     </li>
