@@ -28,9 +28,9 @@ class StudentForm(MyModelForm):
         self.fields['first_name'].widget.attrs.update({'placeholder': 'First Name'})
         self.fields['last_name'].widget.attrs.update({'placeholder': 'Last Name'})
         self.fields['dob'].widget.attrs.update({'placeholder': 'Date of Birth YYYY-MM-DD'})
-        self.fields['dob'].error_messages = {'invalid': "Enter a valid date in YYYY-MM-DD format"}
+        self.fields['dob'].error_messages = {'required': '*', 'invalid': "Enter a valid date in YYYY-MM-DD format"}
         self.fields['safety_class'].widget.attrs.update({'placeholder': 'Safety Class YYYY-MM-DD'})
-        self.fields['safety_class'].error_messages = {'invalid': "Enter a valid date in YYYY-MM-DD format"}
+        self.fields['safety_class'].error_messages = {'required': '*', 'invalid': "Enter a valid date in YYYY-MM-DD format"}
         if student_is_user:
             self.fields['email'].widget.attrs.update({'disabled': 'disabled'})
         else:

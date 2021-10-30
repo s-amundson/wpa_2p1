@@ -26,39 +26,11 @@ $(document).ready(function(){
 
 });
 
-function check_dob(i, el) {
-//    if ($("#id_beginner_class").val() != "") {
-//        let e = $(el);
-//        console.log($("#id_beginner_class").val())
-//        let dob = new Date(e.attr('dob'));;
-//        console.log(dob)
-//        let class_date = new Date($("#id_beginner_class").val());
-//        let of_age = new Date(class_date.setFullYear(class_date.getFullYear() - 9));
-//        console.log(of_age);
-//        console.log(dob < of_age)
-//        if (dob < of_age) {
-//            e.attr("disabled", false);
-//        }
-//        else {
-//            e.attr("disabled", true);
-//            e.attr("checked", false);
-//            if ($("#is-new-student-" + i).html() == "New Student") {
-//                $("#is-new-student-" + i).html("New Student, Students must be 9 years or older to attend")
-//            }
-//            else if ($("#is-new-student-" + i).html() == "Returning Student") {
-//                $("#is-new-student-" + i).html("Returning Student, Students must be 9 years or older to attend")
-//            }
-//        }
-//    }
-}
-
 async function get_calendar() {
     await $.get("class_calendar/" + month, function(data, status){
         $("#div-calendar").html(data);
-        console.log(status);
         $(".bc-btn").click(select_class)
         let d = new Date().getMonth() + 1 // Jan is 0 in javascript
-        console.log(d)
         if (month == d) {
             $("#calendar-prev-btn").hide();
         }
@@ -80,7 +52,6 @@ async function get_class_status() {
             $("#class-availible").html(msg);
         });
     }
-    $(".student-check").each(check_dob);
 }
 
 async function get_reg_table() {
@@ -137,14 +108,12 @@ function pay_status_links(i, el) {
 
 async function post_unregister() {
     // to unregister student(s) from a class.
-    console.log('on submit')
     let refund = 0;
     let unreg_list = [];
     let getConfirm = false;
     let class_id = "";
     $(".unreg").each(function(i, obj) {
         class_id = $(this).attr("class_id");
-        console.log("class_id " + class_id);
         if($(this).prop('checked') == true) {
             refund += parseInt($("#cost_" + class_id).val());
             unreg_list.push(class_id);
@@ -185,8 +154,6 @@ async function post_unregister() {
             return data;
             }, "json");
 
-        //      request new table from server
-        console.log('get table from server')
         get_reg_table();
         alert("You have successfully been unregistered from the class.\n")
     }
@@ -197,7 +164,6 @@ async function post_unregister() {
 
 function select_class() {
     $("#div-calendar").hide()
-    console.log($(this).attr('bc_id'))
     $("#id_beginner_class").val($(this).attr('bc_id'))
     $("#beginner-class-form").show()
     $("#calendar-show-btn").show()

@@ -13,9 +13,10 @@ class ClassRegistrationForm(forms.Form):
         super().__init__(*args, **kwargs)
         bc = self.get_open_classes()
         self.fields['beginner_class'] = forms.ChoiceField(choices=bc)
-        self.fields['terms'] = forms.BooleanField(widget=forms.CheckboxInput(
-                attrs={'class': "m-2"}), required=True, label=f'I agree to the terms of the AWRL',
-                initial=False)
+        self.fields['terms'] = forms.BooleanField(
+            widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=True,
+            label=f'I agree to the terms of the AWRL, COVID-19 Policy and the Cancellation Policy',
+            initial=False)
         self.students = list(students.values())
 
         for student in students:

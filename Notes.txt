@@ -14,18 +14,15 @@ Useful Commands:
     docker exec -it django python manage.py runapschedular
 
 TODO
-    instructors - add to sign up for class but not count as.
     social accounts
     test beginner class canceled (square refunds) - refund needs to check for prior refund amount
     cookie law
     member events
-    add field for vaccination.
     add verbage about vaccination status or covid test. and thier accompaning adult
-    fix error when running test_post_student_errors
 
 Wish:
     Wish: add classes that a student has attended.
-    Wish; add students to class by admin.
+    Wish: add students to class by admin.
 
     For deployment need to add SSL Certs started ssl per: https://stackify.com/how-to-configure-https-for-an-nginx-docker-container/
     https://docs.djangoproject.com/en/3.2/howto/outputting-pdf/
