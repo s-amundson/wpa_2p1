@@ -17,7 +17,7 @@ class StudentForm(MyModelForm):
         disabled_fields = []
         hidden_fields = []
         optional_fields = ['email', 'safety_class']
-        required_fields = ['first_name', 'last_name', 'dob', ]
+        required_fields = ['first_name', 'last_name', 'dob']
         fields = optional_fields + hidden_fields + disabled_fields + required_fields
 
     def __init__(self, *args, **kwargs):

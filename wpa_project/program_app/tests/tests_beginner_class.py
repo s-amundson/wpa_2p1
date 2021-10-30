@@ -35,7 +35,7 @@ class TestsBeginnerClass(TestCase):
         # Post the page user is forbidden
         response = self.client.post(reverse('programs:beginner_class'),
                                     {'class_date': '2021-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
-                                     'state': 'scheduled', 'cost': 5}, secure=True)
+                                     'instructor_limit': 2, 'state': 'scheduled', 'cost': 5}, secure=True)
         self.assertEqual(response.status_code, 403)
 
     def test_staff_user_is_authorized(self):
@@ -51,7 +51,7 @@ class TestsBeginnerClass(TestCase):
         # Add a class
         response = self.client.post(reverse('programs:beginner_class'),
                         {'class_date': '2023-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
-                         'state': 'scheduled', 'cost': 5}, secure=True)
+                         'instructor_limit': 2, 'state': 'scheduled', 'cost': 5}, secure=True)
         # self.assertEqual(response.status_code, 200)
         # self.assertRedirects(response, reverse('registration:index'), status_code=301,
         #     target_status_code=200, fetch_redirect_response=True)
@@ -154,7 +154,7 @@ class TestsBeginnerClass(TestCase):
         self.client.force_login(self.test_user)
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
                                     {'class_date': "2022-06-05", 'beginner_limit': 4, 'returnee_limit': 2,
-                                     'state': 'canceled', 'cost': 5}, secure=True)
+                                     'instructor_limit': 2, 'state': 'canceled', 'cost': 5}, secure=True)
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 4)
         for c in cr:

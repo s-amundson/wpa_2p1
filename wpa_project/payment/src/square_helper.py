@@ -159,5 +159,5 @@ class SquareHelper:
             self.log_refund(square_response, log)
         elif result.is_error():
             square_response['status'] = 'error'
-            square_response['error'] = result.errors
+            square_response['error'] = result.errors['detail']
         return square_response
