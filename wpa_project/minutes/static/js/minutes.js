@@ -5,9 +5,9 @@ $(document).ready(function() {
     // if meeting has started display time started. else put button to start meeting.
     if ($("#id_start_time").val() == "") {
         $("#id_start_time").hide();
-        $("#minutes-form :input").each(function() {
-            disable_inputs(true);
-        });
+//        $("#minutes-form :input").each(function() {
+//            disable_inputs(true);
+//        });
     }
     else {
         $("#btn-start").hide();
@@ -16,6 +16,21 @@ $(document).ready(function() {
         e.preventDefault();
         disable_inputs(false);
         $("#minutes-form").submit();
+        $(".btn-report").prop('disabled', false);
+    });
+
+    if ($("#id_end_time").val() == "") {
+        $("#id_end_time").hide();
+    }
+    else {
+        $("#btn-end").hide();
+    }
+    $("#btn-end").click(function(e){
+        e.preventDefault();
+        $("#id_end_time").val(get_time)
+        disable_inputs(false);
+        $("#minutes-form").submit();
+        $(".btn-report").prop('disabled', false);
     });
 
     // loop though the report owners
@@ -47,6 +62,15 @@ $(document).ready(function() {
         e.preventDefault();
         load_business_form();
     });
+
+    // update minutes on change of inputs
+    let arr = ['id_meeting_date', 'id_start_time', 'id_attending', 'id_minutes_text', 'id_memberships', 'id_balance',
+               'id_discussion', 'id_end_time'];
+    arr.forEach(function(item) {
+        $("#" + item).change(function(e){
+            update_minutes($(this))
+        });
+    });
 });
 
 function disable_inputs(state) {
@@ -58,7 +82,7 @@ function disable_inputs(state) {
 
 function get_time() {
     var dt = new Date();
-    return dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+    return pad(dt.getHours(), 2) + ":" + pad(dt.getMinutes(), 2) + ":" + pad(dt.getSeconds(), 2);
 }
 
 function index_business_div(container, new_business) {
@@ -80,10 +104,6 @@ function index_business_div(container, new_business) {
     container.find("#business_resolved_bool").prop('id', "business_resolved_bool-" + report_count);
     container.find("#div-resolved-date").prop('id', "div-resolved-date-" + report_count);
     container.prop('id', "business-div-" + report_count);
-
-    container.find(".div-business-update").each(function(index) {
-        index_update($(this), false)
-    });
 
     if (new_business) {
         $("#btn-add-update-" + report_count).hide()
@@ -108,6 +128,10 @@ function index_business_div(container, new_business) {
         e.preventDefault();
         console.log($(this).attr("count"));
         load_business_update($("#business-id-" + $(this).attr("count")).val());
+    });
+
+    container.find(".div-business-update").each(function(index) {
+        index_update($(this), false)
     });
 }
 
@@ -203,17 +227,17 @@ async function save_business(business_element) {
         console.log(data);
         $("#business-id-" + count).val(data.business_id);
         indicate_saved(data.success)
-        if ($("#business-div-" + count).attr('new-business')) {
-                $("#business-div-" + count + " :input").each( function() {
-                $(this).prop('disabled', data.success);
-            });
-        }
-        else {
-            $("#business-div-" + count).find(".div-business-update").each(function(index) {
-                logging.debug($(this).attr('new-update'))
-
-            });
-        }
+//        if ($("#business-div-" + count).attr('new-business')) {
+//                $("#business-div-" + count + " :input").each( function() {
+//                $(this).prop('disabled', data.success);
+//            });
+//        }
+//        else {
+//            $("#business-div-" + count).find(".div-business-update").each(function(index) {
+//                logging.debug($(this).attr('new-update'))
+//
+//            });
+//        }
 
         $("#business_resolved_bool-" + count).prop('disabled', false);
     }, "json");
@@ -254,10 +278,32 @@ async function save_update(update_element) {
         update_text: update_element.val()
     }, function(data, status){
         console.log(data);
-        if (status == 'success') {
-            $("#div-saved-message").html("Saved at:" + get_time());
-        }
+//        if (status == 'success') {
+//            $("#div-saved-message").html("Saved at:" + get_time());
+//        }
         $("#business-update-id-" + count).val(data.update_id);
         indicate_saved(data.success);
     }, "json");
+}
+
+async function update_minutes() {
+    if($("#minutes-id").val() != "") {
+        let post_data = {
+            'csrfmiddlewaretoken': $('#minutes-form').find('[name="csrfmiddlewaretoken"]').val(),
+            'update': true
+        }
+        let arr = ['meeting_date', 'start_time', 'attending', 'minutes_text', 'memberships', 'balance',
+                   'discussion', 'end_time'];
+        arr.forEach(function(item) {
+            post_data[item] = $("#id_" + item).val();
+        });
+
+        await $.post($("#url-minutes").val(), post_data, function(data, status){
+            console.log(data);
+            if (status == 'success') {
+                $("#div-saved-message").html("Saved at:" + get_time());
+            }
+
+        }, "json");
+    }
 }

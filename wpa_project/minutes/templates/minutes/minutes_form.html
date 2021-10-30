@@ -8,13 +8,19 @@
 {% endblock %}
 
 {% block main %}
+{% load l10n %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
 
-    <form id="minutes-form" method="post" action="minutes_form">
+    <form id="minutes-form" method="post">
         {% csrf_token %}
         <input type="hidden" id="minutes-id" value="{{ minutes_id }}">
         <input type="hidden" id="url-business" value="{% url 'minutes:business' %}">
         <input type="hidden" id="url-business-update" value="{% url 'minutes:business_update' %}">
+        {% if minutes_id %}
+            <input type="hidden" id="url-minutes" value="{% url 'minutes:minutes_form' minutes_id %}">
+        {% else %}
+            <input type="hidden" id="url-minutes" value="{% url 'minutes:minutes_form' %}">
+        {% endif %}
         <input type="hidden" id="url-report" value="{% url 'minutes:report' %}">
         <div class="row p-3">
             <div class="col-2">
@@ -46,10 +52,10 @@
 
         <div class="row p-3">
             <div class="col-2">
-                {{ form.minutes.label }}
+                {{ form.minutes_text.label }}
             </div>
             <div class="col">
-                {{ form.minutes }}
+                {{ form.minutes_text }}
             </div>
         </div>
 
@@ -67,7 +73,7 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-president-report" class="btn btn-primary">Add Report Item</button>
+                        <button id="btn-president-report" class="btn btn-primary btn-report">Add Report Item</button>
                     </div>
                 {% endif %}
             </div>
@@ -86,7 +92,7 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-vice-report" class="btn btn-primary">Add Report Item</button>
+                        <button id="btn-vice-report" class="btn btn-primary btn-report">Add Report Item</button>
                     </div>
                 {% endif %}
             </div>
@@ -105,7 +111,7 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-secretary-report" class="btn btn-primary">Add Report Item</button>
+                        <button id="btn-secretary-report" class="btn btn-primary btn-report">Add Report Item</button>
                     </div>
                 {% endif %}
             </div>
@@ -124,7 +130,7 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-treasure-report" class="btn btn-primary">Add Report Item</button>
+                        <button id="btn-treasure-report" class="btn btn-primary btn-report">Add Report Item</button>
                     </div>
                 {% endif %}
             </div>
@@ -174,7 +180,7 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-new-business" class="btn btn-primary">Add New Business</button>
+                        <button id="btn-new-business" class="btn btn-primary btn-report">Add New Business</button>
                     </div>
                 {% endif %}
             </div>
@@ -189,6 +195,15 @@
             </div>
         </div>
 
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.end_time.label }}
+            </div>
+            <div id="div-end-input" class="col">
+                {{ form.end_time }}
+                <button id="btn-end" class="btn btn-primary btn-report" type="submit">End Meeting Now</button>
+            </div>
+        </div>
     </form>
 
 {% endblock %}

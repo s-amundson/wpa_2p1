@@ -4,41 +4,51 @@
 
 {% block main %}
     <div class="row p-2" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-
-    <div class="row p-2">
-        <div class="col">
-            Date
-        </div>
-        <div class="col">
-            Beginners
-        </div>
-        <div class="col">
-            Returnees
-        </div>
-        <div class="col">
-            State
-        </div>
-    </div>
-
-    {% for c in object_list %}
+    <div class="p-2">
         <div class="row p-2">
             <div class="col">
-                <a class="nav-link" href="{% url 'programs:beginner_class' c.id %}">
-                    {{ c.class_date }}
-                </a>
+                Date
             </div>
             <div class="col">
-                {{ c.beginner }}/{{ c.beginner_limit }}
+                Beginners
             </div>
             <div class="col">
-                {{ c.returnee }}/{{ c.returnee_limit }}
+                Returnees
             </div>
+            {% if user.is_staff %}
+                <div class="col">
+                    Instructors
+                </div>
+            {% endif %}
             <div class="col">
-                {{ c.state }}
+                State
             </div>
         </div>
-    {% endfor %}
 
+        {% for c in object_list %}
+            <div class="row">
+                <div class="col border">
+                    <a class="nav-link" href="{% url 'programs:beginner_class' c.id %}">
+                        {{ c.class_date }}
+                    </a>
+                </div>
+                <div class="col border">
+                    {{ c.beginner }}/{{ c.beginner_limit }}
+                </div>
+                <div class="col border">
+                    {{ c.returnee }}/{{ c.returnee_limit }}
+                </div>
+                {% if user.is_staff or user.is_instructor %}
+                    <div class="col border">
+                        {{ c.instructors }}/{{ c.instructor_limit }}
+                    </div>
+                {% endif %}
+                <div class="col border">
+                    {{ c.state }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
     <div class="row p-2">
         {% if user.is_board %}
             <a class="nav-link" href="{% url 'programs:beginner_class' %}">

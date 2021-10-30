@@ -12,6 +12,7 @@ class BeginnerClass(models.Model):
     class_date = models.DateTimeField()
     beginner_limit = models.IntegerField()
     returnee_limit = models.IntegerField()
+    instructor_limit = models.IntegerField(default=10)
     state = models.CharField(max_length=20, null=True, choices=states)
     cost = models.IntegerField(default=5)
 

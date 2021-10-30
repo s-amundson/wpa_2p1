@@ -1,4 +1,4 @@
-<div class="row business-div">
+<div class="row business-div" id="business-div">
     <div class="col">
         <div class="row">
             {% csrf_token %}
@@ -20,13 +20,15 @@
         <div class="row">
             <div class="col">
                 {% if user.is_board %}
-                    <button id="btn-add-update" class="btn btn-primary">Add Update</button>
+                    <button id="btn-add-update" class="btn btn-primary btn-report">Add Update</button>
                 {% endif %}
             </div>
             <div class="col"></div>
             <div class="col">
                 <div class="row">
-                    Resolved: {{ business.form.resolved_bool }}
+                    {% if user.is_board %}
+                        Resolved: {{ business.form.resolved_bool }}
+                    {% endif %}
                 </div>
             </div>
 

@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.urls import reverse
 from django.views.generic.base import View
 from django.views.generic import ListView
@@ -65,19 +65,28 @@ class BeginnerClassView(LoginRequiredMixin, View):
             class_registration = c.classregistration_set.exclude(pay_status='refunded')
             new_count = 0
             for registration in class_registration:
-                if f'check_{registration.student.id}' in request.POST:
+                attended = request.POST.get(f'check_{registration.student.id}', 'false')
+                if attended in ['true', 'on']:
                     registration.attended = True
                     registration.student.safety_class = str(c.class_date)[:10]
                     new_count += 1
 
                 elif registration.attended: # if registration was unchecked remove safety class date.
                     logging.debug('remove attendance')
-                    registration.student.safety_class = None
+                    if str(registration.student.safety_class) == str(c.class_date)[:10]:
+                        registration.student.safety_class = None
                     registration.attended = False
+
+                vax = request.POST.get(f'covid_vax_{registration.student.id}', 'false')
+                logging.debug(vax)
+                registration.student.covid_vax = vax in ['true', 'on']
+
                 registration.student.save()
                 registration.save()
             logging.debug(new_count)
-            return HttpResponseRedirect(reverse('programs:class_list'))
+            # return HttpResponseRedirect(reverse('programs:class_list'))
+            return JsonResponse({'count': new_count})
+
         if beginner_class is not None: # we are updating a record.
 
             bc = BeginnerClass.objects.get(pk=beginner_class)
@@ -130,11 +139,15 @@ class BeginnerClassView(LoginRequiredMixin, View):
 
 
 class BeginnerClassListView(LoginRequiredMixin, ListView):
-    crh = ClassRegistrationHelper()
     template_name = 'program_app/beginner_class_list.html'
-    bc = BeginnerClass.objects.filter(class_date__gt=timezone.now())
-    queryset = []
-    for c in bc:
-        d = model_to_dict(c)
-        d = {**d, **crh.enrolled_count(c)}
-        queryset.append(d)
+
+    def get_queryset(self):
+        crh = ClassRegistrationHelper()
+        bc = BeginnerClass.objects.filter(class_date__gt=timezone.now())
+        queryset = []
+        for c in bc:
+            logging.debug(f'date: {c.class_date} status: {c.state}')
+            d = model_to_dict(c)
+            d = {**d, **crh.enrolled_count(c)}
+            queryset.append(d)
+        return queryset

@@ -1,5 +1,5 @@
 import logging
-from django.forms import ModelForm
+from django.forms import ModelForm, TimeField
 from django.utils import datetime_safe, timezone
 
 from ..models import Minutes
@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class MinutesForm(ModelForm):
-
     class Meta:
         model = Minutes
         exclude = []
@@ -25,7 +24,7 @@ class MinutesForm(ModelForm):
         for f in self.Meta.optional_fields:
             self.fields[f].required = False
             if not edit:
-                self.fields[f].widget.attrs.update({'disabled': 'disabled'})
+                self.fields[f].widget.attrs.update({'readonly': 'readonly'})
         self.fields['meeting_date'].initial = datetime_safe.date.today()
         self.fields['memberships'].initial = len(Member.objects.filter(expire_date__gt=timezone.now()))
         self.fields['start_time'].initial = ''

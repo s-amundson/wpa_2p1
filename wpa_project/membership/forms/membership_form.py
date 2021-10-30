@@ -1,14 +1,14 @@
-from django.forms import BooleanField, CheckboxInput, ModelForm, MultipleChoiceField, RadioSelect
+from django.forms import BooleanField, CheckboxInput, RadioSelect
 from django.utils.datetime_safe import date
 import logging
-
+from src.model_form import MyModelForm
 from ..models import Membership, Level
 logger = logging.getLogger(__name__)
 
 
-class MembershipForm(ModelForm):
+class MembershipForm(MyModelForm):
 
-    class Meta:
+    class Meta(MyModelForm.Meta):
         model = Membership
         fields = ['level']
         hidden_fields = []
@@ -29,14 +29,7 @@ class MembershipForm(ModelForm):
             choices.append((level.id, level.name))
         logging.debug(choices)
         self.fields['level'].widget = RadioSelect(choices=choices)
-        # self.fields['level'].choices = choices
-        # for f in self.Meta.fields:
-        #     self.fields[f].widget.attrs.update({'class': 'form-control m-2'})
-        # for f in self.Meta.optional_fields:
-        #     self.fields[f].required = False
-        # for f in self.Meta.hidden_fields:
-        #     self.fields[f].required = False
-        #     self.fields[f].widget.attrs.update({'class': 'form-control m-2', 'disabled': 'disabled'})
+
     def get_boxes(self):
         for field_name in self.fields:
             if field_name.startswith('student_'):

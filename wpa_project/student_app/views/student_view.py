@@ -105,6 +105,7 @@ class AddStudentView(LoginRequiredMixin, View):
             form = StudentForm(request.POST, instance=g)
         else:
             form = StudentForm(request.POST)
+        logging.debug(request.POST)
         if form.is_valid():
             logging.debug(form.cleaned_data)
             if request.user.is_board:

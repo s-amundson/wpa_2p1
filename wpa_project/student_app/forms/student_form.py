@@ -8,12 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class StudentForm(MyModelForm):
-    # dob = forms.DateField(
-    #     error_messages={'invalid': "Enter a valid date in YYYY-MM-DD format"}
-    # )
-    # safety_class = forms.DateField(required=False,
-    #     error_messages={'invalid': "Enter a valid date in YYYY-MM-DD format"}
-    # )
 
     class Meta(MyModelForm.Meta):
         # def __init__(self, *args, **kwargs):
@@ -23,7 +17,7 @@ class StudentForm(MyModelForm):
         disabled_fields = []
         hidden_fields = []
         optional_fields = ['email', 'safety_class']
-        required_fields = ['first_name', 'last_name', 'dob', ]
+        required_fields = ['first_name', 'last_name', 'dob']
         fields = optional_fields + hidden_fields + disabled_fields + required_fields
 
     def __init__(self, *args, **kwargs):
@@ -34,9 +28,9 @@ class StudentForm(MyModelForm):
         self.fields['first_name'].widget.attrs.update({'placeholder': 'First Name'})
         self.fields['last_name'].widget.attrs.update({'placeholder': 'Last Name'})
         self.fields['dob'].widget.attrs.update({'placeholder': 'Date of Birth YYYY-MM-DD'})
-        self.fields['dob'].error_messages = {'invalid': "Enter a valid date in YYYY-MM-DD format"}
+        self.fields['dob'].error_messages = {'required': '*', 'invalid': "Enter a valid date in YYYY-MM-DD format"}
         self.fields['safety_class'].widget.attrs.update({'placeholder': 'Safety Class YYYY-MM-DD'})
-        self.fields['safety_class'].error_messages = {'invalid': "Enter a valid date in YYYY-MM-DD format"}
+        self.fields['safety_class'].error_messages = {'required': '*', 'invalid': "Enter a valid date in YYYY-MM-DD format"}
         if student_is_user:
             self.fields['email'].widget.attrs.update({'disabled': 'disabled'})
         else:

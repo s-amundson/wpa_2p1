@@ -13,6 +13,7 @@ class Calendar(HTMLCalendar):
                                                    class_date__month=self.month,
                                                    state='open')
         super(Calendar, self).__init__()
+        self.setfirstweekday(6)
 
     # formats a day as a td
     # filter events by day

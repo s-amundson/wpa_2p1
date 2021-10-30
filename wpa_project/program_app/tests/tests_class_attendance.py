@@ -47,7 +47,7 @@ class TestsClassAttendance(TestCase):
         # close the class
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
                                     {'class_date': "2022-06-05", 'beginner_limit': 2, 'returnee_limit': 2,
-                                     'state': 'closed', 'cost': 5}, secure=True)
+                                     'instructor_limit': 2, 'state': 'closed', 'cost': 5}, secure=True)
         self.assertEqual(response.status_code, 302)
         # TODO check payment status
         # check that the attending column is there with checkboxes
@@ -57,6 +57,7 @@ class TestsClassAttendance(TestCase):
         self.assertContains(response, 'check_2')
         self.assertContains(response, 'check_3')
 
+        logging.debug("mark attending")
         # Mark the students as attending and check the records were updated.
         self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
                          {'attendee_form': 'on', 'check_2': 'on', 'check_3': 'on'}, secure=True)
@@ -68,7 +69,7 @@ class TestsClassAttendance(TestCase):
 
         # Mark a student as not attending and check the records.
         self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
-                         {'attendee_form': 'on', 'check_3': 'on'}, secure=True)
+                         {'attendee_form': 'on', 'check_2': 'false', 'check_3': 'on'}, secure=True)
         cr = ClassRegistration.objects.all()
         self.assertEqual(cr[0].attended, False)
         self.assertEqual(cr[1].attended, True)

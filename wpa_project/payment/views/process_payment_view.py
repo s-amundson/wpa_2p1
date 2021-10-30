@@ -34,6 +34,7 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         paydict['action_url'] = request.session.get('action_url', reverse('payment:payment'))
         # rows, total = self.table_rows(request.session)
         table_rows = self.table_rows(request.session)
+        logging.debug(table_rows['total'])
         if table_rows['total'] == 0:
             # No payment necessary
             self.bypass_payment(request, table_rows)

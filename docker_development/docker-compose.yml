@@ -12,6 +12,22 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+#  mysql:
+#    image: mysql:8.0
+#    restart: unless-stopped
+#    env_file:
+#      - ../wpa_project/wpa_project.env
+##    environment:
+##      MYSQL_ROOT_PASSWORD: my_password
+##      MYSQL_DATABASE: wordpress
+##      MYSQL_USER: wordpress_user
+##      MYSQL_PASSWORD: wordpress_password
+#    command: '--default-authentication-plugin=mysql_native_password'
+#    ports:
+#      - 3306:3306
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+
   web:
     container_name: django_dev
     env_file:
@@ -31,6 +47,22 @@ services:
 #    env_file:
 #      - ../wpa_project/wpa_project.env
 
+#  wordpress:
+#    container_name: dev_wp
+#    image: wordpress:latest
+#    depends_on:
+#      - mysql
+#    ports:
+#      - 8080:80
+#      - 8081:443
+#    restart: always
+#    environment:
+#      WORDPRESS_DB_HOST: mysql:3306
+#      WORDPRESS_DB_USER: wordpress_user
+#      WORDPRESS_DB_PASSWORD: wordpress_password
+#    volumes:
+#      - ../wordpress:/var/www/html
+
 networks:
   default:
     name: my-app-net
@@ -39,3 +71,4 @@ networks:
 volumes:
   postgres-data:
   staticfiles:
+  mysql_data:

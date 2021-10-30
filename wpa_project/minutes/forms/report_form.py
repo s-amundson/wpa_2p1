@@ -1,13 +1,13 @@
 import logging
 from django.forms import ModelForm
 from ..models import Report
-
+from src.model_form import MyModelForm
 logger = logging.getLogger(__name__)
 
 
-class ReportForm(ModelForm):
+class ReportForm(MyModelForm):
 
-    class Meta:
+    class Meta(MyModelForm.Meta):
         model = Report
         optional_fields = ['report']
         hidden_fields = ['minutes', 'owner']
@@ -28,4 +28,3 @@ class ReportForm(ModelForm):
         self.fields['report'].widget.attrs.update({'cols': 80, 'rows': 3, 'class': 'form-control m-2 report'})
         if not edit:
             self.fields['report'].widget.attrs.update({'disabled': 'disabled'})
-

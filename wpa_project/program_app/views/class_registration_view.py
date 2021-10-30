@@ -85,6 +85,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
             beginner = 0
             returnee = 0
+            instructor = 0
             students = []
             message = ""
             logging.debug(form.cleaned_data)
@@ -93,12 +94,27 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 if str(k).startswith('student_') and v:
                     i = int(str(k).split('_')[-1])
                     s = Student.objects.get(pk=i)
+                    try:
+                        is_instructor = s.user.is_instructor
+                        is_instructor_expire = s.user.instructor_expire_date
+                    except (s.DoesNotExist, AttributeError):
+                        is_instructor = False
+
                     logging.debug(s)
                     if ClassRegistrationHelper().calc_age(s, beginner_class.class_date) < 9:
                         messages.add_message(request, messages.ERROR, 'Student must be at least 9 years old to participate')
                         message += 'Student must be at least 9 years old to participate'
                         logging.debug(message)
                         HttpResponseRedirect(reverse('programs:class_registration'))
+                    elif request.user.is_instructor and is_instructor:
+                        logging.debug('user is instructor')
+                        if is_instructor_expire < timezone.localdate(timezone.now()):
+                            messages.add_message(request, messages.ERROR,
+                                                 'Please update your instructor certification')
+                            message += 'Please update your instructor certification'
+                            logging.debug(message)
+                            HttpResponseRedirect(reverse('programs:class_registration'))
+                        instructor += 1
                     else:
                         if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
                                 pay_status="refunded")) == 0:
@@ -119,6 +135,8 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                 if enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
                     message += "Not enough space available in this class"
                 if enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
+                    message += 'Not enough space available in this class'
+                if enrolled_count['instructors'] + instructor > beginner_class.instructor_limit:
                     message += 'Not enough space available in this class'
                 if message == "":
                     logging.debug(message)

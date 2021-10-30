@@ -3,7 +3,7 @@ import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.shortcuts import render, reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.views.generic.base import View
 from django.utils import timezone
 from ..forms import MinutesForm, BusinessForm, BusinessUpdateForm, ReportForm
@@ -25,7 +25,7 @@ class MinutesFormView(LoginRequiredMixin, View):
         return bl
 
     def get(self, request, minutes_id=None):
-        if not request.user.is_board:
+        if not request.user.is_member:
             return HttpResponseForbidden()
         reports = {}
 
@@ -68,15 +68,22 @@ class MinutesFormView(LoginRequiredMixin, View):
             form = MinutesForm(request.POST)
 
         if form.is_valid():
+            logging.debug(form.cleaned_data)
             if form.cleaned_data.get('start_time', None) is None:
                 minutes = form.save(commit=False)
-                minutes.start_time = timezone.now()
+                minutes.start_time = timezone.localtime(timezone.now())
                 minutes.save()
             else:
                 minutes = form.save()
+            if request.POST.get('update', False):
+                logging.debug('json response')
+                return JsonResponse({'minutes_id': minutes.id, 'success': True})
             return HttpResponseRedirect(reverse('minutes:minutes_form', kwargs={'minutes_id': minutes.id}))
         else:  # pragma: no cover
             logging.debug(form.errors)
+            if request.POST.get('update', False):
+                logging.debug('json response')
+                return JsonResponse({'minutes_id': minutes_id, 'success': False})
             return render(request, 'minutes/minutes_form.html', {'form': form})
 
     def report_forms(self, minutes, owner, is_board):

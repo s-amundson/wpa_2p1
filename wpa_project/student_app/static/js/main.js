@@ -42,3 +42,9 @@ function load_student_form(student_div, student_id) {
         });
     });
 }
+// Pad a number with leading zeros from Geeksforgeeks.org
+function pad(n, width) {
+    n = n + '';
+    return n.length >= width ? n :
+        new Array(width - n.length + 1).join('0') + n;
+}
