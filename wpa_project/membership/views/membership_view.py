@@ -25,7 +25,7 @@ class MembershipView(LoginRequiredMixin, View):
         forms = []
         forms.append(MembershipForm(students=sf.student_set.all()))
         levels = Level.objects.filter(enabled=True)
-        return render(request, 'membership/membership.html', {'forms': forms, 'levels': levels})
+        return render(request, 'membership/construction_membership.html', {'forms': forms, 'levels': levels})
 
     def post(self, request):
         logging.debug(request.POST)

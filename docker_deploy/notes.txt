@@ -11,3 +11,5 @@ docker logs django
 docker exec -it nginx ./init-letsencrypt.sh
 docker exec -it nginx nginx -s reload
 docker exec -it docker_development_mysql_1 sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < m4vd43996587286.sql
+
+privatefiles.txt has information on creating the files that contain private information.

@@ -1,0 +1,48 @@
+docker_deploy/project.env
+    POSTGRES_USER=user
+    POSTGRES_PASSWORD=password
+    POSTGRES_DB=database
+
+docker_deploy/wordpress.env
+    MYSQL_DATABASE=wordpress
+    MYSQL_USER=wordpress_user
+    MYSQL_PASSWORD=wordpress_password
+    MYSQL_HOST=mysql
+
+    WORDPRESS_DB_HOST=mysql:3306
+    WORDPRESS_DB_USER=wordpress_user
+    WORDPRESS_DB_PASSWORD=wordpress_password
+    WORDPRESS_DB_NAME=wordpress
+
+wpa_project/wpa_project/secrets.json
+    {
+      "SECRET_KEY": "django-insecure-yf4azqog_+2skmuj-ps_%hwbh)98*-e3-igoj@vx07&j4wkslj",
+      "ALLOWED_HOSTS": ["localhost", "127.0.0.1", "0.0.0.0"],
+      "DATABASE_NAME": "database",
+      "DATABASE_USER": "user",
+      "DATABASE_PASSWORD": "password",
+      "DATABASE_HOST": "db",
+      "DATABASE_PORT": "5432",
+      "DEBUG": true,
+      "DEFAULT_FROM_EMAIL": "none@example.com",
+      "EMAIL_DEBUG": false,
+      "EMAIL_HOST_USER": "none@example.com",
+      "EMAIL_HOST_PASSWORD": "password",
+      "EMAIL_DEBUG_ADDRESSES": ["none@example.com"],
+      "SOCIALACCOUNT_PROVIDERS": {
+        "google": {
+          "SCOPE": [
+            "profile",
+            "email"
+          ],
+          "AUTH_PARAMS": {
+              "access_type": "offline"
+          }
+        }
+      },
+      "SQUARE_CONFIG": {
+        "access_token": "token",
+        "application_id": "sandbox",
+        "location_id": "",
+        "environment": "sandbox"}
+    }
