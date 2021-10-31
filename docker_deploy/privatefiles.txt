@@ -16,7 +16,7 @@ docker_deploy/wordpress.env
 
 wpa_project/wpa_project/secrets.json
     {
-      "SECRET_KEY": "django-insecure-yf4azqog_+2skmuj-ps_%hwbh)98*-e3-igoj@vx07&j4wkslj",
+      "SECRET_KEY": "secret",
       "ALLOWED_HOSTS": ["localhost", "127.0.0.1", "0.0.0.0"],
       "DATABASE_NAME": "database",
       "DATABASE_USER": "user",

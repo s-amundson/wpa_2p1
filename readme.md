@@ -1,4 +1,4 @@
-###### Project to make site for Woodly Park Archers for student registration
+###### Project to make site for Woodley Park Archers for student registration. See docker_deploy/privatefiles.txt for settings information.
 
 To run: \
 &nbsp;&nbsp; docker-compose build \
