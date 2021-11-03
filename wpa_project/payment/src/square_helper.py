@@ -152,6 +152,8 @@ class SquareHelper:
                   "payment_id": log.payment_id
                   })
         square_response = result.body.get('refund', {'refund': None})
+        logging.debug(square_response)
+        logging.debug(result)
         if result.is_success():
             square_response['error'] = ""
             log.status = 'refund'
@@ -159,5 +161,7 @@ class SquareHelper:
             self.log_refund(square_response, log)
         elif result.is_error():
             square_response['status'] = 'error'
-            square_response['error'] = result.errors['detail']
+            logging.debug(result.errors)
+            logging.debug(type(result.errors))
+            square_response['error'] = result.errors
         return square_response

@@ -30,7 +30,6 @@ class TestsMinutes(TestCase):
     def test_get_minutes_form_new(self):
         response = self.client.get(reverse('minutes:minutes_form'), secure=True)
         self.assertIsNone(response.context['minutes_id'])
-        logging.debug(response.context)
         self.assertTemplateUsed('minutes/minutes_form.html')
 
     def test_get_minutes_form_unauthorized(self):

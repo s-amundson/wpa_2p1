@@ -12,4 +12,10 @@ docker exec -it nginx ./init-letsencrypt.sh
 docker exec -it nginx nginx -s reload
 docker exec -it docker_development_mysql_1 sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < m4vd43996587286.sql
 
+docker exec -it django_dev python manage.py test program_app --pattern temp_tests.py --keepdb
+docker exec -it django_dev coverage run --source='.' manage.py test student_app --keepdb && coverage html
+docker exec -it django_dev coverage run --source='.' manage.py test student_app membership minutes payment program_app
+docker exec -it django_dev python manage.py dumpdata membership > wpa_project/membership/fixtures/level.json
+docker exec -it django python manage.py runapschedular
+
 privatefiles.txt has information on creating the files that contain private information.

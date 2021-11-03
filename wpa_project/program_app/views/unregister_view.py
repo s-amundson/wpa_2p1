@@ -57,7 +57,13 @@ class UnregisterView(LoginRequiredMixin, APIView):
             donation = serializer.data.get('donation', False)
             errors = ""
             for c in class_list:
-                cr = get_object_or_404(ClassRegistration, pk=c)
+                # cr = get_object_or_404(ClassRegistration, pk=c)
+                try:
+                    cr = ClassRegistration.objects.get(pk=c)
+                except (ClassRegistration.DoesNotExist, AttributeError):
+                    logging.debug('registration not found')
+                    response_dict['error'] = 'registration not found'
+                    return response_dict
                 dt = timezone.now() + timedelta(hours=24)
 
                 if cr.beginner_class.state in BeginnerClass().get_states()[3:]:
@@ -77,7 +83,11 @@ class UnregisterView(LoginRequiredMixin, APIView):
                     square_response = self.square_helper.refund_payment(ik.idempotency_key, ik.amount * ik.count)
                     if square_response['status'] == 'error':  # pragma: no cover
                         logging.error(square_response)
-                        errors += square_response['error']
+                        if type(square_response['error']) == str:
+                            errors += square_response['error']
+                        else:
+                            logging.debug(type(square_response['error']))
+                            logging.debug(square_response['error'])
             logging.debug(errors)
             if errors == '':
                 response_dict['status'] = "SUCCESS"

@@ -3,8 +3,10 @@ import json
 import time
 import uuid
 
+
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone, datetime_safe
 
 from ..src import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
@@ -31,7 +33,7 @@ class TestsClassRegistration(TestCase):
         self.assertTemplateUsed(response, 'program_app/class_registration.html')
 
     def test_class_register_good(self):
-        # add a user to the class<option value="2022-06-05 09:00:00+00:00">05 Jun, 2022 09 AM / 11 AM</option>
+        # add a user to the class
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
@@ -247,3 +249,57 @@ class TestsClassRegistration(TestCase):
         response = self.client.get(reverse('programs:class_registered_table'), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'program_app/tables/class_registered_table.html')
+
+    def test_class_register_instructor_current(self):
+        # make user instructor
+        self.test_user.is_instructor = True
+        d = timezone.now()
+        self.test_user.instructor_expire_date = d.replace(year=d.year + 1)
+        self.test_user.save()
+
+        # add a user to the class
+        self.client.post(reverse('programs:class_registration'),
+                         {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'open')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 1)
+        self.assertEqual(cr[0].beginner_class, bc)
+        self.assertEqual(self.client.session['line_items'][0]['name'],
+                         'Class on 2022-06-05 instructor id: 1')
+        self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
+
+    def test_class_register_instructor_overdue(self):
+        # make user instructor
+        self.test_user.is_instructor = True
+        d = timezone.now()
+
+        self.test_user.instructor_expire_date = d.replace(month=d.month - 1)
+        self.test_user.save()
+
+        # add a user to the class
+        self.client.post(reverse('programs:class_registration'),
+                         {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'open')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 0)
+
+    def test_class_register_instructor_full(self):
+        # make user instructor
+        self.test_user.is_instructor = True
+        d = timezone.now()
+        self.test_user.instructor_expire_date = d.replace(month=d.month + 1)
+        self.test_user.save()
+
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.instructor_limit = 0
+        bc.save()
+
+        # add a user to the class
+        self.client.post(reverse('programs:class_registration'),
+                         {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'open')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 0)

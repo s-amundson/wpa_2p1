@@ -100,10 +100,21 @@ class BeginnerClassView(LoginRequiredMixin, View):
             if len(BeginnerClass.objects.filter(class_date=form.cleaned_data['class_date'])) > 0 \
                     and beginner_class is None:
                 logging.debug('Class Exists')
-                messages.add_message(request, messages.ERROR, 'A class on this date already exists')
+                messages.add_message(request, messages.ERROR, 'A class at this time already exists')
                 return render(request, 'student_app/form_as_p.html', {'form': form, 'message': 'Class Exists'})
 
             bc = form.save()
+            logging.debug(bc.class_type)
+            if bc.class_type == 'beginner' and bc.returnee_limit > 0:
+                messages.add_message(request, messages.WARNING,
+                                     "beginner class can't have a returnee limit greater then 0")
+                bc.returnee_limit = 0
+                bc.save()
+            elif bc.class_type == 'returnee' and bc.beginner_limit > 0:
+                messages.add_message(request, messages.WARNING,
+                                     "returning class can't have a beginner limit greater then 0")
+                bc.beginner_limit = 0
+                bc.save()
             if bc.state == 'canceled':
                 ec = ClassRegistrationHelper().enrolled_count(bc)
                 square_helper = SquareHelper()

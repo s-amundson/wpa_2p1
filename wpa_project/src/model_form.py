@@ -29,6 +29,7 @@ class MyModelForm(ModelForm):
             self.fields[f].required = False
             self.fields[f].widget.attrs.update({'class': 'form-control m-2'})
         for f in self.Meta.read_fields:
+            self.fields[f].required = False
             self.fields[f].widget.attrs.update({'class': 'form-control m-2', 'readonly': 'readonly'})
         for f in self.Meta.required_fields:
             self.fields[f].widget.attrs.update({'class': 'form-control m-2'})

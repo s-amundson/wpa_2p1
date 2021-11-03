@@ -11,5 +11,16 @@ Total   {{ total }}
 
 {{ receipt }}
 
+
+COVID-19 Policy
+
+{% include "program_app/covid_policy.txt" %}
+
+
+Cancellation Policy
+
+{% include "program_app/cancellation_policy.txt" %}
+
+
 http://woodleyparkarchers.org/">WoodleyParkArchers.org
 http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

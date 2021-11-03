@@ -1,4 +1,4 @@
 # from .tests.tests_level import TestsLevel
 # from .tests.tests_membership import TestsMembership
 # from .tests.tests_signal import TestsSignal
-from .tests.tests_run_daily import TestsRunDaily
+# from .tests.tests_run_daily import TestsRunDaily
