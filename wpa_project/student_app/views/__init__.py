@@ -1,4 +1,5 @@
 from .index_view import IndexView
+from .instructor_update_view import InstructorUpdateView
 from .privacy_view import PrivacyView
 from .profile_view import ProfileView
 from .search_view import SearchView

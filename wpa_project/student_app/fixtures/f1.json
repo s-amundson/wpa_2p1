@@ -8,7 +8,7 @@
   {"model": "student_app.user", "pk": 1, "fields": {"password": "pbkdf2_sha256$260000$ROw6CmqzGsq0kNB65s1Oh4$C1kWtYvUcIGpLeW7JeJpo+rbJ/1hADr83gZEA5nr/FM=",
    "last_login": "2021-05-31T19:09:22.396Z", "is_superuser": true, "username": "EmilyNConlan", "first_name": "", "last_name": "",
    "email": "EmilyNConlan@einrot.com", "is_staff": true, "is_active": true, "date_joined": "2021-05-31T19:08:19.410Z", "groups": [], "is_board": true,
-   "user_permissions": [], "dark_theme": true, "is_member": true}},
+   "user_permissions": [], "dark_theme": true, "is_member": true, "is_instructor": true}},
   {"model": "student_app.user", "pk": 2, "fields": {"password": "pbkdf2_sha256$260000$ROw6CmqzGsq0kNB65s1Oh4$C1kWtYvUcIGpLeW7JeJpo+rbJ/1hADr83gZEA5nr/FM=",
    "last_login": "2021-05-31T19:09:22.396Z", "is_superuser": false, "username": "RosalvaAHall", "first_name": "", "last_name": "",
    "email": "RosalvaAHall@superrito.com", "is_staff": true, "is_active": true, "date_joined": "2021-05-31T19:08:19.410Z", "groups": [],

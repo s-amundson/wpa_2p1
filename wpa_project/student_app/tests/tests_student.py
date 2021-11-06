@@ -4,7 +4,7 @@ from django.core import mail
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import Student,  User
+from ..models import Student, User
 
 logger = logging.getLogger(__name__)
 

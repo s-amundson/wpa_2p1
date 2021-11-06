@@ -1,0 +1,16 @@
+<form class="col form" method="post" autocomplete="off" id="instructor_form">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col ml-3">USAA Archery Instructor Certificate Expiration Date:</div>
+        <div class="col input-group input-group-md">
+            {{ form.instructor_expire_date }}
+            {% for error in form.instructor_expire_date.errors %}
+                <p class="help-block">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <div class="col-2">
+            <button id="btn-update-instructor" class="btn btn-primary" onsubmit="update_instructor()">Update</button>
+        </div>
+
+    </div>
+</form>

@@ -32,6 +32,14 @@ $(document).ready(function() {
     });
 
     $("#theme-submit").click(theme_function);
+
+    $("#instructor-form-div").hide();
+    $("#btn-instructor").click(function(e) {
+        e.preventDefault();
+        console.log("show instructor update");
+        load_instructor_form();
+    });
+
 });
 
 async function add_student_function(student_id) {
@@ -81,6 +89,20 @@ async function add_student_function(student_id) {
         }
         load_student_table();
     }
+}
+
+function load_instructor_form() {
+    console.log("load instructor form");
+    $("#instructor-form-div").show();
+    $.get("instructor_update", function(data, status){
+        console.log(data);
+        $("#instructor-form-div").html(data);
+        $("#instructor-info-div").hide();
+        $("#instructor_form").submit(function(e) {
+            e.preventDefault();
+            update_instructor(e);
+        });
+    });
 }
 
 function load_student_family_form(family_id) {
@@ -174,4 +196,22 @@ async function theme_function(e) {
         $("#block-main").attr("class", "col-md bg-light text-dark")
     }
 
+}
+
+async function update_instructor() {
+    console.log('update instructor');
+    console.log({
+        csrfmiddlewaretoken: $("#instructor-form-div").find('[name="csrfmiddlewaretoken"]').val(),
+        instructor_expire_date: $("#id_instructor_expire_date").val()
+    });
+    let data = await $.post("instructor_update", {
+        csrfmiddlewaretoken: $("#instructor-form-div").find('[name="csrfmiddlewaretoken"]').val(),
+        instructor_expire_date: $("#id_instructor_expire_date").val()
+    });
+    console.log(data);
+    if (data.status == "SUCCESS") {
+        $("#instructor-form-div").hide();
+        $("#instructor-info-div").show();
+        $("#div-instructor_exp_date").html(data.expire_date);
+    }
 }
