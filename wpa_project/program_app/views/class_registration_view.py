@@ -87,6 +87,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             returnee = 0
             instructor = 0
             students = []
+            instructors = []
             message = ""
             logging.debug(form.cleaned_data)
             for k,v in form.cleaned_data.items():
@@ -96,9 +97,10 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     s = Student.objects.get(pk=i)
                     try:
                         is_instructor = s.user.is_instructor
-                        is_instructor_expire = s.user.instructor_expire_date
+                        instructor_expire = s.user.instructor_expire_date
                     except (s.DoesNotExist, AttributeError):
                         is_instructor = False
+                        instructor_expire = None
 
                     logging.debug(s)
                     if ClassRegistrationHelper().calc_age(s, beginner_class.class_date) < 9:
@@ -108,13 +110,15 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                         HttpResponseRedirect(reverse('programs:class_registration'))
                     elif request.user.is_instructor and is_instructor:
                         logging.debug('user is instructor')
-                        if is_instructor_expire < timezone.localdate(timezone.now()):
+                        logging.debug(instructor_expire)
+                        if instructor_expire < timezone.localdate(timezone.now()):
                             messages.add_message(request, messages.ERROR,
                                                  'Please update your instructor certification')
                             message += 'Please update your instructor certification'
                             logging.debug(message)
                             HttpResponseRedirect(reverse('programs:class_registration'))
                         instructor += 1
+                        instructors.append(s)
                     else:
                         if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
                                 pay_status="refunded")) == 0:
@@ -140,7 +144,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     message += 'Not enough space available in this class'
                 if message == "":
                     logging.debug(message)
-                    return self.transact(beginner_class, request, students)
+                    return self.transact(beginner_class, request, students, instructors)
 
                 else:
                     logging.debug(message)
@@ -155,7 +159,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
 
         # return HttpResponseRedirect(reverse('registration:profile'))
 
-    def transact(self, beginner_class, request, students):
+    def transact(self, beginner_class, request, students, instructors):
         with transaction.atomic():
             uid = str(uuid.uuid4())
             request.session['idempotency_key'] = uid
@@ -174,6 +178,12 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
                                              1, beginner_class.cost))
                 logging.debug(cr)
+            for i in instructors:
+                cr = ClassRegistration(beginner_class=beginner_class, student=i, new_student=False, pay_status='paid',
+                                       idempotency_key=uid).save()
+                request.session['line_items'].append(
+                    SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} instructor id: {str(i.id)}",
+                                             1, 0))
 
         return HttpResponseRedirect(reverse('payment:process_payment'))
 

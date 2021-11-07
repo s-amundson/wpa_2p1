@@ -2,6 +2,8 @@ from django.utils import timezone
 from calendar import HTMLCalendar
 
 from ..models import BeginnerClass
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Calendar(HTMLCalendar):
@@ -22,9 +24,10 @@ class Calendar(HTMLCalendar):
         data = ''
 
         for event in events_per_day:
+            logging.debug(event.class_type)
             cd = timezone.localtime(event.class_date)
             data += f'<li><button class="btn btn-primary bc-btn m-1" type="button" bc_id="{event.id}">'
-            data += f'Class {cd.strftime("%I:%M %p")}</button></li>'
+            data += f'{event.class_type.capitalize()} class {cd.strftime("%I:%M %p")}</button></li>'
 
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {data} </ul></td>"

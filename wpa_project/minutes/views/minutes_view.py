@@ -25,6 +25,8 @@ class MinutesFormView(LoginRequiredMixin, View):
         return bl
 
     def get(self, request, minutes_id=None):
+        logging.debug(request.POST)
+        logging.debug(request.user.is_member)
         if not request.user.is_member:
             return HttpResponseForbidden()
         reports = {}

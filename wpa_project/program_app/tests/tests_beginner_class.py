@@ -12,6 +12,7 @@ from payment.models import PaymentLog
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
+
 class TestsBeginnerClass(TestCase):
     fixtures = ['f1', 'f3']
 
@@ -24,7 +25,13 @@ class TestsBeginnerClass(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        logging.debug('here')
+        self.class_dict = {'class_date': '2021-05-30 09:00',
+                           'class_type': 'combined',
+                           'beginner_limit': 2,
+                           'returnee_limit': 2,
+                           'instructor_limit': 2,
+                           'state': 'scheduled',
+                           'cost': 5}
 
     def test_user_normal_user_not_authorized(self):
         self.test_user = User.objects.get(pk=3)
@@ -33,9 +40,7 @@ class TestsBeginnerClass(TestCase):
         response = self.client.get(reverse('programs:beginner_class'), secure=True)
         self.assertEqual(response.status_code, 403)
         # Post the page user is forbidden
-        response = self.client.post(reverse('programs:beginner_class'),
-                                    {'class_date': '2021-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
-                                     'instructor_limit': 2, 'state': 'scheduled', 'cost': 5}, secure=True)
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
         self.assertEqual(response.status_code, 403)
 
     def test_staff_user_is_authorized(self):
@@ -49,34 +54,22 @@ class TestsBeginnerClass(TestCase):
 
     def test_add_class(self):
         # Add a class
-        response = self.client.post(reverse('programs:beginner_class'),
-                        {'class_date': '2023-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
-                         'instructor_limit': 2, 'state': 'scheduled', 'cost': 5}, secure=True)
-        # self.assertEqual(response.status_code, 200)
-        # self.assertRedirects(response, reverse('registration:index'), status_code=301,
-        #     target_status_code=200, fetch_redirect_response=True)
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 3)
 
-
     def test_get_class_list(self):
-        # # allow user to access
-        # self.test_user.is_staff = True
-        # self.test_user.save()
-
         # Check the list
         response = self.client.get(reverse('programs:class_list'), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('program_app/class_list.html')
 
-
-
     def test_update_class(self):
-
         # Update the class
+        self.class_dict['state'] = 'open'
+        self.class_dict['class_date'] = '2022-05-30'
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
-                        {'class_date': '2022-05-30', 'beginner_limit': 2, 'returnee_limit': 2,
-                         'state': 'open', 'cost': 5}, secure=True)
+                                    self.class_dict, secure=True)
 
         self.assertTemplateUsed('student_app/index.html')
         bc = BeginnerClass.objects.all()
@@ -90,7 +83,7 @@ class TestsBeginnerClass(TestCase):
     def test_2nd_class(self):
         # New class same day
         response = self.client.post(reverse('programs:beginner_class'),
-                        {'class_date': '2022-06-05', 'beginner_limit': 5, 'returnee_limit': 5,
+                        {'class_date': '2022-06-05', 'class_type': 'combined', 'beginner_limit': 5, 'returnee_limit': 5,
                          'state': 'scheduled', 'cost': 5}, secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_list.html')
@@ -152,9 +145,9 @@ class TestsBeginnerClass(TestCase):
         #  Change user and then cancel the class another payment
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
+        self.class_dict['state'] = 'canceled'
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
-                                    {'class_date': "2022-06-05", 'beginner_limit': 4, 'returnee_limit': 2,
-                                     'instructor_limit': 2, 'state': 'canceled', 'cost': 5}, secure=True)
+                                    self.class_dict, secure=True)
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 4)
         for c in cr:
@@ -165,6 +158,21 @@ class TestsBeginnerClass(TestCase):
         self.assertEqual(len(pl), 2)
         for l in pl:
             self.assertEqual(l.status, 'refund')
+
+    def test_beginner_class_with_returnee(self):
+        self.class_dict['class_type'] = 'beginner'
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 3)
+        self.assertEqual(bc[2].returnee_limit, 0)
+
+    def test_returnee_class_with_beginner(self):
+        self.class_dict['class_type'] = 'returnee'
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 3)
+        # self.assertEqual(self.client.session['message'], "returning class can't have a beginner limit greater then 0")
+        self.assertEqual(bc[2].beginner_limit, 0)
 
 
 class TestsBeginnerClass2(TestCase):
