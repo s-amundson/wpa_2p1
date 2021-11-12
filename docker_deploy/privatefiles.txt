@@ -4,6 +4,7 @@ docker_deploy/project.env
     POSTGRES_DB=database
 
 docker_deploy/wordpress.env
+    MYSQL_ROOT_PASSWORD=password
     MYSQL_DATABASE=wordpress
     MYSQL_USER=wordpress_user
     MYSQL_PASSWORD=wordpress_password
