@@ -154,7 +154,7 @@ class BeginnerClassListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         crh = ClassRegistrationHelper()
-        bc = BeginnerClass.objects.filter(class_date__gt=timezone.now())
+        bc = BeginnerClass.objects.filter(class_date__gte=timezone.localtime(timezone.now()).date())
         queryset = []
         for c in bc:
             logging.debug(f'date: {c.class_date} status: {c.state}')

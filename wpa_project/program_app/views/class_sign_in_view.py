@@ -14,6 +14,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Frame, Image, Spacer
+from ..src.class_registration_helper import ClassRegistrationHelper
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,15 @@ logger = logging.getLogger(__name__)
 class ClassSignInView(LoginRequiredMixin, View):
     def get(self, request, reg_id):
         cr = get_object_or_404(ClassRegistration, pk=reg_id)
-        form = ClassSignInForm(initial={'signature': cr.signature})
+        of_age = ClassRegistrationHelper().calc_age(cr.student, cr.beginner_class.class_date) > 18
+        logging.debug(of_age)
+        sig_first_name = ''
+        sig_last_name = ''
+        if of_age:
+            sig_first_name = cr.student.first_name
+            sig_last_name = cr.student.last_name
+        form = ClassSignInForm(initial={'signature': cr.signature, 'sig_first_name': sig_first_name,
+                                        'sig_last_name': sig_last_name}, of_age=of_age)
         logging.debug(bool(cr.signature))
         logging.debug(cr.signature is not None)
         return render(request, 'program_app/class_sign_in.html',
@@ -49,7 +58,7 @@ class ClassSignInView(LoginRequiredMixin, View):
             path = os.path.join(settings.BASE_DIR, 'student_app', 'static', 'images', 'WPAHeader4.jpg')
             story = [Image(path, width=5 * inch, height=5 * inch / 8), Spacer(1, 0.2 * inch)]
 
-            with open(os.path.join(settings.BASE_DIR, 'student_app', 'templates', 'awrl.txt'), 'r') as f:
+            with open(os.path.join(settings.BASE_DIR, 'program_app', 'templates', 'program_app', 'awrl.txt'), 'r') as f:
                 story.append(Paragraph(f.readline(), styles['Normal']))
                 story.append(Spacer(1, 0.2 * inch))
                 story.append(Paragraph(f.readline(), styles['Normal']))
@@ -59,7 +68,9 @@ class ClassSignInView(LoginRequiredMixin, View):
                     story.append(Spacer(1, 0.1 * inch))
 
             story.append(Image('img.jpg', width=3 * inch, height=1 * inch))
-            story.append(Paragraph("Signed on Date: YYYY-MM-DD. By first_name last_name"))
+            d = cr.beginner_class.class_date
+            name = f"{form.cleaned_data['sig_first_name']} {form.cleaned_data['sig_last_name']}"
+            story.append(Paragraph(f"Signed on Date: {d.date()} By {name}"))
             c = Canvas('mydoc.pdf')
             f = Frame(inch / 2, inch, 7 * inch, 9 * inch, showBoundary=1)
             f.addFromList(story, c)
@@ -72,6 +83,7 @@ class ClassSignInView(LoginRequiredMixin, View):
 
             return render(request, 'student_app/message.html', {'message': ' Thank You'})
         else:
+            logging.debug(form.errors)
             return render(request, 'program_app/class_sign_in.html',
                           {'form': form, 'student': cr.student, 'Img': cr.signature,
                            'is_signed': bool(cr.signature), 'message': 'invalid signature'})

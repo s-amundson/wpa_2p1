@@ -34,26 +34,31 @@
             <div class="row pt-5">
                 <div class="col">
                     <div class="row"><h5>ACCIDENT WAIVER AND RELEASE OF LIABILITY (AWRL)</h5></div>
-                    <div class="row p-1">
-I, the undersigned participant and/or parent/guardian of my minor participant under the age of 18 hereby give my permission to Woodley Park Archer’s (“WPA”), for my child or ward to participate in the Archery Instruction Program (the “Program”) and in consideration of his/her/my participation in the Woodley Park archery activity and instruction, agree to follow posted Archery Range Rules and direction of class instructors, (and as Parent/Guardian of a minor participant, to be and remain present at Archery Range during entire class activity) and further hereby acknowledge, understand and agree that:
-1) The sport of archery may involve risk of BODILY INJURY, INCLUDING PARALYSIS, DISMEMBERMENT, and DEATH, as well as LOSS OF or DAMAGE TO PROPERTY.
-2) I KNOWINGLY and FREELY ASSUME ALL SUCH RISK, and agree to waive, release, indemnify and hold harmless, the Woodley Park Archers, its officers, directors, instructors and volunteers, and the City of Los Angeles, and its employees and agents, of and from any and all actions and claims of whatever nature and kind resulting from participation in archery activities of the Woodley Park Archers on/at the Woodley Park Archery Range on and after the below date.
-                    </div>
+                    <div class="row p-1"> {% include "program_app/awrl.txt" %} </div>
                 </div>
             </div>
             <div class="row p-2" id="signed">
-              <div class="col">
-                {{ form.signature }}
-                {% if is_signed %}
-                  <div class="row">Current Signature:</div>
-                  <div class="row">
-                    <img src="{{ Img.url }}" class="img-responsive" style="width: 382; float: left; margin-right: 10px;" />
-                  </div>
-                  <div class="row pt-2">Updated Signature:</div>
-                {% endif %}
-              </div>
+                <div class="col">
+                    {{ form.signature }}
+                    {% if is_signed %}
+                        <div class="row">Current Signature:</div>
+                        <div class="row pl-5">
+                            <img src="{{ Img.url }}" class="img-responsive" style="width: 382; float: left; margin-right: 10px;" />
+                        </div>
+                        <div class="row pt-2">Updated Signature:</div>
+                    {% endif %}
+                </div>
             </div>
-            <div class="row pl-2" id="sig"></div>
+            <div class="row ml-5" id="sig"></div>
+            <div class="row">
+                <div class="col-1">Signed By:</div>
+                <div class="col-2">
+                    {{ form.sig_first_name }}
+                </div>
+                <div class="col-2">
+                    {{ form.sig_last_name }}
+                </div>
+            </div>
             <div class="row p-2">
                 <div class="col">
                     <button class="btn btn-primary" id="clear">Clear</button>
@@ -64,7 +69,7 @@ I, the undersigned participant and/or parent/guardian of my minor participant un
                 </div>
             </div>
             <div class="row p-2">
-                Using Jquery UI Signature
+                Using Jquery UI Signature&nbsp;
                 <a href="http://keith-wood.name/signature.html">http://keith-wood.name/signature.html</a>
             </div>
         </form>
