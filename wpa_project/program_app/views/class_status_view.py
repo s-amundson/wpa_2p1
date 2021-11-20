@@ -12,9 +12,9 @@ class ClassStatusView(LoginRequiredMixin, View):
     def get(self, request, class_id):
         bc = BeginnerClass.objects.get(pk=class_id)
         ec = ClassRegistrationHelper().enrolled_count(bc)
+        logging.debug(bc.instructor_limit - ec['instructors'])
         return JsonResponse({'beginner': bc.beginner_limit - ec['beginner'],
-                             'beginner_time': bc.class_date.strftime("%I %p"),
                              'returnee': bc.returnee_limit - ec['returnee'],
-                             'returnee_time': (bc.class_date + timedelta(hours=2)).strftime("%I %p"),
-                             'status': bc.state})
+                             'instructor': bc.instructor_limit - ec['instructors'],
+                             'status': bc.state, 'class_type': bc.class_type})
 

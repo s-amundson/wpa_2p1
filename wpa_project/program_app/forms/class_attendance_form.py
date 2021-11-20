@@ -18,21 +18,19 @@ class ClassAttendanceForm(forms.Form):
         self.class_date = beginner_class.class_date
 
         for cr in self.class_registration:
-            logging.debug(cr.student.covid_vax)
-            logging.debug(type(cr.student.covid_vax))
             if cr.new_student:
-                self.new_students.append(self.student_dict(cr))
+                self.new_students.append(self.student_dict(cr, bool(cr.signature)))
             else:
                 try:
                     is_instructor = cr.student.user.is_instructor
                 except (cr.student.DoesNotExist, AttributeError):
                     is_instructor = False
                 if is_instructor:
-                    self.instructors.append(self.student_dict(cr))
+                    self.instructors.append(self.student_dict(cr, True))
                 else:
-                    self.return_students.append(self.student_dict(cr))
+                    self.return_students.append(self.student_dict(cr, bool(cr.signature)))
 
-    def student_dict(self, cr):
+    def student_dict(self, cr, is_signed):
         return {'id': cr.student.id,
                 'first_name': cr.student.first_name,
                 'last_name': cr.student.last_name,
@@ -40,7 +38,7 @@ class ClassAttendanceForm(forms.Form):
                 'check': f'check_{cr.student.id}',
                 'checked': cr.attended,
                 'cr_id': cr.id,
-                'covid_vax': {cr.student.covid_vax},
+                'covid_vax': cr.student.covid_vax,
                 'covid_vax_check': f'covid_vax{cr.student.id}',
-                'signature': (cr.signature is not None),
+                'signature': is_signed,
                 'is_minor': self.crh.calc_age(cr.student, self.class_date) < 18}

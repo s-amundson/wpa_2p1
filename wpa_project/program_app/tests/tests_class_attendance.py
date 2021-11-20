@@ -57,8 +57,8 @@ class TestsClassAttendance(TestCase):
         response = self.client.get(reverse('programs:beginner_class', kwargs={'beginner_class': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Attending')
-        self.assertContains(response, 'check_2')
-        self.assertContains(response, 'check_3')
+        self.assertContains(response, 'covid_vax2')
+        self.assertContains(response, 'covid_vax3')
 
         logging.debug("mark attending")
         # Mark the students as attending and check the records were updated.

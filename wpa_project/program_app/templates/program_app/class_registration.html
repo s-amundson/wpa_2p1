@@ -55,7 +55,7 @@
     <div class="row p-2">
         <form id="beginner-class-form" class="col form" method="post" action="{% url 'programs:class_registration' %}" autocomplete="off">
             {% csrf_token %}
-
+            <input type="hidden" id="is_instructor" value="{{ user.is_instructor }}">
             <div class="row p-3">
                 <div class="col-2 text-right">Select a class date:</div>
                 <div class="col">

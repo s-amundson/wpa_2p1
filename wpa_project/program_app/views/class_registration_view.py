@@ -111,7 +111,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     elif request.user.is_instructor and is_instructor:
                         logging.debug('user is instructor')
                         logging.debug(instructor_expire)
-                        if instructor_expire < timezone.localdate(timezone.now()):
+                        if instructor_expire is None or instructor_expire < timezone.localdate(timezone.now()):
                             messages.add_message(request, messages.ERROR,
                                                  'Please update your instructor certification')
                             message += 'Please update your instructor certification'
@@ -129,6 +129,8 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                                 returnee += 1
                                 students.append(s)
                         else:
+                            messages.add_message(request, messages.ERROR,
+                                                 'Student is already enrolled')
                             message += 'Student is already enrolled'
             request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
@@ -137,10 +139,16 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             if beginner_class.state == 'open':  # in case it changed since user got the form.
                 enrolled_count = ClassRegistrationHelper().enrolled_count(beginner_class)
                 if enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
+                    messages.add_message(request, messages.ERROR,
+                                         'Not enough space available in this class')
                     message += "Not enough space available in this class"
                 if enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
+                    messages.add_message(request, messages.ERROR,
+                                         'Not enough space available in this class')
                     message += 'Not enough space available in this class'
                 if enrolled_count['instructors'] + instructor > beginner_class.instructor_limit:
+                    messages.add_message(request, messages.ERROR,
+                                         'Not enough space available in this class')
                     message += 'Not enough space available in this class'
                 if message == "":
                     logging.debug(message)
@@ -150,7 +158,6 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                     logging.debug(message)
                     return render(request, 'program_app/class_registration.html',
                                   {'form': form, 'alert_message': message})
-                logging.debug(message)
 
         else:
             logging.debug(form.errors)

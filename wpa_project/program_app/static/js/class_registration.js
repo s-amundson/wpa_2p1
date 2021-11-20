@@ -47,8 +47,28 @@ async function get_class_status() {
     if(d != "") {
         let data = await $.get("class_status/" + $("#id_beginner_class").val() +"/", function(data, status){
             let msg = "Class openings:</br> &nbsp;&nbsp; ";
-            msg += "New Students: " +  data['beginner'] + ", starting at " + data['beginner_time'];
-            msg += "</br> &nbsp;&nbsp; Returning: " + data['returnee'] + ", starting at " + data['returnee_time'];
+            msg += "New Students: " +  data['beginner'];
+            msg += "</br> &nbsp;&nbsp; Returning: " + data['returnee'];
+            if($("#is_instructor").val() == "True") {
+                msg += "</br> &nbsp;&nbsp; Instructors: " + data['instructor'];
+            }
+            else {
+                if(data["class_type"] == "beginner") {
+                    $(".student-check").each(function(e) {
+                        console.log($(this).attr("is_beginner") != "T")
+                        if ($(this).attr("is_beginner") != "T") {
+                            $(this).attr('checked', false);
+                        }
+                    });
+                }
+                if(data["class_type"] == "returnee") {
+                    $(".student-check").each(function(e) {
+                        if ($(this).attr("is_beginner") == "T") {
+                            $(this).attr('checked', false);
+                        }
+                    });
+                }
+            }
             $("#class-availible").html(msg);
         });
     }
@@ -151,11 +171,17 @@ async function post_unregister() {
             csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
             'donation': $("#donation").prop('checked')
         }, function(data, status){
+            console.log(data);
             return data;
             }, "json");
 
         get_reg_table();
-        alert("You have successfully been unregistered from the class.\n")
+        if (data.status == 'SUCCESS') {
+            alert("You have successfully been unregistered from the class.\n")
+        }
+        else {
+            alert(data.error)
+        }
     }
     else {
         console.log('canceled');
@@ -163,12 +189,13 @@ async function post_unregister() {
 }
 
 function select_class() {
-    $("#div-calendar").hide()
-    $("#id_beginner_class").val($(this).attr('bc_id'))
-    $("#beginner-class-form").show()
-    $("#calendar-show-btn").show()
-    $("#calendar-next-btn").hide()
-    $("#calendar-prev-btn").hide()
+    $("#div-calendar").hide();
+    $("#id_beginner_class").val($(this).attr('bc_id'));
+    $("#beginner-class-form").show();
+    $("#calendar-show-btn").show();
+    $("#calendar-next-btn").hide();
+    $("#calendar-prev-btn").hide();
+    get_class_status();
 }
 
 function show_new_student(i, el) {

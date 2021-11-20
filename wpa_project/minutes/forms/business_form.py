@@ -1,5 +1,5 @@
 import logging
-from django.forms import ModelForm, BooleanField
+from django.forms import BooleanField
 
 from src import MyModelForm
 from ..models import Business, BusinessUpdate
