@@ -40,7 +40,12 @@ services:
 
   wordpress:
     container_name: wordpress
-    image: wordpress:5.8.2-fpm-alpine
+
+    build:
+      context: ..
+      dockerfile: docker_deploy/Dockerfile
+
+#    image: wordpress:5.8.2-fpm-alpine
 #    depends_on:
 #      - mysql
     ports:
