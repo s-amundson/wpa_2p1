@@ -23,6 +23,10 @@ class TestsOther(TestCase):
         self.client.get(reverse('registration:terms'), secure=True)
         self.assertTemplateUsed('registration/terms.html')
 
-    def test_privacy(self):
-        self.client.get(reverse('registration:privacy'), secure=True)
+    def test_policy_privacy(self):
+        self.client.get(reverse('registration:policy', kwargs={'policy': 'privacy'}), secure=True)
         self.assertTemplateUsed('registration/privacy.html')
+
+    def test_policy_covid(self):
+        self.client.get(reverse('registration:policy', kwargs={'policy': 'covid'}), secure=True)
+        self.assertTemplateUsed('registration/covid_policy.html')

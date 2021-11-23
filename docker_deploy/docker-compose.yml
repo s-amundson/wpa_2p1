@@ -43,7 +43,7 @@ services:
 
     build:
       context: ..
-      dockerfile: docker_deploy/Dockerfile
+      dockerfile: docker_deploy/Dockerfile_wordpress
 
 #    image: wordpress:5.8.2-fpm-alpine
 #    depends_on:

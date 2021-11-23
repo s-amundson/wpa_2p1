@@ -1,6 +1,6 @@
 from .index_view import IndexView
 from .instructor_update_view import InstructorUpdateView
-from .privacy_view import PrivacyView
+from .policy_view import PolicyView
 from .profile_view import ProfileView
 from .search_view import SearchView
 from .student_family_api_view import StudentFamilyApiView

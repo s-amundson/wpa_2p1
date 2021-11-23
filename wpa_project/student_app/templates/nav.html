@@ -9,7 +9,8 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="{% url 'registration:terms' %}">Terms</a>
-                    <a class="dropdown-item" href="{% url 'registration:privacy' %}">Privacy</a>
+                    <a class="dropdown-item" href="{% url 'registration:policy' 'privacy' %}">Privacy</a>
+                    <a class="dropdown-item" href="{% url 'registration:policy' 'covid' %}">Covid 19</a>
                 </div>
             </li>
 
