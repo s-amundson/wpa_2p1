@@ -49,18 +49,18 @@ wpa_project/wpa_project/secrets.json
     }
 
 docker_ftp/sftp.json
-    {
-        "Global": {
-            "Chroot": {
-                "Directory": "%h",
-                "StartPath": "sftp"
-            },
-            "Directories": ["sftp"]
+{
+    "Global": {
+        "Chroot": {
+            "Directory": "%h",
+            "StartPath": "sftp"
         },
-        "Users": [
-            {
-                "Username": "wp-user",
-                "Password": "password"
-            }
-        ]
-    }
+        "Directories": ["sftp"]
+    },
+    "Users": [
+        {
+            "Username": "wp-user",
+            "Password": "password"
+        }
+    ]
+}
