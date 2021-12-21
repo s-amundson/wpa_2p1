@@ -43,6 +43,7 @@
                         <a class="dropdown-item" href="{% url 'registration:student_list'%}">Student List</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{% url 'minutes:minutes_form'%}">New Minutes</a>
+                        <a class="dropdown-item" href="{% url 'minutes:decision_list'%}">Decisions</a>
                         {% if user.is_superuser %}
                           <a class="dropdown-item" href="{% url 'payment:costs'%}">Costs</a>
                         {% endif %}
