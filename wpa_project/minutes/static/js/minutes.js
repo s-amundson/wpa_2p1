@@ -57,12 +57,23 @@ $(document).ready(function() {
         index_business_div($(this), true);
     });
 
+    // index decisions
+    $("#div-decisions").find(".decision-div").each(function(index) {
+        index_decision_div($(this), true);
+    });
+
+
     // add listener to the new business button
     $("#btn-new-business").click(function(e){
         e.preventDefault();
         load_business_form();
     });
 
+    // add listener to the new decision button
+    $("#btn-new-decision").click(function(e){
+        e.preventDefault();
+        load_decision_form();
+    });
     // update minutes on change of inputs
     let arr = ['id_meeting_date', 'id_start_time', 'id_attending', 'id_minutes_text', 'id_memberships', 'id_balance',
                'id_discussion', 'id_end_time'];
@@ -135,6 +146,23 @@ function index_business_div(container, new_business) {
     });
 }
 
+function index_decision_div(container) {
+    report_count = report_count + 1;
+    container.find("#decision_decision_date").prop('id', "decision_decision_date-" + report_count);
+    container.find("#initial-decision_decision_date").prop('id', "initial-decision_decision_date-" + report_count);
+    container.find("#decision-id").prop('id', "decision-id-" + report_count);
+    container.find("#decision_text").attr('count', report_count)
+    container.find("#decision_text").prop('id', "decision_text-" + report_count);
+    container.prop('id', "decision-div-" + report_count);
+    $("#decision_decision_date-" + report_count).hide()
+    $("#decision_text-" + report_count).change(function(e){
+        e.preventDefault();
+        console.log($(this));
+        save_decision($(this));
+    });
+
+}
+
 function index_report_div(container) {
     report_count = report_count + 1;
     container.find("#report_report").attr("count", report_count)
@@ -144,10 +172,10 @@ function index_report_div(container) {
     container.find("#report-id").prop('id', "report-id-" + report_count);
     container.prop('id', "report-div-" + report_count);
     $("#report_report-" + report_count).change(function(e){
-            e.preventDefault();
-            console.log($(this));
-            save_report($(this));
-        });
+        e.preventDefault();
+        console.log($(this));
+        save_report($(this));
+    });
 }
 
 function index_update(container, new_update) {
@@ -190,6 +218,15 @@ async function load_business_update(business) {
         $("#div-business-update").html($("#div-business-update").html() + data);
         $("#div-business-update").find("#update_business").val(business);
         index_update($("#div-business-update"), true)
+    });
+}
+
+async function load_decision_form() {
+    console.log('load decision')
+    await $.get($("#url-decision").val(), function(data, status){
+        console.log(data)
+        $("#div-decisions").html($("#div-decisions").html() + data);
+        index_decision_div($("#div-decisions").find("#decision-div"))
     });
 }
 
@@ -240,6 +277,25 @@ async function save_business(business_element) {
 //        }
 
         $("#business_resolved_bool-" + count).prop('disabled', false);
+    }, "json");
+}
+
+async function save_decision(decision_element) {
+    let count = decision_element.attr('count')
+    console.log(count)
+    console.log($("#decision-id-" + count));
+    let url_string = $("#url-decision").val()
+    if ($("#decision-id-" + decision_element.attr('count')).val() != "None") {
+        url_string = url_string + "/" + $("#decision-id-" + decision_element.attr('count')).val()
+    }
+    await $.post(url_string, {
+        csrfmiddlewaretoken: $("#decision-div-" + count).find('[name="csrfmiddlewaretoken"]').val(),
+        decision_date: $("#decision_decision_date-" + count).val(),
+        text: decision_element.val()
+    }, function(data, status){
+        console.log(data);
+        $("#decision-id-" + count).val(data.decision_id);
+        indicate_saved(data.success);
     }, "json");
 }
 

@@ -6,8 +6,8 @@ from django.shortcuts import render, reverse
 from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.views.generic.base import View
 from django.utils import timezone
-from ..forms import MinutesForm, BusinessForm, BusinessUpdateForm, ReportForm
-from ..models import Business, Minutes
+from ..forms import MinutesForm, BusinessForm, BusinessUpdateForm, DecisionForm, ReportForm
+from ..models import Business, Decision, Minutes
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class MinutesFormView(LoginRequiredMixin, View):
         bl = []
         for b in business:
             logging.debug(b.id)
-            update_list =[]
+            update_list = []
             for update in b.businessupdate_set.all():
                 o = timezone.localtime(timezone.now()).date() > update.update_date
                 update_list.append({'form': BusinessUpdateForm(instance=update, old=o), 'id': update.id})
@@ -41,7 +41,8 @@ class MinutesFormView(LoginRequiredMixin, View):
                                             Q(resolved__gte=minutes.meeting_date, added_date__lt=minutes.meeting_date))
             nb = Business.objects.filter(Q(resolved=None, added_date=minutes.meeting_date) |
                                             Q(resolved__gte=minutes.meeting_date, added_date=minutes.meeting_date))
-            logging.debug(ob)
+            decisions_query = Decision.objects.filter(decision_date=minutes.meeting_date)
+            logging.debug(decisions_query)
 
         else:
             form = MinutesForm(edit=request.user.is_board)
@@ -50,12 +51,17 @@ class MinutesFormView(LoginRequiredMixin, View):
 
             ob = Business.objects.filter(resolved__lt=timezone.now())
             nb = []
+            decisions_query = Decision.objects.filter(decision_date=timezone.now())
 
         old_business = self.business_list(ob, True)
         new_business = self.business_list(nb, False)
+        decisions = []
+        for decision in decisions_query:
+            logging.debug(decision.id)
+            decisions.append({'form': DecisionForm(instance=decision), 'id': decision.id})
 
         context = {'form': form, 'minutes_id': minutes_id, 'reports': reports, 'old_business': old_business,
-                   'new_business': new_business}
+                   'new_business': new_business, 'decisions': decisions}
 
         return render(request, 'minutes/minutes_form.html', context)
 
