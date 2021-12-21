@@ -48,18 +48,21 @@ services:
 #      - ../wpa_project/wpa_project.env
 
 #  wordpress:
-#    container_name: dev_wp
-#    image: wordpress:latest
-#    depends_on:
-#      - mysql
+#    container_name: wordpress
+#
+#    build:
+#      context: ..
+#      dockerfile: docker_deploy/Dockerfile_wordpress
+#
+##    image: wordpress:5.8.2-fpm-alpine
+##    depends_on:
+##      - mysql
 #    ports:
 #      - 8080:80
 #      - 8081:443
 #    restart: always
-#    environment:
-#      WORDPRESS_DB_HOST: mysql:3306
-#      WORDPRESS_DB_USER: wordpress_user
-#      WORDPRESS_DB_PASSWORD: wordpress_password
+#    env_file:
+#      - ../docker_deploy/wordpress.env
 #    volumes:
 #      - ../wordpress:/var/www/html
 
@@ -71,4 +74,4 @@ networks:
 volumes:
   postgres-data:
   staticfiles:
-  mysql_data:
+#  mysql_data:

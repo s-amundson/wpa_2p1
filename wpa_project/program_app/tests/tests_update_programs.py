@@ -16,11 +16,15 @@ class TestsUpdatePrograms(TestCase):
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
         bc = BeginnerClass(class_date=d, class_type='combined', beginner_limit=10, returnee_limit=10, state='open')
         bc.save()
-        logging.debug(d)
+        # d = timezone.datetime(year=d.year, month=d.month, day=25, hour=9)
+        # bc = BeginnerClass(class_date=d, class_type='combined', beginner_limit=10, returnee_limit=10, state='open')
+        # bc.save()
 
         UpdatePrograms().beginner_class()
 
-        self.assertEqual(BeginnerClass.objects.all().count(), 3)
+        self.assertEqual(BeginnerClass.objects.all().count(), 9)
         self.assertEqual(BeginnerClass.objects.get(pk=bc.id).state, 'closed')
-        self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 1).state, 'open')
-        self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 2).state, 'open')
+        for i in range(8):
+            self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 1 + i).state, 'open')
+        # self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 2).state, 'open')
+

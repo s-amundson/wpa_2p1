@@ -47,3 +47,20 @@ wpa_project/wpa_project/secrets.json
         "location_id": "",
         "environment": "sandbox"}
     }
+
+docker_ftp/sftp.json
+{
+    "Global": {
+        "Chroot": {
+            "Directory": "%h",
+            "StartPath": "sftp"
+        },
+        "Directories": ["sftp"]
+    },
+    "Users": [
+        {
+            "Username": "wp-user",
+            "Password": "password"
+        }
+    ]
+}

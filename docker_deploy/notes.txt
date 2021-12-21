@@ -19,3 +19,17 @@ docker exec -it django_dev python manage.py dumpdata membership > wpa_project/me
 docker exec -it django python manage.py runapschedular
 
 privatefiles.txt has information on creating the files that contain private information.
+
+For server firewall:
+    sudo nano /etc/default/docker and add the following line:
+        DOCKER_OPTS="--iptables=false"
+    Restart the docker daemon with the command sudo systemctl restart docker.
+
+    sudo ufw limit ssh
+    sudo ufw limit postgres
+    sudo ufw allow http
+    sudo ufw allow https
+    sudo ufw allow 2224
+    sudo ufw limit 3306
+    sudo ufw default deny incoming
+    sudo ufw enable
