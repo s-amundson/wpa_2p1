@@ -137,7 +137,6 @@ function load_student_family_form(family_id) {
 
 function load_student_table() {
     $.get(student_table_url, function(data, status){
-        console.log(data);
         $("#student-table-div").html(data);
 
         if($(".student_row").length == 0) {
@@ -190,6 +189,8 @@ async function post_family_function(family_id) {
     else {
         $("#div-instruct").html("");
     }
+    load_student_table();
+    $("#this-student-div").hide();
 }
 
 async function theme_function(e) {

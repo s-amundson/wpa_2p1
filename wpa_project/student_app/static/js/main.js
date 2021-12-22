@@ -5,11 +5,6 @@ $(document).ready(function(){
     }
 });
 
-function dob_error(e){
-    e.css('border-color', 'red');
-    $("#dob-error").html("DOB must be in YYYY-MM-DD Format")
-}
-
 function load_student_form(student_div, student_id) {
     console.log(student_id)
     student_div.show();
@@ -48,14 +43,24 @@ function load_student_form(student_div, student_id) {
         $("#id_dob").change(function() {
             console.log($(this).val());
             let dob_array = $(this).val().split('-')
+            let is_valid = true;
             if(dob_array.length != 3) {
-                dob_error($(this));
+                is_valid = false;
             }
             else if(dob_array[0].length != 4) {
-                dob_error($(this));
+                is_valid = false;
             }
             else if($(this).val().length != 10) {
-                dob_error($(this));
+                is_valid = false;
+            }
+            if (is_valid) {
+                $(this).css('border-color', 'blue');
+                $("#dob-error").hide();
+            }
+            else {
+                $(this).css('border-color', 'red');
+                $("#dob-error").html("DOB must be in YYYY-MM-DD Format");
+                $("#dob-error").show();
             }
         });
     });
