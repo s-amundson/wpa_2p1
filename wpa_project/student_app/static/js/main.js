@@ -4,10 +4,12 @@ $(document).ready(function(){
         alert($("#alert-message").val());
     }
 });
+
 function dob_error(e){
     e.css('border-color', 'red');
     $("#dob-error").html("DOB must be in YYYY-MM-DD Format")
 }
+
 function load_student_form(student_div, student_id) {
     console.log(student_id)
     student_div.show();

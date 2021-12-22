@@ -1,7 +1,6 @@
 "use strict";
 var new_family = false;
 $(document).ready(function() {
-
     $("#can-register").hide()
     if ($("#btn-address-edit").attr("family_id") == "") {
         console.log('new family');
@@ -135,7 +134,6 @@ function load_student_family_form(family_id) {
 
     });
 }
-
 
 function load_student_table() {
     $.get(student_table_url, function(data, status){
