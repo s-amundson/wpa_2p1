@@ -1,7 +1,6 @@
 "use strict";
 var new_family = false;
 $(document).ready(function() {
-
     $("#can-register").hide()
     if ($("#btn-address-edit").attr("family_id") == "") {
         console.log('new family');
@@ -69,25 +68,36 @@ async function add_student_function(student_id) {
                 'dob': $("#id_dob").val(),
                 'email': $("#id_email").val()
             }, function(data, status){
+                console.log(status)
                 console.log(data)
                 return data;
                 }, "json");
         $("#student_add_div").hide();
-        if ($("#this-student").val() == 'None') {
-            $("#btn-address-edit").prop('disabled', false);
-            $("#this-student").val(data.id)
-            $("h2").html(data.first_name + data.last_name + "'s Profile Page")
-        }
 
-        if ($("#btn-address-edit").attr("family_id") == "") {
-            load_student_family_form($("#btn-address-edit").attr("family_id"));
-            $("#div-instruct").html("Please enter your address and phone number below");
+        if ('error' in data) {
+            Object.entries(data["error"]).forEach(([key, value]) => {
+               console.log(key, value);
+               alert(value[0])
+            });
         }
         else {
-            $("#btn-add-student").show();
-            $("#div-instruct").html("");
+            if ($("#this-student").val() == 'None') {
+                $("#btn-address-edit").prop('disabled', false);
+                $("#this-student").val(data.id)
+                $("h2").html(data.first_name + data.last_name + "'s Profile Page")
+                $("#btn-student-form-add").hide();
+            }
+
+            if ($("#btn-address-edit").attr("family_id") == "") {
+                load_student_family_form($("#btn-address-edit").attr("family_id"));
+                $("#div-instruct").html("Please enter your address and phone number below");
+            }
+            else {
+                $("#btn-add-student").show();
+                $("#div-instruct").html("");
+            }
+            load_student_table();
         }
-        load_student_table();
     }
 }
 
@@ -125,9 +135,8 @@ function load_student_family_form(family_id) {
     });
 }
 
-
 function load_student_table() {
-    $.get("student_table", function(data, status){
+    $.get(student_table_url, function(data, status){
         $("#student-table-div").html(data);
 
         if($(".student_row").length == 0) {
@@ -180,6 +189,8 @@ async function post_family_function(family_id) {
     else {
         $("#div-instruct").html("");
     }
+    load_student_table();
+    $("#this-student-div").hide();
 }
 
 async function theme_function(e) {

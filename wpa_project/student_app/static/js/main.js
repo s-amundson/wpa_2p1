@@ -40,6 +40,29 @@ function load_student_form(student_div, student_id) {
             } catch (e) {
             }
         });
+        $("#id_dob").change(function() {
+            console.log($(this).val());
+            let dob_array = $(this).val().split('-')
+            let is_valid = true;
+            if(dob_array.length != 3) {
+                is_valid = false;
+            }
+            else if(dob_array[0].length != 4) {
+                is_valid = false;
+            }
+            else if($(this).val().length != 10) {
+                is_valid = false;
+            }
+            if (is_valid) {
+                $(this).css('border-color', 'blue');
+                $("#dob-error").hide();
+            }
+            else {
+                $(this).css('border-color', 'red');
+                $("#dob-error").html("DOB must be in YYYY-MM-DD Format");
+                $("#dob-error").show();
+            }
+        });
     });
 }
 // Pad a number with leading zeros from Geeksforgeeks.org

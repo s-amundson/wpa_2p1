@@ -67,7 +67,8 @@ class StudentApiView(LoginRequiredMixin, APIView):
             # request.session['student_family'] = f.student_family.id
             # logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        logging.debug(serializer.errors)
+        return Response({'error': serializer.errors})
 
 
 class AddStudentView(LoginRequiredMixin, View):

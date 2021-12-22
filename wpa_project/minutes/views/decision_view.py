@@ -16,7 +16,7 @@ class DecisionView(LoginRequiredMixin, View):
     def get(self, request, decision_id=None):
         if not request.user.is_member:
             return HttpResponseForbidden()
-        logging.debug(request.GET)
+
         if decision_id:
             report = Decision.objects.get(pk=decision_id)
             form = DecisionForm(instance=report)
@@ -28,7 +28,7 @@ class DecisionView(LoginRequiredMixin, View):
     def post(self, request, decision_id=None):
         if not request.user.is_board:
             return HttpResponseForbidden()
-        logging.debug(request.POST)
+
         if decision_id:
             report = Decision.objects.get(pk=decision_id)
             form = DecisionForm(request.POST, instance=report)
@@ -36,7 +36,6 @@ class DecisionView(LoginRequiredMixin, View):
             form = DecisionForm(request.POST)
 
         if form.is_valid():
-            logging.debug(form.cleaned_data)
             report = form.save()
             decision_id = report.id
             success = True

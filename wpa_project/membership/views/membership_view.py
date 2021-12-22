@@ -28,18 +28,14 @@ class MembershipView(LoginRequiredMixin, View):
         return render(request, 'membership/construction_membership.html', {'forms': forms, 'levels': levels})
 
     def post(self, request):
-        logging.debug(request.POST)
         sf = Student.objects.get(user=request.user).student_family
         students = sf.student_set.all()
         form = MembershipForm(students, request.POST)
         if form.is_valid():
-            logging.debug(form.cleaned_data)
             members = []
             for s in students:
                 if form.cleaned_data.get(f'student_{s.id}', False):
                     members.append(s)
-            logging.debug(members)
-            logging.debug(len(members))
             level = form.cleaned_data.get('level', None)
             if len(members) == 0:
                 logging.debug('nobody selected')

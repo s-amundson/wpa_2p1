@@ -27,7 +27,6 @@ class MembershipForm(MyModelForm):
         levels = Level.objects.filter(enabled=True)
         for level in levels:
             choices.append((level.id, level.name))
-        logging.debug(choices)
         self.fields['level'].widget = RadioSelect(choices=choices)
 
     def get_boxes(self):
