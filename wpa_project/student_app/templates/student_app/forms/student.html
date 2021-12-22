@@ -14,10 +14,13 @@
             {% endfor %}
         </div>
         <div class="col input-group input-group-md">
-            {{ form.dob }}
-            {% for error in form.dob.errors %}
-                <p class="help-block">{{ error }}</p>
-            {% endfor %}
+            <div class="row">
+                {{ form.dob }}
+                {% for error in form.dob.errors %}
+                    <p class="help-block">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div id="dob-error" class="row text-danger"></div>
         </div>
         {% if user.is_staff %}
             <div class="col input-group input-group-md">

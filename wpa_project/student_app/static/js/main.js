@@ -4,7 +4,10 @@ $(document).ready(function(){
         alert($("#alert-message").val());
     }
 });
-
+function dob_error(e){
+    e.css('border-color', 'red');
+    $("#dob-error").html("DOB must be in YYYY-MM-DD Format")
+}
 function load_student_form(student_div, student_id) {
     console.log(student_id)
     student_div.show();
@@ -38,6 +41,19 @@ function load_student_form(student_div, student_id) {
             try {
                 load_student_table();
             } catch (e) {
+            }
+        });
+        $("#id_dob").change(function() {
+            console.log($(this).val());
+            let dob_array = $(this).val().split('-')
+            if(dob_array.length != 3) {
+                dob_error($(this));
+            }
+            else if(dob_array[0].length != 4) {
+                dob_error($(this));
+            }
+            else if($(this).val().length != 10) {
+                dob_error($(this));
             }
         });
     });
