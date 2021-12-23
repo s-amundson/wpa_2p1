@@ -124,20 +124,15 @@ function index_business_div(container, new_business) {
     }
 
     $("#business_business-" + report_count).change(function(e){
-        console.log($(this));
         save_business($(this));
     });
 
-    console.log("#business_resolved_bool-" + report_count)
     $(".resolved-check").change(function(e){
-        console.log("resolved check")
-        console.log($(this).attr("count"));
         save_business($("#business_business-" + $(this).attr("count")));
     });
 
     $("#btn-add-update-" + report_count).click(function(e){
         e.preventDefault();
-        console.log($(this).attr("count"));
         load_business_update($("#business-id-" + $(this).attr("count")).val());
     });
 
@@ -157,7 +152,6 @@ function index_decision_div(container) {
     $("#decision_decision_date-" + report_count).hide()
     $("#decision_text-" + report_count).change(function(e){
         e.preventDefault();
-        console.log($(this));
         save_decision($(this));
     });
 
@@ -173,7 +167,6 @@ function index_report_div(container) {
     container.prop('id', "report-div-" + report_count);
     $("#report_report-" + report_count).change(function(e){
         e.preventDefault();
-        console.log($(this));
         save_report($(this));
     });
 }
@@ -188,7 +181,6 @@ function index_update(container, new_update) {
     container.find("#update_update_text").prop('id', "update_update_text-" + report_count);
     container.find("#update_update_date").prop('id', "update_update_date-" + report_count);
     $("#update_update_text-" + report_count).change(function(e){
-        console.log($(this));
         save_update($(this));
     });
 }
@@ -212,9 +204,7 @@ async function load_business_form() {
 }
 
 async function load_business_update(business) {
-    console.log(business)
     await $.get($("#url-business-update").val(), function(data, status){
-        console.log(status);
         $("#div-business-update").html($("#div-business-update").html() + data);
         $("#div-business-update").find("#update_business").val(business);
         index_update($("#div-business-update"), true)
@@ -222,9 +212,7 @@ async function load_business_update(business) {
 }
 
 async function load_decision_form() {
-    console.log('load decision')
     await $.get($("#url-decision").val(), function(data, status){
-        console.log(data)
         $("#div-decisions").html($("#div-decisions").html() + data);
         index_decision_div($("#div-decisions").find("#decision-div"))
     });
@@ -232,7 +220,6 @@ async function load_decision_form() {
 
 async function load_report_form(container, owner) {
     await $.get($("#url-report").val(), function(data, status){
-//        console.log(data);
         container.html(container.html() + data);
         report_count = report_count + 1;
 //        let count = parseInt(container.find(".report-count").val()) + 1
@@ -246,13 +233,10 @@ async function load_report_form(container, owner) {
 
 async function save_business(business_element) {
     let count = business_element.attr('count')
-    console.log(count)
-    console.log($("#business-id-" + count).val())
     let url_string = $("#url-business").val()
     if ($("#business-id-" + count).val() != "None") {
         url_string = url_string + "/" + $("#business-id-" + count).val()
     }
-    console.log($("#business-div-" + count).find('[name="csrfmiddlewaretoken"]').val())
 
     await $.post(url_string, {
         csrfmiddlewaretoken: $("#business-div-" + count).find('[name="csrfmiddlewaretoken"]').val(),
@@ -261,20 +245,8 @@ async function save_business(business_element) {
         business: business_element.val(),
         resolved_bool: $("#business_resolved_bool-" + count).prop('checked'),
     }, function(data, status){
-        console.log(data);
         $("#business-id-" + count).val(data.business_id);
         indicate_saved(data.success)
-//        if ($("#business-div-" + count).attr('new-business')) {
-//                $("#business-div-" + count + " :input").each( function() {
-//                $(this).prop('disabled', data.success);
-//            });
-//        }
-//        else {
-//            $("#business-div-" + count).find(".div-business-update").each(function(index) {
-//                logging.debug($(this).attr('new-update'))
-//
-//            });
-//        }
 
         $("#business_resolved_bool-" + count).prop('disabled', false);
     }, "json");
@@ -282,8 +254,6 @@ async function save_business(business_element) {
 
 async function save_decision(decision_element) {
     let count = decision_element.attr('count')
-    console.log(count)
-    console.log($("#decision-id-" + count));
     let url_string = $("#url-decision").val()
     if ($("#decision-id-" + decision_element.attr('count')).val() != "None") {
         url_string = url_string + "/" + $("#decision-id-" + decision_element.attr('count')).val()
@@ -293,7 +263,6 @@ async function save_decision(decision_element) {
         decision_date: $("#decision_decision_date-" + count).val(),
         text: decision_element.val()
     }, function(data, status){
-        console.log(data);
         $("#decision-id-" + count).val(data.decision_id);
         indicate_saved(data.success);
     }, "json");
@@ -301,20 +270,16 @@ async function save_decision(decision_element) {
 
 async function save_report(report_element) {
     let count = report_element.attr('count')
-    console.log(count)
-    console.log($("#report-id-" + count));
     let url_string = $("#url-report").val()
     if ($("#report-id-" + report_element.attr('count')).val() != "None") {
         url_string = url_string + "/" + $("#report-id-" + report_element.attr('count')).val()
     }
-    console.log($("#report-div-" + count).find('[name="csrfmiddlewaretoken"]').val())
     await $.post(url_string, {
         csrfmiddlewaretoken: $("#report-div-" + count).find('[name="csrfmiddlewaretoken"]').val(),
         owner: $("#report_owner-" + count).val(),
         minutes: $("#report_minutes-" + count).val(),
         report: report_element.val()
     }, function(data, status){
-        console.log(data);
         $("#report-id-" + count).val(data.report_id);
         indicate_saved(data.success);
     }, "json");
@@ -322,21 +287,15 @@ async function save_report(report_element) {
 
 async function save_update(update_element) {
     let count = update_element.attr('count')
-    console.log(count)
     let url_string = $("#url-business-update").val()
     if ($("#business-update-id-" + update_element.attr('count')).val() != "None") {
         url_string = url_string + "/" + $("#business-update-id-" + update_element.attr('count')).val()
     }
-    console.log($("#business-update-id-" + count).prev('[name="csrfmiddlewaretoken"]').val())
     await $.post(url_string, {
         csrfmiddlewaretoken: $("#business-update-id-" + count).prev('[name="csrfmiddlewaretoken"]').val(),
         business: $("#update_business-" + count).val(),
         update_text: update_element.val()
     }, function(data, status){
-        console.log(data);
-//        if (status == 'success') {
-//            $("#div-saved-message").html("Saved at:" + get_time());
-//        }
         $("#business-update-id-" + count).val(data.update_id);
         indicate_saved(data.success);
     }, "json");
@@ -355,7 +314,6 @@ async function update_minutes() {
         });
 
         await $.post($("#url-minutes").val(), post_data, function(data, status){
-            console.log(data);
             if (status == 'success') {
                 $("#div-saved-message").html("Saved at:" + get_time());
             }

@@ -89,7 +89,10 @@ class TestsStudentAPI(TestCase):
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Wells", }
         response = self.client.post(reverse('registration:student_api'), d, secure=True)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
+        content = json.loads(response.content)
+        logging.debug(content)
+        self.assertEqual(content['error'], {'dob': ['This field is required.']})
         student = Student.objects.all()
         self.assertEqual(len(student), 6)
 
