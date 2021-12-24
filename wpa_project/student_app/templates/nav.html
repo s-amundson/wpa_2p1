@@ -1,43 +1,42 @@
 <nav class="navbar navbar-dark bg-dark border">
     <a class="navbar-brand" href="/"> <span class="green">Class Registration</span></a>
 
-    <div class="navbar-expand-sm" id="navbar">
-        <ul class="navbar-nav ml-auto mt-2">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPolicy" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <div class="navbar-expand-sm gx-3" id="navbar">
+        <div class="navbar-nav ml-auto mt-2 row gx-2">
+
+            <div class="dropdown col">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuPolicy" data-bs-toggle="dropdown" aria-expanded="false">
                     Policies
-                </a>
+                </button>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="{% url 'registration:terms' %}">Terms</a>
                     <a class="dropdown-item" href="{% url 'registration:policy' 'privacy' %}">Privacy</a>
                     <a class="dropdown-item" href="{% url 'registration:policy' 'covid' %}">Covid 19</a>
                 </div>
-            </li>
+            </div>
 
             {% if user.is_authenticated %}
+                <div class="dropdown col">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuMembership" data-bs-toggle="dropdown" aria-expanded="false">
+                        Membership
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        {% if user.is_member %}
+                            Membership coming soon.
+                            <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
+                        {% else %}
+                            Membership coming soon.
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMember" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Membership
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            {% if user.is_member %}
-                                Membership coming soon.
-                                <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
-                            {% else %}
-                                Membership coming soon.
-
-                            {% endif %}
-                        </div>
-                    </li>
-
+                        {% endif %}
+                    </div>
+                </div>
 
                 {% if user.is_board %}
-                    <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBoard" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Board Links
-                      </a>
-                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="dropdown col">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuBoard" data-bs-toggle="dropdown" aria-expanded="false">
+                            Board Links
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{% url 'programs:class_list'%}">Beginner Class</a>
                         <a class="dropdown-item" href="{% url 'registration:search'%}">Search</a>
                         <a class="dropdown-item" href="{% url 'registration:student_list'%}">Student List</a>
@@ -47,39 +46,39 @@
                         {% if user.is_superuser %}
                           <a class="dropdown-item" href="{% url 'payment:costs'%}">Costs</a>
                         {% endif %}
-                      </div>
-                    </li>
+                        </div>
+                    </div>
                 {% endif %}
                 {% if user.is_staff %}
-                    <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownStaff" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Staff Links
-                      </a>
-                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{% url 'programs:class_list'%}">class list</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="{% url 'registration:search'%}">Search</a>
+                    <div class="dropdown col">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuStaff" data-bs-toggle="dropdown" aria-expanded="false">
+                            Staff Links
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{% url 'programs:class_list'%}">class list</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'registration:search'%}">Search</a>
                       </div>
-                    </li>
+                    </div>
                 {% endif %}
 
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'programs:class_registration' %}">Classes</a>
+                <li class="nav-item col">
+                    <a class="btn btn-secondary" href="{% url 'programs:class_registration' %}">Classes</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+                <li class="nav-item col">
+                    <a class="btn btn-secondary" href="{% url 'account_logout' %}">Logout</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'registration:profile' %}">Profile</a>
+                <li class="nav-item col">
+                    <a class="btn btn-secondary" href="{% url 'registration:profile' %}">Profile</a>
 
             {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                <li class="nav-item col">
+                    <a class="btn btn-secondary" href="{% url 'account_login' %}">Login</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'account_signup' %}">Join</a>
+                <li class="nav-item col">
+                    <a class="btn btn-secondary" href="{% url 'account_signup' %}">Join</a>
                 </li>
             {% endif %}
-        </ul>
+        </div>
     </div>
 </nav>

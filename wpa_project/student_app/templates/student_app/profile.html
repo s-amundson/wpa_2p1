@@ -36,7 +36,7 @@
             </div>
             <div id="phone" class="row">{{ student_family.phone }}</div>
             <div class="row">
-                <button id="btn-address-edit" class="btn btn-primary" type="button" name="button"
+                <button id="btn-address-edit" class="col-2 btn btn-primary" type="button" name="button"
                         family_id="{{ student_family.id }}">
                     Edit Address
                 </button>
@@ -50,10 +50,15 @@
             <input type="hidden" id="this-student" value="{{ this_student }}">
         </div>
     </div>
-    <div class="px-3 container" id="student-table-div"></div>
+    <div class="row">
+        <div class="col-1"></div>
+        <div class="col px-3 container" id="student-table-div"></div>
+        <div class="col-1"></div>
+    </div>
+
     <div class="row px-2 container" id="student_add_div"></div>
     <div class="row px-3 mx-5 container">
-        <button id="btn-add-student" class="btn btn-primary" type="button" name="button">
+        <button id="btn-add-student" class="col-2 btn btn-primary" type="button" name="button">
             Add Student
         </button>
     </div>
