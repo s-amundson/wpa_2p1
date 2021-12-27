@@ -25,6 +25,7 @@ wpa_project/wpa_project/secrets.json
       "DATABASE_HOST": "db",
       "DATABASE_PORT": "5432",
       "DEBUG": true,
+      "DEBUG_LEVEL": "DEBUG",
       "DEFAULT_FROM_EMAIL": "none@example.com",
       "EMAIL_DEBUG": false,
       "EMAIL_HOST_USER": "none@example.com",

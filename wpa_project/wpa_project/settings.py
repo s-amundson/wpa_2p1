@@ -162,7 +162,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': get_secret("DEBUG"),
     },
 }
 

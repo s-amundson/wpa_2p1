@@ -22,18 +22,8 @@ class UpdatePrograms:
             c.save()
             logging.debug(c.state)
 
-        # # create class day after tomorrow and open
-        # d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
-        # d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
-        # bc = BeginnerClass(class_date=d, class_type='beginner', beginner_limit=20, returnee_limit=0, state='open')
-        # bc.save()
-        # d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=11)
-        # bc = BeginnerClass(class_date=d, class_type='returnee', beginner_limit=0, returnee_limit=20, state='open')
-        # bc.save()
-
         # create classes for the next month on saturday if doesn't exist
-        next_sat = self.next_class_day(5)
-        logging.debug(next_sat)
+        next_sat = self.next_class_day(5)  # Monday is 0 and Sunday is 6
         classes = BeginnerClass.objects.filter(class_date__gt=tomorrow)
 
         for i in range(4):
@@ -44,13 +34,13 @@ class UpdatePrograms:
             classes = BeginnerClass.objects.filter(class_date=class_day)
             if len(classes) == 0:
                 bc = BeginnerClass(class_date=class_day, class_type='beginner', beginner_limit=20, returnee_limit=0,
-                                   state='open')
+                                   state='scheduled')
                 bc.save()
             class_day = class_day.replace(hour=11)
             classes = BeginnerClass.objects.filter(class_date=class_day)
             if len(classes) == 0:
                 bc = BeginnerClass(class_date=class_day, class_type='returnee', beginner_limit=0, returnee_limit=20,
-                                   state='open')
+                                   state='scheduled')
                 bc.save()
 
     def next_class_day(self, target_day):
