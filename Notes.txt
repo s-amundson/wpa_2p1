@@ -11,7 +11,6 @@ TODO
     test beginner class canceled (square refunds) - refund needs to check for prior refund amount
     cookie law
     member events
-    add first name, last name for signature form.
 
 Wish:
     Wish: add classes that a student has attended.
