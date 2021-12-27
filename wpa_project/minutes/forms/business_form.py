@@ -33,7 +33,7 @@ class BusinessForm(MyModelForm):
 
         else:
             self.fields['resolved_bool'].initial = False
-        self.fields['resolved_bool'].widget.attrs.update({'class': "m-2 resolved-check"})
+        self.fields['resolved_bool'].widget.attrs.update({'class': "form-check-input resolved-check"})
 
 
 class BusinessUpdateForm(MyModelForm):

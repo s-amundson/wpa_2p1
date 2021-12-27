@@ -1,23 +1,48 @@
 <form id="family-form" method="post" action="{% url 'registration:student_register' %}" autocomplete="off" class="form">
 {% csrf_token %}
     <div class="row">
-            <div class="input-group input-group-md">
+        <div class="flex-column">
+            <div class="form-floating input-group-md m-2">
                 {{ form.street }}
+                <label for="id_street">
+                    <span style="color:Black;">{{ form.street.label }}</span>
+                </label>
             </div>
-    </div>
-
-    <div class="row">
-            <div class="input-group input-group-md">
-                {{ form.city }}
-                {{ form.state }}
-                {{ form.post_code }}
-            </div>
-    </div>
-
-    <div class="row">
-        <div class="input-group input-group-md">
-            {{ form.phone }}
         </div>
     </div>
-<button id="btn-family-form" class="btn btn-primary" type="submit">Update</button>
+    <div class="row">
+        <div class="d-md-inline-flex">
+            <div class="form-floating input-group-md m-2 flex-grow-1">
+                {{ form.city }}
+                <label for="id_city">
+                    <span style="color:Black;">{{ form.city.label }}</span>
+                </label>
+            </div>
+            <div class="form-floating input-group-md m-2">
+                {{ form.state }}
+                <label for="id_state">
+                    <span style="color:Black;">{{ form.state.label }}</span>
+                </label>
+            </div>
+            <div class="form-floating input-group-md m-2">
+                {{ form.post_code }}
+                <label for="id_post_code">
+                    <span style="color:Black;">{{ form.post_code.label }}</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="d-md-inline-flex">
+            <div class="form-floating input-group-md m-2">
+                {{ form.phone }}
+                <label for="id_phone">
+                    <span style="color:Black;">{{ form.phone.label }}</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="flex-row px-2 m-2">
+        <button id="btn-family-form" class="btn btn-primary" type="submit">Update</button>
+    </div>
 </form>

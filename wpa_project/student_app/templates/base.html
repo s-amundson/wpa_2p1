@@ -53,11 +53,13 @@
                     {% endif %}
                     {% block left %}{% endblock %}
                 </div>
+                <div class="col-md
                 {% if user.dark_theme %}
-                    <div class="col-md bg-dark text-white" id="block-main">
+                    bg-dark text-white
                 {% else %}
-                    <div class="col-md bg-light text-dark" id="block-main">
+                    bg-light text-dark
                 {% endif %}
+                " id="block-main">
                     {% block main %}{% endblock %}
                 </div>
                 <div class="col-md-2">
