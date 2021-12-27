@@ -29,14 +29,6 @@ $(document).ready(function(){
 async function get_calendar() {
     await $.get("class_calendar/" + month, function(data, status){
         $("#div-calendar").html(data);
-        if (dark == "True") {
-            $("table.calendar").find("td").each(function() {
-                $(this).css("border", "1px solid white");
-            });
-            $("table.calendar").find("tr").each(function() {
-                $(this).css("border", "1px solid white");
-            });
-        }
         $(".bc-btn").click(select_class)
         let d = new Date().getMonth() + 1 // Jan is 0 in javascript
         if (month == d) {

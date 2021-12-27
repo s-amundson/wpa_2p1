@@ -5,10 +5,13 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/class_registration.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/calendar.css' %}">
+    {% if user.dark_theme %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/calendar-dark.css' %}">
+    {% else %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/calendar-light.css' %}">
+    {% endif %}
     <script>
         var month = {{ this_month }}
-        var dark = "{{ user.dark_theme }}"
     </script>
 {% endblock %}
 
