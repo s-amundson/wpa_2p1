@@ -43,7 +43,7 @@
             </div>
             <input type="hidden" id="alert-message" value="{{ alert_message }}">
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-lg-2">
                     {% if messages %}
                     <ul class="messages">
                         {% for message in messages %}
@@ -53,7 +53,7 @@
                     {% endif %}
                     {% block left %}{% endblock %}
                 </div>
-                <div class="col-md
+                <div class="col-lg
                 {% if user.dark_theme %}
                     bg-dark text-white
                 {% else %}
@@ -62,7 +62,7 @@
                 " id="block-main">
                     {% block main %}{% endblock %}
                 </div>
-                <div class="col-md-2">
+                <div class="col-lg-2">
                     {% block right %}{% endblock %}
                 </div>
             </div>
