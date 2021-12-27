@@ -6,7 +6,10 @@
     {% load static %}
     <script src="{% static 'js/class_registration.js' %}"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/calendar.css' %}">
-    <script> var month = {{ this_month }}</script>
+    <script>
+        var month = {{ this_month }}
+        var dark = "{{ user.dark_theme }}"
+    </script>
 {% endblock %}
 
 {% block main %}
