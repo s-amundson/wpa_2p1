@@ -40,16 +40,16 @@
 
                             {% for l in levels %}
                                 <div class="row">
-                                    <div class="col-2 input-group input-group-md border">
+                                    <div class="col-2 input-group-md border">
                                         <label for="id_level_{{ l.id }}">
                                             <input type="radio" name="level" value="{{ l.id }}" id="id_level_{{ l.id }}" required="">
                                             {{ l.name }}
                                         </label>
                                     </div>
-                                    <div class="col-1 input-group input-group-md border">
+                                    <div class="col-1 input-group-md border">
                                         ${{ l.cost }}
                                     </div>
-                                    <div class="col input-group input-group-md border">
+                                    <div class="col input-group-md border">
                                         {{ l.description }}
                                         <input type="hidden" id="max_age_{{l.id}}" value="{{ l.max_age }}">
                                         <input type="hidden" id="min_age_{{l.id}}" value="{{ l.min_age }}">

@@ -71,9 +71,9 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+CSRF_COOKIE_SECURE = True
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         # 'ENGINE': 'django.db.backends.sqlite3',
@@ -186,9 +186,8 @@ ROOT_URLCONF = 'wpa_project.urls'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
-
 SECURE_SSL_REDIRECT = False
-
+SESSION_COOKIE_SECURE = True
 SITE_ID = 1
 
 # Provider specific settings

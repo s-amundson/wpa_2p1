@@ -56,25 +56,6 @@ function load_instructor_form() {
     });
 }
 
-function load_student_family_form(family_id) {
-    console.log(family_id)
-    $("#student-family-address").hide();
-    let url_string = "student_register"
-    if (family_id != "") { // if empty new family so load empty form
-        url_string = url_string + "/" + family_id + "/";
-    }
-    console.log(url_string);
-    $.get(url_string, function(data, status){
-        $("#student-family-form").html(data);
-        $("#student-family-form").show();
-
-        $("#family-form").submit(function(e){
-            e.preventDefault();
-            post_family_function(family_id)
-        });
-
-    });
-}
 
 function load_student_table() {
     $.get(student_table_url, function(data, status){
@@ -94,44 +75,6 @@ function load_student_table() {
             }
         }
     });
-}
-
-async function post_family_function(family_id) {
-    console.log('on submit')
-    let url_string = "student_family_api";
-    if (family_id != "") {
-        url_string = url_string + "/" + family_id + "/";
-    }
-    let data = await $.post(url_string, {
-        csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
-        'street': $("#id_street").val(),
-        'city' : $("#id_city").val(),
-        'state': $("#id_state").val(),
-        'post_code': $("#id_post_code").val(),
-        'phone': $("#id_phone").val()
-    }, function(data, status){
-        console.log(data)
-        return data;
-    }, "json");
-    $("#address1").html($("#id_street").val());
-    $("#address2").html($("#id_city").val() + " " + $("#id_state").val() + " " + $("#id_post_code").val())
-    $("#phone").html($("#id_phone").val())
-
-    $("#student-family-form").html("");
-    $("#student-family-form").hide();
-    $("#student-family-address").show();
-    $("#btn-add-student").prop('disabled', false);
-    $("#btn-add-student").show();
-    $("#btn-address-edit").attr("family_id", data.id);
-    if (url_string == "student_family_api") {
-        $("#div-instruct").html("Please enter name and date of birth information for a student");
-        load_student_form($("#student_add_div"));
-    }
-    else {
-        $("#div-instruct").html("");
-    }
-    load_student_table();
-    $("#this-student-div").hide();
 }
 
 async function theme_function(e) {
