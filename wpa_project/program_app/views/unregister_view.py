@@ -51,6 +51,7 @@ class UnregisterView(LoginRequiredMixin, APIView):
             for s in sf.student_set.all():
                 student_list.append(s.id)
             logging.debug(serializer.data)
+            logging.debug(student_list)
             # idempotency_key = uuid.uuid4()
             self.ik_list = []
             class_list = serializer.data['class_list']
@@ -63,7 +64,7 @@ class UnregisterView(LoginRequiredMixin, APIView):
                 except (ClassRegistration.DoesNotExist, AttributeError):
                     logging.debug('registration not found')
                     response_dict['error'] = 'registration not found'
-                    return response_dict
+                    return Response(response_dict)
                 dt = timezone.now() + timedelta(hours=24)
 
                 if cr.beginner_class.state in BeginnerClass().get_states()[3:]:

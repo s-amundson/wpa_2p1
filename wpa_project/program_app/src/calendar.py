@@ -25,9 +25,14 @@ class Calendar(HTMLCalendar):
 
         for event in events_per_day:
             logging.debug(event.class_type)
+            btn_color = 'btn-primary'
+            if event.class_type == 'combined':
+                btn_color = 'btn-info'
+            elif event.class_type == 'returnee':
+                btn_color = 'btn-secondary'
             cd = timezone.localtime(event.class_date)
-            data += f'<li><button class="btn btn-primary bc-btn m-1" type="button" bc_id="{event.id}">'
-            data += f'{event.class_type.capitalize()} class {cd.strftime("%I:%M %p")}</button></li>'
+            data += f'<li><button class="btn {btn_color} bc-btn m-1" type="button" bc_id="{event.id}">'
+            data += f'{event.class_type.capitalize()} {cd.strftime("%I:%M %p")}</button></li>'
 
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {data} </ul></td>"

@@ -2,7 +2,7 @@ from allauth.account.forms import SignupForm
 from django import forms
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 
 class SignUpForm(SignupForm):

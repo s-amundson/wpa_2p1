@@ -1,10 +1,12 @@
 <nav class="navbar navbar-dark bg-dark border">
-    <a class="navbar-brand" href="/"> <span class="green">Class Registration</span></a>
+    <a class="navbar-brand" href="/">
+        <div class="container px-4"><span class="green">Class Registration</span></div>
+    </a>
 
-    <div class="navbar-expand-sm" id="navbar">
-        <ul class="navbar-nav ml-auto mt-2">
+    <div class="navbar-expand-md" id="navbar">
+        <ul class="navbar-nav md-auto mt-2">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPolicy" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                     Policies
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -17,7 +19,7 @@
             {% if user.is_authenticated %}
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMember" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                             Membership
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -34,7 +36,7 @@
 
                 {% if user.is_board %}
                     <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBoard" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                         Board Links
                       </a>
                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -43,7 +45,6 @@
                         <a class="dropdown-item" href="{% url 'registration:student_list'%}">Student List</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{% url 'minutes:minutes_form'%}">New Minutes</a>
-                        <a class="dropdown-item" href="{% url 'minutes:decision_list'%}">Decisions</a>
                         {% if user.is_superuser %}
                           <a class="dropdown-item" href="{% url 'payment:costs'%}">Costs</a>
                         {% endif %}
@@ -52,7 +53,7 @@
                 {% endif %}
                 {% if user.is_staff %}
                     <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownStaff" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                         Staff Links
                       </a>
                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">

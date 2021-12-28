@@ -16,9 +16,10 @@
 }
 
 .calendar td {
-  width: 200px;
-  height: 100px;
-  padding: 20px 0px 0px 5px;
+  width: auto;
+  height: auto;
+  padding: 5px 0px 0px 5px;
+  vertical-align:top;
 }
 
 .month {

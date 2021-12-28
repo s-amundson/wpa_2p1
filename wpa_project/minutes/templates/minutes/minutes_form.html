@@ -27,37 +27,31 @@
             <div class="col-2">
                 {{ form.meeting_date.label }}
             </div>
-            <div class="col">
+            <div class="col-2">
                 {{ form.meeting_date }}
             </div>
+            <div class="col"></div>
         </div>
 
         <div class="row p-3">
             <div class="col-2">
                 {{ form.attending.label }}
             </div>
-            <div class="col">
+            <div class="col-3">
                 {{ form.attending }}
             </div>
+            <div class="col"></div>
         </div>
 
         <div class="row p-3">
             <div class="col-2">
                 {{ form.start_time.label }}
             </div>
-            <div id="div-start-input" class="col">
+            <div id="div-start-input" class="col-2">
                 {{ form.start_time }}
                 <button id="btn-start" class="btn btn-primary" type="submit">Start Meeting Now</button>
             </div>
-        </div>
-
-        <div class="row p-3">
-            <div class="col-2">
-                {{ form.minutes_text.label }}
-            </div>
-            <div class="col">
-                {{ form.minutes_text }}
-            </div>
+            <div class="col"></div>
         </div>
 
         <div class="row p-3">
@@ -74,7 +68,9 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-president-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        <div class="col-3">
+                            <button id="btn-president-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -85,7 +81,7 @@
                 Vice President's report
             </div>
             <div class="col">
-                <div id="div-vp">
+                <div id="div-vice">
                     <input type="hidden" id="vice-report-count" class="report-count" value="{{ reports.vice|length }}">
                     {% for report in reports.vice %}
                         {% include "minutes/forms/report_form.html" %}
@@ -93,7 +89,9 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-vice-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        <div class="col-3">
+                            <button id="btn-vice-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -112,7 +110,9 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-secretary-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        <div class="col-3">
+                            <button id="btn-secretary-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -131,7 +131,9 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-treasure-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        <div class="col-3">
+                            <button id="btn-treasure-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -141,16 +143,17 @@
             <div class="col-2">
                 {{ form.balance.label }}
             </div>
-            <div class="col">
+            <div class="col-2">
                 {{ form.balance }}
             </div>
+            <div class="col"></div>
         </div>
 
         <div class="row p-3">
             <div class="col-2">
                 {{ form.memberships.label }}
             </div>
-            <div class="col">
+            <div class="col-2">
                 {{ form.memberships }}
             </div>
         </div>
@@ -181,7 +184,9 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-new-business" class="btn btn-primary btn-report">Add New Business</button>
+                        <div class="col-3">
+                            <button id="btn-new-business" class="btn btn-primary btn-report">Add New Business</button>
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -199,7 +204,9 @@
                 </div>
                 {% if user.is_board %}
                     <div class="row">
-                        <button id="btn-new-decision" class="btn btn-primary btn-report">Add New Decision</button>
+                        <div class="col-3">
+                            <button id="btn-new-decision" class="btn btn-primary btn-report">Add New Decision</button>
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -218,10 +225,13 @@
             <div class="col-2">
                 {{ form.end_time.label }}
             </div>
-            <div id="div-end-input" class="col">
+            <div id="div-end-input" class="col-2">
                 {{ form.end_time }}
-                <button id="btn-end" class="btn btn-primary btn-report" type="submit">End Meeting Now</button>
+                {% if user.is_board %}
+                    <button id="btn-end" class="btn btn-primary btn-report" type="submit">End Meeting Now</button>
+                {% endif %}
             </div>
+            <div class="col"></div>
         </div>
     </form>
 

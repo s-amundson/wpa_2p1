@@ -58,7 +58,7 @@ class TestsMinutes(TestCase):
 
         response = self.client.get(reverse('minutes:minutes_form', kwargs={'minutes_id': m.id}), secure=True)
 
-        self.assertEqual(response.context['minutes_id'], 1)
+        self.assertEqual(response.context['minutes_id'], m.id)
         self.assertEqual(len(response.context['reports']['president']), 1)
         self.assertEqual(len(response.context['reports']['vice']), 0)
         self.assertEqual(len(response.context['old_business']), 1)

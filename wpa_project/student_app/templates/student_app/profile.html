@@ -35,7 +35,7 @@
                 {{ student_family.city }} {{ student_family.state }} {{ student_family.post_code }}
             </div>
             <div id="phone" class="row">{{ student_family.phone }}</div>
-            <div class="row">
+            <div class="flex-row m-2">
                 <button id="btn-address-edit" class="btn btn-primary" type="button" name="button"
                         family_id="{{ student_family.id }}">
                     Edit Address
@@ -50,9 +50,14 @@
             <input type="hidden" id="this-student" value="{{ this_student }}">
         </div>
     </div>
-    <div class="px-3 container" id="student-table-div"></div>
+    <div class="row">
+        <div class="col-1"></div>
+        <div class="col px-3 container" id="student-table-div"></div>
+        <div class="col-1"></div>
+    </div>
+
     <div class="row px-2 container" id="student_add_div"></div>
-    <div class="row px-3 mx-5 container">
+    <div class="flex-row px-3 mx-5">
         <button id="btn-add-student" class="btn btn-primary" type="button" name="button">
             Add Student
         </button>
@@ -64,7 +69,7 @@
         &nbsp;for a class. You can also click on Classes in the nav bar.
     </div>
 
-    <div class="row p-3 mx-3 container" id="theme-div">
+    <div class="row p-3 mx-3" id="theme-div">
         <form method="post">{% csrf_token %}
             {{ theme_form.as_p }}
             <input id="theme-submit" class="btn btn-primary" type="submit" value="Update Theme">

@@ -16,10 +16,11 @@
         <div class="p-2">
             <div class="row">
                 <div class="col-1 p-1"></div>
-                <div class="col-3 font-weight-bold border p-1 text-center" > First Name </div>
-                <div class="col-3 font-weight-bold border p-1 text-center"> Last Name </div>
+                <div class="col-2 font-weight-bold border p-1 text-center" > First Name </div>
+                <div class="col-2 font-weight-bold border p-1 text-center"> Last Name </div>
                 <div class="col font-weight-bold border p-1 text-center"> Date of Birth </div>
-                <div class="col-3 font-weight-bold border p-1 text-center"> Safety Class Date </div>
+                <div class="col font-weight-bold border p-1 text-center"> Safety Class Date </div>
+                <div class="col font-weight-bold border p-1 text-center"> Membership Expire Date </div>
             </div>
             {% for student in sf.student_set.all %}
                 <div class="row">
@@ -29,10 +30,17 @@
                             Edit
                         </button>
                     </div>
-                    <div class="col-3 border"> {{ student.first_name }} </div>
-                    <div class="col-3 border"> {{ student.last_name }} </div>
+                    <div class="col-2 border"> {{ student.first_name }} </div>
+                    <div class="col-2 border"> {{ student.last_name }} </div>
                     <div class="col border"> {{ student.dob }} </div>
-                    <div class="col-3 border"> {{ student.safety_class }} </div>
+                    <div class="col border"> {{ student.safety_class }} </div>
+                    <div class="col border">
+                        {% for member in student.member_set.all %}
+                            <a href="{% url 'membership:membership' sf.id %}">
+                                {{ member.expire_date }}
+                            </a>
+                        {% endfor %}
+                    </div>
                 </div>
             {% endfor %}
         </div>

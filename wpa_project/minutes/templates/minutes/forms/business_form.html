@@ -24,12 +24,12 @@
                 {% endif %}
             </div>
             <div class="col"></div>
-            <div class="col">
-                <div class="row">
+            <div class="col form-check mb-3">
                     {% if user.is_board %}
-                        Resolved: {{ business.form.resolved_bool }}
+                    <label class="form-check-label">
+                        {{ business.form.resolved_bool }} Resolved
+                    </label>
                     {% endif %}
-                </div>
             </div>
 
         </div>

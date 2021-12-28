@@ -10,7 +10,7 @@ from django.contrib import messages
 from ..forms import MembershipForm
 from ..models import Level
 from payment.src import SquareHelper
-from student_app.models import Student
+from student_app.models import Student, StudentFamily
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +20,24 @@ class MembershipView(LoginRequiredMixin, View):
     #     super().__init__(*args, **kwargs)
     #     self.table = LevelModel.objects.all()
 
-    def get(self, request):
-        sf = Student.objects.get(user=request.user).student_family
+    def get(self, request, sf_id=None):
+        template = 'membership/construction_membership.html'
+        if request.user.is_board:
+            template = 'membership/membership.html'
+        if sf_id is not None and request.user.is_board:
+            sf = StudentFamily.objects.get(pk=sf_id)
+        else:
+            sf = Student.objects.get(user=request.user).student_family
         forms = []
         forms.append(MembershipForm(students=sf.student_set.all()))
         levels = Level.objects.filter(enabled=True)
-        return render(request, 'membership/construction_membership.html', {'forms': forms, 'levels': levels})
+        return render(request, template, {'forms': forms, 'levels': levels})
 
-    def post(self, request):
-        sf = Student.objects.get(user=request.user).student_family
+    def post(self, request, sf_id=None):
+        if sf_id is not None and request.user.is_board:
+            sf = StudentFamily.objects.get(pk=sf_id)
+        else:
+            sf = Student.objects.get(user=request.user).student_family
         students = sf.student_set.all()
         form = MembershipForm(students, request.POST)
         if form.is_valid():

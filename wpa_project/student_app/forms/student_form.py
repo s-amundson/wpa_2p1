@@ -35,18 +35,3 @@ class StudentForm(MyModelForm):
             self.fields['email'].widget.attrs.update({'disabled': 'disabled'})
         else:
             self.fields['email'].widget.attrs.update({'placeholder': 'Email (optional)'})
-
-        # exclude = ['student_family', 'user']
-        # widgets = {'first_name': TextInput(attrs={'placeholder': 'First Name', 'autocomplete': 'off',
-        #                                           'class': "form-control m-2 member-required"}),
-        #            'last_name': TextInput(attrs={'placeholder': 'Last Name', 'autocomplete': 'off',
-        #                                          'class': "form-control m-2 member-required"}),
-        #            'dob': TextInput(attrs={'placeholder': 'Date of Birth YYYY-MM-DD', 'autocomplete': 'off',
-        #                                          'class': 'form-control m-2 member-required',
-        #                                          'data-error-msg': "Please enter date in format YYYY-MM-DD"}),
-        #            'safety_class': TextInput(attrs={'placeholder': 'Safety Class YYYY-MM-DD', 'autocomplete': 'off',
-        #                                             'class': 'form-control m-2',
-        #                                             'data-error-msg': "Please enter date in format YYYY-MM-DD"}),
-        #            }
-
-

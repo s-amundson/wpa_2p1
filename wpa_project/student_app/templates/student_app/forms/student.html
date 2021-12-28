@@ -1,65 +1,75 @@
-<form class="col form" method="post" autocomplete="off" id="student_form">
+<form class="form border m-3" method="post" autocomplete="off" id="student_form">
     {% csrf_token %}
     <div class="row">
-        <div class="col input-group input-group-md">
-            {{ form.first_name }}
-            {% for error in form.first_name.errors %}
-                <p class="help-block">{{ error }}</p>
-            {% endfor %}
-        </div>
-        <div class=" col input-group input-group-md">
-            {{ form.last_name }}
-            {% for error in form.last_name.errors %}
-                <p class="help-block">{{ error }}</p>
-            {% endfor %}
-        </div>
-        <div class="col input-group input-group-md">
-            <div class="row">
-                {{ form.dob }}
-                {% for error in form.dob.errors %}
+        <div class="d-md-inline-flex">
+            <div class="form-floating input-group-md m-2">
+                {{ form.first_name }}
+                <label for="id_first_name">
+                    <span style="color:Black;">{{ form.first_name.label }}</span>
+                </label>
+                {% for error in form.first_name.errors %}
                     <p class="help-block">{{ error }}</p>
                 {% endfor %}
             </div>
-            <div id="dob-error" class="row text-danger"></div>
-        </div>
-        {% if user.is_staff %}
-            <div class="col input-group input-group-md">
-                <div class="row">Safety Class</div>
-                <div class="row mx-auto">
-                    {{ form.safety_class }}
-                    {% for error in form.safety_class.errors %}
+            <div class="form-floating input-group-md m-2">
+                {{ form.last_name }}
+                <label for="id_last_name">
+                    <span style="color:Black;">{{ form.last_name.label }}</span>
+                </label>
+                {% for error in form.last_name.errors %}
+                    <p class="help-block">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div class="form-floating input-group-md m-2">
+                    {{ form.dob }}
+                    <label for="id_dob">
+                        <span style="color:Black;">Date of Birth</span>
+                    </label>
+                    {% for error in form.dob.errors %}
                         <p class="help-block">{{ error }}</p>
                     {% endfor %}
-                </div>
+                <div id="dob-error" class="row text-danger"></div>
             </div>
-        {% endif %}
+        </div>
     </div>
-    {% if not student_is_user %}
-        <div class="row">
-            <div class="col pt-2 ml-2">
-                If you add an email below we will email them asking them to join, and they will be associated with this account.
+    <div class="row">
+        <div class="flex-column">
+            {% if not student_is_user %}
+                <div class="m-2 ms-3">
+                    If you add an email below we will email them asking them to join, and they will be associated with this account.
+                </div>
+            {% endif %}
+
+            <div class="input-group-md m-2">
+                {{ form.email }}
+                {% for error in form.email.errors %}
+                    <p class="help-block">{{ error }}</p>
+                {% endfor %}
             </div>
+            <div class="col-2 m-2 d-flex align-items-center">
+                {% if student_this_user %}
+                    <a href="{% url 'account_email' %}">Edit Email</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% if user.is_staff %}
+        <div class="row px-3 input-group input-group-md">
+            <div class="col-2">
+                Safety Class
+            </div>
+            <div class="col">
+                {{ form.safety_class }}
+                {% for error in form.safety_class.errors %}
+                    <p class="help-block">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div class="col"></div>
         </div>
     {% endif %}
-    <div class="row">
-        <div class="col">
-            {{ form.email }}
-            {% for error in form.email.errors %}
-                <p class="help-block">{{ error }}</p>
-            {% endfor %}
-        </div>
-        <div class="col-2 m-2 d-flex align-items-center">
-            {% if student_this_user %}
-                <a href="{% url 'account_email' %}">Edit Email</a>
-            {% endif %}
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-2">
+
+    <div class="flex-row m-2">
             <button id="btn-student-form-add" class="btn btn-primary" type="submit">Add</button>
-        </div>
-        <div class="col-2">
             <button id="btn-student-form-close" class="btn btn-primary">Close</button>
-        </div>
     </div>
 </form>

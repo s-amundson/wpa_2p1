@@ -41,65 +41,6 @@ $(document).ready(function() {
 
 });
 
-async function add_student_function(student_id) {
-    console.log('on submit')
-    var url_string = "student_api"
-    let getConfirm = false;
-    if(student_id) {
-        url_string = "student_api/" + student_id + "/";
-        $("#student-row-" + student_id).show();
-    }
-    var of_age = new Date()
-    of_age.setFullYear(of_age.getFullYear() - 9)
-    console.log(of_age);
-    if (Date.parse($("#id_dob").val()) > of_age) {
-        getConfirm = confirm("Students under the age of 9 are not permitted to participate in classes.\n"
-          +  "Do you wish to continue to add this student?");
-    }
-    else {
-        getConfirm = true;
-    }
-    console.log(url_string);
-    if (getConfirm) {
-        let data = await $.post(url_string, {
-                csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
-                'first_name': $("#id_first_name").val(),
-                'last_name' : $("#id_last_name").val(),
-                'dob': $("#id_dob").val(),
-                'email': $("#id_email").val()
-            }, function(data, status){
-                console.log(status)
-                console.log(data)
-                return data;
-                }, "json");
-        $("#student_add_div").hide();
-
-        if ('error' in data) {
-            Object.entries(data["error"]).forEach(([key, value]) => {
-               console.log(key, value);
-               alert(value[0])
-            });
-        }
-        else {
-            if ($("#this-student").val() == 'None') {
-                $("#btn-address-edit").prop('disabled', false);
-                $("#this-student").val(data.id)
-                $("h2").html(data.first_name + data.last_name + "'s Profile Page")
-                $("#btn-student-form-add").hide();
-            }
-
-            if ($("#btn-address-edit").attr("family_id") == "") {
-                load_student_family_form($("#btn-address-edit").attr("family_id"));
-                $("#div-instruct").html("Please enter your address and phone number below");
-            }
-            else {
-                $("#btn-add-student").show();
-                $("#div-instruct").html("");
-            }
-            load_student_table();
-        }
-    }
-}
 
 function load_instructor_form() {
     console.log("load instructor form");

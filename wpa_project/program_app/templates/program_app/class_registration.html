@@ -5,8 +5,14 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/class_registration.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/calendar.css' %}">
-    <script> var month = {{ this_month }}</script>
+    {% if user.dark_theme %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/calendar-dark.css' %}">
+    {% else %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/calendar-light.css' %}">
+    {% endif %}
+    <script>
+        var month = {{ this_month }}
+    </script>
 {% endblock %}
 
 {% block main %}
@@ -57,13 +63,12 @@
             {% csrf_token %}
             <input type="hidden" id="is_instructor" value="{{ user.is_instructor }}">
             <div class="row p-3">
-                <div class="col-2 text-right">Select a class date:</div>
-                <div class="col">
-                    <div class="row input-group input-group-md">
-                        {{ form.beginner_class }}
-                    </div>
+                <div class="d-md-inline-flex">
+                <div class="text-right">Select a class date:</div>
+                <div class="input-group-md m-2">
+                    {{ form.beginner_class }}
                 </div>
-                <div class="col" id="class-availible"></div>
+                <div class="p-1" id="class-availible"></div>
             </div>
             <div class="row p-1">
                 <div class="col-4 text-right border">
