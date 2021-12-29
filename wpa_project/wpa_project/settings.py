@@ -187,6 +187,8 @@ ROOT_URLCONF = 'wpa_project.urls'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
 SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_AGE = get_secret('SESSION_COOKIE_AGE')
+SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_SECURE = True
 SITE_ID = 1
 

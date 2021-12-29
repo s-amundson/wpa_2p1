@@ -31,6 +31,7 @@ wpa_project/wpa_project/secrets.json
       "EMAIL_HOST_USER": "none@example.com",
       "EMAIL_HOST_PASSWORD": "password",
       "EMAIL_DEBUG_ADDRESSES": ["none@example.com"],
+      "SESSION_COOKIE_AGE": 3600,
       "SOCIALACCOUNT_PROVIDERS": {
         "google": {
           "SCOPE": [
