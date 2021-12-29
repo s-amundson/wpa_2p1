@@ -7,13 +7,14 @@ logger = logging.getLogger(__name__)
 
 
 class Calendar(HTMLCalendar):
-    def __init__(self, year=None, month=None):
+    def __init__(self, year=None, month=None, dark=False):
         self.year = year
         self.month = month
         self.events = BeginnerClass.objects.filter(class_date__gt=timezone.now(),
                                                    class_date__year=self.year,
                                                    class_date__month=self.month,
                                                    state='open')
+        self.dark = dark
         super(Calendar, self).__init__()
         self.setfirstweekday(6)
 
@@ -48,8 +49,11 @@ class Calendar(HTMLCalendar):
     # formats a month as a table
     # filter events by year and month
     def formatmonth(self, withyear=True):
-
-        cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
+        if self.dark:
+            bg = 'table-dark'
+        else:
+            bg = ''
+        cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar table table-bordered {bg}">\n'
         cal += f'{self.formatmonthname(self.year, self.month, withyear=withyear)}\n'
         cal += f'{self.formatweekheader()}\n'
         for week in self.monthdays2calendar(self.year, self.month):

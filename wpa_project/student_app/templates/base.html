@@ -21,7 +21,6 @@
                 crossorigin="anonymous"></script>
 
         <script src="{% static 'js/main.js' %}"></script>
-
         <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -34,7 +33,7 @@
     <body>
         {% include "nav.html" %}
 
-        <div class="container-fluid p-4 m-3">
+        <div class="container-fluid m-md-3">
             <div class="row justify-content-center">
                 <div class="col-6">
                     <img class="img-fluid pb-2" alt="Woodley Park Archers"
@@ -53,7 +52,7 @@
                     {% endif %}
                     {% block left %}{% endblock %}
                 </div>
-                <div class="col-lg
+                <div class="col-lg container
                 {% if user.dark_theme %}
                     bg-dark text-white
                 {% else %}

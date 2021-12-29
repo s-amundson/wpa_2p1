@@ -7,6 +7,7 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/search.js' %}"></script>
+    <script> let student_table_url = "{% url 'registration:student_table' %}" </script>
 {% endblock %}
 
 {% block main %}
@@ -45,18 +46,33 @@
             {% endfor %}
         </div>
         <div class="row p-2" id="student_add_div"></div>
-        <div class="row pt-4">
-            <div class="col ">
-                <h4>Address</h4>
-                {{ sf.street }}</br>
-                {{ sf.city }} {{ sf.state }} {{ sf.post_code }}</br>
-                {{ sf.phone }}</br>
+        <div id="student-family-form" class="row px-3"></div>
 
+        <div id="student-family-address" class="row px-3">
+            <div class="col-1"></div>
+            <div class="col px-3">
+                <div id="address1" class="row">{{ sf.street }} </div>
+                <div id="address2" class="row">
+                    {{ sf.city }} {{ sf.state }} {{ sf.post_code }}
+                </div>
+                <div id="phone" class="row">{{ sf.phone }}</div>
+                <div class="flex-row m-2">
+                    <button id="btn-address-edit" class="btn btn-primary" type="button" name="button"
+                            family_id="{{ sf.id }}">
+                        Edit Address
+                    </button>
+                </div>
             </div>
         </div>
+
         <div class="row pt-4">
             <div class="col">Registration date: {{ sf.registration_date}} </div>
         </div>
+        {% if user.is_board %}
+            <div class="row pt-4">
+                <a href="{% url 'membership:membership' sf.id %}"> Membership </a>
+            </div>
+        {% endif %}
         <hr/>
     {% endfor %}
 

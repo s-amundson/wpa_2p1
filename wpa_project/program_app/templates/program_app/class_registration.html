@@ -5,11 +5,7 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/class_registration.js' %}"></script>
-    {% if user.dark_theme %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/calendar-dark.css' %}">
-    {% else %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/calendar-light.css' %}">
-    {% endif %}
+
     <script>
         var month = {{ this_month }}
     </script>
@@ -29,14 +25,12 @@
         </div>
     </div>
     <hr>
-    <div class="row p-2 justify-content-center">
-        <div class="col-3 text-center">
+    <div class="row pt-2 text-center">
             <h5>Select a Class</h5>
-        </div>
     </div>
-    <div class="row p-2">
+    <div class="row py-2">
 <!--        <div class="col"></div>-->
-        <div id="div-calendar" class="col"></div>
+        <div id="div-calendar"></div>
 <!--        <div class="col"></div>-->
     </div>
     <div id="div-calendar-btn" class="row p-2">
@@ -64,11 +58,12 @@
             <input type="hidden" id="is_instructor" value="{{ user.is_instructor }}">
             <div class="row p-3">
                 <div class="d-md-inline-flex">
-                <div class="text-right">Select a class date:</div>
-                <div class="input-group-md m-2">
-                    {{ form.beginner_class }}
+                    <div class="text-right">Select a class date:</div>
+                    <div class="input-group-md m-2">
+                        {{ form.beginner_class }}
+                    </div>
+                    <div class="p-1" id="class-availible"></div>
                 </div>
-                <div class="p-1" id="class-availible"></div>
             </div>
             <div class="row p-1">
                 <div class="col-4 text-right border">

@@ -4,50 +4,42 @@
 
 {% block main %}
     <div class="row p-2" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-    <div class="p-2">
-        <div class="row p-2">
-            <div class="col">
-                Date
-            </div>
-            <div class="col">
-                Beginners
-            </div>
-            <div class="col">
-                Returnees
-            </div>
-            {% if user.is_staff %}
-                <div class="col">
-                    Instructors
-                </div>
-            {% endif %}
-            <div class="col">
-                State
-            </div>
-        </div>
-
-        {% for c in object_list %}
-            <div class="row">
-                <div class="col border">
-                    <a class="nav-link" href="{% url 'programs:beginner_class' c.id %}">
-                        {{ c.class_date }}
-                    </a>
-                </div>
-                <div class="col border">
-                    {{ c.beginner }}/{{ c.beginner_limit }}
-                </div>
-                <div class="col border">
-                    {{ c.returnee }}/{{ c.returnee_limit }}
-                </div>
-                {% if user.is_staff or user.is_instructor %}
-                    <div class="col border">
-                        {{ c.instructors }}/{{ c.instructor_limit }}
-                    </div>
-                {% endif %}
-                <div class="col border">
-                    {{ c.state }}
-                </div>
-            </div>
-        {% endfor %}
+    <div class="row p-2">
+        <table class="table table-bordered table-striped
+                {% if user.dark_theme %}
+                    table-dark
+                {% endif %}">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Beginners</th>
+                    <th>Returnees</th>
+                    {% if user.is_staff or user.is_instructor %}
+                        <th>Instructors</th>
+                    {% endif %}
+                    <th>State</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in object_list %}
+                    <tr>
+                        <td>
+                            <a class="nav-link" href="{% url 'programs:beginner_class' c.id %}">
+                                {{ c.class_date }}
+                            </a>
+                        </td>
+                        <td>{{ c.beginner }}/{{ c.beginner_limit }}</td>
+                        <td>{{ c.returnee }}/{{ c.returnee_limit }}</td>
+                        <td>
+                            {% if user.is_staff or user.is_instructor %}
+                                {{ c.instructors }}/{{ c.instructor_limit }}
+                            {% endif %}
+                        </td>
+                        <td>{{ c.state }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     <div class="row p-2">
         {% if user.is_board %}

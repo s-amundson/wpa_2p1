@@ -20,7 +20,7 @@ class ClassCalendarView(View):
                 d = d.replace(year=d.year + 1)
                 month = month - 12
         # Instantiate our calendar class with today's year and selected month
-        cal = Calendar(d.year, month)
+        cal = Calendar(d.year, month, request.user.dark_theme)
 
         # Call the formatmonth method, which returns our calendar as a table
         html_cal = mark_safe(cal.formatmonth(withyear=True))
