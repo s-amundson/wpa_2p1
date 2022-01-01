@@ -74,7 +74,7 @@ class PaymentView(APIView):
                 # return redirect('registration:process_payment')
             self.square_helper.log_payment(request, square_response, create_date=None)
             logging.debug(self.request.session.get("account_verified_email"))
-            pay_dict = {'line_items': request.session['line_items'], 'total': amt,
+            pay_dict = {'line_items': request.session['line_items'], 'total': amt / 100,
                         'receipt': square_response['receipt_url']}
             EmailMessage().payment_email_user(request.user, pay_dict)
             response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],
