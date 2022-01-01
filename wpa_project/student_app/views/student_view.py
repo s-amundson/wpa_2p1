@@ -78,17 +78,19 @@ class AddStudentView(LoginRequiredMixin, View):
         if student_id is not None:
             if request.user.is_board:
                 g = get_object_or_404(Student, pk=student_id)
+                student_is_user = g.user_id
             else:
                 sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
-                student_is_user = (g.user is not None)
+                student_is_user = g.user_id
                 student_this_user = (g.user == request.user)
             form = StudentForm(instance=g, student_is_user=student_is_user)
         else:
             s = Student.objects.filter(user=request.user)
+            logging.debug(s.count())
             if s.count() == 0:
                 form = StudentForm(initial={'email': request.user.email}, student_is_user=True)
-                student_is_user = True
+                student_is_user = s.user_id
                 student_this_user = True
             else:
                 form = StudentForm()

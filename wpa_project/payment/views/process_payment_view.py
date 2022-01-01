@@ -25,7 +25,7 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         paydict = {}
         if settings.SQUARE_CONFIG['environment'] == "production":   # pragma: no cover
             # paydict['production'] = True
-            paydict['pay_url'] = '' # "https://js.squareup.com/v2/paymentform"
+            paydict['pay_url'] = "https://web.squarecdn.com/v1/square.js"
         else:  # pragma: no cover
             # paydict['production'] = False
             paydict['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"  #"https://js.squareupsandbox.com/v2/paymentform"

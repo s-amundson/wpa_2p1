@@ -20,4 +20,5 @@ urlpatterns = [
         path('student_table', StudentTableView.as_view(), name='student_table'),
         path('terms', TermsView.as_view(), name='terms'),
         path('theme', ThemeView.as_view(), name='theme'),
+        path('update_user/<int:user_id>/', UserView.as_view(), name='update_user')
 ]
