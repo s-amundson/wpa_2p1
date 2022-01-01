@@ -2,6 +2,14 @@ from django.forms import TextInput
 from django import forms
 
 
+class SearchColumnsForm(forms.Form):
+    last_name = forms.BooleanField(required=False)
+    first_name = forms.BooleanField(required=False)
+    dob = forms.BooleanField(required=False)
+    safety_class = forms.BooleanField(required=False)
+    instructor = forms.BooleanField(required=False)
+
+
 class SearchEmailForm(forms.Form):
     email = forms.EmailField(widget=TextInput(attrs={'placeholder': 'Email', 'autocomplete': 'off', 'name': 'email',
                                                      'class': "form-control m-2 email"}))
