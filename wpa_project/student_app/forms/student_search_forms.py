@@ -1,5 +1,13 @@
-from django.forms import TextInput
+from django.forms import TextInput, CheckboxInput
 from django import forms
+
+
+class SearchColumnsForm(forms.Form):
+    last_name = forms.BooleanField(required=False)
+    first_name = forms.BooleanField(required=False)
+    dob = forms.BooleanField(required=False)
+    safety_class = forms.BooleanField(required=False)
+    instructor = forms.BooleanField(required=False)
 
 
 class SearchEmailForm(forms.Form):

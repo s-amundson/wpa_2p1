@@ -10,13 +10,43 @@
 {% endblock %}
 
 {% block main %}
+
+    <form class="form m-2" method="post">
+        {% csrf_token %}
+        <div class="m-2"><h5>Show only:</h5></div>
+        <div class="d-flex flex-row m-2">
+            <div class="m-2 fieldWrapper">
+                {{form.instructor.label_tag }} {{ form.instructor }}
+            </div>
+        </div>
+        <div class="m-2"><h5>Select columns you wish to show:</h5></div>
+
+        <div class="d-flex flex-row m-2">
+            <div class="m-2 fieldWrapper">
+                {{form.last_name.label_tag }} {{ form.last_name }}
+            </div>
+            <div class="m-2 fieldWrapper">
+                {{form.first_name.label_tag }} {{ form.first_name }}
+            </div>
+            <div class="m-2 fieldWrapper">
+                {{form.dob.label_tag }} {{ form.dob }}
+            </div>
+            <div class="m-2 fieldWrapper">
+                {{form.safety_class.label_tag }} {{ form.safety_class }}
+            </div>
+        </div>
+      <input class="btn btn-primary" type="submit" value="Submit">
+  </form>
+
   <div id="student_table" class="bg-light text-dark" curl="{% url 'registration:student_list_json' %}">
     <table class="datatable text-black">
         <thead>
-            <th p-2>"Last Name"</th>
-            <th p-2>"First Name"</th>
-            <th p-2>"Date of Birth"</th>
-            <th p-2>"Safety Class Date"</th>
+            {% for k,v in columns.items %}
+                {% if v %}
+                    <th p-2>{{k}}</th>
+                {% endif %}
+            {% endfor %}
+
         </thead>
         <tbody>
         </tbody>

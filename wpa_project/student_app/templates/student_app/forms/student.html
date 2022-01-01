@@ -65,7 +65,7 @@
                 {% endfor %}
             </div>
             <div class="col">
-                {% if user.is_board %}
+                {% if user.is_board and student_is_user %}
                     <a href="{% url 'registration:update_user' student_is_user%}">student_is_user</a>
                {% endif %}
             </div>
