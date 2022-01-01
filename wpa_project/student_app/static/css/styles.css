@@ -64,3 +64,39 @@ hr {
   border-top: 1px solid rgba(255, 255, 255, 0.5);
 
 }
+
+.calendar {
+  width: 98%;
+  margin: auto;
+  font-size: 13px;
+}
+
+.calendar th {
+  padding: 10px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.calendar td {
+
+  height: auto;
+  padding: 5px 0px 0px 5px;
+  vertical-align:top;
+}
+
+.month {
+  font-size: 25px;
+}
+
+.date {
+  font-size: 16px;
+}
+
+ul {
+  height: 100%;
+  padding: 0px 5px 0px 20px;
+}
+
+a {
+  color: #17a2b8;
+}

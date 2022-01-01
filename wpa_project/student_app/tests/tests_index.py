@@ -2,8 +2,6 @@ import logging
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import CostsModel,  User
-
 logger = logging.getLogger(__name__)
 
 

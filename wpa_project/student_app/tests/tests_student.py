@@ -1,9 +1,10 @@
 import logging
 import json
+from django.core import mail
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import Student,  User
+from ..models import Student, User
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +15,10 @@ class TestsStudentAPI(TestCase):
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
-        self.test_user = User.objects.get(pk=1)
-        self.client.force_login(self.test_user)
 
     def test_get_student(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
         response = self.client.get(reverse('registration:student_api'), secure=True)
         self.assertEqual(response.status_code, 200)
         d = { "first_name": "", "last_name": "", "dob": None}
@@ -28,6 +29,8 @@ class TestsStudentAPI(TestCase):
             self.assertEqual(content[k], v)
 
     def test_get_student_id(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
         response = self.client.get(reverse('registration:student_api', kwargs={'student_id': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
         d = { "first_name": "Emily", "last_name": "Conlan", "dob": "1995-12-03"}
@@ -44,17 +47,17 @@ class TestsStudentAPI(TestCase):
         logging.debug(content)
         self.assertEqual(content['error'], 'Not Authorized')
 
-    def test_post_new_student(self):
+    def test_post_add_student(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
         response = self.client.post(reverse('registration:student_api'), d, secure=True)
-        student = Student.objects.get(pk=7)
+        student = Student.objects.last()
         self.assertEqual(student.first_name, d['first_name'])
         self.assertEqual(student.last_name, d['last_name'])
 
     def test_post_student_id(self):
-        self.test_user = User.objects.get(pk=4)
+        self.test_user = User.objects.get(pk=5)
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
         response = self.client.post(reverse('registration:student_api', kwargs={'student_id': 6}), d, secure=True)
@@ -86,9 +89,35 @@ class TestsStudentAPI(TestCase):
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Wells", }
         response = self.client.post(reverse('registration:student_api'), d, secure=True)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
+        content = json.loads(response.content)
+        logging.debug(content)
+        self.assertEqual(content['error'], {'dob': ['This field is required.']})
         student = Student.objects.all()
         self.assertEqual(len(student), 6)
+
+    def test_new_user_new_student(self):
+        u = User(username='testuser', email='test@example.com', password='password')
+        u.save()
+        self.client.force_login(u)
+        d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03", "email": "test@example.com"}
+        response = self.client.post(reverse('registration:student_api'), d, secure=True)
+        student = Student.objects.last()
+        self.assertEqual(student.first_name, d['first_name'])
+        self.assertEqual(student.last_name, d['last_name'])
+        self.assertEqual(student.email, 'test@example.com')
+
+    def test_new_user_existing_student(self):
+        self.test_user = User.objects.get(pk=5)
+        self.client.force_login(self.test_user)
+        d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03", "email": "test@example.com"}
+        response = self.client.post(reverse('registration:student_api'), d, secure=True)
+        student = Student.objects.last()
+        self.assertEqual(student.first_name, d['first_name'])
+        self.assertEqual(student.last_name, d['last_name'])
+        self.assertEqual(student.email, 'test@example.com')
+        self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Invitation')
+
 
 class TestsStudent(TestCase):
     fixtures = ['f1']
@@ -115,17 +144,18 @@ class TestsStudent(TestCase):
         response = self.client.get(reverse('registration:add_student', kwargs={'student_id': 1}), secure=True)
         self.assertEqual(response.status_code, 404)
 
-    def test_post_new_student(self):
+    def test_post_add_student(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
         response = self.client.post(reverse('registration:add_student'), d, secure=True)
+        logging.debug(len(Student.objects.all()))
         student = Student.objects.get(pk=7)
         self.assertEqual(student.first_name, d['first_name'])
         self.assertEqual(student.last_name, d['last_name'])
 
     def test_post_student_id(self):
-        self.test_user = User.objects.get(pk=4)
+        self.test_user = User.objects.get(pk=5)
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
         response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 6}), d, secure=True)

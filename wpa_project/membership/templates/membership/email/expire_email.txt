@@ -1,0 +1,6 @@
+Hi {{ name }},
+
+Your membership is going to expire on {{ expire_date }}. Please log in and renew your membership.
+
+http://woodleyparkarchers.org/">WoodleyParkArchers.org
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

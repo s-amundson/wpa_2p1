@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %} Beginner Class {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/beginner_class.js' %}"></script>
+    <script src="{% static 'js/class_attendance.js' %}"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    {% if user.is_board %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input class="btn btn-primary" type="submit" value="Submit">
+        </form>
+        <hr/>
+    {% endif %}
+
+    <div class="row p-2">
+        {% if attendee_form %}
+            <form id="attendance_form" class="col" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="attendee_form" value="on">
+                <div class="row">
+                    <div class="col border"> New Students </div>
+                </div>
+                <div class="row">
+                    <div class="col-1 border">ID</div>
+                    <div class="col-3 border">First Name</div>
+                    <div class="col-3 border">Last Name</div>
+                    <div class="col border">Date of Birth</div>
+
+                    <div class="col-2 border">
+                        {% if attendee_form.is_closed %}
+                            Attending
+                        {% endif %}
+                    </div>
+                    <div class="col border">
+                        {% if attendee_form.is_closed %}
+                            Covid-19 Vaccination
+                        {% endif %}
+                    </div>
+                </div>
+                {% for s in attendee_form.new_students %}
+                    <div class="row">
+                        <div class="col-1 border">{{ s.id }}</div>
+                        <div class="col-3 border">{{ s.first_name }}</div>
+                        <div class="col-3 border">{{ s.last_name }}</div>
+                        <div class="col border {% if s.is_minor %} text-warning {% endif %}">{{ s.dob }}</div>
+                        <div class="col-2 border">
+                            {% if attendee_form.is_closed %}
+                                {% if s.signature %}
+                                    <div class="row">
+                                        <input type="checkbox" class="m-2" id="{{ s.check }}"
+                                            {% if s.checked %} checked="checked" {% endif %}>
+                                    </div>
+                                {% endif %}
+                                <div class="row">
+                                    <a class="nav-link" href="{% url 'programs:class_sign_in' s.cr_id %}">
+                                        {% if s.signature %}
+                                            Update Signature
+                                        {% else %}
+                                            Signature Required
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col border">
+                            {% if attendee_form.is_closed %}
+                                <input type="checkbox" class="m-2" id="{{ s.covid_vax_check }}"
+                                {% if s.covid_vax %} checked="" {% endif %}>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="row pt-2">
+                    <div class="col border"> Returning Students </div>
+                </div>
+                {% for rs in attendee_form.return_students %}
+                    <div class="row">
+                        <div class="col-1 border">{{ rs.id }}</div>
+                        <div class="col-3 border">{{ rs.first_name }}</div>
+                        <div class="col-3 border">{{ rs.last_name }}</div>
+                        <div class="col border">{{ rs.dob }}</div>
+                        <div class="col-2 border">
+                            {% if attendee_form.is_closed %}
+                                {% if rs.signature %}
+                                    <div class="row">
+                                        <input type="checkbox" name="{{ rs.check }}" class="m-2" id="{{ rs.check }}">
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                            <div class="row">
+                                <a class="nav-link" href="{% url 'programs:class_sign_in' rs.cr_id %}">
+                                    {% if rs.signature %}
+                                        Update Signature
+                                    {% else %}
+                                        Signature Required
+                                    {% endif %}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col border">
+                            {% if attendee_form.is_closed %}
+                                <input type="checkbox" class="m-2" id="{{ rs.covid_vax_check }}"
+                                {% if s.covid_vax %} checked="" {% endif %}>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="row pt-2">
+                    <div class="col border"> Instructors </div>
+                </div>
+                {% for i in attendee_form.instructors %}
+                    <div class="row">
+                        <div class="col-1 border">{{ i.id }}</div>
+                        <div class="col-3 border">{{ i.first_name }}</div>
+                        <div class="col-3 border">{{ i.last_name }}</div>
+                        <div class="col border"></div>
+                        <div class="col-2 border">
+                            {% if attendee_form.is_closed %}
+                                {% if i.signature %}
+                                    <div class="row">
+                                        <input type="checkbox" name="{{ i.check }}" class="m-2" id="{{ i.check }}">
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                            <div class="row">
+
+                            </div>
+                        </div>
+                        <div class="col border"></div>
+                    </div>
+                {% endfor %}
+                {% if attendee_form.is_closed %}
+                    <input class="btn btn-primary" type="submit" value="Submit">
+                {% endif %}
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

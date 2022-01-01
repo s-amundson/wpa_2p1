@@ -7,45 +7,72 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/search.js' %}"></script>
+    <script> let student_table_url = "{% url 'registration:student_table' %}" </script>
 {% endblock %}
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
 
     {% for sf in student_family %}
-        <div class="row">
-            <div class="col-1"></div>
-            <div class="col-3 font-weight-bold border" > First Name </div>
-            <div class="col-3 font-weight-bold border"> Last Name </div>
-            <div class="col font-weight-bold border"> Date of Birth </div>
-            <div class="col-3 font-weight-bold border"> Safety Class Date </div>
-        </div>
-        {% for student in sf.student_set.all %}
+        <div class="p-2">
             <div class="row">
-                <div class="col-1 p-1">
-                    <button id="btn-edit-{{ student.id }}" class="btn btn-primary" type="button" student-id="{{ student.id }}">
-                        Edit
+                <div class="col-1 p-1"></div>
+                <div class="col-2 font-weight-bold border p-1 text-center" > First Name </div>
+                <div class="col-2 font-weight-bold border p-1 text-center"> Last Name </div>
+                <div class="col font-weight-bold border p-1 text-center"> Date of Birth </div>
+                <div class="col font-weight-bold border p-1 text-center"> Safety Class Date </div>
+                <div class="col font-weight-bold border p-1 text-center"> Membership Expire Date </div>
+            </div>
+            {% for student in sf.student_set.all %}
+                <div class="row">
+                    <div class="col-1 p-1">
+                        <button id="btn-edit-{{ student.id }}" class="btn btn-primary" type="button"
+                                student-id="{{ student.id }}">
+                            Edit
+                        </button>
+                    </div>
+                    <div class="col-2 border"> {{ student.first_name }} </div>
+                    <div class="col-2 border"> {{ student.last_name }} </div>
+                    <div class="col border"> {{ student.dob }} </div>
+                    <div class="col border"> {{ student.safety_class }} </div>
+                    <div class="col border">
+                        {% for member in student.member_set.all %}
+                            <a href="{% url 'membership:membership' sf.id %}">
+                                {{ member.expire_date }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="row p-2" id="student_add_div"></div>
+        <div id="student-family-form" class="row px-3"></div>
+
+        <div id="student-family-address" class="row px-3">
+            <div class="col-1"></div>
+            <div class="col px-3">
+                <div id="address1" class="row">{{ sf.street }} </div>
+                <div id="address2" class="row">
+                    {{ sf.city }} {{ sf.state }} {{ sf.post_code }}
+                </div>
+                <div id="phone" class="row">{{ sf.phone }}</div>
+                <div class="flex-row m-2">
+                    <button id="btn-address-edit" class="btn btn-primary" type="button" name="button"
+                            family_id="{{ sf.id }}">
+                        Edit Address
                     </button>
                 </div>
-                <div class="col-3 border"> {{ student.first_name }} </div>
-                <div class="col-3 border"> {{ student.last_name }} </div>
-                <div class="col border"> {{ student.dob }} </div>
-                <div class="col-3 border"> {{ student.safety_class }} </div>
-            </div>
-        {% endfor %}
-        <div class="row p-2" id="student_add_div"></div>
-        <div class="row pt-4">
-            <div class="col ">
-                <h4>Address</h4>
-                {{ sf.street }}</br>
-                {{ sf.city }} {{ sf.state }} {{ sf.post_code }}</br>
-                {{ sf.phone }}</br>
-
             </div>
         </div>
+
         <div class="row pt-4">
             <div class="col">Registration date: {{ sf.registration_date}} </div>
         </div>
+        {% if user.is_board and sf.id %}
+            <div class="row pt-4">
+                <a href="{% url 'membership:membership' sf.id %}"> Membership </a>
+            </div>
+        {% endif %}
         <hr/>
     {% endfor %}
 

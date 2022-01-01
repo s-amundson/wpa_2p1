@@ -71,9 +71,9 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+CSRF_COOKIE_SECURE = True
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         # 'ENGINE': 'django.db.backends.sqlite3',
@@ -97,7 +97,7 @@ DEBUG = get_secret("DEBUG")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_FROM_EMAIL = get_secret('DEFAULT_FROM_EMAIL')
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = get_secret("EMAIL_BACKEND") #'django.core.mail.backends.console.EmailBackend'
 EMAIL_DEBUG = get_secret("EMAIL_DEBUG")
 EMAIL_DEBUG_ADDRESSES = get_secret('EMAIL_DEBUG_ADDRESSES')
 EMAIL_USE_TLS = True
@@ -110,7 +110,12 @@ EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 
 # Application definition
 INSTALLED_APPS = [
+    'payment',
     'student_app',
+    'program_app',
+    'membership',
+    'minutes',
+
     "django_apscheduler",
     'django.contrib.admin',
     'django.contrib.auth',
@@ -157,7 +162,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': get_secret("DEBUG"),
     },
 }
 
@@ -181,9 +186,10 @@ ROOT_URLCONF = 'wpa_project.urls'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
-
 SECURE_SSL_REDIRECT = False
-
+SESSION_COOKIE_AGE = get_secret('SESSION_COOKIE_AGE')
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_SECURE = True
 SITE_ID = 1
 
 # Provider specific settings

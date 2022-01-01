@@ -1,6 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
-from django.urls import reverse_lazy
 import logging
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
@@ -12,7 +11,7 @@ from rest_framework.response import Response
 from ..forms import StudentForm
 from ..models import Student, StudentFamily
 from ..serializers import StudentSerializer
-
+from ..src import EmailMessage
 logger = logging.getLogger(__name__)
 
 
@@ -22,8 +21,8 @@ class StudentApiView(LoginRequiredMixin, APIView):
     def get(self, request, student_id=None, format=None):
         if student_id is not None:
             student = get_object_or_404(Student, pk=student_id)
-            students = StudentFamily.objects.get(user=request.user).student_set.all()
-            if request.user.is_staff or student in students:
+            # students = StudentFamily.objects.get(user=request.user).student_set.all()
+            if request.user.is_staff or student_id == request.user.id:
                 serializer = StudentSerializer(student)
             else:
                 return Response({'error': "Not Authorized"}, status=400)
@@ -34,12 +33,14 @@ class StudentApiView(LoginRequiredMixin, APIView):
     def post(self, request, student_id=None, format=None):
         logging.debug(student_id)
         logging.debug(request.data)
+        old_email = None
         if student_id is not None:
             if request.user.is_staff:
                 student = get_object_or_404(Student, id=student_id)
             else:
-                sf = StudentFamily.objects.get(user=request.user)
+                sf = get_object_or_404(Student, user=request.user).student_family
                 student = get_object_or_404(Student, id=student_id, student_family=sf)
+                old_email = student.email
             serializer = StudentSerializer(student, data=request.data)
 
         else:
@@ -48,46 +49,73 @@ class StudentApiView(LoginRequiredMixin, APIView):
         if serializer.is_valid():
             logging.debug(serializer.validated_data)
             if student_id is None:
-                sf = get_object_or_404(StudentFamily, user=request.user)
-                f = serializer.save(student_family=sf)
+                owner = Student.objects.filter(user=request.user)
+                if owner.count() == 0:
+                    logging.debug('student is user')
+                    f = serializer.save(user=request.user)
+                else:
+                    f = serializer.save(student_family=owner[0].student_family)
+
             else:
                 f = serializer.update(student, serializer.validated_data)
-            request.session['student_family'] = f.student_family.id
-            logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
+
+            if f.user is None:
+                logging.debug('student is not user')
+                if f.email != old_email:
+                    logging.debug('email updated')
+                    EmailMessage().invite_user_email(f, request.user)
+            # request.session['student_family'] = f.student_family.id
+            # logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        logging.debug(serializer.errors)
+        return Response({'error': serializer.errors})
 
 
 class AddStudentView(LoginRequiredMixin, View):
     def get(self, request, student_id=None):
+        student_is_user = False
+        student_this_user = False
         if student_id is not None:
             if request.user.is_board:
                 g = get_object_or_404(Student, pk=student_id)
+                student_is_user = g.user_id
             else:
-                sf = StudentFamily.objects.get(user=request.user)
+                sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
-            form = StudentForm(instance=g)
+                student_is_user = g.user_id
+                student_this_user = (g.user == request.user)
+            form = StudentForm(instance=g, student_is_user=student_is_user)
         else:
-            form = StudentForm()
-        return render(request, 'student_app/forms/student.html', {'form': form})
+            s = Student.objects.filter(user=request.user)
+            logging.debug(s.count())
+            if s.count() == 0:
+                form = StudentForm(initial={'email': request.user.email}, student_is_user=True)
+                student_is_user = s.user_id
+                student_this_user = True
+            else:
+                form = StudentForm()
+        logging.debug(student_is_user)
+        d = {'form': form, 'student_is_user': student_is_user, 'student_this_user': student_this_user}
+        return render(request, 'student_app/forms/student.html', d)
 
     def post(self, request, student_id=None):
         if student_id is not None:
             if request.user.is_board:
                 g = get_object_or_404(Student, pk=student_id)
             else:
-                sf = StudentFamily.objects.get(user=request.user)
+                sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
             form = StudentForm(request.POST, instance=g)
         else:
             form = StudentForm(request.POST)
+        logging.debug(request.POST)
         if form.is_valid():
             logging.debug(form.cleaned_data)
             if request.user.is_board:
                 f = form.save()
             else:
                 f = form.save(commit=False)
-                sf = StudentFamily.objects.get(user=request.user)
+                sf = Student.objects.get(user=request.user).student_family
                 logging.debug(sf.id)
                 f.student_family = sf
                 request.session['student_family'] = sf.id

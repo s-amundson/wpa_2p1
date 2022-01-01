@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %} Class Sign up {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/minutes.js' %}"></script>
+{% endblock %}
+
+{% block main %}
+{% load l10n %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form id="minutes-form" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="minutes-id" value="{{ minutes_id }}">
+        <input type="hidden" id="url-business" value="{% url 'minutes:business' %}">
+        <input type="hidden" id="url-business-update" value="{% url 'minutes:business_update' %}">
+        {% if minutes_id %}
+            <input type="hidden" id="url-minutes" value="{% url 'minutes:minutes_form' minutes_id %}">
+        {% else %}
+            <input type="hidden" id="url-minutes" value="{% url 'minutes:minutes_form' %}">
+        {% endif %}
+        <input type="hidden" id="url-report" value="{% url 'minutes:report' %}">
+        <input type="hidden" id="url-decision" value="{% url 'minutes:decision' %}">
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.meeting_date.label }}
+            </div>
+            <div class="col-2">
+                {{ form.meeting_date }}
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.attending.label }}
+            </div>
+            <div class="col-3">
+                {{ form.attending }}
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.start_time.label }}
+            </div>
+            <div id="div-start-input" class="col-2">
+                {{ form.start_time }}
+                <button id="btn-start" class="btn btn-primary" type="submit">Start Meeting Now</button>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                President's report
+            </div>
+            <div class="col">
+                <div id="div-president">
+                    <input type="hidden" id="president-report-count" class="report-count" value="{{ reports.president|length }}">
+                    {% for report in reports.president %}
+                        <input type="hidden" id="report-count" value="{{ forloop.counter }}">
+                        {% include "minutes/forms/report_form.html" %}
+                    {% endfor %}
+                </div>
+                {% if user.is_board %}
+                    <div class="row">
+                        <div class="col-3">
+                            <button id="btn-president-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                Vice President's report
+            </div>
+            <div class="col">
+                <div id="div-vice">
+                    <input type="hidden" id="vice-report-count" class="report-count" value="{{ reports.vice|length }}">
+                    {% for report in reports.vice %}
+                        {% include "minutes/forms/report_form.html" %}
+                    {% endfor %}
+                </div>
+                {% if user.is_board %}
+                    <div class="row">
+                        <div class="col-3">
+                            <button id="btn-vice-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                Secretary's report
+            </div>
+            <div class="col">
+                <div id="div-secretary">
+                    <input type="hidden" id="secretary-report-count" class="report-count" value="{{ reports.secretary|length }}">
+                    {% for report in reports.secretary %}
+                        {% include "minutes/forms/report_form.html" %}
+                    {% endfor %}
+                </div>
+                {% if user.is_board %}
+                    <div class="row">
+                        <div class="col-3">
+                            <button id="btn-secretary-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                Treasure's report
+            </div>
+            <div class="col">
+                <div id="div-treasure">
+                    <input type="hidden" id="treasure-report-count" class="report-count" value="{{ reports.treasure|length }}">
+                    {% for report in reports.treasure %}
+                        {% include "minutes/forms/report_form.html" %}
+                    {% endfor %}
+                </div>
+                {% if user.is_board %}
+                    <div class="row">
+                        <div class="col-3">
+                            <button id="btn-treasure-report" class="btn btn-primary btn-report">Add Report Item</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.balance.label }}
+            </div>
+            <div class="col-2">
+                {{ form.balance }}
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.memberships.label }}
+            </div>
+            <div class="col-2">
+                {{ form.memberships }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                Old Business
+            </div>
+            <div class="col">
+                <div id="div-old-business">
+                    {% for business in old_business %}
+                        {% include "minutes/forms/business_form.html" %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                New Business
+            </div>
+            <div class="col">
+                <div id="div-new-business">
+<!--                    <input type="hidden" id="new-business-count" value="{{ business.new|length }}">-->
+                    {% for business in new_business %}
+                        {% include "minutes/forms/business_form.html" %}
+                    {% endfor %}
+                </div>
+                {% if user.is_board %}
+                    <div class="row">
+                        <div class="col-3">
+                            <button id="btn-new-business" class="btn btn-primary btn-report">Add New Business</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                Decisions
+            </div>
+            <div class="col">
+                <div id="div-decisions">
+                    {% for decision in decisions %}
+                        {% include "minutes/forms/decision_form.html" %}
+                    {% endfor %}
+                </div>
+                {% if user.is_board %}
+                    <div class="row">
+                        <div class="col-3">
+                            <button id="btn-new-decision" class="btn btn-primary btn-report">Add New Decision</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.discussion.label }}
+            </div>
+            <div class="col">
+                {{ form.discussion }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.end_time.label }}
+            </div>
+            <div id="div-end-input" class="col-2">
+                {{ form.end_time }}
+                {% if user.is_board %}
+                    <button id="btn-end" class="btn btn-primary btn-report" type="submit">End Meeting Now</button>
+                {% endif %}
+            </div>
+            <div class="col"></div>
+        </div>
+    </form>
+
+{% endblock %}
+
+{% block right %}
+    <div id="div-saved-message" class="row p-3 sticky-top">
+        Saved At:
+    </div>
+{% endblock %}

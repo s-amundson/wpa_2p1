@@ -1,0 +1,86 @@
+{% extends "student_app/email/email_layout.html" %}
+{% block main %}
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+
+        Hi {{ name }},
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Thank you for your purchase with Woodley Park Archers.
+    </p>
+
+    <table style="font-family: arial, sans-serif; border-collapse: collapse; color: black; margin: 10px;">
+        <tr>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                Item
+            </th>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                Quantity
+            </th>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                Amount Each
+            </th>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                Amount
+            </th>
+        </tr>
+
+        {% for row in line_items %}
+            <tr>
+                <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                    {{ row.name }}
+                </td>
+                <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                    {{ row.quantity }}
+                </td>
+                <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                    {{ row.amount }}
+                </td>
+                <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                    {{ row.cost }}
+                </td>
+            </tr>
+        {% endfor %}
+
+        <tr>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+            Total
+            </td>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+
+            </td>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+
+            </td>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                {{ total }}
+            </td>
+        </tr>
+    </table>
+    <p style="margin-bottom: 0in; line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        {{ receipt }}
+    </p>
+
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        COVID-19 Policy
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        {% include "program_app/covid_policy.txt" %}
+    </p>
+
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Cancellation Policy
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        {% include "program_app/cancellation_policy.txt" %}
+    </p>
+
+    <br>
+
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+    </p>
+    <img src="cid:photo" />
+{% endblock %}

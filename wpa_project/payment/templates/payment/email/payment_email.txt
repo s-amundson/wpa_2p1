@@ -1,0 +1,26 @@
+Hi {{ name }},
+
+Thank you for your purchase with Woodley Park Archers.
+
+Item    Quantity    Amount Each Amount
+{% for row in line_items %}
+{{ row.name }}   {{ row.quantity }}   {{ row.amount }}    {{ row.cost }}
+{% endfor %}
+
+Total   {{ total }}
+
+{{ receipt }}
+
+
+COVID-19 Policy
+
+{% include "program_app/covid_policy.txt" %}
+
+
+Cancellation Policy
+
+{% include "program_app/cancellation_policy.txt" %}
+
+
+http://woodleyparkarchers.org/">WoodleyParkArchers.org
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

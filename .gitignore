@@ -1,8 +1,9 @@
 # Untracked files:
-temp_tests.py
 venv/**
 .sqlite3
 secrets.json
 *~S
 temp_*
 *.env
+/wpa_project/student_app/media/signatures/
+wordpress/

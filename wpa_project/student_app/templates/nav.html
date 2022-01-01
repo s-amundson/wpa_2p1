@@ -1,38 +1,63 @@
 <nav class="navbar navbar-dark bg-dark border">
-    <a class="navbar-brand" href="/"> <span class="green">Class Registrtion</span></a>
+    <a class="navbar-brand" href="/">
+        <div class="container px-4"><span class="green">Class Registration</span></div>
+    </a>
 
-    <div class="navbar-expand-sm" id="navbar">
-        <ul class="navbar-nav ml-auto mt-2">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'registration:terms' %}">Terms</a>
+    <div class="navbar-expand-md" id="navbar">
+        <ul class="navbar-nav md-auto mt-2">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                    Policies
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'registration:terms' %}">Terms</a>
+                    <a class="dropdown-item" href="{% url 'registration:policy' 'privacy' %}">Privacy</a>
+                    <a class="dropdown-item" href="{% url 'registration:policy' 'covid' %}">Covid 19</a>
+                </div>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'registration:privacy' %}">Privacy</a>
-            </li>
+
             {% if user.is_authenticated %}
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                            Membership
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            {% if user.is_member %}
+                                Membership coming soon.
+                                <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
+                            {% else %}
+                                Membership coming soon.
+
+                            {% endif %}
+                        </div>
+                    </li>
+
+
                 {% if user.is_board %}
                     <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                         Board Links
                       </a>
                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{% url 'registration:class_list'%}">Beginner Class</a>
+                        <a class="dropdown-item" href="{% url 'programs:class_list'%}">Beginner Class</a>
                         <a class="dropdown-item" href="{% url 'registration:search'%}">Search</a>
                         <a class="dropdown-item" href="{% url 'registration:student_list'%}">Student List</a>
                         <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'minutes:minutes_form'%}">New Minutes</a>
                         {% if user.is_superuser %}
-<!--                          <a class="dropdown-item" href="{% url 'registration:costs'%}">Costs</a>-->
+                          <a class="dropdown-item" href="{% url 'payment:costs'%}">Costs</a>
                         {% endif %}
                       </div>
                     </li>
                 {% endif %}
                 {% if user.is_staff %}
                     <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownStaff" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                         Staff Links
                       </a>
                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{% url 'registration:class_list'%}">class list</a>
+                        <a class="dropdown-item" href="{% url 'programs:class_list'%}">class list</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{% url 'registration:search'%}">Search</a>
                       </div>
@@ -40,7 +65,7 @@
                 {% endif %}
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'registration:class_registration' %}">Classes</a>
+                    <a class="nav-link" href="{% url 'programs:class_registration' %}">Classes</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>

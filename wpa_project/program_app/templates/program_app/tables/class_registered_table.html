@@ -1,0 +1,46 @@
+<form class="col form" id="unreg_form" method="post" action="{% url 'programs:class_registered_table' %}" autocomplete="off">
+    {% csrf_token %}
+    <table class="table table-bordered
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <tr>
+                <th> Class Date </th>
+                <th> Name </th>
+                <th> Payment Status </th>
+                <th> Unregister </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for class in enrolled_classes %}
+            <tr>
+                <td> {{ class.beginner_class.class_date }} </td>
+                <td>
+                    {{ class.student.first_name }} {{ class.student.last_name }}
+                    <input type="hidden" id="cost_{{ class.id }}" value="{{ class.beginner_class.cost }}">
+                </td>
+                <td class="pay_status" curl="{% url 'programs:class_registration' class.id %}">
+                    {{ class.pay_status }}
+                </td>
+                <td>
+                    <input type="checkbox" class_id={{ class.id }} class="m-2 unreg" id="check_{{ class.id }}">
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+    <div class="row p-2 form-check">
+        <label class="form-check-label">
+            <input type="checkbox" class="m-2" id="donation">
+            I wish to donate my refund to Woodley Park Archers
+        </label>
+    </div>
+    <div class="flex-row m-2">
+        <button class="btn btn-primary" type="submit">Unregister</button>
+    </div>
+</form>

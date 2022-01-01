@@ -1,4 +1,4 @@
-from django.forms import TextInput
+from django.forms import TextInput, CheckboxInput
 from django import forms
 
 

@@ -1,0 +1,4 @@
+FROM wordpress:5.8.2-fpm
+
+# RUN apt-get install -y php7.4-mysql
+RUN docker-php-ext-install pdo pdo_mysql

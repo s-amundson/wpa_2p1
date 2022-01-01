@@ -19,9 +19,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
     path('', include('student_app.urls', namespace='registration')),
+    path('accounts/', include('allauth.urls')),
+    path('admin/', admin.site.urls),
+    path('membership/', include('membership.urls', namespace='membership')),
+    path('minutes/', include('minutes.urls', namespace='minutes')),
+    path('payment/', include('payment.urls', namespace='payment')),
+    path('programs/', include('program_app.urls', namespace='programs'))
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
