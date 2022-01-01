@@ -1,6 +1,3 @@
-from django import forms
-from django.forms import TextInput
-
 from src import MyModelForm
 from ..models import Student
 import logging
@@ -10,8 +7,6 @@ logger = logging.getLogger(__name__)
 class StudentForm(MyModelForm):
 
     class Meta(MyModelForm.Meta):
-        # def __init__(self, *args, **kwargs):
-        #     super.__init__(*args, **kwargs)
 
         model = Student
         disabled_fields = []

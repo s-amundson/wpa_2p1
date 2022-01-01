@@ -64,7 +64,11 @@
                     <p class="help-block">{{ error }}</p>
                 {% endfor %}
             </div>
-            <div class="col"></div>
+            <div class="col">
+                {% if user.is_board %}
+                    <a href="{% url 'registration:update_user' student_is_user%}">student_is_user</a>
+               {% endif %}
+            </div>
         </div>
     {% endif %}
 

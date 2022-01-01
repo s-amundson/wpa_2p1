@@ -11,3 +11,4 @@ from .student_table_view import StudentTableView
 from .student_view import AddStudentView, StudentApiView
 from .terms_view import TermsView
 from .theme_view import ThemeView
+from .user_view import UserView
