@@ -7,7 +7,16 @@
     <script> let student_table_url = "{% url 'registration:student_table' %}" </script>
 {% endblock %}
 
+{% block left %}
+
+{% endblock %}
+
 {% block main %}
+    <div id="div-can-register-top" class="d-flex flex-row-reverse pt-3 can-register-top">
+        <h4><a href="{% url 'programs:class_registration' %}" class="can-register-top">
+            Register for an Introductory Archery class.
+        </a></h4>
+    </div>
     <div class="row p-3 align-items-center mx-auto">
         <div class="col-12">
             {% if this_student %}

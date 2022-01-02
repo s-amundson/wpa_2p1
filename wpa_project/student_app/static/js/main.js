@@ -187,4 +187,5 @@ async function post_family_function(family_id) {
     }
 
     $("#this-student-div").hide();
+    $(".can-register-top").show();
 }
