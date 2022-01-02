@@ -90,7 +90,7 @@ class AddStudentView(LoginRequiredMixin, View):
             logging.debug(s.count())
             if s.count() == 0:
                 form = StudentForm(initial={'email': request.user.email}, student_is_user=True)
-                student_is_user = s.user_id
+                student_is_user = 0
                 student_this_user = True
             else:
                 form = StudentForm()
