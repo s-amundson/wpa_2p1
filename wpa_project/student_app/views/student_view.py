@@ -63,7 +63,7 @@ class StudentApiView(LoginRequiredMixin, APIView):
                 logging.debug('student is not user')
                 if f.email != old_email:
                     logging.debug('email updated')
-                    EmailMessage().invite_user_email(f, request.user)
+                    EmailMessage().invite_user_email(request.user, f)
             # request.session['student_family'] = f.student_family.id
             # logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
             return Response(serializer.data)
