@@ -1,3 +1,4 @@
+from .help_view import HelpView
 from .index_view import IndexView
 from .instructor_update_view import InstructorUpdateView
 from .policy_view import PolicyView
