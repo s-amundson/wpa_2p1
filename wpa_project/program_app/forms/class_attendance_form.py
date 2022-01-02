@@ -14,7 +14,7 @@ class ClassAttendanceForm(forms.Form):
         self.new_students = []
         self.return_students = []
         self.instructors = []
-        self.class_registration = beginner_class.classregistration_set.all()
+        self.class_registration = beginner_class.classregistration_set.filter(pay_status='paid')
         self.class_date = beginner_class.class_date
 
         for cr in self.class_registration:
