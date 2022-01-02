@@ -3,7 +3,7 @@ var new_family = false;
 $(document).ready(function() {
     $("#can-register").hide()
     if ($("#btn-address-edit").attr("family_id") == "") {
-        $(".can-register-top").hide()
+        $(".can-register-top").hide();
         console.log('new family');
         new_family = true;
         $("#btn-add-student").prop('disabled', true);
