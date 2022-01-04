@@ -26,10 +26,6 @@ class TestsSearchList(TestCase):
         response = self.client.get(reverse('registration:student_list'), secure=True)
         self.assertEqual(response.status_code, 403)
 
-
     def test_student_list_access_allowed(self):
         response = self.client.get(reverse('registration:student_list'), secure=True)
         self.assertEqual(response.status_code, 200)
-
-
-
