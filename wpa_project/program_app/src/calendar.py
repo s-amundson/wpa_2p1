@@ -1,7 +1,7 @@
 from django.utils import timezone
 from calendar import HTMLCalendar
 
-from ..models import BeginnerClass
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -10,10 +10,7 @@ class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None, dark=False):
         self.year = year
         self.month = month
-        self.events = BeginnerClass.objects.filter(class_date__gt=timezone.now(),
-                                                   class_date__year=self.year,
-                                                   class_date__month=self.month,
-                                                   state='open')
+        self.events = None
         self.dark = dark
         super(Calendar, self).__init__()
         self.setfirstweekday(6)
@@ -59,3 +56,6 @@ class Calendar(HTMLCalendar):
         for week in self.monthdays2calendar(self.year, self.month):
             cal += f'{self.formatweek(week)}\n'
         return cal
+
+    def set_event(self, queryset):
+        self.events = queryset

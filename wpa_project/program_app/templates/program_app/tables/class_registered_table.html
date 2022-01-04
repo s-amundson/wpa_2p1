@@ -17,7 +17,7 @@
         <tbody>
         {% for class in enrolled_classes %}
             <tr>
-                <td> {{ class.beginner_class.class_date }} </td>
+                <td> {{ class.beginner_class.class_date }} ({{ class.beginner_class.class_type }})</td>
                 <td>
                     {{ class.student.first_name }} {{ class.student.last_name }}
                     <input type="hidden" id="cost_{{ class.id }}" value="{{ class.beginner_class.cost }}">

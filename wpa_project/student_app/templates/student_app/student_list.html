@@ -2,21 +2,17 @@
 
 {% block title %} Student List {% endblock %}
 
-{% block script %}
-    {% load static %}
-    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" href="//cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
-    <script src="{% static 'js/student_list.js' %}"></script>
-{% endblock %}
 
 {% block main %}
 
-    <form class="form m-2" method="post">
-        {% csrf_token %}
+    <form class="form m-2" method="get">
         <div class="m-2"><h5>Show only:</h5></div>
         <div class="d-flex flex-row m-2">
             <div class="m-2 fieldWrapper">
                 {{form.instructor.label_tag }} {{ form.instructor }}
+            </div>
+            <div class="m-2 fieldWrapper">
+                {{form.safety_class.label_tag }} {{ form.safety_class }}
             </div>
         </div>
         <div class="m-2"><h5>Select columns you wish to show:</h5></div>
@@ -28,27 +24,34 @@
             <div class="m-2 fieldWrapper">
                 {{form.first_name.label_tag }} {{ form.first_name }}
             </div>
-            <div class="m-2 fieldWrapper">
-                {{form.dob.label_tag }} {{ form.dob }}
-            </div>
-            <div class="m-2 fieldWrapper">
-                {{form.safety_class.label_tag }} {{ form.safety_class }}
-            </div>
         </div>
       <input class="btn btn-primary" type="submit" value="Submit">
   </form>
 
-  <div id="student_table" class="bg-light text-dark" curl="{% url 'registration:student_list_json' %}">
-    <table class="datatable text-black">
+  <div id="student_table">
+    <table class="table table-bordered
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
         <thead>
-            {% for k,v in columns.items %}
-                {% if v %}
-                    <th p-2>{{k}}</th>
-                {% endif %}
-            {% endfor %}
+            <th> Last Name </th>
+            <th> First Name </th>
+            <th> Safety Class </th>
 
         </thead>
         <tbody>
+            {% for student in object_list %}
+                <tr>
+                    <td><a href="{% url 'registration:search_result' student.student_family.id %}">
+                        {{ student.last_name }}</a></td>
+                    <td>{{ student.first_name }}</td>
+                    <td>{{ student.safety_class }}</td>
+                </tr>
+            {% empty %}
+                <tr>No Students yet.</tr>
+            {% endfor %}
         </tbody>
     </table>
   </div>

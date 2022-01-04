@@ -16,6 +16,14 @@ class EmailMessage(EmailMultiAlternatives):
         self.test_emails = ["EmilyNConlan@einrot.com", "RosalvaAHall@superrito.com", "CharlesNWells@einrot.com",
                             "RicardoRHoyt@jourrapide.com", "RicardoRHoyt@Ricardo.com"]
 
+    def bcc_from_students(self, queryset):
+        self.bcc = []
+        for row in queryset:
+            if row.user is not None:
+                self.bcc.append(EmailAddress.objects.get_primary(row.user))
+        logging.debug(self.bcc)
+
+
     def get_email_address(self, user):
         if settings.EMAIL_DEBUG:
             self.to = settings.EMAIL_DEBUG_ADDRESSES
@@ -25,7 +33,8 @@ class EmailMessage(EmailMultiAlternatives):
                 self.to = settings.EMAIL_DEBUG_ADDRESSES
 
     def invite_user_email(self, send_student, add_student):
-        self.get_email_address(add_student.email)
+        logging.debug(add_student.email)
+        self.to = [add_student.email]
         d = {'add_name': add_student.first_name, 'send_name': send_student.first_name}
         self.subject = 'Woodley Park Archers Invitation'
         self.body = get_template('student_app/email/invite_email.txt').render(d)

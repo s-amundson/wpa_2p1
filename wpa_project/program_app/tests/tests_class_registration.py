@@ -281,8 +281,12 @@ class TestsClassRegistration(TestCase):
         self.client.force_login(self.test_user)
         self.test_user.is_instructor = True
         d = timezone.now()
+        if d.month == 1:
+            d = d.replace(year=d.year - 1, month=12)
+        else:
+            d = d.replace(month=d.month - 1)
 
-        self.test_user.instructor_expire_date = d.replace(month=d.month - 1)
+        self.test_user.instructor_expire_date = d
         self.test_user.save()
 
         # add a user to the class

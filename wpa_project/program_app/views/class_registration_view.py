@@ -28,7 +28,8 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
         except (Student.DoesNotExist, AttributeError):
             request.session['message'] = 'Address form is required'
             return HttpResponseRedirect(reverse('registration:profile'))
-        bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:3])
+        bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:3],
+                                          class_date__gte=timezone.localdate(timezone.now()))
         enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
             pay_status='refunded')
         logging.debug(enrolled_classes.values())
@@ -116,8 +117,14 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                             message += 'Please update your instructor certification'
                             logging.debug(message)
                             HttpResponseRedirect(reverse('programs:class_registration'))
-                        instructor += 1
-                        instructors.append(s)
+                        if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
+                                pay_status="refunded")) == 0:
+                            instructor += 1
+                            instructors.append(s)
+                        else:
+                            messages.add_message(request, messages.ERROR,
+                                                 'Instructor is already enrolled')
+                            message += 'Instructor is already enrolled'
                     else:
                         if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
                                 pay_status="refunded")) == 0:
@@ -155,8 +162,9 @@ class ClassRegistrationView(LoginRequiredMixin, View):
 
                 else:
                     logging.debug(message)
+                    tm = timezone.localtime(timezone.now()).month
                     return render(request, 'program_app/class_registration.html',
-                                  {'form': form, 'alert_message': message})
+                                  {'form': form, 'alert_message': message, 'this_month': tm})
 
         else:
             logging.debug(form.errors)

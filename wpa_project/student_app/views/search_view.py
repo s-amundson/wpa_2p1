@@ -1,5 +1,5 @@
 from allauth.account.models import EmailAddress
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.views.generic.base import View
@@ -9,6 +9,14 @@ from ..forms import SearchEmailForm, SearchNameForm, SearchPhoneForm
 from ..models import StudentFamily, Student
 logger = logging.getLogger(__name__)
 
+
+class SearchResultView(UserPassesTestMixin, View):
+    def get(self, request, student_family):
+        s = StudentFamily.objects.filter(pk=student_family)
+        return render(request, 'student_app/search_result.html', {'student_family': s})
+
+    def test_func(self):
+        return self.request.user.is_board
 
 class SearchView(LoginRequiredMixin, View):
     def get(self, request):

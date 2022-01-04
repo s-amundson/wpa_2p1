@@ -10,9 +10,12 @@ logger = logging.getLogger(__name__)
 @receiver(email_changed)
 def email_update(request, user, from_email_address, to_email_address, **kwargs):
     logging.debug(to_email_address.email)
-    student = Student.objects.get(user=user)
-    student.email = to_email_address.email
-    student.save()
+    try:
+        student = Student.objects.get(user=user)
+        student.email = to_email_address.email
+        student.save()
+    except Student.DoesNotExist:  # pragma: no cover
+        pass
 
 
 @receiver(email_confirmed)

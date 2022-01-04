@@ -46,6 +46,12 @@ class TestsClassAttendance(TestCase):
         self.client.force_login(User.objects.get(pk=1))
         self.client.get(reverse('programs:beginner_class', kwargs={'beginner_class': 1}), secure=True)
 
+        # set pay status to paid
+        cr = ClassRegistration.objects.all()
+        for c in cr:
+            c.pay_status = 'paid'
+            c.save()
+
         # close the class
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
                                     {'class_date': "2022-06-05", 'class_type': 'combined', 'beginner_limit': 2,
