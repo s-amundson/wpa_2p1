@@ -18,17 +18,16 @@ class ClassAttendanceForm(forms.Form):
         self.class_date = beginner_class.class_date
 
         for cr in self.class_registration:
-            if cr.new_student:
+            try:
+                is_instructor = cr.student.user.is_instructor
+            except (cr.student.DoesNotExist, AttributeError):
+                is_instructor = False
+            if is_instructor:
+                self.instructors.append(self.student_dict(cr, True))
+            elif cr.student.safety_class is None:
                 self.new_students.append(self.student_dict(cr, bool(cr.signature)))
             else:
-                try:
-                    is_instructor = cr.student.user.is_instructor
-                except (cr.student.DoesNotExist, AttributeError):
-                    is_instructor = False
-                if is_instructor:
-                    self.instructors.append(self.student_dict(cr, True))
-                else:
-                    self.return_students.append(self.student_dict(cr, bool(cr.signature)))
+                self.return_students.append(self.student_dict(cr, bool(cr.signature)))
 
     def student_dict(self, cr, is_signed):
         return {'id': cr.student.id,
