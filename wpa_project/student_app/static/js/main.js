@@ -58,7 +58,10 @@ async function add_student_function(student_id) {
                 $("#btn-add-student").show();
                 $("#div-instruct").html("");
             }
-            load_student_table();
+            try {
+                load_student_table();
+            } catch (e) {
+            }
         }
     }
 }

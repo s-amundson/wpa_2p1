@@ -3,9 +3,10 @@ from django import forms
 
 
 class SearchColumnsForm(forms.Form):
-    last_name = forms.BooleanField(required=False)
-    first_name = forms.BooleanField(required=False)
-    dob = forms.BooleanField(required=False)
+    first_name = forms.CharField(widget=TextInput(attrs={'placeholder': 'First Name', 'autocomplete': 'off',
+                                                  'class': "form-control m-2"}), required=False)
+    last_name = forms.CharField(widget=TextInput(attrs={'placeholder': 'Last Name', 'autocomplete': 'off',
+                                                         'class': "form-control m-2"}), required=False)
     safety_class = forms.BooleanField(required=False)
     instructor = forms.BooleanField(required=False)
 
