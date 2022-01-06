@@ -34,4 +34,7 @@ class StudentList(UserPassesTestMixin, ListView):
         return object_list
 
     def test_func(self):
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        else:
+            return False
