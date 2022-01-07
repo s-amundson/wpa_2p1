@@ -110,6 +110,7 @@ EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 
 # Application definition
 INSTALLED_APPS = [
+    # 'contact_us',
     'payment',
     'student_app',
     'program_app',

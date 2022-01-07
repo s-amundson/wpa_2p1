@@ -70,9 +70,11 @@ class UnregisterView(LoginRequiredMixin, APIView):
                 if cr.beginner_class.state in BeginnerClass().get_states()[3:]:
                     logging.error(f'beginner class state is {cr.beginner_class.state}')
                     return Response(response_dict)
-                if cr.student.student_family.id not in student_list:
+                logging.debug(cr.student.student_family.id)
+                if cr.student.id not in student_list:
                     logging.error('not authorized')
                     return Response(response_dict)
+                logging.debug(cr.pay_status)
                 if cr.beginner_class.class_date < dt:
                     logging.debug('Time to unregister has passed.')
                     response_dict['error'] = 'Time to unregister has passed.'
@@ -93,17 +95,23 @@ class UnregisterView(LoginRequiredMixin, APIView):
             if errors == '':
                 response_dict['status'] = "SUCCESS"
                 # update the number of enrolled students
+                canceled_count = 0
                 for c in class_list:
                     cr = ClassRegistration.objects.get(pk=c)
                     if cr.beginner_class.state == 'full':
                         cr.beginner_class.state = 'open'
                     cr.beginner_class.save()
-                    if donation:
+                    if cr.pay_status == 'start' or cr.pay_status == 'canceled':
+                        cr.pay_status = 'canceled'
+                        canceled_count += 1
+                    elif donation:
                         cr.pay_status = 'refund donated'
                     else:
                         cr.pay_status = 'refunded'
                     cr.save()
-                EmailMessage().refund_email(request.user, donation)
+                logging.debug(f'class_list length: {len(class_list)}, canceled_count: {canceled_count}')
+                if len(class_list) > canceled_count:
+                    EmailMessage().refund_email(request.user, donation)
             elif errors == 'Previously refunded':  # pragma: no cover  # we should remove them from the list anyway
                 response_dict['status'] = "SUCCESS"
             else:  # pragma: no cover

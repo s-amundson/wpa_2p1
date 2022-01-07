@@ -18,7 +18,7 @@ class StudentList(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         form = self.form_class(self.request.GET)
-        object_list = self.model.objects.all()
+        object_list = self.model.objects.filter(student_family__isnull=False)
         if form.is_valid():
             logging.debug(form.cleaned_data)
             if form.cleaned_data['safety_class']:
@@ -34,4 +34,7 @@ class StudentList(UserPassesTestMixin, ListView):
         return object_list
 
     def test_func(self):
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        else:
+            return False

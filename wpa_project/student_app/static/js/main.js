@@ -66,6 +66,12 @@ async function add_student_function(student_id) {
     }
 }
 
+function alert_notice(title, message) {
+    $("#alert-title").html(title)
+    $("#div-warning").html(message)
+    $("#alert-warning").modal("show");
+}
+
 function load_student_family_form(family_id) {
     console.log(family_id)
     $("#student-family-address").hide();

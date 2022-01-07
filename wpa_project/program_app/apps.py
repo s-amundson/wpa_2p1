@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class MembershipConfig(AppConfig):
+class ProgramConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'program_app'
 

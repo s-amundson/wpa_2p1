@@ -23,7 +23,7 @@ $(document).ready(function(){
         month = month + 1;
         get_calendar();
     });
-
+    $("#myModal").modal("show");
 });
 
 async function get_calendar() {
@@ -95,9 +95,7 @@ async function get_reg_table() {
     else {
         $(".pay_status").each(pay_status_links);
         if (started_status){
-            alert("You have an incomplete payment and are not registered for the class.\n" +
-            "If you wish to process the payment click on the 'Started' link. " +
-            "If can't attend please unregister by selecting the class(es) you wish to cancel and click the Unregister button')");
+            $("#incompleteRegistration").modal("show");
         }
         $("#registered_classes").show()
     }
@@ -140,29 +138,34 @@ async function post_unregister() {
         }
     });
     if(unreg_list.length == 0){
-        alert("Please select a class to unregister")
-        }
-    if(unreg_list.length == 1){
-        if ($("#donation").prop('checked') == true) {
-            getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be donating " +
-            refund + " to the club");
-            }
-        else {
-            getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
-            refund + " to your card in 5 to 10 business days");
-            }
+        alert_notice("Notice", "Please select a class to unregister")
+    }
+    if ('confirm' in window) {
+        if(unreg_list.length == 1){
+            if ($("#donation").prop('checked') == true) {
+                getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be donating " +
+                refund + " to the club");
+                }
+            else {
+                getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
+                refund + " to your card in 5 to 10 business days");
+                }
 
-        }
-    else if (unreg_list.length > 1) {
-        if ($("#donation").prop('checked') == true) {
-            getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be donating " +
-            refund + " to the club");
             }
-        else {
-            getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be refunded " +
-            refund + " to your card(s) in 5 to 10 business days");
+        else if (unreg_list.length > 1) {
+            if ($("#donation").prop('checked') == true) {
+                getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be donating " +
+                refund + " to the club");
+                }
+            else {
+                getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be refunded " +
+                refund + " to your card(s) in 5 to 10 business days");
+                }
             }
-        }
+    }
+    else {
+        getConfirm = true;
+    }
     if (getConfirm) {
 
         //       Send the unregister request to the server
@@ -177,10 +180,14 @@ async function post_unregister() {
 
         get_reg_table();
         if (data.status == 'SUCCESS') {
-            alert("You have successfully been unregistered from the class.\n")
+            alert_notice("Success", "You have successfully been unregistered from the class.")
+//            $("#div-warning").html("You have successfully been unregistered from the class.")
+//            $("#registration-warning").modal("show");
         }
         else {
-            alert(data.error)
+            alert_notice('Error', data.error)
+//            $("#div-warning").html(data.error)
+//            $("#registration-warning").modal("show");
         }
     }
     else {

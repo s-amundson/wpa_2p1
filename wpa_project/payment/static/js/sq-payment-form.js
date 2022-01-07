@@ -32,12 +32,12 @@ document.addEventListener('DOMContentLoaded', async function () {
          const paymentResults = await createPayment(token);
          if (paymentResults["status"] == "COMPLETED") {
              displayPaymentResults('SUCCESS');
-             alert("Thank you for your purchase.\n Your payment was processed successfully.\n An email has been sent for confirmation. ")
+             alert_notice("Success", "Thank you for your purchase.\n Your payment was processed successfully.\n An email has been sent for confirmation. ")
 
              console.debug('Payment Success', paymentResults);
          }
          else{
-            alert('Maximum payment tries exceeded. Unable to process payment.')
+            alert_notice("Error", 'Maximum payment tries exceeded. Unable to process payment.')
          }
        } catch (e) {
          cardButton.disabled = false;
@@ -91,10 +91,10 @@ async function createPayment(token) {
         $("#index-link").show();
         }
     else if (!paymentResponse["continue"]){
-        alert(paymentResponse["error"]);
+        alert_notice('Notice', paymentResponse["error"]);
     }
     else {
-        alert(paymentResponse["error"]);
+        alert_notice("Notice", paymentResponse["error"]);
         throw new Error(paymentResponse["error"]);
         }
     return paymentResponse;
