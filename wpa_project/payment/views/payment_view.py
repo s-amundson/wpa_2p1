@@ -67,9 +67,9 @@ class PaymentView(APIView):
                             message += 'Invalid zip code, '
                         else:  # pragma: no cover
                             message += 'Other payment error'
-                    # logging.debug(message)
+                    logging.debug(message)
                     response_dict['error'] = message
-                    response_dict['continue'] = self.square_helper.payment_error(request)
+                    response_dict['continue'] = self.square_helper.payment_error(request, square_response['error'])
                     return Response(response_dict)
                 # return redirect('registration:process_payment')
             self.square_helper.log_payment(request, square_response, create_date=None)

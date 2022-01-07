@@ -6,7 +6,7 @@ from django.utils.datetime_safe import datetime
 from square.client import Client
 import django.dispatch
 
-from ..models import PaymentLog, RefundLog
+from ..models import PaymentLog, PaymentErrorLog, RefundLog
 from student_app.models import Student
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,7 @@ class SquareHelper:
             access_token=settings.SQUARE_CONFIG['access_token'],
             environment=settings.SQUARE_CONFIG['environment'],
         )
+        self.square_response = {'payment': None}
 
         error_signal = django.dispatch.Signal()
 
@@ -66,15 +67,7 @@ class SquareHelper:
                                         status=square_response['status'],
                                         total_money=square_response['approved_money']['amount'],
                                         )
-        # TODO email receipt if exists
-
-        # if request.session.get('payment_db', None) is not None:
-        #     pdb = request.session['payment_db']
-        #     m = apps.get_model(app_label=pdb[0], model_name=pdb[1])
-        #     records = m.objects.filter(idempotency_key=request.session['idempotency_key'])
-        #     for record in records:
-        #         record.pay_status = 'paid'
-        #         record.save()
+        request.session['payment_error'] = 0
 
     def log_refund(self, square_response, payment_log):
         # refund = square_response['refund']
@@ -88,11 +81,19 @@ class SquareHelper:
                                  status=square_response.get('status', None)
                                  )
 
-    def payment_error(self, request):
+    def payment_error(self, request, errors):
         """ reset idempotency_key and increment payment_error count"""
-
+        logging.debug(self.square_response.get('created_at'))
         payment_error = request.session.get('payment_error', 0)
-        if payment_error >= 2:  # only allow 3 tries
+        for error in errors:
+            PaymentErrorLog.objects.create(user=request.user,
+                                           db_model=request.session.get('payment_db', None),
+                                           error_code=error['code'],
+                                           error_count=payment_error,
+                                           error_time=datetime.now(),
+                                           idempotency_key=request.session['idempotency_key']
+                                           )
+        if payment_error >= 10:  # only allow 3 tries
             return False
         request.session['payment_error'] = payment_error + 1
 
@@ -106,6 +107,7 @@ class SquareHelper:
                 record.save()
             request.session['idempotency_key'] = ik
             logging.debug(f'ik = {ik}')
+
         return True
 
     def process_payment(self, idempotency_key, sq_token, note, amount):
@@ -119,13 +121,14 @@ class SquareHelper:
                 "note": note
             }
         )
-        square_response = result.body.get('payment', {'payment': None})
+        logging.debug(result)
+        self.square_response = result.body.get('payment', {'payment': None})
         if result.is_success():
-            square_response['error'] = []
+            self.square_response['error'] = []
         elif result.is_error():
-            square_response['error'] = result.errors
+            self.square_response['error'] = result.errors
 
-        return square_response
+        return self.square_response
 
     def refund_payment(self, idempotency_key, amount):
         """ does either a full or partial refund. """

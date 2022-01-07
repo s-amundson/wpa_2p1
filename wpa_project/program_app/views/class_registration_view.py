@@ -31,7 +31,7 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
         bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:3],
                                           class_date__gte=timezone.localdate(timezone.now()))
         enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
-            pay_status='refunded')
+            pay_status='refunded').exclude(pay_status='canceled')
         logging.debug(enrolled_classes.values())
         return render(request, 'program_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
 
@@ -118,7 +118,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                             logging.debug(message)
                             HttpResponseRedirect(reverse('programs:class_registration'))
                         if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
-                                pay_status="refunded")) == 0:
+                                pay_status="refunded").exclude(pay_status='canceled')) == 0:
                             instructor += 1
                             instructors.append(s)
                         else:
@@ -127,7 +127,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                             message += 'Instructor is already enrolled'
                     else:
                         if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
-                                pay_status="refunded")) == 0:
+                                pay_status="refunded").exclude(pay_status='canceled')) == 0:
                             if s.safety_class is None:
                                 beginner += 1
                                 students.append(s)
