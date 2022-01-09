@@ -4,6 +4,7 @@ import uuid
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone
 
 from ..models import BeginnerClass, ClassRegistration
 Student = apps.get_model('student_app', 'Student')
@@ -21,11 +22,10 @@ class TestsClassAttendance(TestCase):
         # Every test needs a client.
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
 
     def test_class_attendance(self):
         # Get the page
-        self.client.force_login(self.test_user)
-
         response = self.client.get(reverse('programs:beginner_class', kwargs={'beginner_class': 1}), secure=True)
         # list the class students but since class is not closed Attending column is missing
         self.assertEqual(response.status_code, 200)
@@ -63,30 +63,55 @@ class TestsClassAttendance(TestCase):
         response = self.client.get(reverse('programs:beginner_class', kwargs={'beginner_class': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Attending')
-        self.assertContains(response, 'covid_vax2')
-        self.assertContains(response, 'covid_vax3')
+        self.assertContains(response, 'covid_vax_2')
+        self.assertContains(response, 'covid_vax_3')
 
-        logging.debug("mark attending")
-        # Mark the students as attending and check the records were updated.
-        self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
-                         {'attendee_form': 'on', 'check_2': 'on', 'check_3': 'on'}, secure=True)
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(cr[0].attended, True)
-        self.assertEqual(cr[1].attended, True)
-        self.assertNotEquals(cr[0].student.safety_class, None)
-        self.assertNotEquals(cr[1].student.safety_class, None)
+    def test_class_beginner_attendance(self):
+        # register instructor and close class.
+        bc = BeginnerClass.objects.get(pk=1)
+        cr = ClassRegistration(beginner_class=bc,
+                               student=Student.objects.get(pk=1),
+                               new_student=False,
+                               pay_status='paid',
+                               idempotency_key=str(uuid.uuid4()))
+        cr.save()
+        bc.state = 'closed'
+        bc.save()
 
-        # Mark a student as not attending and check the records.
-        self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
-                         {'attendee_form': 'on', 'check_2': 'false', 'check_3': 'on'}, secure=True)
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(cr[0].attended, False)
-        self.assertEqual(cr[1].attended, True)
-        self.assertEquals(cr[0].student.safety_class, None)
-        self.assertNotEquals(cr[1].student.safety_class, None)
+        # check that the attending column is there with checkboxes
+        response = self.client.get(reverse('programs:beginner_class', kwargs={'beginner_class': 1}), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'check_1')
+
+        # mark instructor as attending.
+        self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
+                         {'check_1': 'on'}, secure=True)
+
+        cr = ClassRegistration.objects.get(pk=cr.pk)
+        self.assertEqual(cr.attended, True)
+        self.assertEqual(cr.student.safety_class, timezone.datetime.date(bc.class_date))
+
+    def test_class_beginner_unattend(self):
+        # register instructor and close class.
+        bc = BeginnerClass.objects.get(pk=1)
+        cr = ClassRegistration(beginner_class=bc,
+                               student=Student.objects.get(pk=1),
+                               new_student=False,
+                               pay_status='paid',
+                               idempotency_key=str(uuid.uuid4()))
+        cr.save()
+        bc.state = 'closed'
+        bc.save()
+
+        # mark instructor as attending.
+        self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
+                         {'check_1': ''}, secure=True)
+
+        cr = ClassRegistration.objects.get(pk=cr.pk)
+        self.assertEqual(cr.attended, False)
+        self.assertIsNone(cr.student.safety_class)
 
     def test_class_instructor_attendance(self):
-        self.client.force_login(self.test_user)
         # make user instructor
         u = User.objects.get(pk=1)
         u.is_instructor = True
@@ -106,12 +131,11 @@ class TestsClassAttendance(TestCase):
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:beginner_class', kwargs={'beginner_class': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Attending')
         self.assertContains(response, 'check_1')
 
         # mark instructor as attending.
-        self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
-                         {'attendee_form': 'on', 'check_1': 'on'}, secure=True)
+        self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
+                         {'check_1': 'on'}, secure=True)
 
         cr = ClassRegistration.objects.get(pk=cr.pk)
         self.assertEqual(cr.attended, True)

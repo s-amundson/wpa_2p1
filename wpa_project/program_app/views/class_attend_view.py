@@ -8,9 +8,20 @@ logger = logging.getLogger(__name__)
 
 class ClassAttendView(UserPassesTestMixin, View):
     def post(self, request, registration):
+        logging.debug(request.POST)
         cr = ClassRegistration.objects.get(pk=registration)
         if f'check_{cr.student.id}' in request.POST:
             cr.attended = request.POST[f'check_{cr.student.id}'] in ['true', 'on']
+
+            logging.debug(f'safety_class date: {cr.student.safety_class} class_date: {cr.beginner_class.class_date}')
+            if cr.attended:
+                if cr.student.safety_class is None:
+                    cr.student.safety_class = cr.beginner_class.class_date
+                    cr.student.save()
+            else:
+                if cr.beginner_class.class_date == cr.student.safety_class:
+                    cr.student.safety_class = None
+                    cr.student.save()
             cr.save()
             return JsonResponse({'error': False})
         if f'covid_vax_{cr.student.id}' in request.POST:

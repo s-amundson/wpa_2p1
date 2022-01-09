@@ -111,7 +111,7 @@
                             {% if attendee_form.is_closed %}
                                 <input type="checkbox" class="m-2 attend-check"
                                    attend_url="{% url 'programs:class_attend' rs.cr_id %}" id="{{ rs.covid_vax_check }}"
-                                {% if s.covid_vax %} checked="" {% endif %}>
+                                {% if rs.covid_vax %} checked="" {% endif %}> {{ rs.covid_vax }}
                             {% endif %}
                         </div>
                     </div>
