@@ -54,8 +54,9 @@
                             {% if attendee_form.is_closed %}
                                 {% if s.signature %}
                                     <div class="row">
-                                        <input type="checkbox" class="m-2" id="{{ s.check }}"
-                                            {% if s.checked %} checked="checked" {% endif %}>
+                                        <input type="checkbox" class="m-2 attend-check" id="{{ s.check }}"
+                                           attend_url="{% url 'programs:class_attend' s.cr_id %}"
+                                           {% if s.checked %} checked="checked" {% endif %}>
                                     </div>
                                 {% endif %}
                                 <div class="row">
@@ -71,7 +72,8 @@
                         </div>
                         <div class="col border">
                             {% if attendee_form.is_closed %}
-                                <input type="checkbox" class="m-2" id="{{ s.covid_vax_check }}"
+                                <input type="checkbox" class="m-2 attend-check"
+                                   attend_url="{% url 'programs:class_attend' s.cr_id %}"  id="{{ s.covid_vax_check }}"
                                 {% if s.covid_vax %} checked="" {% endif %}>
                             {% endif %}
                         </div>
@@ -90,7 +92,8 @@
                             {% if attendee_form.is_closed %}
                                 {% if rs.signature %}
                                     <div class="row">
-                                        <input type="checkbox" name="{{ rs.check }}" class="m-2" id="{{ rs.check }}">
+                                        <input type="checkbox" name="{{ rs.check }}" class="m-2 attend-check"
+                                           attend_url="{% url 'programs:class_attend' rs.cr_id %}" id="{{ rs.check }}">
                                     </div>
                                 {% endif %}
                             {% endif %}
@@ -106,7 +109,8 @@
                         </div>
                         <div class="col border">
                             {% if attendee_form.is_closed %}
-                                <input type="checkbox" class="m-2" id="{{ rs.covid_vax_check }}"
+                                <input type="checkbox" class="m-2 attend-check"
+                                   attend_url="{% url 'programs:class_attend' rs.cr_id %}" id="{{ rs.covid_vax_check }}"
                                 {% if s.covid_vax %} checked="" {% endif %}>
                             {% endif %}
                         </div>
@@ -125,7 +129,8 @@
                             {% if attendee_form.is_closed %}
                                 {% if i.signature %}
                                     <div class="row">
-                                        <input type="checkbox" name="{{ i.check }}" class="m-2" id="{{ i.check }}">
+                                        <input type="checkbox" name="{{ i.check }}" class="m-2 attend-check"
+                                           attend_url="{% url 'programs:class_attend' i.cr_id %}" id="{{ i.check }}">
                                     </div>
                                 {% endif %}
                             {% endif %}
@@ -136,9 +141,6 @@
                         <div class="col border"></div>
                     </div>
                 {% endfor %}
-                {% if attendee_form.is_closed %}
-                    <input class="btn btn-primary" type="submit" value="Submit">
-                {% endif %}
             </form>
         {% endif %}
     </div>
