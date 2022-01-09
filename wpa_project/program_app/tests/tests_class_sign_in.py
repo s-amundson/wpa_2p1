@@ -31,7 +31,7 @@ class TestsClassSignIn(TestCase):
 
     def test_post_sign_in_page_good(self):
         response = self.client.post(reverse('programs:class_sign_in', kwargs={'reg_id': 1}), self.img, secure=True)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
         cr = ClassRegistration.objects.get(pk=1)
         self.assertTrue(cr.signature)
 

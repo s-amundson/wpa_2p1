@@ -1,7 +1,8 @@
 import logging
 import base64
 import os
-
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.conf import settings
 from django.core.files.base import File
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -81,7 +82,8 @@ class ClassSignInView(LoginRequiredMixin, View):
             cr.attended = True
             cr.save()
 
-            return render(request, 'student_app/message.html', {'message': ' Thank You'})
+            return HttpResponseRedirect(reverse('programs:beginner_class',
+                                                kwargs={'beginner_class': cr.beginner_class.id}))
         else:
             logging.debug(form.errors)
             return render(request, 'program_app/class_sign_in.html',
