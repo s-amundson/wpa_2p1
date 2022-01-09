@@ -83,7 +83,7 @@ async function theme_function(e) {
     e.preventDefault();
     console.log('theme update')
     console.log($("#id_theme_1").prop('checked'))
-    let data = await $.post("theme", {
+    let data = await $.post(url_theme, {
                 csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
                 theme: $("#id_theme_1").prop('checked')});
     if ($("#id_theme_1").prop('checked')) {
