@@ -158,7 +158,6 @@ class BeginnerClassListView(LoginRequiredMixin, ListView):
             class_date__gte=timezone.localtime(timezone.now()).date()).order_by('class_date')
         queryset = []
         for c in bc:
-            logging.debug(f'date: {c.class_date} status: {c.state}')
             d = model_to_dict(c)
             d = {**d, **crh.enrolled_count(c)}
             queryset.append(d)

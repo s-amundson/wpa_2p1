@@ -53,6 +53,7 @@ async function get_class_status() {
                 msg += "</br> &nbsp;&nbsp; Instructors: " + data['instructor'];
             }
             else {
+                $("#class-description").html("")
                 if(data["class_type"] == "beginner") {
                     $(".student-check").each(function(e) {
                         console.log($(this).attr("is_beginner") != "T")
@@ -60,6 +61,7 @@ async function get_class_status() {
                             $(this).attr('checked', false);
                         }
                     });
+                    $("#class-description").html("This class is reserved for new students.")
                 }
                 if(data["class_type"] == "returnee") {
                     $(".student-check").each(function(e) {
@@ -67,6 +69,7 @@ async function get_class_status() {
                             $(this).attr('checked', false);
                         }
                     });
+                    $("#class-description").html("This class is reserved for students that have been to at least one of our classes before.")
                 }
             }
             $("#class-availible").html(msg);
