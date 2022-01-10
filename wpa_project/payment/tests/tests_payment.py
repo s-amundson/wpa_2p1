@@ -65,26 +65,26 @@ class TestsPayment(TestCase):
                                     {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
         self.eval_content(json.loads(response.content), 'ERROR', 'payment processing error', False, 0)
 
-    def test_payment_retries(self):
-
-        ik = self.client.session['idempotency_key']
-
-        response = self.client.post(reverse('payment:payment'),
-                                    {'sq_token': 'cnon:card-nonce-rejected-cvv'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'Error with CVV, ', True, 0)
-        self.assertNotEqual(ik, self.client.session['idempotency_key'])
-        self.assertEqual(self.client.session['payment_error'], 1)
-
-        response = self.client.post(reverse('payment:payment'),
-                                    {'sq_token': 'cnon:card-nonce-rejected-cvv'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'Error with CVV, ', True, 0)
-        self.assertNotEqual(ik, self.client.session['idempotency_key'])
-        self.assertEqual(self.client.session['payment_error'], 2)
-
-        response = self.client.post(reverse('payment:payment'),
-                                    {'sq_token': 'cnon:card-nonce-rejected-expiration'}, secure=True)
-        self.eval_content(json.loads(response.content), 'ERROR', 'Invalid expiration date, ', False, 0)
-        self.assertNotEqual(ik, self.client.session['idempotency_key'])
+    # def test_payment_retries(self):
+    #
+    #     ik = self.client.session['idempotency_key']
+    #
+    #     response = self.client.post(reverse('payment:payment'),
+    #                                 {'sq_token': 'cnon:card-nonce-rejected-cvv'}, secure=True)
+    #     self.eval_content(json.loads(response.content), 'ERROR', 'Error with CVV, ', True, 0)
+    #     self.assertNotEqual(ik, self.client.session['idempotency_key'])
+    #     self.assertEqual(self.client.session['payment_error'], 1)
+    #
+    #     response = self.client.post(reverse('payment:payment'),
+    #                                 {'sq_token': 'cnon:card-nonce-rejected-cvv'}, secure=True)
+    #     self.eval_content(json.loads(response.content), 'ERROR', 'Error with CVV, ', True, 0)
+    #     self.assertNotEqual(ik, self.client.session['idempotency_key'])
+    #     self.assertEqual(self.client.session['payment_error'], 2)
+    #
+    #     response = self.client.post(reverse('payment:payment'),
+    #                                 {'sq_token': 'cnon:card-nonce-rejected-expiration'}, secure=True)
+    #     self.eval_content(json.loads(response.content), 'ERROR', 'Invalid expiration date, ', False, 0)
+    #     self.assertNotEqual(ik, self.client.session['idempotency_key'])
 
     def test_payment_without_line_items(self):
         session = self.client.session

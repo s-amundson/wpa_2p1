@@ -90,7 +90,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             instructors = []
             message = ""
             logging.debug(form.cleaned_data)
-            for k,v in form.cleaned_data.items():
+            for k, v in form.cleaned_data.items():
                 logging.debug(k)
                 if str(k).startswith('student_') and v:
                     i = int(str(k).split('_')[-1])
@@ -144,15 +144,15 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             logging.debug(beginner_class.state)
             if beginner_class.state == 'open':  # in case it changed since user got the form.
                 enrolled_count = ClassRegistrationHelper().enrolled_count(beginner_class)
-                if enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
+                if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
                     messages.add_message(request, messages.ERROR,
                                          'Not enough space available in this class')
                     message += "Not enough space available in this class"
-                if enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
+                if returnee and enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
                     messages.add_message(request, messages.ERROR,
                                          'Not enough space available in this class')
                     message += 'Not enough space available in this class'
-                if enrolled_count['instructors'] + instructor > beginner_class.instructor_limit:
+                if instructor and enrolled_count['instructors'] + instructor > beginner_class.instructor_limit:
                     messages.add_message(request, messages.ERROR,
                                          'Not enough space available in this class')
                     message += 'Not enough space available in this class'

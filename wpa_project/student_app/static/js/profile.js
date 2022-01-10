@@ -47,7 +47,7 @@ $(document).ready(function() {
 function load_instructor_form() {
     console.log("load instructor form");
     $("#instructor-form-div").show();
-    $.get("instructor_update", function(data, status){
+    $.get(url_instructor_update, function(data, status){
         console.log(data);
         $("#instructor-form-div").html(data);
         $("#instructor-info-div").hide();
@@ -83,7 +83,7 @@ async function theme_function(e) {
     e.preventDefault();
     console.log('theme update')
     console.log($("#id_theme_1").prop('checked'))
-    let data = await $.post("theme", {
+    let data = await $.post(url_theme, {
                 csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
                 theme: $("#id_theme_1").prop('checked')});
     if ($("#id_theme_1").prop('checked')) {
@@ -101,7 +101,7 @@ async function update_instructor() {
         csrfmiddlewaretoken: $("#instructor-form-div").find('[name="csrfmiddlewaretoken"]').val(),
         instructor_expire_date: $("#id_instructor_expire_date").val()
     });
-    let data = await $.post("instructor_update", {
+    let data = await $.post(url_instructor_update, {
         csrfmiddlewaretoken: $("#instructor-form-div").find('[name="csrfmiddlewaretoken"]').val(),
         instructor_expire_date: $("#id_instructor_expire_date").val()
     });

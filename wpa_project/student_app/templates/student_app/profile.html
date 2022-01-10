@@ -4,7 +4,15 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/profile.js' %}"></script>
-    <script> let student_table_url = "{% url 'registration:student_table' %}" </script>
+    <script>
+        let student_table_url = "{% url 'registration:student_table' %}"
+        let add_student_url = "{% url 'registration:add_student' %}"
+        let url_student_api = "{% url 'registration:student_api' %}"
+        let url_student_register = "{% url 'registration:student_register' %}"
+        let url_student_family_api = "{% url 'registration:student_family_api' %}"
+        let url_theme = "{% url 'registration:theme' %}"
+        let url_instructor_update = "{% url 'registration:instructor_update' %}"
+    </script>
 {% endblock %}
 
 {% block left %}

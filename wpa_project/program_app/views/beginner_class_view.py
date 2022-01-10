@@ -60,32 +60,32 @@ class BeginnerClassView(LoginRequiredMixin, View):
         if not request.user.is_staff:
             return HttpResponseForbidden()
         logging.debug(request.POST)
-        if 'attendee_form' in request.POST:
-            c = BeginnerClass.objects.get(id=beginner_class)
-            class_registration = c.classregistration_set.exclude(pay_status='refunded')
-            new_count = 0
-            for registration in class_registration:
-                attended = request.POST.get(f'check_{registration.student.id}', 'false')
-                if attended in ['true', 'on']:
-                    registration.attended = True
-                    registration.student.safety_class = str(c.class_date)[:10]
-                    new_count += 1
-
-                elif registration.attended: # if registration was unchecked remove safety class date.
-                    logging.debug('remove attendance')
-                    if str(registration.student.safety_class) == str(c.class_date)[:10]:
-                        registration.student.safety_class = None
-                    registration.attended = False
-
-                vax = request.POST.get(f'covid_vax_{registration.student.id}', 'false')
-                logging.debug(vax)
-                registration.student.covid_vax = vax in ['true', 'on']
-
-                registration.student.save()
-                registration.save()
-            logging.debug(new_count)
-            # return HttpResponseRedirect(reverse('programs:class_list'))
-            return JsonResponse({'count': new_count})
+        # if 'attendee_form' in request.POST:
+        #     c = BeginnerClass.objects.get(id=beginner_class)
+        #     class_registration = c.classregistration_set.exclude(pay_status='refunded')
+        #     new_count = 0
+        #     for registration in class_registration:
+        #         attended = request.POST.get(f'check_{registration.student.id}', 'false')
+        #         if attended in ['true', 'on']:
+        #             registration.attended = True
+        #             registration.student.safety_class = str(c.class_date)[:10]
+        #             new_count += 1
+        #
+        #         elif registration.attended: # if registration was unchecked remove safety class date.
+        #             logging.debug('remove attendance')
+        #             if str(registration.student.safety_class) == str(c.class_date)[:10]:
+        #                 registration.student.safety_class = None
+        #             registration.attended = False
+        #
+        #         vax = request.POST.get(f'covid_vax_{registration.student.id}', 'false')
+        #         logging.debug(vax)
+        #         registration.student.covid_vax = vax in ['true', 'on']
+        #
+        #         registration.student.save()
+        #         registration.save()
+        #     logging.debug(new_count)
+        #     # return HttpResponseRedirect(reverse('programs:class_list'))
+        #     return JsonResponse({'count': new_count})
 
         if beginner_class is not None: # we are updating a record.
 
@@ -158,7 +158,6 @@ class BeginnerClassListView(LoginRequiredMixin, ListView):
             class_date__gte=timezone.localtime(timezone.now()).date()).order_by('class_date')
         queryset = []
         for c in bc:
-            logging.debug(f'date: {c.class_date} status: {c.state}')
             d = model_to_dict(c)
             d = {**d, **crh.enrolled_count(c)}
             queryset.append(d)
