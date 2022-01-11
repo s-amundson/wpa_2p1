@@ -7,6 +7,7 @@ urlpatterns = [
         path('add_student/', AddStudentView.as_view(), name='add_student'),
         path('help/', HelpView.as_view(), name='help'),
         path('instructor_update/', InstructorUpdateView.as_view(), name='instructor_update'),
+        path('pdf/<int:student_id>/', PdfGetView.as_view(), name='pdf'),
         path('policy/<str:policy>/', PolicyView.as_view(), name='policy'),
         path('profile/', ProfileView.as_view(), name='profile'),
         path('search/', SearchView.as_view(), name='search'),

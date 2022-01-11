@@ -16,6 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Frame, Image, Spacer
 from ..src.class_registration_helper import ClassRegistrationHelper
+from student_app.src.email import EmailMessage
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +31,13 @@ class ClassSignInView(LoginRequiredMixin, View):
         if of_age:
             sig_first_name = cr.student.first_name
             sig_last_name = cr.student.last_name
-        form = ClassSignInForm(initial={'signature': cr.signature, 'sig_first_name': sig_first_name,
+        form = ClassSignInForm(initial={'signature': cr.student.signature, 'sig_first_name': sig_first_name,
                                         'sig_last_name': sig_last_name}, of_age=of_age)
-        logging.debug(bool(cr.signature))
-        logging.debug(cr.signature is not None)
+        logging.debug(bool(cr.student.signature))
+        logging.debug(cr.student.signature is not None)
         return render(request, 'program_app/class_sign_in.html',
-                      {'form': form, 'student': cr.student, 'Img': cr.signature, 'is_signed': bool(cr.signature)})
+                      {'form': form, 'student': cr.student, 'Img': cr.student.signature,
+                       'is_signed': bool(cr.student.signature)})
 
     def post(self, request, reg_id):
         logging.debug(request.POST)
@@ -48,7 +50,9 @@ class ClassSignInView(LoginRequiredMixin, View):
             if form.cleaned_data['signature'] == sig:
                 logging.error('invalid signature')
             image_b64 = form.cleaned_data['signature']
+
             img_format, imgstr = image_b64.split(';base64,')
+
             ext = img_format.split('/')[-1]
             with open('img.jpg', 'wb') as f:
                 f.write(base64.b64decode(imgstr))
@@ -68,7 +72,8 @@ class ClassSignInView(LoginRequiredMixin, View):
                     story.append(Paragraph(line, styles['Bullet']))
                     story.append(Spacer(1, 0.1 * inch))
 
-            story.append(Image('img.jpg', width=3 * inch, height=1 * inch))
+            new_sig = Image('img.jpg', width=3 * inch, height=1 * inch)
+            story.append(new_sig)
             d = cr.beginner_class.class_date
             name = f"{form.cleaned_data['sig_first_name']} {form.cleaned_data['sig_last_name']}"
             story.append(Paragraph(f"Signed on Date: {d.date()} By {name}"))
@@ -76,18 +81,19 @@ class ClassSignInView(LoginRequiredMixin, View):
             f = Frame(inch / 2, inch, 7 * inch, 9 * inch, showBoundary=1)
             f.addFromList(story, c)
             c.save()
-
-            # cr.signature = ContentFile(self.awrl_from_signature(), name=f'{reg_id}.pdf')
-            cr.signature = File(open('mydoc.pdf', 'rb'), name=f'{reg_id}.pdf')
+            cr.student.signature = File(open('img.jpg', 'rb'), name=f'{reg_id}.jpg')
+            cr.student.signature_pdf = File(open('mydoc.pdf', 'rb'), name=f'{reg_id}.pdf')
+            cr.student.save()
             cr.attended = True
             cr.save()
+
+            # send email to user with the waiver attached
+            EmailMessage().awrl_email(cr.student)
 
             return HttpResponseRedirect(reverse('programs:beginner_class',
                                                 kwargs={'beginner_class': cr.beginner_class.id}))
         else:
             logging.debug(form.errors)
             return render(request, 'program_app/class_sign_in.html',
-                          {'form': form, 'student': cr.student, 'Img': cr.signature,
-                           'is_signed': bool(cr.signature), 'message': 'invalid signature'})
-
-
+                          {'form': form, 'student': cr.student, 'Img': cr.student.signature,
+                           'is_signed': bool(cr.student.signature), 'message': 'invalid signature'})
