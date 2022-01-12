@@ -1,6 +1,7 @@
 from datetime import timedelta
 from django import forms
 from django.utils import timezone
+from django.db.models import Q
 from ..models import BeginnerClass, ClassRegistration
 import logging
 
@@ -9,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 class ClassRegistrationForm(forms.Form):
 
-    def __init__(self, students, *args, **kwargs):
+    def __init__(self, students, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        bc = self.get_open_classes()
+        bc = self.get_open_classes(user)
         self.fields['beginner_class'] = forms.ChoiceField(choices=bc)
         self.fields['terms'] = forms.BooleanField(
             widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=True,
@@ -24,16 +25,18 @@ class ClassRegistrationForm(forms.Form):
                 attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
                        'dob': f"{student.dob}"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
-            # TODO WISH set initial to student's last class state
-            # student['checkbox'] = self.fields[f'student_{student["id"]}']
 
     def get_boxes(self):
         for field_name in self.fields:
             if field_name.startswith('student_'):
                 yield self[field_name]
 
-    def get_open_classes(self):
-        classes = BeginnerClass.objects.filter(class_date__gt=timezone.now(), state__exact='open')
+    def get_open_classes(self, user):
+        classes = BeginnerClass.objects.filter(class_date__gt=timezone.now())
+        if user.is_instructor:
+            classes = classes.filter(Q(state='open') | Q(state='full'))
+        else:
+            classes = classes.filter(state='open')
         d = [("", "None")]
         for c in classes:
             cd = timezone.localtime(c.class_date)

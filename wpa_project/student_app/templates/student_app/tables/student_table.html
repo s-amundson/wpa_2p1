@@ -24,11 +24,11 @@
                             <a target="_blank" href="{% url 'registration:pdf' student.id %}">Waiver</a>
                         {% endif %}
                     </td>
-                    <td>
-                        {% if has_member %}
+                    {% if has_member %}
+                        <td>
                             {{ student.member_expire }}
-                        {% endif %}
-                    </td>
+                        </td>
+                    {% endif %}
                     <td>
                         <button id="btn-edit-{{ student.id }}" class="btn btn-primary" type="button"
                                 student-id="{{ student.id }}">

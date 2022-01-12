@@ -44,9 +44,15 @@ async function get_calendar() {
 async function get_class_status() {
     // get the class status from the server. tells us how many openings there are in the class.
     let d = $("#id_beginner_class").val();
-    if(d != "") {
+    console.log(d)
+    let msg = ""
+
+    if(d == "" | d == 'null') {
+        $("#class-description").html("")
+    }
+    else {
         let data = await $.get("class_status/" + $("#id_beginner_class").val() +"/", function(data, status){
-            let msg = "Class openings:</br> &nbsp;&nbsp; ";
+            msg = "Class openings:</br> &nbsp;&nbsp; ";
             msg += "New Students: " +  data['beginner'];
             msg += "</br> &nbsp;&nbsp; Returning: " + data['returnee'];
             if($("#is_instructor").val() == "True") {
@@ -72,9 +78,10 @@ async function get_class_status() {
                     $("#class-description").html("This class is reserved for students that have been to at least one of our classes before.")
                 }
             }
-            $("#class-availible").html(msg);
+
         });
     }
+    $("#class-available").html(msg);
 }
 
 async function get_reg_table() {

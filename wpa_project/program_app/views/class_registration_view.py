@@ -73,7 +73,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                                                      'returnee': returnee}
             return HttpResponseRedirect(reverse('payment:process_payment'))
 
-        form = ClassRegistrationForm(students)
+        form = ClassRegistrationForm(students, request.user)
         tm = timezone.localtime(timezone.now()).month
         return render(request, 'program_app/class_registration.html', {'form': form, 'this_month': tm})
 
