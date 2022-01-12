@@ -80,7 +80,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
     def post(self, request):
         students = Student.objects.get(user=request.user).student_family.student_set.all()
         logging.debug(request.POST)
-        form = ClassRegistrationForm(students, request.POST)
+        form = ClassRegistrationForm(students, request.user, request.POST)
         if form.is_valid():
             beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
             beginner = 0
