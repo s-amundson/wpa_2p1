@@ -73,14 +73,14 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                                                      'returnee': returnee}
             return HttpResponseRedirect(reverse('payment:process_payment'))
 
-        form = ClassRegistrationForm(students)
+        form = ClassRegistrationForm(students, request.user)
         tm = timezone.localtime(timezone.now()).month
         return render(request, 'program_app/class_registration.html', {'form': form, 'this_month': tm})
 
     def post(self, request):
         students = Student.objects.get(user=request.user).student_family.student_set.all()
         logging.debug(request.POST)
-        form = ClassRegistrationForm(students, request.POST)
+        form = ClassRegistrationForm(students, request.user, request.POST)
         if form.is_valid():
             beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
             beginner = 0

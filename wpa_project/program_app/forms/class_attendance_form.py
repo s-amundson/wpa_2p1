@@ -26,9 +26,9 @@ class ClassAttendanceForm(forms.Form):
             if is_instructor:
                 self.instructors.append(self.student_dict(cr, True))
             elif cr.student.safety_class is None:
-                self.new_students.append(self.student_dict(cr, bool(cr.signature)))
+                self.new_students.append(self.student_dict(cr, bool(cr.student.signature)))
             else:
-                self.return_students.append(self.student_dict(cr, bool(cr.signature)))
+                self.return_students.append(self.student_dict(cr, bool(cr.student.signature)))
 
     def student_dict(self, cr, is_signed):
         logging.debug(f'student: {cr.student.id} vax: {cr.student.covid_vax}')
