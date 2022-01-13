@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.urls import reverse
@@ -19,11 +19,8 @@ from payment.models import CostsModel
 logger = logging.getLogger(__name__)
 
 
-class BeginnerClassView(LoginRequiredMixin, View):
+class BeginnerClassView(UserPassesTestMixin, View):
     def get(self, request, beginner_class=None):
-        if not request.user.is_staff:
-            return HttpResponseForbidden()
-        # messages.add_message(request, messages.INFO, 'Hello world.')
         alert_message = ''
         logging.debug('staff')
         attendee_form = False
@@ -56,36 +53,7 @@ class BeginnerClassView(LoginRequiredMixin, View):
                                                                    'alert_message': alert_message})
 
     def post(self, request, beginner_class=None):
-
-        if not request.user.is_staff:
-            return HttpResponseForbidden()
         logging.debug(request.POST)
-        # if 'attendee_form' in request.POST:
-        #     c = BeginnerClass.objects.get(id=beginner_class)
-        #     class_registration = c.classregistration_set.exclude(pay_status='refunded')
-        #     new_count = 0
-        #     for registration in class_registration:
-        #         attended = request.POST.get(f'check_{registration.student.id}', 'false')
-        #         if attended in ['true', 'on']:
-        #             registration.attended = True
-        #             registration.student.safety_class = str(c.class_date)[:10]
-        #             new_count += 1
-        #
-        #         elif registration.attended: # if registration was unchecked remove safety class date.
-        #             logging.debug('remove attendance')
-        #             if str(registration.student.safety_class) == str(c.class_date)[:10]:
-        #                 registration.student.safety_class = None
-        #             registration.attended = False
-        #
-        #         vax = request.POST.get(f'covid_vax_{registration.student.id}', 'false')
-        #         logging.debug(vax)
-        #         registration.student.covid_vax = vax in ['true', 'on']
-        #
-        #         registration.student.save()
-        #         registration.save()
-        #     logging.debug(new_count)
-        #     # return HttpResponseRedirect(reverse('programs:class_list'))
-        #     return JsonResponse({'count': new_count})
 
         if beginner_class is not None: # we are updating a record.
 
@@ -147,6 +115,12 @@ class BeginnerClassView(LoginRequiredMixin, View):
         else:
             logging.debug(form.errors)
             return render(request, 'program_app/beginner_class.html', {'form': form})
+
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            return self.request.user.is_staff
+        else:
+            return False
 
 
 class BeginnerClassListView(LoginRequiredMixin, ListView):

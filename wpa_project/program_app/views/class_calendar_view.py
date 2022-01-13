@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import View
 from django.utils import timezone
 from django.utils.safestring import mark_safe
@@ -10,7 +11,7 @@ from ..models import BeginnerClass
 logger = logging.getLogger(__name__)
 
 
-class ClassCalendarView(View):
+class ClassCalendarView(LoginRequiredMixin, View):
     def get(self, request, month=None):
         # use today's date for the calendar
         d = timezone.localtime(timezone.now()).date()
