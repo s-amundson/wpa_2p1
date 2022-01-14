@@ -12,7 +12,7 @@ fi
 
 ## Make migrations and migrate the database.
 #echo "Making migrations and migrating the database. "
-python manage.py makemigrations payment student_app program_app membership minutes --noinput
+python manage.py makemigrations student_app payment program_app membership minutes --noinput
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 python manage.py runapscheduler &
