@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.files.base import File
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
+from django.utils import timezone
 from django.views.generic.base import View
 from django.shortcuts import get_object_or_404
 from ..forms import ClassSignInForm
@@ -42,6 +43,7 @@ class ClassSignInView(LoginRequiredMixin, View):
     def post(self, request, reg_id):
         logging.debug(request.POST)
         cr = get_object_or_404(ClassRegistration, pk=reg_id)
+        sf = cr.student.student_family
         form = ClassSignInForm(request.POST)
         if form.is_valid():
             logging.debug('valid')
@@ -71,18 +73,23 @@ class ClassSignInView(LoginRequiredMixin, View):
                 for line in f.readlines():
                     story.append(Paragraph(line, styles['Bullet']))
                     story.append(Spacer(1, 0.1 * inch))
+            story.append(Paragraph("Student:", styles['Normal']))
+            story.append(Paragraph(f'&nbsp;&nbsp;&nbsp;&nbsp;{cr.student.first_name} {cr.student.last_name}', styles['Normal']))
+            story.append(Paragraph(f'&nbsp;&nbsp;&nbsp;&nbsp;{sf.street}', styles['Normal']))
+            story.append(Paragraph(f'&nbsp;&nbsp;&nbsp;&nbsp;{sf.city} {sf.state} {sf.post_code}', styles['Normal']))
 
-            new_sig = Image('img.jpg', width=3 * inch, height=1 * inch)
+            new_sig = Image('img.jpg', width=3 * inch, height=1 * inch, hAlign='LEFT')
             story.append(new_sig)
             d = cr.beginner_class.class_date
             name = f"{form.cleaned_data['sig_first_name']} {form.cleaned_data['sig_last_name']}"
-            story.append(Paragraph(f"Signed on Date: {d.date()} By {name}"))
+            story.append(Paragraph(f"Signed By {name} on Date: {timezone.localtime(timezone.now()).date()}"))
             c = Canvas('mydoc.pdf')
             f = Frame(inch / 2, inch, 7 * inch, 9 * inch, showBoundary=1)
             f.addFromList(story, c)
             c.save()
-            cr.student.signature = File(open('img.jpg', 'rb'), name=f'{reg_id}.jpg')
-            cr.student.signature_pdf = File(open('mydoc.pdf', 'rb'), name=f'{reg_id}.pdf')
+            fn = f'{cr.student.last_name}_{cr.student.first_name}'
+            cr.student.signature = File(open('img.jpg', 'rb'), name=f'{fn}.jpg')
+            cr.student.signature_pdf = File(open('mydoc.pdf', 'rb'), name=f'{fn}.pdf')
             cr.student.save()
             cr.attended = True
             cr.save()

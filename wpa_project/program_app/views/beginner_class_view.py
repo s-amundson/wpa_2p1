@@ -125,14 +125,25 @@ class BeginnerClassView(UserPassesTestMixin, View):
 
 class BeginnerClassListView(LoginRequiredMixin, ListView):
     template_name = 'program_app/beginner_class_list.html'
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['past'] = self.kwargs.get('past', False)
+        return context
 
     def get_queryset(self):
         crh = ClassRegistrationHelper()
-        bc = BeginnerClass.objects.filter(
-            class_date__gte=timezone.localtime(timezone.now()).date()).order_by('class_date')
+        if self.kwargs.get('past', False):
+            bc = BeginnerClass.objects.filter(
+                class_date__lte=timezone.localtime(timezone.now()).date()).order_by('-class_date')
+        else:
+            bc = BeginnerClass.objects.filter(
+                class_date__gte=timezone.localtime(timezone.now()).date()).order_by('class_date')
         queryset = []
         for c in bc:
             d = model_to_dict(c)
             d = {**d, **crh.enrolled_count(c)}
             queryset.append(d)
+        logging.debug(len(queryset))
         return queryset
