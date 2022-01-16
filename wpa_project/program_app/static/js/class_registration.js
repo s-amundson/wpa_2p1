@@ -67,7 +67,7 @@ async function get_class_status() {
                             $(this).attr('checked', false);
                         }
                     });
-                    $("#class-description").html("This class is reserved for new students.")
+                    $("#class-description").html("This class is reserved for new students. Student's may only register for one upcoming beginner class.")
                 }
                 if(data["class_type"] == "returnee") {
                     $(".student-check").each(function(e) {
@@ -77,6 +77,7 @@ async function get_class_status() {
                     });
                     $("#class-description").html("This class is reserved for students that have been to at least one of our classes before.")
                 }
+                $("#class-description").append('</br> Please show up 15 minutes prior to class time.')
             }
 
         });

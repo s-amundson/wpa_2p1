@@ -126,11 +126,18 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                                                  'Instructor is already enrolled')
                             message += 'Instructor is already enrolled'
                     else:
-                        if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
-                                pay_status="refunded").exclude(pay_status='canceled')) == 0:
+                        reg = ClassRegistration.objects.filter(student=s).exclude(
+                                pay_status="refunded").exclude(pay_status='canceled')
+                        if len(reg.filter(beginner_class=beginner_class)) == 0:
                             if s.safety_class is None:
-                                beginner += 1
-                                students.append(s)
+                                logging.debug(len(reg))
+                                if len(reg.filter(beginner_class__class_date__gt=timezone.localdate(timezone.now()))) > 0:
+                                    messages.add_message(request, messages.ERROR,
+                                                         f'{s.first_name} is enrolled in another beginner class')
+                                    message += f'{s.first_name} is enrolled in another beginner class'
+                                else:
+                                    beginner += 1
+                                    students.append(s)
                             else:
                                 returnee += 1
                                 students.append(s)
