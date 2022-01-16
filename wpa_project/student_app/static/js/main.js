@@ -6,10 +6,10 @@ $(document).ready(function(){
 });
 
 async function add_student_function(student_id) {
-    var url_string = "student_api"
+    var url_string = url_student_api
     let getConfirm = false;
     if(student_id) {
-        url_string = "student_api/" + student_id + "/";
+        url_string = url_student_api + student_id + "/";
         $("#student-row-" + student_id).show();
     }
     var of_age = new Date()
@@ -75,9 +75,9 @@ function alert_notice(title, message) {
 function load_student_family_form(family_id) {
     console.log(family_id)
     $("#student-family-address").hide();
-    let url_string = "student_register"
+    let url_string = url_student_register
     if (family_id != "") { // if empty new family so load empty form
-        url_string = url_string + "/" + family_id + "/";
+        url_string = url_string + family_id + "/";
     }
     console.log(url_string);
     $.get(url_string, function(data, status){
@@ -95,11 +95,13 @@ function load_student_family_form(family_id) {
 function load_student_form(student_div, student_id) {
     student_div.show();
     $("#btn-add-student").hide()
-    var url_string = "add_student"
+    var url_string = add_student_url
+
     if(student_id) {
-        url_string = "add_student/" + student_id + "/"
+        url_string = add_student_url + student_id + "/"
         $("#student-row-" + student_id).hide()
     }
+    console.log(url_string)
     $.get(url_string, function(data, status){
 //        $("#student_add_div").html(data);
         student_div.html(data);
@@ -118,11 +120,13 @@ function load_student_form(student_div, student_id) {
             }
         });
         $("#btn-student-form-close").click(function() {
+            e.preventDefault();
             student_div.html("");
             try {
                 load_student_table();
             } catch (e) {
             }
+            $("#btn-add-student").show();
         });
         $("#id_dob").change(function() {
             let dob_array = $(this).val().split('-')
@@ -157,9 +161,9 @@ function pad(n, width) {
 
 async function post_family_function(family_id) {
     console.log('on submit')
-    let url_string = "student_family_api";
+    let url_string = url_student_family_api;
     if (family_id != "") {
-        url_string = url_string + "/" + family_id + "/";
+        url_string = url_string + family_id + "/";
     }
     let data = await $.post(url_string, {
         csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),

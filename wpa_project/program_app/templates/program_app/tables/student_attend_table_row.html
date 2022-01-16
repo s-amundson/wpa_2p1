@@ -1,0 +1,29 @@
+<tr>
+    <td>{{ s.id }}</td>
+    <td>{{ s.first_name }}</td>
+    <td>{{ s.last_name }}</td>
+    <td class="{% if s.is_minor %} text-warning {% endif %}">{{ s.dob }}</td>
+    <td>
+        {% if attendee_form.is_closed %}
+            {% if s.signature %}
+                <input type="checkbox" class="m-2 attend-check" id="{{ s.check }}"
+                   attend_url="{% url 'programs:class_attend' s.cr_id %}"
+                   {% if s.checked %} checked="checked" {% endif %}>
+            {% endif %}
+            <a class="nav-link" href="{% url 'programs:class_sign_in' s.cr_id %}">
+                {% if s.signature %}
+                    Update Signature
+                {% else %}
+                    Signature Required
+                {% endif %}
+            </a>
+        {% endif %}
+    </td>
+    <td>
+        {% if attendee_form.is_closed %}
+            <input type="checkbox" class="m-2 attend-check"
+               attend_url="{% url 'programs:class_attend' s.cr_id %}"  id="{{ s.covid_vax_check }}"
+            {% if s.covid_vax %} checked="checked" {% endif %}>
+        {% endif %}
+    </td>
+</tr>

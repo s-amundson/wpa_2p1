@@ -8,6 +8,7 @@
 
     <script>
         var month = {{ this_month }}
+        url_unregister_class = "{% url 'programs:unregister_class' %}"
     </script>
 {% endblock %}
 
@@ -62,9 +63,11 @@
                     <div class="input-group-md m-2">
                         {{ form.beginner_class }}
                     </div>
-                    <div class="p-1" id="class-availible"></div>
+                    <div class="p-1" id="class-available"></div>
                 </div>
+                <div id="class-description"></div>
             </div>
+
             <div class="row p-1">
                 <div class="col-4 text-right border">
                     Select students to enroll:

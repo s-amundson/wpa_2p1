@@ -75,17 +75,7 @@ CSRF_COOKIE_SECURE = True
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 DATABASES = {
-    'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': get_secret("DATABASE_NAME"),
-        'USER': get_secret("DATABASE_USER"),
-        'PASSWORD': get_secret("DATABASE_PASSWORD"),
-        'HOST': get_secret("DATABASE_HOST"),
-        'PORT': get_secret("DATABASE_PORT"),
-
-    }
+    'default': get_secret("DATABASE"),
 }
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -134,6 +124,7 @@ INSTALLED_APPS = [
     # 'allauth.socialaccount.providers.instagram',
     'rest_framework',
     "sslserver",
+    'django_sendfile',
 ]
 
 LOGIN_REDIRECT_URL = 'registration:profile'
@@ -188,6 +179,14 @@ ROOT_URLCONF = 'wpa_project.urls'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
 SECURE_SSL_REDIRECT = False
+
+if DEBUG:
+    SENDFILE_BACKEND = 'django_sendfile.backends.development'
+else:
+    SENDFILE_BACKEND = 'django_sendfile.backends.nginx'
+SENDFILE_ROOT = MEDIA_ROOT
+SENDFILE_URL = MEDIA_URL
+
 SESSION_COOKIE_AGE = get_secret('SESSION_COOKIE_AGE')
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_SECURE = True

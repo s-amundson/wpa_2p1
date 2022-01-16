@@ -1,0 +1,7 @@
+Hi {{ name }},
+
+{{ message }}
+
+
+http://woodleyparkarchers.org/">WoodleyParkArchers.org
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

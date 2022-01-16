@@ -7,45 +7,66 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/search.js' %}"></script>
-    <script> let student_table_url = "{% url 'registration:student_table' %}" </script>
+    <script>
+        let student_table_url = "{% url 'registration:student_table' %}"
+        let add_student_url = "{% url 'registration:add_student' %}"
+        let url_student_api = "{% url 'registration:student_api' %}"
+        let url_student_register = "{% url 'registration:student_register' %}"
+        let url_student_family_api = "{% url 'registration:student_family_api' %}"
+        let url_theme = "{% url 'registration:theme' %}"
+    </script>
 {% endblock %}
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-
     {% for sf in student_family %}
         <div class="p-2">
-            <div class="row">
-                <div class="col-1 p-1"></div>
-                <div class="col-2 font-weight-bold border p-1 text-center" > First Name </div>
-                <div class="col-2 font-weight-bold border p-1 text-center"> Last Name </div>
-                <div class="col font-weight-bold border p-1 text-center"> Date of Birth </div>
-                <div class="col font-weight-bold border p-1 text-center"> Safety Class Date </div>
-                <div class="col font-weight-bold border p-1 text-center"> Membership Expire Date </div>
-            </div>
-            {% for student in sf.student_set.all %}
-                <div class="row">
-                    <div class="col-1 p-1">
-                        <button id="btn-edit-{{ student.id }}" class="btn btn-primary" type="button"
-                                student-id="{{ student.id }}">
-                            Edit
-                        </button>
-                    </div>
-                    <div class="col-2 border"> {{ student.first_name }} </div>
-                    <div class="col-2 border"> {{ student.last_name }} </div>
-                    <div class="col border"> {{ student.dob }} </div>
-                    <div class="col border"> {{ student.safety_class }} </div>
-                    <div class="col border">
-                        {% for member in student.member_set.all %}
-                            <a href="{% url 'membership:membership' sf.id %}">
-                                {{ member.expire_date }}
-                            </a>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endfor %}
+            <table class="table table-bordered
+                {% if user.dark_theme %}
+                    text-white
+                {% else %}
+                    text-dark
+                {% endif %}">
+                <thead>
+                    <th> </th>
+                    <th> First Name </th>
+                    <th> Last Name </th>
+                    <th> Date of Birth </th>
+                    <th> Safety Class Date </th>
+                    <th> Waiver </th>
+                    <th> Membership Expire Date </th>
+                </thead>
+                <tbody>
+                    {% for student in sf.student_set.all %}
+                        <tr>
+                            <td>
+                                <button id="btn-edit-{{ student.id }}" class="btn btn-primary" type="button"
+                                        student-id="{{ student.id }}">
+                                    Edit
+                                </button>
+                            </td>
+                            <td>{{ student.first_name }}</td>
+                            <td>{{ student.last_name }}</td>
+                            <td>{{ student.dob }}</td>
+                            <td>{{ student.safety_class }}</td>
+                            <td>
+                                {% if student.signature_pdf %}
+                                    <a target="_blank" href="{% url 'registration:pdf' student.id %}">Waiver</a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for member in student.member_set.all %}
+                                    <a href="{% url 'membership:membership' sf.id %}">
+                                        {{ member.expire_date }}
+                                    </a>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <div class="row p-2" id="student_add_div"></div>
+        <div class="container" id="student_add_div"></div>
         <div id="student-family-form" class="row px-3"></div>
 
         <div id="student-family-address" class="row px-3">

@@ -1,6 +1,8 @@
+# from .tests.tests_email import TestsEmail
 # from .tests.tests_index import TestsIndex
 # from .tests.tests_instructor import TestsInstructor
 # from .tests.tests_other import TestsOther
+# from .tests.tests_pdf import TestsPdf
 # from .tests.tests_search import TestsSearch
 # from .tests.tests_student import TestsStudent
 # from .tests.tests_student import TestsStudentAPI

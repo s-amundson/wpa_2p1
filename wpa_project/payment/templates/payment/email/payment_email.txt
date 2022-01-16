@@ -20,7 +20,7 @@ COVID-19 Policy
 Cancellation Policy
 
 {% include "program_app/cancellation_policy.txt" %}
-
+To unregister for a class go to https://registration.woodleyparkarchers.org/programs/class_registration
 
 http://woodleyparkarchers.org/">WoodleyParkArchers.org
 http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

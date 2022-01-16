@@ -14,15 +14,17 @@ class ClassRegistrationHelper:
         is_space = True
         bc = BeginnerClass.objects.get(pk=class_registration_dict['beginner_class'])
         ec = self.enrolled_count(bc)
-        if ec['beginner'] + class_registration_dict['beginner'] > bc.beginner_limit:
+        logging.debug(class_registration_dict)
+        if class_registration_dict['beginner'] and ec['beginner'] + class_registration_dict['beginner'] > bc.beginner_limit:
             is_space = False
-        if ec['returnee'] + class_registration_dict['returnee'] > bc.returnee_limit:
+        if class_registration_dict['returnee'] and ec['returnee'] + class_registration_dict['returnee'] > bc.returnee_limit:
             is_space = False
         if ec['beginner'] + class_registration_dict['beginner'] == bc.beginner_limit and \
            ec['returnee'] + class_registration_dict['returnee'] == bc.returnee_limit:
             if update:
                 bc.state = 'full'
                 bc.save()
+        logging.debug(is_space)
         return is_space
 
     def enrolled_count(self, beginner_class):

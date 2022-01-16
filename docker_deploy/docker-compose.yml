@@ -24,7 +24,7 @@ services:
 #    volumes:
 #      - mysql_data:/var/lib/mysql
 
-  web:
+  django:
     container_name: django
     build:
       context: ..
@@ -37,6 +37,7 @@ services:
       - db
     volumes:
       - staticfiles:/home/app/web/staticfiles
+      - media:/home/app/web/student_app/media
 
   wordpress:
     container_name: wordpress
@@ -71,9 +72,10 @@ services:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
       - ../wordpress:/var/www/html
+      - media:/app/media
 
     depends_on:
-      - web
+      - django
       - wordpress
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
@@ -94,3 +96,4 @@ volumes:
   postgres-data:
   staticfiles:
   mysql_data:
+  media:

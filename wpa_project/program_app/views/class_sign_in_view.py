@@ -1,11 +1,13 @@
 import logging
 import base64
 import os
-
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.conf import settings
 from django.core.files.base import File
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
+from django.utils import timezone
 from django.views.generic.base import View
 from django.shortcuts import get_object_or_404
 from ..forms import ClassSignInForm
@@ -15,6 +17,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Frame, Image, Spacer
 from ..src.class_registration_helper import ClassRegistrationHelper
+from student_app.src.email import EmailMessage
 
 logger = logging.getLogger(__name__)
 
@@ -29,16 +32,18 @@ class ClassSignInView(LoginRequiredMixin, View):
         if of_age:
             sig_first_name = cr.student.first_name
             sig_last_name = cr.student.last_name
-        form = ClassSignInForm(initial={'signature': cr.signature, 'sig_first_name': sig_first_name,
+        form = ClassSignInForm(initial={'signature': cr.student.signature, 'sig_first_name': sig_first_name,
                                         'sig_last_name': sig_last_name}, of_age=of_age)
-        logging.debug(bool(cr.signature))
-        logging.debug(cr.signature is not None)
+        logging.debug(bool(cr.student.signature))
+        logging.debug(cr.student.signature is not None)
         return render(request, 'program_app/class_sign_in.html',
-                      {'form': form, 'student': cr.student, 'Img': cr.signature, 'is_signed': bool(cr.signature)})
+                      {'form': form, 'student': cr.student, 'Img': cr.student.signature,
+                       'is_signed': bool(cr.student.signature)})
 
     def post(self, request, reg_id):
         logging.debug(request.POST)
         cr = get_object_or_404(ClassRegistration, pk=reg_id)
+        sf = cr.student.student_family
         form = ClassSignInForm(request.POST)
         if form.is_valid():
             logging.debug('valid')
@@ -47,7 +52,9 @@ class ClassSignInView(LoginRequiredMixin, View):
             if form.cleaned_data['signature'] == sig:
                 logging.error('invalid signature')
             image_b64 = form.cleaned_data['signature']
+
             img_format, imgstr = image_b64.split(';base64,')
+
             ext = img_format.split('/')[-1]
             with open('img.jpg', 'wb') as f:
                 f.write(base64.b64decode(imgstr))
@@ -66,26 +73,34 @@ class ClassSignInView(LoginRequiredMixin, View):
                 for line in f.readlines():
                     story.append(Paragraph(line, styles['Bullet']))
                     story.append(Spacer(1, 0.1 * inch))
+            story.append(Paragraph("Student:", styles['Normal']))
+            story.append(Paragraph(f'&nbsp;&nbsp;&nbsp;&nbsp;{cr.student.first_name} {cr.student.last_name}', styles['Normal']))
+            story.append(Paragraph(f'&nbsp;&nbsp;&nbsp;&nbsp;{sf.street}', styles['Normal']))
+            story.append(Paragraph(f'&nbsp;&nbsp;&nbsp;&nbsp;{sf.city} {sf.state} {sf.post_code}', styles['Normal']))
 
-            story.append(Image('img.jpg', width=3 * inch, height=1 * inch))
+            new_sig = Image('img.jpg', width=3 * inch, height=1 * inch, hAlign='LEFT')
+            story.append(new_sig)
             d = cr.beginner_class.class_date
             name = f"{form.cleaned_data['sig_first_name']} {form.cleaned_data['sig_last_name']}"
-            story.append(Paragraph(f"Signed on Date: {d.date()} By {name}"))
+            story.append(Paragraph(f"Signed By {name} on Date: {timezone.localtime(timezone.now()).date()}"))
             c = Canvas('mydoc.pdf')
             f = Frame(inch / 2, inch, 7 * inch, 9 * inch, showBoundary=1)
             f.addFromList(story, c)
             c.save()
-
-            # cr.signature = ContentFile(self.awrl_from_signature(), name=f'{reg_id}.pdf')
-            cr.signature = File(open('mydoc.pdf', 'rb'), name=f'{reg_id}.pdf')
+            fn = f'{cr.student.last_name}_{cr.student.first_name}'
+            cr.student.signature = File(open('img.jpg', 'rb'), name=f'{fn}.jpg')
+            cr.student.signature_pdf = File(open('mydoc.pdf', 'rb'), name=f'{fn}.pdf')
+            cr.student.save()
             cr.attended = True
             cr.save()
 
-            return render(request, 'student_app/message.html', {'message': ' Thank You'})
+            # send email to user with the waiver attached
+            EmailMessage().awrl_email(cr.student)
+
+            return HttpResponseRedirect(reverse('programs:beginner_class',
+                                                kwargs={'beginner_class': cr.beginner_class.id}))
         else:
             logging.debug(form.errors)
             return render(request, 'program_app/class_sign_in.html',
-                          {'form': form, 'student': cr.student, 'Img': cr.signature,
-                           'is_signed': bool(cr.signature), 'message': 'invalid signature'})
-
-
+                          {'form': form, 'student': cr.student, 'Img': cr.student.signature,
+                           'is_signed': bool(cr.student.signature), 'message': 'invalid signature'})
