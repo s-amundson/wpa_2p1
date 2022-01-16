@@ -37,6 +37,7 @@ $(document).ready(function() {
     $.each(report_owners, function(index, value) {
         // loop though the existing reports and update indexes and set event
         $("#div-" + value).find(".report-div").each(function(index) {
+            console.log($(this).prop("id"))
             index_report_div($(this))
         });
 
@@ -197,7 +198,7 @@ function indicate_saved(status) {
 
 async function load_business_form() {
     await $.get($("#url-business").val(), function(data, status){
-        $("#div-new-business").html($("#div-new-business").html() + data);
+        $("#div-new-business").append(data);
         $("#business_minutes").val($("#minutes-id").val());
         index_business_div($("#div-new-business").find("#business-div"), true)
     });
@@ -205,7 +206,7 @@ async function load_business_form() {
 
 async function load_business_update(business) {
     await $.get($("#url-business-update").val(), function(data, status){
-        $("#div-business-update").html($("#div-business-update").html() + data);
+        $("#div-business-update").append(data);
         $("#div-business-update").find("#update_business").val(business);
         index_update($("#div-business-update"), true)
     });
@@ -213,20 +214,19 @@ async function load_business_update(business) {
 
 async function load_decision_form() {
     await $.get($("#url-decision").val(), function(data, status){
-        $("#div-decisions").html($("#div-decisions").html() + data);
+        $("#div-decisions").append(data);
         index_decision_div($("#div-decisions").find("#decision-div"))
     });
 }
 
 async function load_report_form(container, owner) {
     await $.get($("#url-report").val(), function(data, status){
-        container.html(container.html() + data);
-        report_count = report_count + 1;
-//        let count = parseInt(container.find(".report-count").val()) + 1
-        container.find(".report-count").val(report_count)
+        console.log(status)
+        console.log(container.html())
+        container.append(data);
         $("#report_owner").val(owner);
         $("#report_minutes").val($("#minutes-id").val());
-        index_report_div(container)
+        index_report_div(container.find("#report-div"))
 
     });
 }
@@ -274,14 +274,17 @@ async function save_report(report_element) {
     if ($("#report-id-" + report_element.attr('count')).val() != "None") {
         url_string = url_string + "/" + $("#report-id-" + report_element.attr('count')).val()
     }
+    let report_data = report_element.val();
     await $.post(url_string, {
         csrfmiddlewaretoken: $("#report-div-" + count).find('[name="csrfmiddlewaretoken"]').val(),
         owner: $("#report_owner-" + count).val(),
         minutes: $("#report_minutes-" + count).val(),
-        report: report_element.val()
+        report: report_data
     }, function(data, status){
+        console.log(report_data)
         $("#report-id-" + count).val(data.report_id);
         indicate_saved(data.success);
+        report_element.val(report_data);
     }, "json");
 }
 
