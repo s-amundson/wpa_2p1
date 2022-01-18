@@ -23,6 +23,7 @@ class ReportView(LoginRequiredMixin, View):
         else:
             form = ReportForm(edit=request.user.is_board)
         r = {'form': form, 'id': report_id}
+        logging.debug(r)
         return render(request, 'minutes/forms/report_form.html', {'report': r})
 
     def post(self, request, report_id=None):

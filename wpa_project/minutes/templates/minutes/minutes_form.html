@@ -62,7 +62,6 @@
                 <div id="div-president">
                     <input type="hidden" id="president-report-count" class="report-count" value="{{ reports.president|length }}">
                     {% for report in reports.president %}
-                        <input type="hidden" id="report-count" value="{{ forloop.counter }}">
                         {% include "minutes/forms/report_form.html" %}
                     {% endfor %}
                 </div>
@@ -85,6 +84,8 @@
                     <input type="hidden" id="vice-report-count" class="report-count" value="{{ reports.vice|length }}">
                     {% for report in reports.vice %}
                         {% include "minutes/forms/report_form.html" %}
+                    {% empty %}
+                        <div class="div-next"></div>
                     {% endfor %}
                 </div>
                 {% if user.is_board %}

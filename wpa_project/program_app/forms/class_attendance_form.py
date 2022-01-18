@@ -31,7 +31,7 @@ class ClassAttendanceForm(forms.Form):
                 self.return_students.append(self.student_dict(cr, bool(cr.student.signature)))
 
     def student_dict(self, cr, is_signed):
-        logging.debug(f'student: {cr.student.id} vax: {cr.student.covid_vax}')
+        logging.debug(f'student: {cr.student.id} vax: {cr.student.covid_vax}, attended:{cr.attended}')
         return {'id': cr.student.id,
                 'first_name': cr.student.first_name,
                 'last_name': cr.student.last_name,
