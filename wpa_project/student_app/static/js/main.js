@@ -152,6 +152,16 @@ function load_student_form(student_div, student_id) {
         });
     });
 }
+
+function objectifyForm(formArray) {
+    //serialize data function
+    var returnArray = {};
+    for (var i = 0; i < formArray.length; i++){
+        returnArray[formArray[i]['name']] = formArray[i]['value'];
+    }
+    return returnArray;
+}
+
 // Pad a number with leading zeros from Geeksforgeeks.org
 function pad(n, width) {
     n = n + '';

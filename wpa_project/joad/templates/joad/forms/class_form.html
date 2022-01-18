@@ -1,0 +1,8 @@
+<form class="form" method="post" autocomplete="off" id="joad-class-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="d-flex flex-row m-2">
+        <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">
+    </div>
+</form>

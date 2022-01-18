@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %} JOAD Session {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/session.js' %}"></script>
+    <script>
+        {% if session_id %}
+            let session_url = "{% url 'joad:session' session_id %}";
+        {% else %}
+            let session_url = "{% url 'joad:session' %}";
+        {% endif %}
+        let session_id = {{ session_id }};
+        let joad_class_url = "{% url 'joad:joad_class' %}";
+    </script>
+{% endblock %}
+
+{% block main %}
+    <div class="row p-3" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-3">
+        <form id="session-form" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">
+        </form>
+    </div>
+    <hr>
+    <div id="class-list" class="row p-3">
+        <table class="table table-bordered
+            {% if user.dark_theme %}
+                text-white
+            {% else %}
+                text-dark
+            {% endif %}">
+            <thead>
+                <tr>
+                    <th> ID </th>
+                    <th> Class Date </th>
+                    <th> State </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="class-list-body">
+                {% for row in class_list %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.class_date }}</td>
+                        <td>{{ row.state }}</td>
+                        <td>
+                            <button class="btn btn-primary edit-class" type="button" class_id="{{row.id}}">
+                                Update
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="row p-3">
+        <button id="btn-add-class" class="btn btn-primary" type="button">
+            Add Class
+        </button>
+    </div>
+    <div id="jc-form" class="row p-3"></div>
+{% endblock %}
+

@@ -23,3 +23,7 @@ class Student(models.Model):
     covid_vax = models.BooleanField(default=False)
     signature = models.ImageField(upload_to="signatures/%Y/%m/%d/", null=True)
     signature_pdf = models.FileField(upload_to="signatures/%Y/%m/%d/", null=True)
+    is_joad = models.BooleanField(default=False)
+
+    # def __str__(self):
+    #     return f'{self.first_name} {self.last_name}'
