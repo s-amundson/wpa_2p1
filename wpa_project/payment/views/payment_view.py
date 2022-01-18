@@ -54,7 +54,6 @@ class PaymentView(APIView):
                 square_response = self.square_helper.comp_response(note, amt)
             else:
                 square_response = self.square_helper.process_payment(idempotency_key, sq_token, note, amount)
-                logging.debug(square_response)
                 if len(square_response['error']) > 0:
                     for e in square_response['error']:
                         if e['code'] == 'GENERIC_DECLINE':
@@ -67,13 +66,11 @@ class PaymentView(APIView):
                             message += 'Invalid zip code, '
                         else:  # pragma: no cover
                             message += 'Other payment error'
-                    logging.debug(message)
                     response_dict['error'] = message
                     response_dict['continue'] = self.square_helper.payment_error(request, square_response['error'])
                     return Response(response_dict)
                 # return redirect('registration:process_payment')
             self.square_helper.log_payment(request, square_response, create_date=None)
-            logging.debug(self.request.session.get("account_verified_email"))
             pay_dict = {'line_items': request.session['line_items'], 'total': amt / 100,
                         'receipt': square_response['receipt_url']}
             EmailMessage().payment_email_user(request.user, pay_dict)
