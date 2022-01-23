@@ -17,11 +17,10 @@ def choices(choice_list):
 
 
 class JoadClass(models.Model):
-    class_states = ['scheduled', 'open', 'full', 'closed', 'canceled', 'recorded']
+    class_states = ['scheduled', 'past', 'canceled']
     class_date = models.DateTimeField()
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True)
-    state = models.CharField(max_length=20, null=True, choices=choices(class_states))
-    
+    state = models.CharField(max_length=20, null=True, choices=choices(class_states), default='scheduled')
 
     # def __str__(self):
     #     return f'{self.start_date}'

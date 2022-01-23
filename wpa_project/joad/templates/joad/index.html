@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %} Index {% endblock %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="col-4 text-center"><h2> JOAD </h2></div>
+    </div>
+
+    {% if not is_auth %}
+        <p>
+            Junior Olympic Archery Development (JOAD) is a program of USA Archery that teaches archery to young people,
+            provides great opportunities for awarding achievement, and helps archers to enjoy the sport recreationally or
+            progress to the excitement of competition!
+        </p>
+        <p>
+            JOAD offers both recurve and compound archers the opportunity to learn range safety and proper shooting
+            technique in an environment that also fosters focus, increased self-confidence, and team building skills.
+            JOAD is open to any youth archer aged 8 to 20 and is designed to grow with the youth archer. Introductory
+            JOAD classes teach the fundamentals of proper shooting form; as the young archer develops, they will learn
+            more advanced techniques.
+        </p>
+        <p>
+            Both recurve and compound bows are used in club activities and in tournaments. JOAD archers who use a
+            compound bow can train to compete in local and regional tournaments, and can earn a seat on a youth world
+            team to compete in other countries representing the United States on behalf of USA Archery. Recurve archers
+            can compete likewise, with the added benefit of being able to use their recurve bow to try out for a spot
+            on the US Olympic Archery team which is selected and managed by USA Archery.
+        </p>
+        <p>
+            Whether your child’s interest is purely recreational or an Olympic, Paralympic or World Championship dream,
+            USA Archery’s JOAD program is tailored to help the young archer achieve their goals.
+        </p>
+        <p>
+            <a href="https://www.usarchery.org/participate/junior-olympic-archery-development-program" target="_blank">
+                https://www.usarchery.org/participate/junior-olympic-archery-development-program
+            </a>
+        </p>
+        <p>
+            A student must get pre-approval from a WPA instructor prior to being allowed to register for JOAD.
+        </p>
+    {% endif %}
+    <div class="row"><h5>Upcoming Sessions:</h5></div>
+    <table class="table table-bordered
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th> Start Date </th>
+                <th> State</th>
+                {% for student in students %}
+                    <th>{{student.first_name}} {{student.last_name}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody id="class-list-body">
+            {% for session in session_list %}
+                <tr>
+                    {% if user.is_board %}
+                        <td>
+                            <a href="{% url 'joad:session' session.id %}">{{ session.id }}</a>
+                        </td>
+                    {% else %}
+                        <td>{{ session.id }}</td>
+                    {% endif %}
+                    <td>{{ session.start_date }}</td>
+                    <td>{{ session.state }}</td>
+                    {% for row in session.registrations %}
+                        <td>
+                            {% if row %}
+                                Registered
+                            {% else %}
+                                <a href="{% url 'joad:registration' session.id %}" class="btn btn-primary" role="button">
+                                    Register
+                                </a>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div id="class-div"></div>
+{% endblock %}
+
+{% block right %}
+  <div id="login-div"></div>
+{% endblock %}

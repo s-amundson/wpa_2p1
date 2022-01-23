@@ -8,10 +8,10 @@
     <script>
         {% if session_id %}
             let session_url = "{% url 'joad:session' session_id %}";
+            let session_id = {{ session_id }};
         {% else %}
             let session_url = "{% url 'joad:session' %}";
         {% endif %}
-        let session_id = {{ session_id }};
         let joad_class_url = "{% url 'joad:joad_class' %}";
     </script>
 {% endblock %}
@@ -27,35 +27,8 @@
     </div>
     <hr>
     <div id="class-list" class="row p-3">
-        <table class="table table-bordered
-            {% if user.dark_theme %}
-                text-white
-            {% else %}
-                text-dark
-            {% endif %}">
-            <thead>
-                <tr>
-                    <th> ID </th>
-                    <th> Class Date </th>
-                    <th> State </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="class-list-body">
-                {% for row in class_list %}
-                    <tr>
-                        <td>{{ row.id }}</td>
-                        <td>{{ row.class_date }}</td>
-                        <td>{{ row.state }}</td>
-                        <td>
-                            <button class="btn btn-primary edit-class" type="button" class_id="{{row.id}}">
-                                Update
-                            </button>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% include "joad/tables/class_table.html" %}
+
     </div>
     <div class="row p-3">
         <button id="btn-add-class" class="btn btn-primary" type="button">

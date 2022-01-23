@@ -7,7 +7,7 @@ class ClassForm(MyModelForm):
 
     class Meta(MyModelForm.Meta):
         model = JoadClass
-        required_fields = ['class_date', 'state']
+        required_fields = ['class_date']
         disabled_fields = ['session']
         fields = required_fields + disabled_fields
 

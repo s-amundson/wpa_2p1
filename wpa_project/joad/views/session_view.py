@@ -24,7 +24,7 @@ class SessionFormView(UserPassesTestMixin, View):
             form = SessionForm()
             class_list = []
 
-        return render(request, 'joad/session.html', {'form': form, 'class_list': class_list, 'session_id': session_id})
+        return render(request, 'joad/session.html', {'form': form, 'object_list': class_list, 'session_id': session_id})
 
     def post(self, request, session_id=None):
         if session_id is not None:

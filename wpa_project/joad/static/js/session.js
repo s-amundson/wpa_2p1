@@ -10,6 +10,14 @@ $(document).ready(function(){
         load_joad_class_form(null);
     });
     edit_btn();
+
+    $(".attend-check").change(function(e){
+        let data = {
+            'csrfmiddlewaretoken': $('[name="csrfmiddlewaretoken"]').val(),
+        }
+        data[$(this).attr('id')] = $(this).prop('checked');
+        post_attend(data);
+    });
 });
 
 function class_url(class_id=null) {
@@ -32,6 +40,15 @@ function edit_btn(){
     });
 }
 
+function load_class_table(){
+    if ($("#id_session").val() == "") {
+        return;
+    }
+    $.get(class_list_url + $("#id_session").val(), function(data, status){
+        $("#class-table-div").html(data);
+    });
+}
+
 function load_joad_class_form(class_id) {
     $.get(class_url(class_id), function(data, status){
         $("#jc-form").html(data);
@@ -41,6 +58,13 @@ function load_joad_class_form(class_id) {
         });
         $("#id_session").val(session_id)
     });
+}
+
+async function post_attend(send_data) {
+    await $.post(attend_url, send_data, function(data, status){
+        console.log(data);
+        return data;
+    }, "json");
 }
 
 async function post_joad_class_form() {
@@ -69,12 +93,12 @@ async function post_session() {
 
     console.log(form_data);
     let url_string = session_url;
-//    let data = await $.post(url_string, form_data, function(data, status){
-//        console.log(data);
-//        console.log(status);
-//        alert_notice("Submitted", status)
-//        return data;
-//    }, "json");
+    let data = await $.post(url_string, form_data, function(data, status){
+        console.log(data);
+        console.log(status);
+        alert_notice("Submitted", status)
+        return data;
+    }, "json");
     session_id = data["session_id"];
 
 }

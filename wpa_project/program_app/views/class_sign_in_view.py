@@ -80,7 +80,6 @@ class ClassSignInView(LoginRequiredMixin, View):
 
             new_sig = Image('img.jpg', width=3 * inch, height=1 * inch, hAlign='LEFT')
             story.append(new_sig)
-            d = cr.beginner_class.class_date
             name = f"{form.cleaned_data['sig_first_name']} {form.cleaned_data['sig_last_name']}"
             story.append(Paragraph(f"Signed By {name} on Date: {timezone.localtime(timezone.now()).date()}"))
             c = Canvas('mydoc.pdf')
@@ -90,6 +89,7 @@ class ClassSignInView(LoginRequiredMixin, View):
             fn = f'{cr.student.last_name}_{cr.student.first_name}'
             cr.student.signature = File(open('img.jpg', 'rb'), name=f'{fn}.jpg')
             cr.student.signature_pdf = File(open('mydoc.pdf', 'rb'), name=f'{fn}.pdf')
+            cr.student.safety_class = cr.beginner_class.class_date
             cr.student.save()
             cr.attended = True
             cr.save()

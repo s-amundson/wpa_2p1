@@ -4,10 +4,9 @@
 
 {% block script %}
     {% load static %}
-    <script src="{% static 'js/session.js' %}"></script>
+    <script src="{% static 'js/joad_registration.js' %}"></script>
     <script>
-
-        let joad_class_url = "{% url 'joad:joad_class' %}";
+        let class_list_url = "{% url 'joad:class_list' %}";
     </script>
 {% endblock %}
 
@@ -30,7 +29,7 @@
         </form>
     </div>
     <hr>
-    <div id="class-list" class="row p-3">
+    <div id="class-table-div" class="row p-3">
         <table class="table table-bordered
             {% if user.dark_theme %}
                 text-white
@@ -61,11 +60,7 @@
             </tbody>
         </table>
     </div>
-    <div class="row p-3">
-        <button id="btn-add-class" class="btn btn-primary" type="button">
-            Add Class
-        </button>
-    </div>
+
     <div id="jc-form" class="row p-3"></div>
 {% endblock %}
 

@@ -113,15 +113,19 @@ class RegistrationView(LoginRequiredMixin, View):
     template_name = 'joad/registration.html'
     form = RegistrationForm
 
-    def get(self, request, reg_id=None):
-        self.form = RegistrationForm(user=request.user)
+    def get(self, request, session_id=None):
+        if session_id:
+            session = get_object_or_404(Session, pk=session_id)
+            self.form = RegistrationForm(user=request.user, initial={'session': session})
+        else:
+            self.form = RegistrationForm(user=request.user)
         return render(request, self.template_name, {'form': self.form})
 
     def has_error(self, request, message):
         messages.add_message(request, messages.ERROR, message)
         return render(request, self.template_name, {'form': self.form})
 
-    def post(self, request):
+    def post(self, request, session_id=None):
         logging.debug(request.POST)
         self.form = RegistrationForm(request.user, request.POST)
         if self.form.is_valid():
