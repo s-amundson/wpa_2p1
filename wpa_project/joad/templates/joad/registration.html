@@ -25,7 +25,9 @@
                     {{ student }} {{ student.label }}
                 </div>
             {% endfor %}
-            <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">
+            {% if form.student_count %}
+                <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">
+            {% endif %}
         </form>
     </div>
     <hr>

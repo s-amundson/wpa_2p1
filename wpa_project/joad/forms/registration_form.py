@@ -33,6 +33,7 @@ class RegistrationForm(MyModelForm):
                 attrs={'class': "m-2 student-check"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
         self.fields['session'].queryset = Session.objects.filter(state='open').order_by('start_date')
+        self.student_count = len(students)
 
     def get_boxes(self):
         for field_name in self.fields:
