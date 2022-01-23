@@ -97,3 +97,15 @@ class TestsJoadRegistration(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'Student is already enrolled')
         self.assertEqual(response.status_code, 200)
+
+    def test_session_wrong_state(self):
+        self.test_user = User.objects.get(pk=6)
+        self.client.force_login(self.test_user)
+        session = Session.objects.get(pk=1)
+        session.state = 'closed'
+        session.save()
+
+        response = self.client.post(reverse('joad:registration'), self.student_dict, secure=True)
+        form = response.context['form']
+        self.assertIn('session', form.errors.keys())
+        self.assertIn('Select a valid choice. That choice is not one of the available choices.', form.errors['session'])

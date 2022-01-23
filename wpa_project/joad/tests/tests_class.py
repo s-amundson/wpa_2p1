@@ -42,7 +42,7 @@ class TestsJoadClass(TestCase):
         # {'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True}
         content = json.loads(response.content)
         logging.debug(content)
-        self.assertEqual(content['id'], 4)
+        self.assertEqual(content['id'], 6)
         self.assertEqual(content['class_date'], "2022-04-01T00:00:00-07:00")
         self.assertEqual(content['state'], 'scheduled')
         self.assertTrue(content['success'])

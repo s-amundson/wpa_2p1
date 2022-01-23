@@ -25,7 +25,7 @@ class AttendView(UserPassesTestMixin, View):
             key = k.split('_')
             if key[0] == 'check':
                 student = get_object_or_404(Student, pk=int(key[1]))
-                attend = v in ['true', 'on']
+                attend = v.lower() in ['true', 'on']
         if student:
             a, created = Attendance.objects.get_or_create(joad_class=jc, student=student, defaults={'attended': attend})
             if not created:
