@@ -121,7 +121,6 @@ class SquareHelper:
                 "note": note
             }
         )
-        logging.debug(result)
         self.square_response = result.body.get('payment', {'payment': None})
         if result.is_success():
             self.square_response['error'] = []
