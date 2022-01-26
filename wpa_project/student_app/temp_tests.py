@@ -1,3 +1,4 @@
+# from .tests.tests_covid_vax import TestsCovidVax
 # from .tests.tests_email import TestsEmail
 # from .tests.tests_index import TestsIndex
 # from .tests.tests_instructor import TestsInstructor

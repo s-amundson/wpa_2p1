@@ -1,5 +1,5 @@
 from django import forms
-from ..src.class_registration_helper import ClassRegistrationHelper
+from student_app.src import StudentHelper
 import logging
 
 logger = logging.getLogger(__name__)
@@ -9,7 +9,7 @@ class ClassAttendanceForm(forms.Form):
 
     def __init__(self, beginner_class, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.crh = ClassRegistrationHelper()
+        self.student_helper = StudentHelper()
         self.is_closed = beginner_class.state == 'closed'
         self.new_students = []
         self.return_students = []
@@ -42,4 +42,4 @@ class ClassAttendanceForm(forms.Form):
                 'covid_vax': cr.student.covid_vax,
                 'covid_vax_check': f'covid_vax_{cr.student.id}',
                 'signature': is_signed,
-                'is_minor': self.crh.calc_age(cr.student, self.class_date) < 18}
+                'is_minor': self.student_helper.calculate_age(cr.student.dob, self.class_date) < 18}

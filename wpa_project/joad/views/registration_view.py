@@ -10,6 +10,7 @@ from payment.src import SquareHelper
 from ..forms import RegistrationForm
 from ..models import Registration, Session
 from student_app.models import Student
+from student_app.src import StudentHelper
 
 import uuid
 import logging
@@ -55,6 +56,11 @@ class RegistrationView(LoginRequiredMixin, FormView):
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
+                age = StudentHelper().calculate_age(s.dob, session.start_date)
+                if age < 9:
+                    self.has_error('Student is to young')
+                if age > 20:
+                    self.has_error('Student is to old.')
 
                 logging.debug(s)
                 sreg = reg.filter(student=s)

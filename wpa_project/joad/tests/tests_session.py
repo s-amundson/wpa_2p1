@@ -39,5 +39,5 @@ class TestsJoadSession(TestCase):
 
         response = self.client.post(reverse('joad:session'), self.session_dict, secure=True)
         s = Session.objects.all()
-        self.assertEqual(len(s), 2)
+        self.assertEqual(len(s), 3)
         self.assertEqual(response.status_code, 200)

@@ -14,4 +14,5 @@ urlpatterns = [
     path('registration/', RegistrationView.as_view(), name='registration'),
     path('session/<int:session_id>', SessionFormView.as_view(), name='session'),
     path('session', SessionFormView.as_view(), name='session'),
+    path('waiver/<int:student_id>', WaiverView.as_view(), name='waiver')
 ]

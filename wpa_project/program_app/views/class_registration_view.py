@@ -14,6 +14,7 @@ import logging
 from ..forms import ClassRegistrationForm
 from ..models import BeginnerClass, ClassRegistration
 from ..src import ClassRegistrationHelper
+from student_app.src import StudentHelper
 from payment.src import SquareHelper
 
 logger = logging.getLogger(__name__)
@@ -103,7 +104,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                         instructor_expire = None
 
                     logging.debug(s)
-                    if ClassRegistrationHelper().calc_age(s, beginner_class.class_date) < 9:
+                    if StudentHelper().calculate_age(s.dob, beginner_class.class_date) < 9:
                         messages.add_message(request, messages.ERROR, 'Student must be at least 9 years old to participate')
                         message += 'Student must be at least 9 years old to participate'
                         logging.debug(message)

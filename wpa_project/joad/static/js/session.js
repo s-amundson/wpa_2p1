@@ -16,7 +16,7 @@ $(document).ready(function(){
             'csrfmiddlewaretoken': $('[name="csrfmiddlewaretoken"]').val(),
         }
         data[$(this).attr('id')] = $(this).prop('checked');
-        post_attend(data);
+        post_attend($(this).attr('attend_url'), data);
     });
 });
 
@@ -60,9 +60,8 @@ function load_joad_class_form(class_id) {
     });
 }
 
-async function post_attend(send_data) {
-    await $.post(attend_url, send_data, function(data, status){
-        console.log(data);
+async function post_attend(url, send_data) {
+    await $.post(url, send_data, function(data, status){
         return data;
     }, "json");
 }

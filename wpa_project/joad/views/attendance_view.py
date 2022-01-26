@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.forms import model_to_dict
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 import logging
 from django.views.generic.base import View
 from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
@@ -53,6 +54,8 @@ class AttendanceListView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         cid = self.kwargs.get("class_id", None)
         self.joad_class = get_object_or_404(JoadClass, pk=cid)
+        self.request.session['next_url'] = reverse('joad:attendance',  kwargs={'class_id': cid})
+        self.request.session['joad_class'] = cid
         registrations = self.model.objects.filter(session=self.joad_class.session, pay_status='paid').order_by(
             'student__last_name')
         logging.debug(registrations)
@@ -69,7 +72,9 @@ class AttendanceListView(UserPassesTestMixin, ListView):
                                 'check_id': f'check_{registration.student.id}',
                                 'id': registration.student.id,
                                 'checked': checked,
-                                'signature': bool(registration.student.signature)
+                                'signature': bool(registration.student.signature),
+                                'covid_vax': registration.student.covid_vax,
+                                'covid_vax_check': f'covid_vax_{registration.student.id}',
                                 })
 
         return object_list
