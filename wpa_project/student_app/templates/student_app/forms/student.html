@@ -34,7 +34,7 @@
     </div>
     <div class="row">
         <div class="flex-column">
-            {% if not student_is_user %}
+            {% if not student.is_user %}
                 <div class="m-2 ms-3">
                     If you add an email below we will email them asking them to join, and they will be associated with this account.
                 </div>
@@ -47,7 +47,7 @@
                 {% endfor %}
             </div>
             <div class="col-2 m-2 d-flex align-items-center">
-                {% if student_this_user %}
+                {% if student.this_user %}
                     <a href="{% url 'account_email' %}">Edit Email</a>
                 {% endif %}
             </div>
@@ -64,10 +64,17 @@
                     <p class="help-block">{{ error }}</p>
                 {% endfor %}
             </div>
+            {% if student.joad_age %}
+            <div>
+                <input type="checkbox" class="m-2 is-joad-check"
+                    joad_url="{% url 'registration:is_joad' student.id %}"  id="joad_check_{{ student.id }}"
+                            {% if student.is_joad %} checked="checked" {% endif %}> Joad Student
+            </div>
+            {% endif %}
             <div class="col">
-                {% if user.is_board and student_is_user %}
-                    <a href="{% url 'registration:update_user' student_is_user%}">Edit User</a>
-               {% endif %}
+                {% if user.is_board and student.is_user %}
+                    <a href="{% url 'registration:update_user' student.is_user%}">Edit User</a>
+                {% endif %}
             </div>
         </div>
     {% endif %}

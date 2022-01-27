@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %} Student List {% endblock %}
+
+
+{% block main %}
+    <div class="m-2"><h5>Contact Categories:</h5></div>
+    {% for category in categories %}
+        <div class="d-flex flex-row m-2">
+            <div class="col">
+                <a href="{% url 'contact_us:category' category.id %}">
+                    {{ category.title }}
+                </a>
+            </div>
+            <div class="col">
+                {% for r in category.recipients  %}
+                    <div class="row">
+                        {{ r }}
+                    </div>
+
+                {% endfor %}
+            </div>
+        </div>
+    {% empty %}
+        <h6>No categories yet.</h6>
+    {% endfor %}
+
+
+{% endblock %}

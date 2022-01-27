@@ -14,6 +14,7 @@ import logging
 from ..forms import ClassRegistrationForm
 from ..models import BeginnerClass, ClassRegistration
 from ..src import ClassRegistrationHelper
+from student_app.src import StudentHelper
 from payment.src import SquareHelper
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
 class ClassRegistrationView(LoginRequiredMixin, View):
     form = ClassRegistrationForm
     students = None
-    
+
     def get(self, request, reg_id=None):
         try:
             students = Student.objects.get(user=request.user).student_family.student_set.all()
@@ -110,7 +111,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                         instructor_expire = None
 
                     logging.debug(s)
-                    if ClassRegistrationHelper().calc_age(s, beginner_class.class_date) < 9:
+                    if StudentHelper().calculate_age(s.dob, beginner_class.class_date) < 9:
                         return self.has_error(request, 'Student must be at least 9 years old to participate')
 
                     elif request.user.is_instructor and is_instructor:
@@ -124,14 +125,19 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                             instructor += 1
                             instructors.append(s)
                         else:
-                            return self.has_error('Instructor is already enrolled')
+                            return self.has_error(request, 'Instructor is already enrolled')
 
                     else:
-                        if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
-                                pay_status="refunded").exclude(pay_status='canceled')) == 0:
+                        reg = ClassRegistration.objects.filter(student=s).exclude(
+                                pay_status="refunded").exclude(pay_status='canceled')
+                        if len(reg.filter(beginner_class=beginner_class)) == 0:
                             if s.safety_class is None:
-                                beginner += 1
-                                students.append(s)
+                                logging.debug(len(reg))
+                                if len(reg.filter(beginner_class__class_date__gt=timezone.localdate(timezone.now()))) > 0:
+                                    return self.has_error(request, f'{s.first_name} is enrolled in another beginner class')
+                                else:
+                                    beginner += 1
+                                    students.append(s)
                             else:
                                 returnee += 1
                                 students.append(s)

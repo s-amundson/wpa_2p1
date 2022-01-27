@@ -5,3 +5,4 @@ from .student_family_registration_form import StudentFamilyRegistrationForm
 from .student_search_forms import SearchColumnsForm, SearchEmailForm, SearchNameForm, SearchPhoneForm
 from .theme_form import ThemeForm
 from .user_form import UserForm
+from .waiver_form import WaiverForm

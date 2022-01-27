@@ -1,0 +1,6 @@
+[
+  {"model":  "joad.registration", "pk": 1, "fields": {"session": 1, "student": 8, "pay_status": "paid", "idempotency_key":"992c77a8-87cc-45af-b390-13d80554e3e0"}},
+  {"model":  "joad.registration", "pk": 2, "fields": {"session": 1, "student": 10, "pay_status": "paid", "idempotency_key":"646c9c32-c787-4cdd-a7cd-cdc16bf13145"}},
+  {"model":  "joad.registration", "pk": 3, "fields": {"session": 1, "student": 11, "pay_status": "paid", "idempotency_key":"646c9c32-c787-4cdd-a7cd-cdc16bf13145"}},
+  {"model":  "joad.registration", "pk": 4, "fields": {"session": 1, "student": 12, "pay_status": "paid", "idempotency_key":"646c9c32-c787-4cdd-a7cd-cdc16bf13145"}}
+]
