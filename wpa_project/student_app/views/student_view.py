@@ -1,7 +1,7 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404
 import logging
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic.base import View
 from rest_framework.views import APIView
@@ -9,9 +9,9 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 
 from ..forms import StudentForm
-from ..models import Student, StudentFamily
+from ..models import Student
 from ..serializers import StudentSerializer
-from ..src import EmailMessage
+from ..src import EmailMessage, StudentHelper
 logger = logging.getLogger(__name__)
 
 
@@ -73,29 +73,32 @@ class StudentApiView(LoginRequiredMixin, APIView):
 
 class AddStudentView(LoginRequiredMixin, View):
     def get(self, request, student_id=None):
-        student_is_user = False
-        student_this_user = False
+        student = {'is_user': False, 'this_user': False, 'id': student_id, 'is_joad': False, 'joad_age': False}
         if student_id is not None:
             if request.user.is_board:
                 g = get_object_or_404(Student, pk=student_id)
+                student['is_joad'] = g.is_joad
                 student_is_user = g.user_id
             else:
                 sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
-                student_is_user = g.user_id
-                student_this_user = (g.user == request.user)
-            form = StudentForm(instance=g, student_is_user=student_is_user)
+                student['is_user'] = g.user_id
+                student['is_joad'] = g.is_joad
+                student['this_user'] = (g.user == request.user)
+            age = StudentHelper().calculate_age(g.dob)
+            student['joad_age'] = 8 < age < 21
+            form = StudentForm(instance=g, student_is_user=student['is_user'])
         else:
             s = Student.objects.filter(user=request.user)
             logging.debug(s.count())
             if s.count() == 0:
                 form = StudentForm(initial={'email': request.user.email}, student_is_user=True)
-                student_is_user = 0
-                student_this_user = True
+                student['is_user'] = 0
+                student['this_user'] = True
             else:
                 form = StudentForm()
-        logging.debug(student_is_user)
-        d = {'form': form, 'student_is_user': student_is_user, 'student_this_user': student_this_user}
+        logging.debug(student['is_user'])
+        d = {'form': form, 'student': student}
         return render(request, 'student_app/forms/student.html', d)
 
     def post(self, request, student_id=None):
@@ -127,3 +130,27 @@ class AddStudentView(LoginRequiredMixin, View):
             logging.debug(form.errors)
 
         return render(request, 'student_app/student_page.html', {'form': form})
+
+
+class StudentIsJoadView(UserPassesTestMixin, View):
+    def post(self, request, student_id):
+        logging.debug(request.POST)
+        student = Student.objects.get(pk=student_id)
+        age = StudentHelper().calculate_age(student.dob)
+        logging.debug(age)
+        if age < 9:
+            return JsonResponse({'error': True, 'message': 'Student to young'})
+        elif age > 20:
+            return JsonResponse({'error': True, 'message': 'Student to old'})
+
+        if f'joad_check_{student.id}' in request.POST:
+            student.is_joad = request.POST[f'joad_check_{student.id}'].lower() in ['true', 'on']
+            student.save()
+            return JsonResponse({'error': False, 'message': ''})
+        return JsonResponse({'error': True, 'message': ''})
+
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            return self.request.user.is_staff
+        else:
+            return False

@@ -3,6 +3,7 @@ $(document).ready(function(){
     if ($("#alert-message").val() != "") {
         alert($("#alert-message").val());
     }
+
 });
 
 async function add_student_function(student_id) {
@@ -150,6 +151,14 @@ function load_student_form(student_div, student_id) {
                 $("#dob-error").show();
             }
         });
+        $(".is-joad-check").change(function(e){
+            console.log('joad_check');
+            let data = {
+                'csrfmiddlewaretoken': $('[name="csrfmiddlewaretoken"]').val(),
+            }
+            data[$(this).attr('id')] = $(this).prop('checked');
+            post_is_joad($(this), data);
+        });
     });
 }
 
@@ -211,4 +220,15 @@ async function post_family_function(family_id) {
 
     $("#this-student-div").hide();
     $(".can-register-top").show();
+}
+
+async function post_is_joad(checkbox, send_data) {
+    await $.post(checkbox.attr('joad_url'), send_data, function(data, status){
+        console.log(data);
+        if(data['error']) {
+            checkbox.attr('checked', false);
+            alert_notice("Error", data['message']);
+        }
+        return data;
+    }, "json");
 }
