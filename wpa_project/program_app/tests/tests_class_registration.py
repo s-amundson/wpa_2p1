@@ -299,6 +299,8 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 0)
 
     def test_class_register_instructor_full(self):
+        # Don't add an instructor when instructors are at limit.
+
         # make user instructor
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
@@ -318,6 +320,28 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(bc.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 0)
+
+    def test_class_register_instructor_full2(self):
+        # Add instructor when the class is full of students but open instructor positions.
+        # make user instructor
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        self.test_user.is_instructor = True
+        d = timezone.now()
+        self.test_user.instructor_expire_date = d.replace(month=d.month + 1)
+        self.test_user.save()
+
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.state = 'full'
+        bc.save()
+
+        # add a user to the class
+        self.client.post(reverse('programs:class_registration'),
+                         {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'full')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 1)
 
     def test_resume_registration(self):
         cr = ClassRegistration(

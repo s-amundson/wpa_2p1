@@ -38,6 +38,9 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
 
 
 class ClassRegistrationView(LoginRequiredMixin, View):
+    form = ClassRegistrationForm
+    students = None
+
     def get(self, request, reg_id=None):
         try:
             students = Student.objects.get(user=request.user).student_family.student_set.all()
@@ -60,8 +63,6 @@ class ClassRegistrationView(LoginRequiredMixin, View):
             returnee = 0
 
             for r in registrations:
-                # logging.debug(r.student.id)
-                logging.debug(r.beginner_class.class_date)
                 request.session['line_items'].append(
                     SquareHelper().line_item(f"Class on {str(r.beginner_class.class_date)[:10]} student id: {str(r.student.id)}", 1,
                                              r.beginner_class.cost))
@@ -74,25 +75,31 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                                                      'returnee': returnee}
             return HttpResponseRedirect(reverse('payment:process_payment'))
 
-        form = ClassRegistrationForm(students, request.user)
+        self.form = ClassRegistrationForm(students, request.user)
         tm = timezone.localtime(timezone.now()).month
-        return render(request, 'program_app/class_registration.html', {'form': form, 'this_month': tm})
+        return render(request, 'program_app/class_registration.html', {'form': self.form, 'this_month': tm})
+
+    def has_error(self, request, message):
+        messages.add_message(request, messages.ERROR, message)
+        # return HttpResponseRedirect(reverse('programs:class_registration'))
+        tm = timezone.localtime(timezone.now()).month
+        return render(request, 'program_app/class_registration.html',
+                  {'form': self.form, 'alert_message': message, 'this_month': tm})
 
     def post(self, request):
         students = Student.objects.get(user=request.user).student_family.student_set.all()
         logging.debug(request.POST)
-        form = ClassRegistrationForm(students, request.user, request.POST)
-        if form.is_valid():
-            beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
+        self.form = ClassRegistrationForm(students, request.user, request.POST)
+        if self.form.is_valid():
+            beginner_class = BeginnerClass.objects.get(pk=self.form.cleaned_data['beginner_class'])
             beginner = 0
             returnee = 0
             instructor = 0
             students = []
             instructors = []
             message = ""
-            logging.debug(form.cleaned_data)
-            for k, v in form.cleaned_data.items():
-                logging.debug(k)
+            logging.debug(self.form.cleaned_data)
+            for k, v in self.form.cleaned_data.items():
                 if str(k).startswith('student_') and v:
                     i = int(str(k).split('_')[-1])
                     s = Student.objects.get(pk=i)
@@ -105,27 +112,21 @@ class ClassRegistrationView(LoginRequiredMixin, View):
 
                     logging.debug(s)
                     if StudentHelper().calculate_age(s.dob, beginner_class.class_date) < 9:
-                        messages.add_message(request, messages.ERROR, 'Student must be at least 9 years old to participate')
-                        message += 'Student must be at least 9 years old to participate'
-                        logging.debug(message)
-                        HttpResponseRedirect(reverse('programs:class_registration'))
+                        return self.has_error(request, 'Student must be at least 9 years old to participate')
+
                     elif request.user.is_instructor and is_instructor:
                         logging.debug('user is instructor')
                         logging.debug(instructor_expire)
                         if instructor_expire is None or instructor_expire < timezone.localdate(timezone.now()):
-                            messages.add_message(request, messages.ERROR,
-                                                 'Please update your instructor certification')
-                            message += 'Please update your instructor certification'
-                            logging.debug(message)
-                            HttpResponseRedirect(reverse('programs:class_registration'))
+                            return self.has_error(request, 'Please update your instructor certification')
+
                         if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
                                 pay_status="refunded").exclude(pay_status='canceled')) == 0:
                             instructor += 1
                             instructors.append(s)
                         else:
-                            messages.add_message(request, messages.ERROR,
-                                                 'Instructor is already enrolled')
-                            message += 'Instructor is already enrolled'
+                            return self.has_error(request, 'Instructor is already enrolled')
+
                     else:
                         reg = ClassRegistration.objects.filter(student=s).exclude(
                                 pay_status="refunded").exclude(pay_status='canceled')
@@ -133,9 +134,7 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                             if s.safety_class is None:
                                 logging.debug(len(reg))
                                 if len(reg.filter(beginner_class__class_date__gt=timezone.localdate(timezone.now()))) > 0:
-                                    messages.add_message(request, messages.ERROR,
-                                                         f'{s.first_name} is enrolled in another beginner class')
-                                    message += f'{s.first_name} is enrolled in another beginner class'
+                                    return self.has_error(request, f'{s.first_name} is enrolled in another beginner class')
                                 else:
                                     beginner += 1
                                     students.append(s)
@@ -143,41 +142,34 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                                 returnee += 1
                                 students.append(s)
                         else:
-                            messages.add_message(request, messages.ERROR,
-                                                 'Student is already enrolled')
-                            message += 'Student is already enrolled'
+                            return self.has_error(request, 'Student is already enrolled')
+
             request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
 
             logging.debug(beginner_class.state)
-            if beginner_class.state == 'open':  # in case it changed since user got the form.
-                enrolled_count = ClassRegistrationHelper().enrolled_count(beginner_class)
+            enrolled_count = ClassRegistrationHelper().enrolled_count(beginner_class)
+            if beginner_class.state == 'open':  # in case it changed since user got the self.form.
                 if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
-                    messages.add_message(request, messages.ERROR,
-                                         'Not enough space available in this class')
-                    message += "Not enough space available in this class"
+                    return self.has_error(request, 'Not enough space available in this class')
+
                 if returnee and enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
-                    messages.add_message(request, messages.ERROR,
-                                         'Not enough space available in this class')
-                    message += 'Not enough space available in this class'
+                    return self.has_error(request, 'Not enough space available in this class')
+
                 if instructor and enrolled_count['instructors'] + instructor > beginner_class.instructor_limit:
-                    messages.add_message(request, messages.ERROR,
-                                         'Not enough space available in this class')
-                    message += 'Not enough space available in this class'
-                if message == "":
-                    logging.debug(message)
-                    return self.transact(beginner_class, request, students, instructors)
+                    return self.has_error(request, 'Not enough space available in this class')
 
+                return self.transact(beginner_class, request, students, instructors)
+
+            elif beginner_class.state == 'full' and request.user.is_staff:
+                if instructor and enrolled_count['instructors'] + instructor > beginner_class.instructor_limit:
+                    return self.has_error(request, 'Not enough space available in this class')
                 else:
-                    logging.debug(message)
-                    tm = timezone.localtime(timezone.now()).month
-                    return render(request, 'program_app/class_registration.html',
-                                  {'form': form, 'alert_message': message, 'this_month': tm})
-
+                    return self.transact(beginner_class, request, students, instructors)
         else:
-            logging.debug(form.errors)
+            logging.debug(self.form.errors)
             return render(request, 'program_app/class_registration.html',
-                          {'form': form, 'alert_message': 'This form has errors'})
+                          {'form': self.form, 'alert_message': 'This self.form has errors'})
 
         # return HttpResponseRedirect(reverse('registration:profile'))
 
