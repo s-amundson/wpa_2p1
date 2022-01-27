@@ -34,13 +34,13 @@ class UpdatePrograms:
             classes = BeginnerClass.objects.filter(class_date=class_day)
             if len(classes) == 0:
                 bc = BeginnerClass(class_date=class_day, class_type='beginner', beginner_limit=20, returnee_limit=0,
-                                   state='scheduled')
+                                   state='open')
                 bc.save()
             class_day = class_day.replace(hour=11)
             classes = BeginnerClass.objects.filter(class_date=class_day)
             if len(classes) == 0:
                 bc = BeginnerClass(class_date=class_day, class_type='returnee', beginner_limit=0, returnee_limit=20,
-                                   state='scheduled')
+                                   state='open')
                 bc.save()
 
     def next_class_day(self, target_day):
