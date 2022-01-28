@@ -144,6 +144,9 @@ class ClassRegistrationView(LoginRequiredMixin, View):
                         else:
                             return self.has_error(request, 'Student is already enrolled')
 
+            if 0 == beginner + returnee + instructor:
+                return self.has_error(request, 'No students selected')
+
             request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
 

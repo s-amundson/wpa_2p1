@@ -85,6 +85,11 @@
         </tbody>
     </table>
     <div id="class-div"></div>
+    {% if user.is_board %}
+        <div class="m-3">
+            <a href="{% url 'joad:session' %}" class="btn btn-primary" role="button">New Session</a>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block right %}

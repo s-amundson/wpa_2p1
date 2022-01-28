@@ -13,7 +13,7 @@ from django.forms import model_to_dict
 from ..forms import BeginnerClassForm, ClassAttendanceForm
 from ..models import BeginnerClass, ClassRegistration
 from ..src import ClassRegistrationHelper
-from payment.src import SquareHelper
+from payment.src import SquareHelper, EmailMessage
 from payment.models import CostsModel
 
 logger = logging.getLogger(__name__)
@@ -86,6 +86,7 @@ class BeginnerClassView(UserPassesTestMixin, View):
             if bc.state == 'canceled':
                 ec = ClassRegistrationHelper().enrolled_count(bc)
                 square_helper = SquareHelper()
+                email_message = EmailMessage()
                 # need to refund students if any
                 logging.debug(f'beginners: {ec["beginner"]}, returnees: {ec["returnee"]}')
                 cancel_error = False
@@ -103,10 +104,18 @@ class BeginnerClassView(UserPassesTestMixin, View):
                                     logging.error(square_response)
                                     messages.add_message(request, messages.ERROR, square_response)
                             else:
+                                email_sent = False
                                 for c in cr.filter(idempotency_key=reg.idempotency_key):
                                     c.pay_status = 'refund'
                                     c.save()
-
+                                    if c.student.user is not None:
+                                        email_message.refund_canceled_email(c.student.user, f'Class on {bc.class_date}')
+                                        email_sent = True
+                                if not email_sent:  # if none of the students is a user find a user in the family.
+                                    c = cr.filter(idempotency_key=reg.idempotency_key)[0]
+                                    for s in c.student.student_family.student_set.all():
+                                        if s.user is not None:
+                                            email_message.refund_canceled_email(s.user, f'Class on {bc.class_date}')
                     logging.debug(cr)
                 if not cancel_error:
                     messages.add_message(request, messages.SUCCESS, 'Class was canceled')
