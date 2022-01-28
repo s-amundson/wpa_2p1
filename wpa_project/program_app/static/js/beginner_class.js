@@ -27,4 +27,9 @@ $(document).ready(function(){
             }
         }
     });
+    $("#id_state").change(function(e){
+        if ($(this).val() == 'canceled') {
+            alert_notice("Warning", "Setting the state to canceled will cause a refund to go out to all students.");
+        }
+    });
 });
