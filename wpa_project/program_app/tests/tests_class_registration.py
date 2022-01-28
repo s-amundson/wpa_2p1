@@ -1,3 +1,4 @@
+import datetime
 import logging
 import json
 import time
@@ -356,3 +357,32 @@ class TestsClassRegistration(TestCase):
         response = self.client.get(reverse('programs:class_registration', kwargs={'reg_id': cr.id}), secure=True)
         self.assertEqual(response.status_code, 302)
         # self.assertTemplateUsed(response, 'program_app/class_registration.html')
+
+    def test_new_student_register_twice(self):
+        d = timezone.now() + datetime.timedelta(days=2)
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_date = d
+        bc.class_type = 'beginner'
+        bc.save()
+        s = Student.objects.get(pk=4)
+        cr = ClassRegistration(
+            beginner_class=bc,
+            student=s,
+            new_student=True,
+            pay_status="start",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        cr.save()
+
+        bc2 = BeginnerClass.objects.get(pk=2)
+        bc2.class_date = d + datetime.timedelta(days=2)
+        bc2.class_type = 'beginner'
+        bc2.state = 'open'
+        bc2.save()
+
+        response = self.client.post(reverse('programs:class_registration'),
+                         {'beginner_class': '2', 'student_4': 'on', 'terms': 'on'}, secure=True)
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 1)
+        self.assertContains(response, f'{s.first_name} is enrolled in another beginner class')

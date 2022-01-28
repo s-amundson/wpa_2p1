@@ -39,9 +39,11 @@ class MinutesFormView(LoginRequiredMixin, View):
                 reports[owner] = self.report_forms(minutes, owner, request.user.is_board)
             ob = Business.objects.filter(Q(resolved=None, added_date__lt=minutes.meeting_date) |
                                             Q(resolved__gte=minutes.meeting_date, added_date__lt=minutes.meeting_date))
+            ob = ob.order_by('added_date', 'id')
             nb = Business.objects.filter(Q(resolved=None, added_date=minutes.meeting_date) |
                                             Q(resolved__gte=minutes.meeting_date, added_date=minutes.meeting_date))
-            decisions_query = Decision.objects.filter(decision_date=minutes.meeting_date)
+            nb = nb.order_by('id')
+            decisions_query = Decision.objects.filter(decision_date=minutes.meeting_date).order_by('id')
             logging.debug(decisions_query)
 
         else:
@@ -49,9 +51,9 @@ class MinutesFormView(LoginRequiredMixin, View):
             for owner in owners:
                 reports[owner] = []
 
-            ob = Business.objects.filter(resolved__lt=timezone.now())
+            ob = Business.objects.filter(resolved__lt=timezone.now()).order_by('added_date', 'id')
             nb = []
-            decisions_query = Decision.objects.filter(decision_date=timezone.now())
+            decisions_query = Decision.objects.filter(decision_date=timezone.now()).order_by('id')
 
         old_business = self.business_list(ob, True)
         new_business = self.business_list(nb, False)

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %} JOAD Session {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/joad_registration.js' %}"></script>
+    <script>
+        let class_list_url = "{% url 'joad:class_list' %}";
+    </script>
+{% endblock %}
+
+{% block main %}
+    <div class="row p-3" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-3">
+        <form id="registration-form" method="post">
+            {% csrf_token %}
+            <div class="fieldWrapper">
+                {{ form.session.errors }}
+                {{ form.session.label_tag }}
+                {{ form.session }}
+            </div>
+            {% for student in form.get_boxes %}
+                <div class="input-group input-group-md">
+                    {{ student }} {{ student.label }}
+                </div>
+            {% endfor %}
+            {% if form.student_count %}
+                <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">
+            {% endif %}
+        </form>
+    </div>
+    <hr>
+    <div id="class-table-div" class="row p-3">
+        <table class="table table-bordered
+            {% if user.dark_theme %}
+                text-white
+            {% else %}
+                text-dark
+            {% endif %}">
+            <thead>
+                <tr>
+                    <th> ID </th>
+                    <th> Class Date </th>
+                    <th> State </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="class-list-body">
+                {% for row in class_list %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.class_date }}</td>
+                        <td>{{ row.state }}</td>
+                        <td>
+                            <button class="btn btn-primary edit-class" type="button" class_id="{{row.id}}">
+                                Update
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="jc-form" class="row p-3"></div>
+{% endblock %}
+

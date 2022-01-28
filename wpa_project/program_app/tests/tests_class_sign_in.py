@@ -42,5 +42,5 @@ class TestsClassSignIn(TestCase):
         self.assertFalse(cr.student.signature)
 
     def test_get_pdf_auth(self):
-        response = self.client.post(reverse('programs:pdf_get', kwargs={'student_id': 3}), secure=True)
+        response = self.client.post(reverse('programs:pdf', kwargs={'student_id': 3}), secure=True)
         self.assertEqual(response.status_code, 200)

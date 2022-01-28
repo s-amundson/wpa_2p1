@@ -1,0 +1,37 @@
+<table class="table table-bordered
+    {% if user.dark_theme %}
+        text-white
+    {% else %}
+        text-dark
+    {% endif %}">
+    <thead>
+        <tr>
+            <th> ID </th>
+            <th> Class Date </th>
+            <th> Class State</th>
+            {% if user.is_staff %}
+                <th></th>
+                <th></th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody id="class-list-body">
+        {% for row in object_list %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.class_date }}</td>
+                <td>{{ row.state }}</td>
+                {% if user.is_staff %}
+                    <td>
+                        <button class="btn btn-primary edit-class" type="button" class_id="{{row.id}}">
+                            Edit Class
+                        </button>
+                    </td>
+                    <td>
+                        <a href="{% url 'joad:attendance' row.id %}" class="btn btn-primary" role="button">Attendance</a>
+                    </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

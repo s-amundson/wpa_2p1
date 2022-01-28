@@ -36,10 +36,11 @@ class EmailMessage(EmailMessage):
         self.attach_alternative(get_template('payment/email/refund_email.html').render(d), 'text/html')
         self.send()
 
-    # def release_email(self, registration, pdf):
-    #     cr = ClassRegistration.objects.get(pk=registration)
-    #     users = cr.student.student_family.user.all()
-    #     logging.debug(users)
-    #     self.get_email_address(users[0])
-    #     # TODO set to student if student is user.
-    #     self.subject = ""
+    def refund_canceled_email(self, user, event):
+        self.get_email_address(user)
+        d = {'name': user.first_name, 'event': event}
+        self.subject = 'Woodley Park Archers Cancellation'
+        self.body = get_template('payment/email/refund_canceled_email.txt').render(d)
+        self.attach_alternative(get_template('payment/email/refund_canceled_email.html').render(d), 'text/html')
+        self.send()
+
