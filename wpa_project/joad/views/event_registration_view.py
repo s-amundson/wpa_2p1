@@ -7,8 +7,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
 from payment.src import SquareHelper
-from ..forms import RegistrationForm
-from ..models import Registration, Session
+from ..forms import EventRegistrationForm
+from ..models import EventRegistration, JoadEvent
 from student_app.models import Student
 from student_app.src import StudentHelper
 
@@ -17,20 +17,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RegistrationView(LoginRequiredMixin, FormView):
-    template_name = 'joad/registration.html'
-    form_class = RegistrationForm
+class EventRegistrationView(LoginRequiredMixin, FormView):
+    template_name = 'joad/event_registration.html'
+    form_class = EventRegistrationForm
     success_url = reverse_lazy('payment:process_payment')
     form = None
 
     def get_form(self):
-        return RegistrationForm(user=self.request.user, **self.get_form_kwargs())
+        return self.form_class(user=self.request.user, **self.get_form_kwargs())
 
     def get_initial(self):
-        sid = self.kwargs.get("session_id", None)
-        if sid is not None:
-            session = get_object_or_404(Session, pk=sid)
-            self.initial = {'session': session}
+        eid = self.kwargs.get("event_id", None)
+        if eid is not None:
+            event = get_object_or_404(JoadEvent, pk=eid)
+            self.initial = {'event': event}
 
         return super().get_initial()
 
@@ -42,12 +42,12 @@ class RegistrationView(LoginRequiredMixin, FormView):
         self.form = form
         students = []
         # message = ""
-        logging.debug(form.cleaned_data['session'])
-        session = form.cleaned_data['session']
-        if session.state != "open":
+        logging.debug(form.cleaned_data['event'])
+        event = form.cleaned_data['event']
+        if event.state != "open":
             return self.has_error('Session in wrong state')
 
-        reg = Registration.objects.filter(session=session).exclude(
+        reg = EventRegistration.objects.filter(event=event).exclude(
             pay_status="refunded").exclude(pay_status='canceled')
         logging.debug(len(reg.filter(pay_status='paid')))
 
@@ -56,7 +56,7 @@ class RegistrationView(LoginRequiredMixin, FormView):
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
-                age = StudentHelper().calculate_age(s.dob, session.start_date)
+                age = StudentHelper().calculate_age(s.dob, event.event_date)
                 if age < 9:
                     self.has_error('Student is to young')
                 if age > 20:
@@ -73,21 +73,21 @@ class RegistrationView(LoginRequiredMixin, FormView):
         if len(students) == 0:
             return self.has_error('Invalid student selected')
 
-        if len(reg.filter(pay_status='paid')) + len(students) > session.student_limit:
+        if len(reg.filter(pay_status='paid')) + len(students) > event.student_limit:
             return self.has_error('Class is full')
 
         with transaction.atomic():
             uid = str(uuid.uuid4())
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
-            self.request.session['payment_db'] = ['joad', 'Registration']
+            self.request.session['payment_db'] = ['joad', 'EventRegistration']
             self.request.session['action_url'] = reverse('programs:class_payment')
             logging.debug(students)
+            description = f"Joad {str(event.event_type)} event on {str(event.event_date)[:10]} student id: "
             for s in students:
-                cr = Registration(session=session, student=s, pay_status='start', idempotency_key=uid).save()
+                cr = EventRegistration(event=event, student=s, pay_status='start', idempotency_key=uid).save()
                 self.request.session['line_items'].append(
-                    SquareHelper().line_item(f"Joad session starting {str(session.start_date)[:10]} student id: {str(s.id)}",
-                                             1, session.cost))
+                    SquareHelper().line_item(description + f'{str(s.id)}', 1, event.cost))
                 logging.debug(cr)
         return HttpResponseRedirect(reverse('payment:process_payment'))
 

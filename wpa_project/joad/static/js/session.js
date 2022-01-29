@@ -18,6 +18,13 @@ $(document).ready(function(){
         data[$(this).attr('id')] = $(this).prop('checked');
         post_attend($(this).attr('attend_url'), data);
     });
+    console.log($("#joad-event-div").length)
+    if ($("#joad-event-div").length) {
+        $.get(joad_event_list_url, function(data, status){
+            $("#joad-event-div").html(data)
+        });
+    }
+
 });
 
 function class_url(class_id=null) {

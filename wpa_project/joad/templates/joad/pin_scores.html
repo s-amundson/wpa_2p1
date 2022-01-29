@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %} JOAD Pin Scores {% endblock %}
+
+
+{% block main %}
+    <div class="m-2">
+        This table shows the values of the parameters used for scoring. Altering these values will affect the
+        stars give in pin shoots.
+    </div>
+    <table class="table table-bordered m-2
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th> Bow </th>
+                <th> Category </th>
+                <th> Distance </th>
+                <th> Target </th>
+                <th> Score </th>
+                <th> Stars </th>
+            </tr>
+        </thead>
+        <tbody id="class-list-body">
+            {% for row in object_list %}
+                <tr>
+                    <td>
+                        <a class="nav-link" href="{% url 'joad:pin_score' row.id %}">{{ row.id }}</a>
+                    </td>
+                    <td>{{ row.bow }}</td>
+                    <td>{{ row.category }}</td>
+                    <td>{{ row.distance }}</td>
+                    <td>{{ row.target }}</td>
+                    <td>{{ row.score }}</td>
+                    <td>{{ row.stars }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="m-2">
+        <a href="{% url 'joad:pin_score' %}" class="btn btn-primary" role="button">
+            Add Score
+        </a>
+    </div>
+{% endblock %}

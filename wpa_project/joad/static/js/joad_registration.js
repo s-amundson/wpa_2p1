@@ -5,7 +5,12 @@ $(document).ready(function(){
         e.preventDefault();
         load_class_table();
     });
-
+    console.log($("#joad-event-div").length)
+    if ($("#joad-event-div").length) {
+        $.get(joad_event_list_url, function(data, status){
+            $("#joad-event-div").html(data)
+        });
+    }
 });
 
 
