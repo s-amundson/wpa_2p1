@@ -50,7 +50,7 @@
                         <td>
                             {% if student.attend_record %}
                                 <input type="checkbox" class="m-2 attend-check" id="student_{{ student.id }}"
-                                {% if student.attend %} checked="checked" {% endif %}>
+                                {% if student.attend %} checked="checked" {% endif %} disabled="disabled">
                                 <a class="nav-link" href="{% url 'joad:event_attendance' form.instance.id student.id %}">
                                     Edit Attendance
                                 </a>

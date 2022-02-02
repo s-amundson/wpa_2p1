@@ -2,8 +2,9 @@
 
 class Choices:
     def bows(self):
-        return [('barebow', 'Barebow/Basic Compound'),
-                ('olympic', 'Recurve/Para Recurve Open'),
+        return [('', 'None'),
+                ('barebow', 'Barebow/Basic Compound'),
+                ('recurve', 'Recurve/Para Recurve Open'),
                 ('compound', 'Compound/Para Compound Open/W1/Fixed Pins**')]
 
     def choices(self, choice_list):

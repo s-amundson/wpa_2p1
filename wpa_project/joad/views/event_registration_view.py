@@ -50,6 +50,7 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
         reg = EventRegistration.objects.filter(event=event).exclude(
             pay_status="refunded").exclude(pay_status='canceled')
         logging.debug(len(reg.filter(pay_status='paid')))
+        logging.debug(form.cleaned_data)
 
         for k, v in form.cleaned_data.items():
             logging.debug(k)

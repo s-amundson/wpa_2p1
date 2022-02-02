@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from .joad_event_model import JoadEvent
 from student_app.models import Student
 from ..src import Choices
@@ -14,7 +15,7 @@ class CommonPin(models.Model):
     inner_scoring = models.BooleanField(default=False)
     score = models.IntegerField(null=True, default=None)
     stars = models.IntegerField(choices.stars(), null=True, default=None)
-
+# 'bow', 'category', 'distance', 'target', 'inner_scoring', 'score', 'stars'
     class Meta:
         abstract = True
 
@@ -28,3 +29,7 @@ class PinAttendance(CommonPin):
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
     attended = models.BooleanField(default=False)
     previous_stars = models.IntegerField(choices.stars(), default=0)
+    pay_status = models.CharField(max_length=20, null=True, default=None)
+    idempotency_key = models.CharField(max_length=40, null=True, default=None)
+    award_received = models.BooleanField(default=False)
+# 'event', 'student', 'attended', 'previous_stars', 'pay_status', 'idempotency_key', 'award_received'

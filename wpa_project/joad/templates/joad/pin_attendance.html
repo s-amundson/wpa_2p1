@@ -20,8 +20,10 @@
                 {{ form.event.errors }}
             </div>
             <div class="col pt-3 m-2">
-                {{ form.attended.label }}
-                {{ form.attended }}
+                {% if user.is_staff %}
+                    {{ form.attended.label }}
+                    {{ form.attended }}
+                {% endif %}
             </div>
         </div>
         <div class="d-flex flex-row">
@@ -54,6 +56,11 @@
                 {{ form.score.label }}
                 {{ form.score }}
                 {{ form.score.errors }}
+            </div>
+            <div class="col m-2">
+                {{ form.award_received.label }}
+                {{ form.award_received }}
+                {{ form.award_received.errors }}
             </div>
         </div>
 

@@ -14,12 +14,12 @@ class EventRegistration(models.Model):
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
     pay_status = models.CharField(max_length=20)
     idempotency_key = models.UUIDField()
-    reg_time = models.DateField(default=timezone.now)
-
+    reg_time = models.DateTimeField(default=timezone.now)
+['event', 'student', 'pay_status', 'idempotency_key', 'reg_time']
 
 class Registration(models.Model):
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True)
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, limit_choices_to={'is_joad': True}, null=True)
     pay_status = models.CharField(max_length=20)
     idempotency_key = models.UUIDField()
-    reg_time = models.DateField(default=timezone.now)
+    reg_time = models.DateTimeField(default=timezone.now)

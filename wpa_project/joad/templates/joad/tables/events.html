@@ -30,8 +30,13 @@
                 <td>{{ event.state }}</td>
                 {% for row in event.registrations %}
                     <td>
-                        {% if row %}
+                        {% if row.reg_status == 'registered' %}
                             Registered
+                        {% elif row.reg_status == 'attending' %}
+                            <a href="{% url 'joad:event_attendance' event.id row.student_id %}"
+                               class="btn btn-primary" role="button">
+                                Finish
+                            </a>
                         {% else %}
                             <a href="{% url 'joad:event_registration' event.id %}" class="btn btn-primary" role="button">
                                 Register

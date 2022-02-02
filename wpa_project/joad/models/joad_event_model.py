@@ -16,6 +16,7 @@ class JoadEvent(models.Model):
     event_type = models.CharField(max_length=40, null=True, choices=c, default=c[0])
     state = models.CharField(max_length=20, null=True, choices=choices.class_states(), default='open')
     student_limit = models.IntegerField(default=24)
+    pin_cost = models.IntegerField(null=True, default=None)
 
     def __str__(self):
         return timezone.localtime(self.event_date).strftime("%d %b, %Y %I:%M %p")

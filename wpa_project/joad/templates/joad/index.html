@@ -76,12 +76,14 @@
                     <td>{{ session.state }}</td>
                     {% for row in session.registrations %}
                         <td>
-                            {% if row %}
-                                Registered
-                            {% else %}
-                                <a href="{% url 'joad:registration' session.id %}" class="btn btn-primary" role="button">
-                                    Register
-                                </a>
+                            {% if row.is_joad %}
+                                {% if row %}
+                                    Registered
+                                {% else %}
+                                    <a href="{% url 'joad:registration' session.id %}" class="btn btn-primary" role="button">
+                                        Register
+                                    </a>
+                                {% endif %}
                             {% endif %}
                         </td>
                     {% endfor %}
