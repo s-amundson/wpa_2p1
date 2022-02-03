@@ -22,13 +22,11 @@ logger = logging.getLogger(__name__)
 class BeginnerClassView(UserPassesTestMixin, View):
     def get(self, request, beginner_class=None):
         alert_message = ''
-        logging.debug('staff')
         attendee_form = False
         if beginner_class is not None:
             c = BeginnerClass.objects.get(id=beginner_class)
             form = BeginnerClassForm(instance=c)
             attendee_form = ClassAttendanceForm(c)
-            logging.debug(attendee_form)
         else:
             try:
                 c = BeginnerClass.objects.latest('class_date').class_date
