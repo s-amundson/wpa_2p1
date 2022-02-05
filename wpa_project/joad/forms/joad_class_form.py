@@ -1,4 +1,4 @@
-from django.forms import ModelForm, DateTimeField
+from django.forms import DateTimeField
 from src.model_form import MyModelForm
 from ..models import JoadClass
 

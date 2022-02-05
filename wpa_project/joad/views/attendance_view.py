@@ -1,15 +1,13 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.forms import model_to_dict
-from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 import logging
 from django.views.generic.base import View
-from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.views.generic.list import ListView
 
 from ..models import Attendance, Registration, JoadClass
 from student_app.models import Student
-from ..forms import ClassForm
 
 logger = logging.getLogger(__name__)
 

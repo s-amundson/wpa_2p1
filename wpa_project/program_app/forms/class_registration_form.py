@@ -33,7 +33,7 @@ class ClassRegistrationForm(forms.Form):
 
     def get_open_classes(self, user):
         classes = BeginnerClass.objects.filter(class_date__gt=timezone.now())
-        if user.is_instructor:
+        if user.is_staff:
             classes = classes.filter(Q(state='open') | Q(state='full'))
         else:
             classes = classes.filter(state='open')

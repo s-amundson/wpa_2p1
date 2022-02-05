@@ -27,7 +27,7 @@ class ClassCalendarView(LoginRequiredMixin, View):
         bc = BeginnerClass.objects.filter(class_date__gt=timezone.now(),
                                           class_date__year=d.year,
                                           class_date__month=month).order_by('class_date')
-        if request.user.is_instructor:
+        if request.user.is_staff:
             bc = bc.filter(Q(state='open') | Q(state='full'))
         else:
             bc = bc.filter(state='open')

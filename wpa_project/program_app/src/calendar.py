@@ -22,7 +22,6 @@ class Calendar(HTMLCalendar):
         data = ''
 
         for event in events_per_day:
-            logging.debug(event.class_type)
             btn_color = 'btn-primary'
             if event.class_type == 'combined':
                 btn_color = 'btn-info'

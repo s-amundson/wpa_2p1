@@ -40,5 +40,11 @@
 
   {"model":  "joad.session", "pk": 2, "fields": {"cost": 120, "start_date": "2022-04-01", "state": "open", "student_limit":10}},
   {"model":  "joad.joadclass", "pk": 4, "fields": {"class_date": "2022-04-01", "session": 2, "state": "scheduled"}},
-  {"model":  "joad.joadclass", "pk": 5, "fields": {"class_date": "2022-04-08", "session": 2, "state": "scheduled"}}
+  {"model":  "joad.joadclass", "pk": 5, "fields": {"class_date": "2022-04-08", "session": 2, "state": "scheduled"}},
+
+  {"model": "payment.costsmodel", "pk": 2, "fields": {"name": "Pin Shoot", "member_cost": 20, "standard_cost": 20, "membership": false, "enabled": true}},
+  {"model": "payment.costsmodel", "pk": 3, "fields": {"name": "JOAD Pin", "member_cost": 5, "standard_cost": 5, "membership": false, "enabled": true}},
+
+  {"model": "joad.joadevent", "pk": 1, "fields": {"cost": 15, "event_date": "2022-02-15 16:00:00", "event_type": "joad_indoor", "state": "open", "student_limit":  10, "pin_cost": 5}},
+  {"model": "joad.eventregistration", "pk": 1, "fields": {"pay_status": "paid", "idempotency_key": "49aa95a1-b104-4199-8eb8-ecb7a784bf67", "event": 1, "student": 10}}
 ]

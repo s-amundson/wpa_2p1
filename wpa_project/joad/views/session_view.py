@@ -1,12 +1,8 @@
-from django.views.generic.edit import FormView
-from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.forms import model_to_dict
 from django.shortcuts import render, get_object_or_404
 import logging
 from django.views.generic.base import View
-from django.shortcuts import render, reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 
 from ..models import Session
 from ..forms import SessionForm

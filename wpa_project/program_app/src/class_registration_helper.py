@@ -27,7 +27,7 @@ class ClassRegistrationHelper:
     def enrolled_count(self, beginner_class):
         # bc = self.objects.get(beginner_class)
         beginner = 0
-        instructors = 0
+        staff_count = 0
         returnee = 0
         records = ClassRegistration.objects.filter(beginner_class=beginner_class)
         pay_statuses = ['paid']
@@ -35,13 +35,13 @@ class ClassRegistrationHelper:
             # logging.debug(f'safety_class {record.student.safety_class}, pay_status {record.pay_status}')
             if record.pay_status in pay_statuses:
                 try:
-                    instructor = record.student.user.is_instructor
+                    is_staff = record.student.user.is_staff
                 except (record.student.DoesNotExist, AttributeError):
-                    instructor = False
-                if instructor:
-                    instructors += 1
+                    is_staff = False
+                if is_staff:
+                    staff_count += 1
                 elif record.student.safety_class:
                     returnee += 1
                 else:
                     beginner += 1
-        return {'beginner': beginner, 'instructors': instructors, 'returnee': returnee}
+        return {'beginner': beginner, 'staff': staff_count, 'returnee': returnee}

@@ -22,7 +22,7 @@
                     {{ class.student.first_name }} {{ class.student.last_name }}
                     <input type="hidden" id="cost_{{ class.id }}" value="{{ class.beginner_class.cost }}">
                 </td>
-                <td class="pay_status" curl="{% url 'programs:class_registration' class.id %}">
+                <td class="pay_status" curl="{% url 'programs:resume_registration' class.id %}">
                     {{ class.pay_status }}
                 </td>
                 <td>

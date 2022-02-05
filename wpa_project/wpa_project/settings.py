@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import json
+import sys
 import os
 from django.core.exceptions import ImproperlyConfigured
 from pathlib import Path
@@ -38,7 +39,6 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_FORMS = {'signup': 'student_app.forms.SignUpForm'}
 ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS')
-# ALLOWED_HOSTS = [*,]
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_USERNAME_REQUIRED = False
 
@@ -77,7 +77,8 @@ CSRF_COOKIE_SECURE = True
 DATABASES = {
     'default': get_secret("DATABASE"),
 }
-
+# if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
+#     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_secret("DEBUG")
 

@@ -1,11 +1,8 @@
-from datetime import timedelta
 from django import forms
 from django.utils import timezone
-from django.db.models import Q
 from src.model_form import MyModelForm
 from student_app.models import Student
 from ..models import Registration, Session
-import uuid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -26,7 +23,7 @@ class RegistrationForm(MyModelForm):
         else:
             students = Student.objects.get(user=user).student_family.student_set.filter(is_joad=True)
         d = timezone.localdate(timezone.now())
-        d = d.replace(year=d.year - 20)
+        d = d.replace(year=d.year - 21)
         students = students.filter(dob__gt=d).order_by('last_name')
         for student in students:
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(

@@ -2,7 +2,7 @@ import logging
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Registration
+from .models import EventRegistration, PinAttendance, Registration
 from payment.models import PaymentLog
 
 logger = logging.getLogger(__name__)
@@ -12,8 +12,15 @@ logger = logging.getLogger(__name__)
 def registration_update(sender, instance, created, **kwargs):
     if instance.db_model == 'Registration':
         cr = Registration.objects.filter(idempotency_key=instance.idempotency_key)
-        logging.debug(instance.status)
-        if instance.status in ["SUCCESS", "COMPLETED"]:
-            for c in cr:
-                c.pay_status = 'paid'
-                c.save()
+    elif instance.db_model == 'EventRegistration':
+        cr = EventRegistration.objects.filter(idempotency_key=instance.idempotency_key)
+    elif instance.db_model == 'PinAttendance':
+        cr = PinAttendance.objects.filter(idempotency_key=instance.idempotency_key)
+    else:
+        return
+    logging.debug(instance.status)
+    if instance.status in ["SUCCESS", "COMPLETED"]:
+        for c in cr:
+            c.pay_status = 'paid'
+            c.save()
+

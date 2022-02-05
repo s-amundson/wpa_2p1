@@ -89,9 +89,6 @@ class RegistrationView(LoginRequiredMixin, FormView):
                     SquareHelper().line_item(f"Joad session starting {str(session.start_date)[:10]} student id: {str(s.id)}",
                                              1, session.cost))
                 logging.debug(cr)
-        # This method is called when valid form data has been POSTed.
-        # It should return an HttpResponse.
-        # form.send_email()
         return HttpResponseRedirect(reverse('payment:process_payment'))
 
     def has_error(self, message):

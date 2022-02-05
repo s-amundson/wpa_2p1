@@ -2,6 +2,11 @@
 
 {% block title %} Index {% endblock %}
 
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/joad_registration.js' %}"></script>
+{% endblock %}
+
 {% block main %}
     <div class="row justify-content-center">
         <div class="col-4 text-center"><h2> JOAD </h2></div>
@@ -71,12 +76,14 @@
                     <td>{{ session.state }}</td>
                     {% for row in session.registrations %}
                         <td>
-                            {% if row %}
-                                Registered
-                            {% else %}
-                                <a href="{% url 'joad:registration' session.id %}" class="btn btn-primary" role="button">
-                                    Register
-                                </a>
+                            {% if row.is_joad %}
+                                {% if row %}
+                                    Registered
+                                {% else %}
+                                    <a href="{% url 'joad:registration' session.id %}" class="btn btn-primary" role="button">
+                                        Register
+                                    </a>
+                                {% endif %}
                             {% endif %}
                         </td>
                     {% endfor %}
@@ -90,6 +97,11 @@
             <a href="{% url 'joad:session' %}" class="btn btn-primary" role="button">New Session</a>
         </div>
     {% endif %}
+    <hr>
+    <div class="m-1">
+        {% include "joad/tables/events.html" %}
+    </div>
+
 {% endblock %}
 
 {% block right %}

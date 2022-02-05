@@ -22,27 +22,22 @@ logger = logging.getLogger(__name__)
 class BeginnerClassView(UserPassesTestMixin, View):
     def get(self, request, beginner_class=None):
         alert_message = ''
-        logging.debug('staff')
         attendee_form = False
         if beginner_class is not None:
             c = BeginnerClass.objects.get(id=beginner_class)
             form = BeginnerClassForm(instance=c)
             attendee_form = ClassAttendanceForm(c)
-            logging.debug(attendee_form)
         else:
             try:
                 c = BeginnerClass.objects.latest('class_date').class_date
-                logging.debug(f'c = str(c), type = {type(c)}')
+                # logging.debug(f'c = str(c), type = {type(c)}')
                 c = c + timedelta(days=7)
             except BeginnerClass.DoesNotExist:  # pragma: no cover
                 c = timezone.now()
                 logging.debug('class does not exist')
             try:
                 cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1] #[0].standard_cost
-                # costs = get_list_or_404(CostsModel, name='Beginner Class', enabled=True)
-                # logging.debug(cost.values())
                 costs = cost[0].standard_cost
-                logging.debug(costs)
             except (CostsModel.DoesNotExist, IndexError) as e:  # pragma: no cover
                 costs = 0
                 messages.add_message(request, messages.ERROR, 'cost does not exist')
@@ -72,7 +67,7 @@ class BeginnerClassView(UserPassesTestMixin, View):
                 return render(request, 'student_app/form_as_p.html', {'form': form, 'message': 'Class Exists'})
 
             bc = form.save()
-            logging.debug(bc.class_type)
+            # logging.debug(bc.class_type)
             if bc.class_type == 'beginner' and bc.returnee_limit > 0:
                 messages.add_message(request, messages.WARNING,
                                      "beginner class can't have a returnee limit greater then 0")
@@ -88,7 +83,7 @@ class BeginnerClassView(UserPassesTestMixin, View):
                 square_helper = SquareHelper()
                 email_message = EmailMessage()
                 # need to refund students if any
-                logging.debug(f'beginners: {ec["beginner"]}, returnees: {ec["returnee"]}')
+                # logging.debug(f'beginners: {ec["beginner"]}, returnees: {ec["returnee"]}')
                 cancel_error = False
                 if ec["beginner"] > 0 or ec["returnee"] > 0:
                     cr = ClassRegistration.objects.filter(beginner_class__id=bc.id)
@@ -154,5 +149,5 @@ class BeginnerClassListView(LoginRequiredMixin, ListView):
             d = model_to_dict(c)
             d = {**d, **crh.enrolled_count(c)}
             queryset.append(d)
-        logging.debug(len(queryset))
+        # logging.debug(len(queryset))
         return queryset

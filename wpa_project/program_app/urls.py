@@ -11,9 +11,10 @@ urlpatterns = [
     path('class_list', BeginnerClassListView.as_view(), name='class_list'),
     path('class_payment', PaymentView.as_view(), name='class_payment'),
     path('class_registered_table', ClassRegisteredTable.as_view(), name='class_registered_table'),
-    path('class_registration/<int:reg_id>', ClassRegistrationView.as_view(), name='class_registration'),
+    # path('class_registration/<int:reg_id>', ClassRegistrationView.as_view(), name='class_registration'),
     path('class_registration', ClassRegistrationView.as_view(), name='class_registration'),
     path('class_sign_in/<int:reg_id>', ClassSignInView.as_view(), name='class_sign_in'),
     path('class_status/<str:class_id>/', ClassStatusView.as_view(), name='class_status'),
+    path('resume_registration/<int:reg_id>', ResumeRegistrationView.as_view(), name='resume_registration'),
     path('unregister_class', UnregisterView.as_view(), name='unregister_class'),
 ]

@@ -32,7 +32,7 @@
                         <td>{{ c.returnee }}/{{ c.returnee_limit }}</td>
                         <td>
                             {% if user.is_staff or user.is_instructor %}
-                                {{ c.instructors }}/{{ c.instructor_limit }}
+                                {{ c.staff }}/{{ c.instructor_limit }}
                             {% endif %}
                         </td>
                         <td>{{ c.state }}</td>

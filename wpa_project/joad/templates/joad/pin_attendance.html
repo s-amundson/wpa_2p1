@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %} Pin Shoot Attendance {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row justify-content-center">
+        <div class="col-4 text-center"><h4> JOAD Pin Shoot {{ student }} </h4></div>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="d-flex flex-row">
+            <div class="col m-2">
+                {{ form.previous_stars.label }}
+                {{ form.previous_stars }}
+            </div>
+            <div class="col m-2">
+                {{ form.event.label }}
+                {{ form.event }}
+                {{ form.event.errors }}
+            </div>
+            <div class="col pt-3 m-2">
+                {% if user.is_staff %}
+                    {{ form.attended.label }}
+                    {{ form.attended }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-flex flex-row">
+            <div class="col m-2">
+                {{ form.bow.label }}
+                {{ form.bow }}
+            </div>
+<!--            <div class="col m-2">-->
+<!--                {{ form.category.label }}-->
+<!--                {{ form.category }}-->
+<!--            </div>-->
+
+        </div>
+        <div class="d-flex flex-row">
+            <div class="col m-2">
+                {{ form.distance.label }}
+                {{ form.distance }}
+            </div>
+            <div class="col m-2">
+                {{ form.target.label }}
+                {{ form.target }}
+            </div>
+            <div class="col pt-3 m-2">
+                {{ form.inner_scoring.label }}
+                {{ form.inner_scoring }}
+            </div>
+        </div>
+        <div class="d-flex flex-row">
+            <div class="col m-2">
+                {{ form.score.label }}
+                {{ form.score }}
+                {{ form.score.errors }}
+            </div>
+            <div class="col m-2">
+                {{ form.award_received.label }}
+                {{ form.award_received }}
+                {{ form.award_received.errors }}
+            </div>
+        </div>
+
+        <button class="btn btn-primary m-2" type="submit" name="button">Submit</button>
+    </form>
+
+{% endblock %}
