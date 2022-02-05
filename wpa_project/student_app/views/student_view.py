@@ -31,8 +31,8 @@ class StudentApiView(LoginRequiredMixin, APIView):
         return Response(serializer.data)
 
     def post(self, request, student_id=None, format=None):
-        logging.debug(student_id)
-        logging.debug(request.data)
+        # logging.debug(student_id)
+        # logging.debug(request.data)
         old_email = None
         if student_id is not None:
             if request.user.is_staff:
@@ -78,7 +78,7 @@ class AddStudentView(LoginRequiredMixin, View):
             if request.user.is_board:
                 g = get_object_or_404(Student, pk=student_id)
                 student['is_joad'] = g.is_joad
-                student_is_user = g.user_id
+                # student_is_user = g.user_id
             else:
                 sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
@@ -90,14 +90,14 @@ class AddStudentView(LoginRequiredMixin, View):
             form = StudentForm(instance=g, student_is_user=student['is_user'])
         else:
             s = Student.objects.filter(user=request.user)
-            logging.debug(s.count())
+            # logging.debug(s.count())
             if s.count() == 0:
                 form = StudentForm(initial={'email': request.user.email}, student_is_user=True)
                 student['is_user'] = 0
                 student['this_user'] = True
             else:
                 form = StudentForm()
-        logging.debug(student['is_user'])
+        # logging.debug(student['is_user'])
         d = {'form': form, 'student': student}
         return render(request, 'student_app/forms/student.html', d)
 
@@ -111,7 +111,7 @@ class AddStudentView(LoginRequiredMixin, View):
             form = StudentForm(request.POST, instance=g)
         else:
             form = StudentForm(request.POST)
-        logging.debug(request.POST)
+        # logging.debug(request.POST)
         if form.is_valid():
             logging.debug(form.cleaned_data)
             if request.user.is_board:

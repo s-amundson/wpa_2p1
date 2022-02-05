@@ -13,18 +13,18 @@ class ClassAttendanceForm(forms.Form):
         self.is_closed = beginner_class.state == 'closed'
         self.new_students = []
         self.return_students = []
-        self.instructors = []
+        self.staff = []
         self.class_registration = beginner_class.classregistration_set.filter(pay_status='paid')
         self.class_registration = self.class_registration.order_by('student__last_name')
         self.class_date = beginner_class.class_date
 
         for cr in self.class_registration:
             try:
-                is_instructor = cr.student.user.is_instructor
+                is_staff = cr.student.user.is_staff
             except (cr.student.DoesNotExist, AttributeError):
-                is_instructor = False
-            if is_instructor:
-                self.instructors.append(self.student_dict(cr, True))
+                is_staff = False
+            if is_staff:
+                self.staff.append(self.student_dict(cr, True))
             elif cr.student.safety_class is None:
                 self.new_students.append(self.student_dict(cr, bool(cr.student.signature)))
             else:

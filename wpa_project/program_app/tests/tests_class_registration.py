@@ -70,9 +70,12 @@ class TestsClassRegistration(TestCase):
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
+        u = User.objects.get(pk=2)
+        u.is_staff = False
+        u.save()
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
-        self.client.force_login(User.objects.get(pk=2))
+        self.client.force_login(u)
         response = self.client.post(reverse('programs:class_registration'),
                      {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         time.sleep(1)
@@ -219,7 +222,7 @@ class TestsClassRegistration(TestCase):
 
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
-        response = self.client.get(reverse('programs:class_registration', kwargs={'reg_id': 1}), secure=True)
+        response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': 1}), secure=True)
         self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
 
@@ -343,6 +346,25 @@ class TestsClassRegistration(TestCase):
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
 
+    def test_class_register_staff_full(self):
+        # Add instructor when the class is full of students but open instructor positions.
+        # make user instructor
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        d = timezone.now()
+
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.state = 'full'
+        bc.save()
+
+        # add a user to the class
+        self.client.post(reverse('programs:class_registration'),
+                         {'beginner_class': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'full')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 1)
+
     def test_resume_registration(self):
         cr = ClassRegistration(
             beginner_class=BeginnerClass.objects.get(pk=1),
@@ -354,9 +376,8 @@ class TestsClassRegistration(TestCase):
             attended=False)
         cr.save()
 
-        response = self.client.get(reverse('programs:class_registration', kwargs={'reg_id': cr.id}), secure=True)
+        response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
         self.assertEqual(response.status_code, 302)
-        # self.assertTemplateUsed(response, 'program_app/class_registration.html')
 
     def test_new_student_register_twice(self):
         d = timezone.now() + datetime.timedelta(days=2)

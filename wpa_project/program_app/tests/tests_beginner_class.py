@@ -102,6 +102,8 @@ class TestsBeginnerClass(TestCase):
 
     def test_refund_success_class(self):
         self.test_user = User.objects.get(pk=2)
+        self.test_user.is_staff = False
+        self.test_user.save()
         self.client.force_login(self.test_user)
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)

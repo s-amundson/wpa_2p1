@@ -77,8 +77,8 @@ CSRF_COOKIE_SECURE = True
 DATABASES = {
     'default': get_secret("DATABASE"),
 }
-if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
-    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+# if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
+#     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_secret("DEBUG")
 

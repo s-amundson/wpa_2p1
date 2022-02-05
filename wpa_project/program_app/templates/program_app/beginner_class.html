@@ -91,7 +91,7 @@
                     </table>
                 </div>
                 <div class="row pt-2">
-                    <div class="col"> Instructors </div>
+                    <div class="col"> Instructors/Staff </div>
                 </div>
                 <div class="row">
                     <table class="table table-bordered
@@ -117,7 +117,7 @@
                             </th>
                         </thead>
                         <tbody>
-                            {% for s in attendee_form.instructors %}
+                            {% for s in attendee_form.staff %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>

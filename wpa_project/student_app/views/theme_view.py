@@ -13,13 +13,9 @@ class ThemeView(LoginRequiredMixin, APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-
         serializer = ThemeSerializer(data=request.data)
 
         if serializer.is_valid():
-            logging.debug('valid')
-            logging.debug(serializer.validated_data)
-            # u = User.objects.get(request.user)
             request.user.dark_theme = serializer.validated_data['theme']
             request.user.save()
             return Response({'status': 'SUCCESS'})

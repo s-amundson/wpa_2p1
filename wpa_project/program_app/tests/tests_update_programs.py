@@ -26,6 +26,6 @@ class TestsUpdatePrograms(TestCase):
         self.assertEqual(BeginnerClass.objects.get(pk=bc.id).state, 'closed')
         for i in range(8):
             # self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 1 + i).state, 'open')
-            self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 1 + i).state, 'scheduled')
+            self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 1 + i).state, 'open')
         # self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 2).state, 'open')
 

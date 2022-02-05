@@ -35,7 +35,7 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
         return Response(serializer.data)
 
     def post(self, request, family_id=None):
-        logging.debug(family_id)
+        # logging.debug(family_id)
         if family_id is None:
             # check if user is part of family so that we don't make duplicate enteries
             try:
@@ -58,7 +58,7 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
                 return HttpResponseBadRequest()
 
         if serializer.is_valid():
-            logging.debug('valid')
+            # logging.debug('valid')
             if family_id is None:
                 f = serializer.save()
                 s = Student.objects.get(user=request.user)
@@ -67,7 +67,7 @@ class StudentFamilyApiView(LoginRequiredMixin, APIView):
             else:
                 f = serializer.update(student_family, serializer.validated_data)
                 f.save()
-            logging.debug(serializer.data)
+            # logging.debug(serializer.data)
             return Response(serializer.data)
 
         else:
