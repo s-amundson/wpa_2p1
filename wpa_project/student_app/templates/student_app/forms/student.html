@@ -54,7 +54,7 @@
         </div>
     </div>
     {% if user.is_staff %}
-        <div class="row px-3 input-group input-group-md">
+        <div class="d-flex flex-row px-3 input-group input-group-md">
             <div class="col-2">
                 Safety Class
             </div>
@@ -64,18 +64,29 @@
                     <p class="help-block">{{ error }}</p>
                 {% endfor %}
             </div>
+
             {% if student.joad_age %}
-            <div>
+            <div class="m-2">
                 <input type="checkbox" class="m-2 is-joad-check"
                     joad_url="{% url 'registration:is_joad' student.id %}"  id="joad_check_{{ student.id }}"
                             {% if student.is_joad %} checked="checked" {% endif %}> Joad Student
             </div>
             {% endif %}
-            <div class="col">
+            <div>
+                <a class="nav-link" href="{% url 'registration:waiver' student.id %}">
+                    {% if student.signature %}
+                        Update Signature
+                    {% else %}
+                        Signature Required
+                    {% endif %}
+                </a>
+            </div>
+            <div>
                 {% if user.is_board and student.is_user %}
                     <a href="{% url 'registration:update_user' student.is_user%}">Edit User</a>
                 {% endif %}
             </div>
+
         </div>
     {% endif %}
 

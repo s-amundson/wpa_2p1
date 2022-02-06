@@ -14,3 +14,4 @@ from .student_view import AddStudentView, StudentApiView, StudentIsJoadView
 from .terms_view import TermsView
 from .theme_view import ThemeView
 from .user_view import UserView
+from .waiver_view import WaiverView

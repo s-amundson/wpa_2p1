@@ -7,3 +7,4 @@
 # from .tests.tests_index import TestsJoadIndex
 # from .tests.tests_session import TestsJoadSession
 # from .tests.tests_registration import TestsJoadRegistration
+from .tests.tests_waiver import TestsWaiver

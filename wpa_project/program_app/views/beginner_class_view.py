@@ -27,6 +27,8 @@ class BeginnerClassView(UserPassesTestMixin, View):
             c = BeginnerClass.objects.get(id=beginner_class)
             form = BeginnerClassForm(instance=c)
             attendee_form = ClassAttendanceForm(c)
+            request.session['waiver_url'] = reverse('programs:beginner_class',
+                                                    kwargs={'beginner_class': beginner_class})
         else:
             try:
                 c = BeginnerClass.objects.latest('class_date').class_date

@@ -24,6 +24,8 @@ class WaiverForm(forms.Form):
         of_age = False
         age_date = kwargs.get('age_date', timezone.now().date())
         initial = kwargs.get('initial', {})
+        if 'initial' in kwargs:
+            kwargs.pop('initial')
         if student is not None:
             of_age = StudentHelper().calculate_age(student.dob, age_date) >= 18
             initial['signature'] = student.signature

@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.forms import model_to_dict
 
 from payment.src import SquareHelper
 from ..forms import EventRegistrationForm
@@ -42,7 +43,7 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
         self.form = form
         students = []
         # message = ""
-        logging.debug(form.cleaned_data['event'])
+        logging.debug(form.cleaned_data)
         event = form.cleaned_data['event']
         if event.state != "open":
             return self.has_error('Session in wrong state')
@@ -50,18 +51,20 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
         reg = EventRegistration.objects.filter(event=event).exclude(
             pay_status="refunded").exclude(pay_status='canceled')
         logging.debug(len(reg.filter(pay_status='paid')))
-        logging.debug(form.cleaned_data)
 
-        for k, v in form.cleaned_data.items():
+        logging.debug(dict(self.request.POST))
+        for k, v in dict(self.request.POST).items():
             logging.debug(k)
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
                 age = StudentHelper().calculate_age(s.dob, event.event_date)
+                logging.debug(age)
                 if age < 9:
-                    self.has_error('Student is to young')
+                    return self.has_error('Student is to young.')
                 if age > 20:
-                    self.has_error('Student is to old.')
+                    logging.debug(age)
+                    return self.has_error('Student is to old.')
 
                 logging.debug(s)
                 sreg = reg.filter(student=s)
@@ -73,7 +76,8 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
 
         if len(students) == 0:
             return self.has_error('Invalid student selected')
-
+        logging.debug(len(reg.filter(pay_status='paid')))
+        logging.debug(len(students))
         if len(reg.filter(pay_status='paid')) + len(students) > event.student_limit:
             return self.has_error('Class is full')
 
@@ -84,7 +88,7 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
             self.request.session['payment_db'] = ['joad', 'EventRegistration']
             self.request.session['action_url'] = reverse('programs:class_payment')
             logging.debug(students)
-            description = f"Joad {str(event.event_type)} event on {str(event.event_date)[:10]} student id: "
+            description = f"Joad event on {str(event.event_date)[:10]} student id: "
             for s in students:
                 cr = EventRegistration(event=event, student=s, pay_status='start', idempotency_key=uid).save()
                 self.request.session['line_items'].append(

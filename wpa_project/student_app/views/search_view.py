@@ -71,3 +71,4 @@ class SearchView(LoginRequiredMixin, View):
         phone_form = SearchPhoneForm()
         return render(request, 'student_app/student_search.html',
                       {'email_form': email_form, 'name_form': name_form, 'phone_form': phone_form})
+
