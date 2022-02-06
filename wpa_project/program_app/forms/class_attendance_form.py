@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from student_app.src import StudentHelper
 import logging
 
@@ -14,7 +15,8 @@ class ClassAttendanceForm(forms.Form):
         self.new_students = []
         self.return_students = []
         self.staff = []
-        self.class_registration = beginner_class.classregistration_set.filter(pay_status='paid')
+        self.class_registration = beginner_class.classregistration_set.filter(
+            Q(pay_status='paid') | Q(pay_status='admin'))
         self.class_registration = self.class_registration.order_by('student__last_name')
         self.class_date = beginner_class.class_date
 
