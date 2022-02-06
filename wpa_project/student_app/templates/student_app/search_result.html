@@ -85,14 +85,14 @@
                 </div>
             </div>
         </div>
-
-        <div class="row pt-4">
-            <div class="col">Registration date: {{ sf.registration_date}} </div>
-            <a class="col m-2 btn btn-primary" href="{% url 'programs:class_registration_admin' sf.id %}" role="button">
-                Admin Registration
-            </a>
-        </div>
         {% if user.is_board and sf.id %}
+            <div class="row pt-4">
+                <div class="col">Registration date: {{ sf.registration_date}} </div>
+                <a class="col m-2 btn btn-primary" href="{% url 'programs:class_registration_admin' sf.id %}" role="button">
+                    Admin Registration
+                </a>
+            </div>
+
             <div class="row pt-4">
                 <a href="{% url 'membership:membership' sf.id %}"> Membership </a>
             </div>

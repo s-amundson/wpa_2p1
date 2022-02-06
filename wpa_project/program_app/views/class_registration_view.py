@@ -146,9 +146,9 @@ class ClassRegistrationView(LoginRequiredMixin, FormView):
         return self.form_invalid(self.form)
         # return render(self.request, self.template_name, {'form': self.form})
 
-    def post(self, request, *args, **kwargs):
-        logging.debug(self.request.POST)
-        return super().post(request, *args, **kwargs)
+    # def post(self, request, *args, **kwargs):
+    #     logging.debug(self.request.POST)
+    #     return super().post(request, *args, **kwargs)
 
     def transact(self, beginner_class, students, instructors):
         with transaction.atomic():
@@ -197,6 +197,7 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
 
         uid = str(uuid.uuid4())
         cr = ClassRegistration.objects.filter(beginner_class=beginner_class)
+        logging.debug(timezone.now())
         for k, v in form.cleaned_data.items():
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
@@ -213,7 +214,7 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                     return self.has_error(f'{s.first_name} {s.last_name} already registered')
                 else:
                     ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
-                                                     pay_status='admin', idempotency_key=uid)
+                                                     pay_status='admin', idempotency_key=uid, reg_time=timezone.now())
 
         return HttpResponseRedirect(self.success_url)
 

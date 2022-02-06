@@ -16,8 +16,8 @@ class ClassRegistrationHelper:
             is_space = False
         if class_registration_dict['returnee'] and ec['returnee'] + class_registration_dict['returnee'] > bc.returnee_limit:
             is_space = False
-        if ec['beginner'] + class_registration_dict['beginner'] == bc.beginner_limit and \
-           ec['returnee'] + class_registration_dict['returnee'] == bc.returnee_limit:
+        if is_space and ec['beginner'] + class_registration_dict['beginner'] >= bc.beginner_limit and \
+           ec['returnee'] + class_registration_dict['returnee'] >= bc.returnee_limit:
             if update:
                 bc.state = 'full'
                 bc.save()
