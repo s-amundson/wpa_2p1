@@ -24,3 +24,4 @@ class Registration(models.Model):
     pay_status = models.CharField(max_length=20)
     idempotency_key = models.UUIDField()
     reg_time = models.DateTimeField(default=timezone.now)
+# ['session', 'student', 'pay_status', 'idempotency_key', 'reg_time']

@@ -55,10 +55,22 @@
                         {% endif %}
                       </div>
                     </li>
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        JOAD
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                          <a class="dropdown-item" href="{% url 'joad:index'%}">JOAD</a>
+                          <div class="dropdown-divider"></div>
+                          <a class="dropdown-item" href="{% url 'joad:pin_score_list'%}">Pin Scores</a>
+                      </div>
+                    </li>
+                {% else %}
+                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'joad:index'%}">JOAD</a>
+                    </li>
                 {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'joad:index'%}">Joad</a>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'programs:class_registration' %}">Classes</a>
                 </li>

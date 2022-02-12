@@ -16,7 +16,7 @@ class PdfGetView(LoginRequiredMixin, View):
             sf = get_object_or_404(Student, user=request.user).student_family
             student = get_object_or_404(Student, id=student_id, student_family=sf)
 
-        if student.signature_pdf is not None:
+        if student.signature_pdf:
             return sendfile(request, student.signature_pdf.path)
 
         return HttpResponseForbidden()

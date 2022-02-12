@@ -42,6 +42,17 @@ class TestsPdf(TestCase):
         response = self.client.get(reverse('registration:pdf', kwargs={'student_id': 3}), secure=True)
         self.assertEqual(response.status_code, 200)
 
+    def test_get_pdf_auth_board(self):
+        self.test_user = self.User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+
+        student = Student.objects.get(pk=3)
+        student.signature = File(open('img.jpg', 'rb'), name=f'3.jpg')
+        student.signature_pdf = File(open('mydoc.pdf', 'rb'), name=f'3.pdf')
+        student.save()
+        response = self.client.get(reverse('registration:pdf', kwargs={'student_id': 3}), secure=True)
+        self.assertEqual(response.status_code, 200)
+
     def test_get_pdf_no_auth(self):
         self.test_user = self.User.objects.get(pk=4)
         self.client.force_login(self.test_user)
@@ -52,3 +63,10 @@ class TestsPdf(TestCase):
         student.save()
         response = self.client.get(reverse('registration:pdf', kwargs={'student_id': 3}), secure=True)
         self.assertEqual(response.status_code, 404)
+
+    def test_get_pdf_no_pdf(self):
+        self.test_user = self.User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+
+        response = self.client.get(reverse('registration:pdf', kwargs={'student_id': 3}), secure=True)
+        self.assertEqual(response.status_code, 403)

@@ -69,3 +69,14 @@ class TestsSearch(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/student_search.html')
 
+    def test_search_result_get_auth(self):
+        response = self.client.get(reverse('registration:search_result', kwargs={'student_family': 2}), secure=True)
+        self.assertTemplateUsed('student_app/search_result.html')
+        self.assertEqual(response.status_code, 200)
+
+    def test_search_result_get_no_auth(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('registration:search_result', kwargs={'student_family': 2}), secure=True)
+        self.assertTemplateUsed('student_app/search_result.html')
+        self.assertEqual(response.status_code, 403)

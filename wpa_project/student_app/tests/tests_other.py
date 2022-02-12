@@ -29,3 +29,11 @@ class TestsOther(TestCase):
     def test_policy_covid(self):
         self.client.get(reverse('registration:policy', kwargs={'policy': 'covid'}), secure=True)
         self.assertTemplateUsed('registration/covid_policy.html')
+
+    def test_policy_invalid(self):
+        response = self.client.get(reverse('registration:policy', kwargs={'policy': 'invalid'}), secure=True)
+        self.assertEqual(response.status_code, 404)
+
+    def test_help(self):
+        self.client.get(reverse('registration:help'), secure=True)
+        self.assertTemplateUsed('registration/covid_policy.html')

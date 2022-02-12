@@ -1,0 +1,10 @@
+Hi,
+
+Contact us regarding {{ message.category.title }}
+
+{{ message.message }}
+
+{{ message.contact_name }}
+
+http://woodleyparkarchers.org/">WoodleyParkArchers.org
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

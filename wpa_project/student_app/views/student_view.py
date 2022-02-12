@@ -74,14 +74,16 @@ class StudentApiView(LoginRequiredMixin, APIView):
 class AddStudentView(LoginRequiredMixin, View):
     def get(self, request, student_id=None):
         student = {'is_user': False, 'this_user': False, 'id': student_id, 'is_joad': False, 'joad_age': False}
+        logging.debug(student_id)
         if student_id is not None:
             if request.user.is_staff:
                 g = get_object_or_404(Student, pk=student_id)
                 student['is_joad'] = g.is_joad
-                # student_is_user = g.user_id
+                student['is_user'] = g.user_id
             else:
                 sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
+                logging.debug(g.user)
                 student['is_user'] = g.user_id
                 student['is_joad'] = g.is_joad
                 student['this_user'] = (g.user == request.user)
@@ -97,7 +99,7 @@ class AddStudentView(LoginRequiredMixin, View):
                 student['this_user'] = True
             else:
                 form = StudentForm()
-        # logging.debug(student['is_user'])
+        logging.debug(student['is_user'])
         d = {'form': form, 'student': student}
         return render(request, 'student_app/forms/student.html', d)
 

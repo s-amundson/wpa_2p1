@@ -73,13 +73,15 @@
             </div>
             {% endif %}
             <div>
-                <a class="nav-link" href="{% url 'registration:waiver' student.id %}">
-                    {% if student.signature %}
-                        Update Signature
-                    {% else %}
-                        Signature Required
-                    {% endif %}
-                </a>
+                {% if student.id %}
+                    <a class="nav-link" href="{% url 'registration:waiver' student.id %}">
+                        {% if student.signature %}
+                            Update Signature
+                        {% else %}
+                            Signature Required
+                        {% endif %}
+                    </a>
+                {% endif %}
             </div>
             <div>
                 {% if user.is_board and student.is_user %}

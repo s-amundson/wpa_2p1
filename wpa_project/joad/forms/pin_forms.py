@@ -1,4 +1,4 @@
-from django.forms import ChoiceField, BooleanField
+from django.forms import ChoiceField, BooleanField, CheckboxInput
 from django.forms import model_to_dict
 from src.model_form import MyModelForm
 from ..models import PinAttendance, PinScores
@@ -82,19 +82,18 @@ class PinAttendanceStudentForm(PinAttendanceBaseForm):
         optional_fields = ['inner_scoring']
         fields = read_fields + optional_fields + disabled_fields + required_fields
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-
 
 class PinScoresForm(MyModelForm):
-
 
     class Meta(MyModelForm.Meta):
         model = PinScores
         required_fields = ['bow', 'category', 'distance', 'target', 'score', 'stars']
-        fields = required_fields
+        optional_fields = ['inner_scoring']
+        fields = required_fields + optional_fields
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['stars'] = ChoiceField(choices=choices.stars())
         self.fields['stars'].widget.attrs.update({'class': 'form-control m-2'})
+        self.fields['inner_scoring'] = BooleanField(widget=CheckboxInput(
+            attrs={'class': "m-2 student-check"}), required=False, initial=True)

@@ -33,6 +33,15 @@ class TestsJoadSession(TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
         self.assertEqual(response.status_code, 200)
 
+    def test_board_user_get_existing(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        # allow user to access
+        response = self.client.get(reverse('joad:session', kwargs={'session_id': 1}), secure=True)
+        self.assertIsNotNone(response.context['session_id'])
+        self.assertEqual(len(response.context['object_list']), 3)
+        self.assertEqual(response.status_code, 200)
+
     def test_board_user_post_session(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
@@ -40,4 +49,11 @@ class TestsJoadSession(TestCase):
         response = self.client.post(reverse('joad:session'), self.session_dict, secure=True)
         s = Session.objects.all()
         self.assertEqual(len(s), 3)
+        self.assertEqual(response.status_code, 200)
+
+    def test_board_user_post_existing(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        # allow user to access
+        response = self.client.post(reverse('joad:session', kwargs={'session_id': 1}), self.session_dict, secure=True)
         self.assertEqual(response.status_code, 200)

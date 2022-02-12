@@ -11,57 +11,7 @@ from student_app.models import Student
 import logging
 logger = logging.getLogger(__name__)
 
-# from datetime import timedelta
-# from django import forms
-# from django.utils import timezone
-# from django.db.models import Q
-# from ..models import BeginnerClass, ClassRegistration
-# import logging
-#
-# logger = logging.getLogger(__name__)
 
-
-# class EventRegistrationForm(forms.Form):
-#
-#     def __init__(self, user, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         if user.is_board:
-#             students = Student.objects.all()
-#         else:
-#             students = Student.objects.get(user=user).student_family.student_set.all()
-#         d = timezone.localdate(timezone.now())
-#         old = d.replace(year=d.year - 21)
-#         young = d.replace(year=d.year - 9)
-#         students = students.filter(dob__gt=old).filter(dob__lte=young).order_by('last_name')
-#         students = list(students.values())
-#
-#         for student in students:
-#             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
-#                 attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
-#                        'dob': f"{student.dob}"}), required=False,
-#                 label=f'{student.first_name} {student.last_name}', initial=True)
-#
-#     def get_boxes(self):
-#         for field_name in self.fields:
-#             if field_name.startswith('student_'):
-#                 yield self[field_name]
-#
-#     # def get_open_classes(self, user):
-#     #     classes = BeginnerClass.objects.filter(class_date__gt=timezone.now())
-#     #     if user.is_staff:
-#     #         classes = classes.filter(Q(state='open') | Q(state='full'))
-#     #     else:
-#     #         classes = classes.filter(state='open')
-#     #     d = [("", "None")]
-#     #     for c in classes:
-#     #         cd = timezone.localtime(c.class_date)
-#     #         s = cd.strftime("%d %b, %Y %I:%M %p")
-#     #         d.append((str(c.id), s))
-#     #     return d
-#
-#     class Meta:
-#         model = EventRegistration
-#         exclude = ['pay_status', 'idempotency_key', 'reg_time']
 class EventRegistrationForm(MyModelForm):
 
     class Meta(MyModelForm.Meta):

@@ -42,10 +42,12 @@ class SearchView(LoginRequiredMixin, View):
                     # student_family.append(StudentFamily.objects.get(user__id=u.user_id))
                     try:
                         student = Student.objects.get(user__id=u.user_id)
-                    except Student.DoesNotExist:
-                        return render(request, 'student_app/message.html', {'message': 'No student found'})
+                        student_family.append(student.student_family)
+                    except Student.DoesNotExist: # pragma: no cover
+                        pass
+                        # return render(request, 'student_app/message.html', {'message': 'No student found'})
                     # logging.debug(student)
-                    student_family.append(student.student_family)
+
                 return render(request, 'student_app/search_result.html', {'student_family': student_family})
         elif 'first_name' in request.POST:
             form = SearchNameForm(request.POST)
