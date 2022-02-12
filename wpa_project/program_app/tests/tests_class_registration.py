@@ -227,26 +227,38 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
 
     def test_class_status(self):
-        # add 1 beginner students and 1 returnee.
         self.client.force_login(User.objects.get(pk=3))
-        # response = self.client.get(reverse('programs:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
+
         response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
         content = json.loads(response.content)
         self.assertEqual(content['status'], 'open')
         self.assertEqual(content['beginner'], 2)
         self.assertEqual(content['returnee'], 2)
 
-        self.client.post(reverse('programs:class_registration'),
-                         {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
-        for c in cr:
-            c.pay_status = 'paid'
-            c.save()
+        # add 1 beginner students and 1 returnee.
+        cr = ClassRegistration(
+            beginner_class=BeginnerClass.objects.get(pk=1),
+            student=Student.objects.get(pk=4),
+            new_student=True,
+            pay_status="paid",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        cr.save()
+        cr = ClassRegistration(
+            beginner_class=BeginnerClass.objects.get(pk=1),
+            student=Student.objects.get(pk=5),
+            new_student=False,
+            pay_status="paid",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        cr.save()
 
         # response = self.client.get(reverse('programs:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
         response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
         content = json.loads(response.content)
+        logging.debug(content)
         self.assertEqual(content['status'], 'open')
         self.assertEqual(content['beginner'], 1)
         self.assertEqual(content['returnee'], 1)

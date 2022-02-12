@@ -17,8 +17,9 @@ class ClassAttendanceForm(forms.Form):
         self.staff = []
         self.class_registration = beginner_class.classregistration_set.filter(
             Q(pay_status='paid') | Q(pay_status='admin'))
-        self.class_registration = self.class_registration.order_by('student__last_name')
+        self.class_registration = self.class_registration.order_by('attended', 'student__last_name')
         self.class_date = beginner_class.class_date
+        self.attend_count = {'beginner': 0, 'returnee': 0, 'staff': 0}
 
         for cr in self.class_registration:
             try:
@@ -27,10 +28,16 @@ class ClassAttendanceForm(forms.Form):
                 is_staff = False
             if is_staff:
                 self.staff.append(self.student_dict(cr, True))
-            elif cr.student.safety_class is None:
+                if cr.attended:
+                    self.attend_count['staff'] += 1
+            elif cr.student.safety_class is None or cr.student.safety_class <= self.class_date.date():
                 self.new_students.append(self.student_dict(cr, bool(cr.student.signature)))
+                if cr.attended:
+                    self.attend_count['beginner'] += 1
             else:
                 self.return_students.append(self.student_dict(cr, bool(cr.student.signature)))
+                if cr.attended:
+                    self.attend_count['returnee'] += 1
 
     def student_dict(self, cr, is_signed):
         # logging.debug(f'student: {cr.student.id} vax: {cr.student.covid_vax}, attended:{cr.attended}')

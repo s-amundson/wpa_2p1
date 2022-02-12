@@ -4,7 +4,7 @@
 # from .tests.tests_class_attendance import TestsClassAttendance
 # from .tests.tests_class_payment import TestsClassPayment
 # from .tests.tests_class_registration import TestsClassRegistration
-from .tests.tests_class_registration import TestsClassAdminRegistration
+# from .tests.tests_class_registration import TestsClassAdminRegistration
 # from .tests.tests_class_sign_in import TestsClassSignIn
 # from .tests.tests_signal import TestsSignal
 # from .tests.tests_unregister import TestsUnregisterStudent

@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views.generic.base import View
@@ -22,6 +22,8 @@ class ClassSignInView(WaiverView):
         if rid is not None:
             self.class_registration = get_object_or_404(ClassRegistration, pk=rid)
             self.student = self.class_registration.student
+            self.success_url = reverse_lazy('programs:beginner_class',
+                                            kwargs={'beginner_class': self.class_registration.beginner_class.id})
         if self.request.user.is_authenticated:
             return self.request.user.is_staff
         else:
