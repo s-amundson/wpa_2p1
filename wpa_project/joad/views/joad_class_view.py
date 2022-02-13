@@ -1,47 +1,47 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.forms import model_to_dict
-from django.shortcuts import render, get_object_or_404
-import logging
-from django.views.generic.base import View
-from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
+from django.http import JsonResponse
+from django.urls import reverse_lazy
 
-from ..models import JoadClass
+from ..models import JoadClass, Session
 from ..forms import ClassForm
-
+import logging
 logger = logging.getLogger(__name__)
 
 
-class JoadClassView(UserPassesTestMixin, View):
-    def get(self, request, class_id=None):
-        if class_id:
-            jc = get_object_or_404(JoadClass, pk=class_id)
-            form = ClassForm(instance=jc)
-        else:
-            form = ClassForm()
-        return render(request, 'joad/forms/class_form.html', {'form': form})
+class JoadClassView(UserPassesTestMixin, FormView):
+    template_name = 'joad/forms/class_form.html'
+    form_class = ClassForm
+    success_url = reverse_lazy('joad:session')
+    form = None
+    session = None
+    joad_class = None
 
-    def post(self, request, class_id=None):
-        logging.debug(request.POST)
-        if class_id:
-            jc = get_object_or_404(JoadClass, pk=class_id)
-            form = ClassForm(request.POST, instance=jc)
-        else:
-            form = ClassForm(request.POST)
-        if form.is_valid():
-            f = form.save()
-            return JsonResponse({'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True})
+    def get_form(self):
+        return self.form_class(self.session, **self.get_form_kwargs())
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.joad_class is not None:
+            kwargs['instance'] = self.joad_class
+        return kwargs
+
+    def form_valid(self, form):
+        f = form.save()
+        return JsonResponse({'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True})
 
     def test_func(self):
+        self.session = get_object_or_404(Session, pk=self.kwargs['session_id'])
+        if self.kwargs.get('class_id', None) is not None:
+            self.joad_class = get_object_or_404(JoadClass, pk=self.kwargs['class_id'])
         return self.request.user.is_board
 
 
 class ClassListView(LoginRequiredMixin, ListView):
     model = JoadClass
     template_name = 'joad/tables/class_table.html'
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     return context
 
     def get_queryset(self):
         sid = self.kwargs.get("session_id", None)

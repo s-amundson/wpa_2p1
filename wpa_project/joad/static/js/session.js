@@ -2,8 +2,10 @@
 var edit_class_id = null;
 $(document).ready(function(){
     $("#session-form").submit(function(e){
-        e.preventDefault();
-        post_session();
+        if (session_id != null){
+            e.preventDefault();
+            post_session();
+        }
     });
     $("#btn-add-class").click(function() {
         $(this).hide();
@@ -34,7 +36,7 @@ function class_url(class_id=null) {
         url_string = url_string + 'class_id';
     }
     console.log(joad_class_url + class_id);
-    return joad_class_url + class_id;
+    return joad_class_url + class_id + '/';
 }
 
 function edit_btn(){
@@ -48,12 +50,10 @@ function edit_btn(){
 }
 
 function load_class_table(){
-    if ($("#id_session").val() == "") {
-        return;
-    }
-    $.get(class_list_url + $("#id_session").val(), function(data, status){
+    $.get(class_list_url + session_id + '/', function(data, status){
         $("#class-table-div").html(data);
     });
+    edit_btn();
 }
 
 function load_joad_class_form(class_id) {
@@ -79,9 +79,10 @@ async function post_joad_class_form() {
     let data = await $.post(class_url(edit_class_id), form_data, function(data, status){
         console.log(data);
         if(data['success']) {
-            $("#class-list-body").append("<tr><td>" + data['id'] + "</td><td>" + data['class_date'] + "</td><td>" +
-                data['state'] + '</td><td><button class="btn btn-primary edit-class" type="button" class_id="' +
-                data['id'] + '"> Update </button></td></tr>')
+            load_class_table();
+//            $("#class-list-body").append("<tr><td>" + data['id'] + "</td><td>" + data['class_date'] + "</td><td>" +
+//                data['state'] + '</td><td><button class="btn btn-primary edit-class" type="button" class_id="' +
+//                data['id'] + '"> Update </button></td></tr>')
         }
         else {
             alert_notice("Error", "Error with form")

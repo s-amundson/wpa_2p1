@@ -11,6 +11,7 @@ $(document).ready(function(){
             $("#joad-event-div").html(data)
         });
     }
+    load_class_table();
 });
 
 

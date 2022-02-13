@@ -18,8 +18,9 @@ class IndexView(LoginRequiredMixin, View):
         max_dob = today.replace(year=today.year - 9)
         students = Student.objects.get(user=request.user).student_family.student_set.filter(dob__gt=min_dob)
         students = students.filter(dob__lt=max_dob).order_by('last_name', 'first_name')
-
-        sessions = Session.objects.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
+        sessions = Session.objects.all()
+        if not request.user.is_staff:
+            sessions = sessions.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
         sessions = sessions.order_by('start_date')
         session_list = []
         for session in sessions:

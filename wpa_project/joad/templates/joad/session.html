@@ -9,10 +9,12 @@
         {% if session_id %}
             let session_url = "{% url 'joad:session' session_id %}";
             let session_id = {{ session_id }};
+            let joad_class_url = "{% url 'joad:joad_class' session_id%}";
         {% else %}
             let session_url = "{% url 'joad:session' %}";
+            let session_id = null;
         {% endif %}
-        let joad_class_url = "{% url 'joad:joad_class' %}";
+        let class_list_url = "{% url 'joad:class_list' %}";
     </script>
 {% endblock %}
 
@@ -26,14 +28,13 @@
         </form>
     </div>
     <hr>
-    <div id="class-list" class="row p-3">
-        {% include "joad/tables/class_table.html" %}
-
-    </div>
+    <div id="class-table-div" class="row p-3"></div>
     <div class="row p-3">
-        <button id="btn-add-class" class="btn btn-primary" type="button">
-            Add Class
-        </button>
+        {% if session_id %}
+            <button id="btn-add-class" class="btn btn-primary" type="button">
+                Add Class
+            </button>
+        {% endif %}
     </div>
     <div id="jc-form" class="row p-3"></div>
 {% endblock %}
