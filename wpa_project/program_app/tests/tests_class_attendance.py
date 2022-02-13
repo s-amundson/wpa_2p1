@@ -32,7 +32,7 @@ class TestsClassAttendance(TestCase):
         self.assertTemplateUsed('student_app/beginner_class.html')
         # logging.debug(response.content)
         self.assertContains(response, '<input type="hidden" name="attendee_form" value="on">', html=True)
-        self.assertNotContains(response, 'Attending')
+        self.assertContains(response, 'Attending', 3)
 
         # change user, then add 2 new.
         self.client.force_login(User.objects.get(pk=2))
@@ -58,11 +58,10 @@ class TestsClassAttendance(TestCase):
                                      'returnee_limit': 2, 'instructor_limit': 2, 'state': 'closed', 'cost': 5},
                                     secure=True)
         self.assertEqual(response.status_code, 302)
-        # TODO check payment status
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:beginner_class', kwargs={'beginner_class': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Attending')
+        self.assertContains(response, 'Attending', 6)
         self.assertContains(response, 'covid_vax_2')
         self.assertContains(response, 'covid_vax_3')
 

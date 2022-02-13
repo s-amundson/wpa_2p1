@@ -227,26 +227,38 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
 
     def test_class_status(self):
-        # add 1 beginner students and 1 returnee.
         self.client.force_login(User.objects.get(pk=3))
-        # response = self.client.get(reverse('programs:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
+
         response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
         content = json.loads(response.content)
         self.assertEqual(content['status'], 'open')
         self.assertEqual(content['beginner'], 2)
         self.assertEqual(content['returnee'], 2)
 
-        self.client.post(reverse('programs:class_registration'),
-                         {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
-        for c in cr:
-            c.pay_status = 'paid'
-            c.save()
+        # add 1 beginner students and 1 returnee.
+        cr = ClassRegistration(
+            beginner_class=BeginnerClass.objects.get(pk=1),
+            student=Student.objects.get(pk=4),
+            new_student=True,
+            pay_status="paid",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        cr.save()
+        cr = ClassRegistration(
+            beginner_class=BeginnerClass.objects.get(pk=1),
+            student=Student.objects.get(pk=5),
+            new_student=False,
+            pay_status="paid",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        cr.save()
 
         # response = self.client.get(reverse('programs:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
         response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
         content = json.loads(response.content)
+        logging.debug(content)
         self.assertEqual(content['status'], 'open')
         self.assertEqual(content['beginner'], 1)
         self.assertEqual(content['returnee'], 1)
@@ -407,3 +419,119 @@ class TestsClassRegistration(TestCase):
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertContains(response, f'{s.first_name} is enrolled in another beginner class')
+
+
+class TestsClassAdminRegistration(TestCase):
+    fixtures = ['f1']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def setUp(self):
+        # Every test needs a client.
+        self.client = Client()
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        self.post_dict = {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}
+
+    def test_class_get_no_auth(self):
+        # Check that staff cannot access
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('programs:class_registration_admin', kwargs={'family_id': 4}), secure=True)
+        self.assertEqual(response.status_code, 403)
+        # self.assertTemplateUsed(response, 'program_app/class_registration.html')
+
+    def test_class_get_auth(self):
+        # Check that board can access
+        response = self.client.get(reverse('programs:class_registration_admin', kwargs={'family_id': 4}), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'student_app/form_as_p.html')
+
+    def test_class_post_good(self):
+        response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
+                                    self.post_dict, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'open')
+        cr = ClassRegistration.objects.all()
+        # logging.debug(len(cr))
+        self.assertEqual(len(cr), 2)
+        for c in cr:
+            self.assertEqual(c.pay_status, 'admin')
+        self.assertRedirects(response, reverse('programs:beginner_class', kwargs={'beginner_class': 1}))
+
+    def test_add_student_to_full(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.beginner_limit = 1
+        bc.state = 'full'
+        bc.save()
+
+        s = Student.objects.get(pk=5)
+        s.safety_class = None
+        s.save()
+
+        response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
+                                    self.post_dict, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'full')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 2)
+        for c in cr:
+            self.assertEqual(c.pay_status, 'admin')
+        self.assertRedirects(response, reverse('programs:beginner_class', kwargs={'beginner_class': 1}))
+
+    def test_add_student_to_closed(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.beginner_limit = 1
+        bc.state = 'closed'
+        bc.save()
+
+        s = Student.objects.get(pk=5)
+        s.safety_class = None
+        s.save()
+
+        response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
+                                    self.post_dict, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'closed')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 2)
+        for c in cr:
+            self.assertEqual(c.pay_status, 'admin')
+        self.assertRedirects(response, reverse('programs:beginner_class', kwargs={'beginner_class': 1}))
+
+    def test_add_student_registered(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        s = Student.objects.get(pk=4)
+        cr = ClassRegistration(
+            beginner_class=bc,
+            student=s,
+            new_student=True,
+            pay_status="paid",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        cr.save()
+        response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
+                                    self.post_dict, secure=True)
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 1)
+        self.assertContains(response, f'{s.first_name} {s.last_name} already registered')
+
+    def test_add_student_registered_admin(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        s = Student.objects.get(pk=4)
+        cr = ClassRegistration(
+            beginner_class=bc,
+            student=s,
+            new_student=True,
+            pay_status="admin",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        cr.save()
+        response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
+                                    self.post_dict, secure=True)
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 1)
+        self.assertContains(response, f'{s.first_name} {s.last_name} already registered by admin')

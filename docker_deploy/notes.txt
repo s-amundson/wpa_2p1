@@ -34,3 +34,5 @@ For server firewall:
     sudo ufw limit 3306
     sudo ufw default deny incoming
     sudo ufw enable
+
+Create issue with Django on migration from date to datetime field with postgres. Note: behaves properly in testing.

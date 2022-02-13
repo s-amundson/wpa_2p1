@@ -1,4 +1,5 @@
 import logging
+import json
 from datetime import date
 
 from django.test import TestCase, Client
@@ -34,6 +35,14 @@ class TestsInstructor(TestCase):
                                    secure=True)
         self.test_user = User.objects.get(pk=1)
         self.assertEqual(self.test_user.instructor_expire_date, date(2022, 11, 21))
+
+    def test_post_form_error(self):
+        response = self.client.post(reverse('registration:instructor_update'),
+                                   {'instructor_expire_date': '2022'},
+                                   secure=True)
+        self.test_user = User.objects.get(pk=1)
+        content = json.loads(response.content)
+        self.assertEqual(content['status'], 'error')
 
     def test_post_non_instructor(self):
         self.test_user = User.objects.get(pk=2)

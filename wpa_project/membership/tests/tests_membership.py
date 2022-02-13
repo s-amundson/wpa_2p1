@@ -2,8 +2,10 @@ import logging
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.apps import apps
+from django.utils import timezone
+from datetime import timedelta
 
-from ..models import Membership
+from ..models import Level, Membership, Member
 from student_app.models import Student
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,6 @@ class TestsMembership(TestCase):
         self.assertEqual(self.client.session['payment_db'][1], 'Membership')
 
     def test_membership_to_young(self):
-        Student = apps.get_model(app_label='student_app', model_name='Student')
         s = Student.objects.get(pk=2)
         s.dob = "2011-07-22"
         s.save()
@@ -86,3 +87,14 @@ class TestsMembership(TestCase):
         messages = list(response.context['messages'])
         self.assertEqual(len(messages), 1)
         self.assertEqual(len(Membership.objects.all()), 0)
+
+    def test_get_student_table(self):
+        d_now = timezone.localtime(timezone.now()).date()
+        student = Student.objects.get(pk=2)
+        student.user.is_member = True
+        student.user.save()
+        member = Member.objects.create(student=student, expire_date=d_now + timedelta(days=30),
+                                       level=Level.objects.get(pk=1), join_date=d_now - timedelta(days=600))
+        member.save()
+        response = self.client.get(reverse('registration:student_table'), secure=True)
+        self.assertEqual(response.status_code, 200)

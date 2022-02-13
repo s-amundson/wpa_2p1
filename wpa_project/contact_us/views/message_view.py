@@ -14,11 +14,12 @@ class MessageView(FormView):
 
     # def get_form(self):
     def get_initial(self):
-        if self.request.user:
+        self.initial = super().get_initial()
+        if self.request.user.is_authenticated:
             student = Student.objects.get(user=self.request.user)
-            self.initial = {'contact_name': f'{student.first_name} {student.last_name}',
-                       'email': EmailAddress.objects.get_primary(self.request.user)}
-        return super().get_initial()
+            self.initial['contact_name'] = f'{student.first_name} {student.last_name}'
+            self.initial['email'] = EmailAddress.objects.get_primary(self.request.user)
+        return self.initial
 
     def form_invalid(self, form):
         logging.debug(form.errors)
@@ -27,7 +28,9 @@ class MessageView(FormView):
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
-        form.send_email()
+        message = form.save()
+        logging.debug(message.category.recipients.all())
+        form.send_email(message)
         return super().form_valid(form)
 
     def post(self, request, *args, **kwargs):

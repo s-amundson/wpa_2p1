@@ -32,6 +32,7 @@ class EventRegistrationForm(MyModelForm):
         old = d.replace(year=d.year - 21)
         young = d.replace(year=d.year - 9)
         students = students.filter(dob__gt=old).filter(dob__lte=young).order_by('last_name')
+        # students = list(students.values())
         for student in students:
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2 student-check"}), required=False,

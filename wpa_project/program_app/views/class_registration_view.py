@@ -1,6 +1,6 @@
 import uuid
 from django.apps import apps
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404
@@ -146,9 +146,9 @@ class ClassRegistrationView(LoginRequiredMixin, FormView):
         return self.form_invalid(self.form)
         # return render(self.request, self.template_name, {'form': self.form})
 
-    def post(self, request, *args, **kwargs):
-        logging.debug(self.request.POST)
-        return super().post(request, *args, **kwargs)
+    # def post(self, request, *args, **kwargs):
+    #     logging.debug(self.request.POST)
+    #     return super().post(request, *args, **kwargs)
 
     def transact(self, beginner_class, students, instructors):
         with transaction.atomic():
@@ -178,6 +178,55 @@ class ClassRegistrationView(LoginRequiredMixin, FormView):
 
         return HttpResponseRedirect(reverse('payment:process_payment'))
 
+
+class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
+    template_name = 'student_app/form_as_p.html'
+    form = None
+    students = None
+
+    def get_form(self):
+        logging.debug('get_form')
+        return self.form_class(self.students, self.request.user, **self.get_form_kwargs())
+
+    def form_valid(self, form):
+        self.form = form
+        logging.debug(form.cleaned_data)
+        beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
+        self.success_url = reverse_lazy('programs:beginner_class',
+                                        kwargs={'beginner_class': form.cleaned_data['beginner_class']})
+
+        uid = str(uuid.uuid4())
+        cr = ClassRegistration.objects.filter(beginner_class=beginner_class)
+        logging.debug(timezone.now())
+        for k, v in form.cleaned_data.items():
+            if str(k).startswith('student_') and v:
+                i = int(str(k).split('_')[-1])
+                s = Student.objects.get(pk=i)
+
+                if s.safety_class is None:
+                    n = True
+                else:
+                    n = False
+
+                if len(cr.filter(student=s, pay_status='admin')) > 0:
+                    return self.has_error(f'{s.first_name} {s.last_name} already registered by admin')
+                elif len(cr.filter(student=s, pay_status='paid')) > 0:
+                    return self.has_error(f'{s.first_name} {s.last_name} already registered')
+                else:
+                    ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
+                                                     pay_status='admin', idempotency_key=uid, reg_time=timezone.now())
+
+        return HttpResponseRedirect(self.success_url)
+
+    def test_func(self):
+        fid = self.kwargs.get('family_id', None)
+        if fid is not None:
+            student_family = get_object_or_404(StudentFamily, pk=fid)
+            self.students = student_family.student_set.all()
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        else:
+            return False
 
 class ResumeRegistrationView(LoginRequiredMixin, View):
     def get(self, request, reg_id=None):

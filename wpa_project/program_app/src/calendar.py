@@ -7,11 +7,12 @@ logger = logging.getLogger(__name__)
 
 
 class Calendar(HTMLCalendar):
-    def __init__(self, year=None, month=None, dark=False):
+    def __init__(self, year=None, month=None, dark=False, staff=False):
         self.year = year
         self.month = month
         self.events = None
         self.dark = dark
+        self.staff = staff
         super(Calendar, self).__init__()
         self.setfirstweekday(6)
 
@@ -28,14 +29,16 @@ class Calendar(HTMLCalendar):
             elif event.class_type == 'returnee':
                 btn_color = 'btn-secondary'
             cd = timezone.localtime(event.class_date)
-            data += f'<li><button class="btn {btn_color} bc-btn m-1" type="button" bc_id="{event.id}">'
-            data += f'{event.class_type.capitalize()} {cd.strftime("%I:%M %p")}</button></li>'
+            data += f'<li><button class="btn {btn_color} bc-btn m-1" type="button" bc_id="{event.id}" '
+            if not self.staff and event.state not in ['open']:
+                data += f'disabled >{event.class_type.capitalize()} {cd.strftime("%I:%M %p")} FULL</button></li>'
+            else:
+                data += f'>{event.class_type.capitalize()} {cd.strftime("%I:%M %p")}</button></li>'
 
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {data} </ul></td>"
         return '<td></td>'
 
-    # formats a week as a tr
     def formatweek(self, theweek):
         week = ''
         for d, weekday in theweek:

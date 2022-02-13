@@ -44,3 +44,8 @@ class TestsEmail(TestCase):
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers AWRL agreement')
         self.assertTrue(mail.outbox[0].body.find('Attached is the Accident Waiver and Release of Liability') > 0)
         self.assertTrue(len(mail.outbox[0].attachments) > 0)
+
+    def test_bcc_from_students(self):
+        em = EmailMessage()
+        em.bcc_from_students(Student.objects.all())
+        self.assertEqual(len(em.bcc), 5)

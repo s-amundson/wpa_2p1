@@ -26,6 +26,7 @@
                 <input type="hidden" name="attendee_form" value="on">
                 <div class="row">
                     <div class="col"> New Students </div>
+                    <div class="col"> Attending: {{ attendee_form.attend_count.beginner }} </div>
                 </div>
                 <div class="row">
                     <table class="table table-bordered col
@@ -59,6 +60,7 @@
                 </div>
                 <div class="row pt-2">
                     <div class="col"> Returning Students </div>
+                    <div class="col"> Attending: {{ attendee_form.attend_count.returnee }} </div>
                 </div>
                 <div class="row">
                     <table class="table table-bordered
@@ -92,6 +94,7 @@
                 </div>
                 <div class="row pt-2">
                     <div class="col"> Instructors/Staff </div>
+                    <div class="col"> Attending: {{ attendee_form.attend_count.staff }} </div>
                 </div>
                 <div class="row">
                     <table class="table table-bordered

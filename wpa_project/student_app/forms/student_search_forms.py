@@ -8,7 +8,7 @@ class SearchColumnsForm(forms.Form):
     last_name = forms.CharField(widget=TextInput(attrs={'placeholder': 'Last Name', 'autocomplete': 'off',
                                                          'class': "form-control m-2"}), required=False)
     safety_class = forms.BooleanField(required=False)
-    instructor = forms.BooleanField(required=False)
+    staff = forms.BooleanField(required=False)
 
 
 class SearchEmailForm(forms.Form):
