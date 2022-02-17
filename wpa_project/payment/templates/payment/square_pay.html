@@ -26,58 +26,51 @@
     <div class="col" id="message"> {{ message }}</div>
   </div>
   <div class="p-1">
-    <div class="row"><h4>Purchase Items</h4></div>
-    <div class="row table_head">
-      <div class="col-md">
-        <strong>Item</strong>
-      </div>
-      <div class="col-md-2">
-        <strong>Quanity</strong>
-      </div>
-      <div class="col-md-2">
-        <strong>Amount each</strong>
-      </div>
-      <div class="col-md-2">
-        <strong>Amount</strong>
-      </div>
+    {% if donation %}
+      <div class="row"><h4>Donation</h4></div>
+      <div class="p-1"> This is a donation only and will not register you for any classes.</div>
+    {% else %}
+      <div class="row"><h4>Purchase Items</h4></div>
+    {% endif %}
+    <div class="row m-1">
+      <table class="col table table-bordered
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <tr>
+              <th> Item </th>
+              <th> Quanity </th>
+              <th> Amount each </th>
+              <th> Amount </th>
+            </tr>
+        </thead>
+        <tbody id="class-list-body">
+            {% for row in rows %}
+              <tr>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.quantity }}</td>
+                  <td>{{ row.amount_each }}</td>
+                  <td>{{ row.amount_total }}</td>
+              </tr>
+            {% endfor %}
+            <tr>
+                <td>Donation</td>
+                <td></td>
+                <td></td>
+                <td><input type="number" value="0" id="donation"></td>
+            </tr>
+            <tr>
+                <td>Total</td>
+                <td></td>
+                <td></td>
+                <td id="total-div">{{ total }}</td>
+            </tr>
+        </tbody>
+      </table>
     </div>
-
-    {% for row in rows %}
-      <div class="row table_row border">
-        <div class="col-md">
-          {{ row.name }}
-        </div>
-        <div class="col-md-2">
-          {{ row.quantity }}
-        </div>
-        <div class="col-md-2">
-          {{ row.amount_each }}
-        </div>
-        <div class="col-md-2">
-          {{ row.amount_total }}
-        </div>
-      </div>
-    {% endfor %}
-      <div class="row table_row border border-top-0">
-        <div class="col-md">
-          Donation
-        </div>
-        <div class="col-md-2"></div>
-        <div class="col-md-2"></div>
-        <div class="col-md-2">
-          <input type="number" value="0" id="donation">
-        </div>
-      </div>
-      <div class="row table_row border border-top-0">
-        <div class="col-md">
-          Total
-        </div>
-        <div class="col-md-2"></div>
-        <div class="col-md-2"></div>
-        <div class="col-md-2" id="total-div">
-          {{ total }}
-        </div>
-      </div>
   </div>
 
   {% if bypass %}

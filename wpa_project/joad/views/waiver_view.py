@@ -22,10 +22,12 @@ class WaiverView(UserPassesTestMixin, View):
                        'is_signed': bool(student.signature)})
 
     def get_joad_class(self, class_id):
+        logging.debug(class_id)
         if class_id is not None:
             jc = JoadClass.objects.get(pk=class_id)
             if jc is not None:
                 return jc
+            logging.debug(jc)
         return None
 
     def post(self, request, student_id):
@@ -37,6 +39,7 @@ class WaiverView(UserPassesTestMixin, View):
                 jc = self.get_joad_class(request.session.get('joad_class', None))
                 a, created = Attendance.objects.get_or_create(joad_class=jc, student=student,
                                                               defaults={'attended': True})
+                logging.debug(created)
                 if not created:
                     a.attended = True
                     a.save()
