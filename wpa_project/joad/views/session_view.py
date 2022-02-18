@@ -1,6 +1,7 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404
 from django.views.generic.edit import FormView
+from django.views.generic.base import View
 from django.http import JsonResponse
 from django.urls import reverse, reverse_lazy
 
@@ -47,3 +48,20 @@ class SessionFormView(UserPassesTestMixin, FormView):
         if self.kwargs.get('session_id', None) is not None:
             self.session = get_object_or_404(Session, pk=self.kwargs['session_id'])
         return self.request.user.is_board
+
+
+class SessionStatusView(LoginRequiredMixin, View):
+    def get(self, request, session_id):
+        logging.debug(session_id)
+        session = get_object_or_404(Session, pk=session_id)
+        registrations = session.registration_set.all()
+        student_count = 0
+        for r in registrations:
+            if r.pay_status in ['paid', 'admin']:
+                student_count += 1
+
+        logging.debug(student_count)
+        context = {'openings': session.student_limit - student_count, 'limit': session.student_limit,
+                   'cost': session.cost, 'status': session.state}
+        logging.debug(context)
+        return render(request, 'joad/session_status.html', context)

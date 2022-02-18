@@ -22,17 +22,20 @@ class TestsBusiness(TestCase):
         self.test_user = self.User.objects.get(pk=1)
         self.client.force_login(self.test_user)
 
-    # def test_get_business(self):
-    #     response = self.client.get(reverse('minutes:business'), secure=True)
-    #     self.assertTemplateUsed('minutes/forms/business_form.html')
+    def test_get_business(self):
+        response = self.client.get(reverse('minutes:business'), secure=True)
+        self.assertTemplateUsed('minutes/forms/business_form.html')
+        self.assertIn('business', response.context)
 
-    # def test_get_business_existing(self):
-    #     b1 = Business(minutes=None, added_date='2021-09-04', business='Some old test business')
-    #     b1.save()
-    #
-    #     response = self.client.get(reverse('minutes:business', kwargs={'business_id': b1.id}), secure=True)
-    #     self.assertTemplateUsed('minutes/forms/business_form.html')
-    #
+    def test_get_business_existing(self):
+        b1 = Business(minutes=None, added_date='2021-09-04', business='Some old test business')
+        b1.save()
+
+        response = self.client.get(reverse('minutes:business', kwargs={'business_id': b1.id}), secure=True)
+        self.assertTemplateUsed('minutes/forms/business_form.html')
+        self.assertIn('business', response.context)
+        self.assertContains(response, 'Some old test business')
+
     def test_post_business_new(self):
         d = {'business': "test business text", 'resolved_bool': False}
         response = self.client.post(reverse('minutes:business'), d, secure=True)

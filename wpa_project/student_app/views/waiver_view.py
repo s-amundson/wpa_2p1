@@ -30,7 +30,7 @@ class WaiverView(UserPassesTestMixin, FormView):
         logging.debug('valid')
         if form.make_pdf():
             self.update_attendance()
-            # form.send_pdf()
+            form.send_pdf()
         return HttpResponseRedirect(self.success_url)
 
     def post(self, request, *args, **kwargs):

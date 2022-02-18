@@ -56,3 +56,10 @@ class TestsJoadSession(TestCase):
         # allow user to access
         response = self.client.post(reverse('joad:session', kwargs={'session_id': 1}), self.session_dict, secure=True)
         self.assertEqual(response.status_code, 200)
+
+    def get_session_status(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('joad:session_status', kwargs={'session_id': 1}), secure=True)
+        self.assertEqual(response.context['cost'], 120)
+        self.assertEqual(response.context['limit'], 10)
