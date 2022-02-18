@@ -7,6 +7,7 @@
     <script src="{% static 'js/joad_registration.js' %}"></script>
     <script>
         let class_list_url = "{% url 'joad:class_list' %}";
+        let session_status_url = "{% url 'joad:session_status' %}";
     </script>
 {% endblock %}
 
@@ -19,7 +20,10 @@
                 {{ form.session.errors }}
                 {{ form.session.label_tag }}
                 {{ form.session }}
+                {{ form.session.id }}
             </div>
+            <div id="status-div"></div>
+            <div> Student(s): </div>
             {% for student in form.get_boxes %}
                 <div class="input-group input-group-md">
                     {{ student }} {{ student.label }}

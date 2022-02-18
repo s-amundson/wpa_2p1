@@ -71,10 +71,15 @@ class TestsProcessPayment(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 0)
 
-
     def test_bypass(self):
         response = self.client.post(reverse('payment:process_payment'),
                                     {'bypass': ''}, secure=True)
         self.assertTemplateUsed('student_app/message.html')
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
+
+    def test_get_donate_page(self):
+        response = self.client.get(reverse('payment:donation'), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('payment/square_pay.html')
+        self.assertEqual(self.client.session['line_items'], [])

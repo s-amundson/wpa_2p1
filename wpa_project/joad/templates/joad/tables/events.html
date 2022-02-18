@@ -49,8 +49,10 @@
     </tbody>
 </table>
 <div class="m-2">
-    <a href="{% url 'joad:event' %}" class="btn btn-primary" role="button">
-        Add Event
-    </a>
+    {% if user.is_staff %}
+        <a href="{% url 'joad:event' %}" class="btn btn-primary" role="button">
+            Add Event
+        </a>
+    {% endif %}
 </div>
 

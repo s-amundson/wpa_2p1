@@ -5,6 +5,9 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/joad_registration.js' %}"></script>
+    <script>
+        let class_list_url = null;
+    </script>
 {% endblock %}
 
 {% block main %}
@@ -77,7 +80,7 @@
                     {% for row in session.registrations %}
                         <td>
                             {% if row.is_joad %}
-                                {% if row %}
+                                {% if row.reg %}
                                     Registered
                                 {% else %}
                                     <a href="{% url 'joad:registration' session.id %}" class="btn btn-primary" role="button">

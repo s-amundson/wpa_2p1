@@ -11,6 +11,12 @@ $(document).ready(function(){
             $("#joad-event-div").html(data)
         });
     }
+    if (class_list_url != null){
+        load_class_table();
+    }
+    if (session_status_url != null){
+        load_session_status();
+    }
 });
 
 
@@ -20,6 +26,15 @@ function load_class_table(){
     }
     $.get(class_list_url + $("#id_session").val(), function(data, status){
         $("#class-table-div").html(data);
+    });
+}
+
+function load_session_status(){
+    if ($("#id_session").val() == "") {
+        return;
+    }
+    $.get(session_status_url + $("#id_session").val(), function(data, status){
+        $("#status-div").html(data);
     });
 }
 
