@@ -32,7 +32,7 @@ class ClassRegistrationForm(forms.Form):
                 yield self[field_name]
 
     def get_open_classes(self, user):
-        classes = BeginnerClass.objects.filter(class_date__gt=timezone.now())
+        classes = BeginnerClass.objects.filter(class_date__gt=timezone.now()).order_by('class_date')
         if user.is_board:
             classes = classes.filter(Q(state='open') | Q(state='full') | Q(state='closed'))
         elif user.is_staff:

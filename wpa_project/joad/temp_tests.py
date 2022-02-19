@@ -1,6 +1,6 @@
 # from .tests.tests_event import TestsJoadEvent
 # from .tests.tests_event_attendance import TestsEventAttendance
-# from .tests.tests_eventregistration import TestsJoadEventRegistration
+from .tests.tests_eventregistration import TestsJoadEventRegistration
 # from .tests.tests_attendance import TestsJoadAttendance
 # from .tests.tests_class import TestsJoadClass
 # from .tests.tests_class import TestsJoadClassList

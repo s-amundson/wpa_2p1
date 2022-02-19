@@ -33,6 +33,14 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'program_app/class_registration.html')
 
+    def test_class_get_no_student_family(self):
+        student = self.test_user.student_set.first()
+        student.student_family = None
+        student.save()
+
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
+        self.assertRedirects(response, reverse('registration:profile'))
+
     def test_class_register_good(self):
         # add a user to the class
         self.client.post(reverse('programs:class_registration'),
@@ -209,10 +217,11 @@ class TestsClassRegistration(TestCase):
 
         response = self.client.get(reverse('programs:class_registration'), secure=True)
         self.assertEqual(self.client.session['message'], 'Address form is required')
-        # self.assertTemplateUsed(response, 'student_app/class_registration.html')
+        self.assertRedirects(response, reverse('registration:profile'))
 
         response = self.client.get(reverse('programs:class_registered_table'), secure=True)
         self.assertEqual(self.client.session['message'], 'Address form is required')
+        self.assertRedirects(response, reverse('registration:profile'))
 
     def test_class_register_return_for_payment(self):
         # add 1 beginner students and 1 returnee.

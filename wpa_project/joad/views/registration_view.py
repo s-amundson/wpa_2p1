@@ -1,6 +1,6 @@
 from django.views.generic.edit import FormView
 from django.urls import reverse, reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect
@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RegistrationView(LoginRequiredMixin, FormView):
+class RegistrationView(UserPassesTestMixin, FormView):
     template_name = 'joad/registration.html'
     form_class = RegistrationForm
     success_url = reverse_lazy('payment:process_payment')
@@ -99,3 +99,11 @@ class RegistrationView(LoginRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         logging.debug(self.request.POST)
         return super().post(request, *args, **kwargs)
+
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            if self.request.user.student_set.first().student_family is None:
+                HttpResponseRedirect(reverse('registration:profile'))
+            return True
+        else:
+            return False

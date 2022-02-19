@@ -20,7 +20,7 @@ class TestsJoadEventRegistration(TestCase):
 
     def _set_joad_age(self, student, age=None):
         if age is None:
-            age = random.randint(9, 20)
+            age = random.randint(10, 19)
         dob = student.dob
         birth = timezone.now().date()
         student.dob = birth.replace(year=birth.year - age, month=dob.month, day=dob.day)
