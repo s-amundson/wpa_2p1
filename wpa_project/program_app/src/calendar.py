@@ -27,7 +27,7 @@ class Calendar(HTMLCalendar):
             if event.class_type == 'combined':
                 btn_color = 'btn-info'
             elif event.class_type == 'returnee':
-                btn_color = 'btn-secondary'
+                btn_color = 'btn-success'
             cd = timezone.localtime(event.class_date)
             data += f'<li><button class="btn {btn_color} bc-btn m-1" type="button" bc_id="{event.id}" '
             if not self.staff and event.state not in ['open']:

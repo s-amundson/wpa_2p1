@@ -23,7 +23,7 @@ class IndexView(LoginRequiredMixin, View):
             sessions = sessions.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
         sessions = sessions.order_by('start_date')
         session_list = []
-        has_joad = False
+        has_joad = request.user.is_staff
         for session in sessions:
             s = model_to_dict(session)
             reg_list = []
