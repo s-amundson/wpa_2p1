@@ -54,8 +54,8 @@ function edit_btn(){
 function load_class_table(){
     $.get(class_list_url + session_id + '/', function(data, status){
         $("#class-table-div").html(data);
+        edit_btn();
     });
-    edit_btn();
 }
 
 function load_joad_class_form(class_id) {

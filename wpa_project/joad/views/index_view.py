@@ -44,6 +44,7 @@ class IndexView(LoginRequiredMixin, View):
         if not request.user.is_board:
             events = events.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
         event_list = []
+        logging.debug(events)
         for event in events:
             e = model_to_dict(event)
             reg_list = []

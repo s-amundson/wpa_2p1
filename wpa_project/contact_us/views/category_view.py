@@ -34,7 +34,6 @@ class CategoryListView(UserPassesTestMixin, ListView):
             r = []
             for u in c.recipients.all():
                 s = u.student_set.first()
-                logging.debug(s)
                 r.append(f'{s.first_name} {s.last_name}')
             categories.append({'id': c.id, 'title': c.title, 'recipients': r})
         context['categories'] = categories

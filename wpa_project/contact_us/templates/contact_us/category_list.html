@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} Student List {% endblock %}
+{% block title %} Category List {% endblock %}
 
 
 {% block main %}
@@ -25,5 +25,12 @@
         <h6>No categories yet.</h6>
     {% endfor %}
 
+    <div class="d-flex flex-row m-2">
+        <div class="m-3">
+            <a href="{% url 'contact_us:category'%}" class="btn btn-primary" role="button">
+                Add Category
+            </a>
+        </div>
+    </div>
 
 {% endblock %}

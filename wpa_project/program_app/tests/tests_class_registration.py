@@ -264,7 +264,6 @@ class TestsClassRegistration(TestCase):
             attended=False)
         cr.save()
 
-        # response = self.client.get(reverse('programs:class_status', kwargs={'class_date': '2022-06-05'}), secure=True)
         response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
         content = json.loads(response.content)
         logging.debug(content)
@@ -544,3 +543,20 @@ class TestsClassAdminRegistration(TestCase):
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertContains(response, f'{s.first_name} {s.last_name} already registered by admin')
+
+    def test_class_add_student_after_class(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_date = timezone.now() - timezone.timedelta(hours=3)
+        bc.state = 'closed'
+        bc.save()
+
+        response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
+                                    self.post_dict, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'closed')
+        cr = ClassRegistration.objects.all()
+        # logging.debug(len(cr))
+        self.assertEqual(len(cr), 2)
+        for c in cr:
+            self.assertEqual(c.pay_status, 'admin')
+        self.assertRedirects(response, reverse('programs:beginner_class', kwargs={'beginner_class': 1}))

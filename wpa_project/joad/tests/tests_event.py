@@ -55,6 +55,16 @@ class TestsJoadEvent(TestCase):
         event = JoadEvent.objects.all()
         self.assertEqual(len(event), 2)
 
+    def test_board_user_post_event_invalid(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+
+        del self.event_dict['event_date']
+
+        response = self.client.post(reverse('joad:event'), self.event_dict, secure=True)
+        event = JoadEvent.objects.all()
+        self.assertEqual(len(event), 1)
+        self.assertContains(response, 'This field is required.')
 
 class TestsJoadClassList(TestCase):
     fixtures = ['f1', 'joad1']

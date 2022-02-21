@@ -44,7 +44,7 @@ class RegistrationView(UserPassesTestMixin, FormView):
         # message = ""
         logging.debug(form.cleaned_data['session'])
         session = form.cleaned_data['session']
-        if session.state != "open":
+        if session.state != "open": # pragma: no cover
             return self.has_error('Session in wrong state')
 
         reg = Registration.objects.filter(session=session).exclude(
@@ -57,10 +57,11 @@ class RegistrationView(UserPassesTestMixin, FormView):
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
                 age = StudentHelper().calculate_age(s.dob, session.start_date)
+                logging.debug(age)
                 if age < 9:
-                    self.has_error('Student is to young')
-                if age > 20:
-                    self.has_error('Student is to old.')
+                    return self.has_error('Student is to young')
+                if age > 20: # pragma: no cover
+                    return self.has_error('Student is to old.')
 
                 logging.debug(s)
                 sreg = reg.filter(student=s)
@@ -103,7 +104,8 @@ class RegistrationView(UserPassesTestMixin, FormView):
     def test_func(self):
         if self.request.user.is_authenticated:
             if self.request.user.student_set.first().student_family is None:
-                HttpResponseRedirect(reverse('registration:profile'))
+                # return HttpResponseRedirect(reverse('registration:profile'))
+                return False
             return True
         else:
             return False

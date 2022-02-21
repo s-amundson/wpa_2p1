@@ -11,7 +11,6 @@ class WaiverView(StudentWaiverView):
             jc = JoadClass.objects.get(pk=class_id)
             if jc is not None:
                 return jc
-            logging.debug(jc)
         return None
 
     def update_attendance(self):

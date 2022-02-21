@@ -66,6 +66,9 @@ class TestsJoadClass(TestCase):
         jc = JoadClass.objects.get(pk=1)
         self.assertEqual(jc.class_date, datetime(2022, 4, 5, 1, 0, tzinfo=timezone.utc))
 
+    def test_get_states(self):
+        self.assertEqual(JoadClass().get_states(), ['scheduled', 'past', 'canceled'])
+
 
 class TestsJoadClassList(TestCase):
     fixtures = ['f1', 'joad1']
