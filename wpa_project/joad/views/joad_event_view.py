@@ -39,10 +39,6 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
         context['student'] = f'{self.student.first_name} {self.student.last_name}'
         return context
 
-    def form_invalid(self, form):
-        logging.debug(form.errors)
-        return super().form_invalid(form)
-
     def form_valid(self, form):
         logging.debug(form.cleaned_data)
         record = form.save()
@@ -56,7 +52,7 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
                 pin_cost = CostsModel.objects.filter(name='JOAD Pin', enabled=True)
                 if pin_cost is not None:
                     pin_cost = pin_cost[0].standard_cost
-                else:
+                else: # pragma: no cover
                     pin_cost = 6
                 uid = str(uuid.uuid4())
                 self.request.session['idempotency_key'] = uid

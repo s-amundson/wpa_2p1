@@ -19,15 +19,11 @@ class ClassAttendView(UserPassesTestMixin, View):
                     cr.student.safety_class = cr.beginner_class.class_date
                     cr.student.save()
             else:
-                if cr.beginner_class.class_date == cr.student.safety_class:
+                if cr.beginner_class.class_date.date() == cr.student.safety_class:
                     cr.student.safety_class = None
                     cr.student.save()
             cr.save()
             return JsonResponse({'error': False})
-        # if f'covid_vax_{cr.student.id}' in request.POST:
-        #     cr.student.covid_vax = request.POST[f'covid_vax_{cr.student.id}'] in ['true', 'on']
-        #     cr.student.save()
-        #     return JsonResponse({'error': False})
         return JsonResponse({'error': True})
 
     def test_func(self):

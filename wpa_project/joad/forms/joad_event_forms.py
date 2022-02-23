@@ -45,8 +45,8 @@ class EventRegistrationForm(MyModelForm):
             if field_name.startswith('student_'):
                 yield self[field_name]
 
-    def save(self, commit=True):
-        logging.debug('save')
+    # def save(self, commit=True):
+    #     logging.debug('save')
 
 
 class JoadEventForm(MyModelForm):

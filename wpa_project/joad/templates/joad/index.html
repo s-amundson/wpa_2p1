@@ -7,6 +7,8 @@
     <script src="{% static 'js/joad_registration.js' %}"></script>
     <script>
         let class_list_url = null;
+        let session_status_url = null;
+        let has_joad = {{ has_joad|lower }};
     </script>
 {% endblock %}
 
@@ -15,7 +17,7 @@
         <div class="col-4 text-center"><h2> JOAD </h2></div>
     </div>
 
-    {% if not is_auth %}
+    <div id="joad-info-div" class="row">
         <p>
             Junior Olympic Archery Development (JOAD) is a program of USA Archery that teaches archery to young people,
             provides great opportunities for awarding achievement, and helps archers to enjoy the sport recreationally or
@@ -47,7 +49,14 @@
         <p>
             A student must get pre-approval from a WPA instructor prior to being allowed to register for JOAD.
         </p>
-    {% endif %}
+    </div>
+    <div class="row">
+        <div class="m-3">
+            <button id="joad-info-btn" class="btn btn-info" type="button">
+                Show Information
+            </button>
+        </div>
+    </div>
     <div class="row"><h5>Upcoming Sessions:</h5></div>
     <table class="table table-bordered
         {% if user.dark_theme %}

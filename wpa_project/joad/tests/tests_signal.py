@@ -1,15 +1,13 @@
 import logging
-import uuid
+
 from django.test import TestCase, Client
-from django.urls import reverse
 from django.apps import apps
 from django.utils import timezone
-from datetime import date, timedelta
 
 from ..models import EventRegistration, JoadEvent, Registration, PinAttendance, Session
 
 from payment.models import PaymentLog
-from student_app.models import Student, StudentFamily
+from student_app.models import Student
 logger = logging.getLogger(__name__)
 
 

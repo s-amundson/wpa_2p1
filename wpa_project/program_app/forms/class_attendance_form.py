@@ -30,7 +30,7 @@ class ClassAttendanceForm(forms.Form):
                 self.staff.append(self.student_dict(cr, True))
                 if cr.attended:
                     self.attend_count['staff'] += 1
-            elif cr.student.safety_class is None or cr.student.safety_class <= self.class_date.date():
+            elif cr.student.safety_class is None or cr.student.safety_class >= self.class_date.date():
                 self.new_students.append(self.student_dict(cr, bool(cr.student.signature)))
                 if cr.attended:
                     self.attend_count['beginner'] += 1

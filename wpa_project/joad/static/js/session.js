@@ -12,6 +12,7 @@ $(document).ready(function(){
         load_joad_class_form(null);
     });
     edit_btn();
+    load_class_table();
 
     $(".attend-check").change(function(e){
         let data = {
@@ -20,6 +21,7 @@ $(document).ready(function(){
         data[$(this).attr('id')] = $(this).prop('checked');
         post_attend($(this).attr('attend_url'), data);
     });
+
     console.log($("#joad-event-div").length)
     if ($("#joad-event-div").length) {
         $.get(joad_event_list_url, function(data, status){
@@ -52,8 +54,8 @@ function edit_btn(){
 function load_class_table(){
     $.get(class_list_url + session_id + '/', function(data, status){
         $("#class-table-div").html(data);
+        edit_btn();
     });
-    edit_btn();
 }
 
 function load_joad_class_form(class_id) {

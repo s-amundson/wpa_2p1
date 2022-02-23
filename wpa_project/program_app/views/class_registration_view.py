@@ -1,10 +1,10 @@
 import uuid
 from django.apps import apps
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, AccessMixin
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic.base import View
@@ -38,12 +38,20 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
         return render(request, 'program_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
 
 
-class ClassRegistrationView(LoginRequiredMixin, FormView):
+class ClassRegistrationView(AccessMixin, FormView):
     template_name = 'program_app/class_registration.html'
     form_class = ClassRegistrationForm
     success_url = reverse_lazy('payment:process_payment')
     form = None
     students = None
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        if request.user.student_set.first().student_family is None:
+            request.session['message'] = 'Address form is required'
+            return HttpResponseRedirect(reverse('registration:profile'))
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -228,6 +236,7 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
         else:
             return False
 
+
 class ResumeRegistrationView(LoginRequiredMixin, View):
     def get(self, request, reg_id=None):
         try:
@@ -263,5 +272,3 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             request.session['class_registration'] = {'beginner_class': r.beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
             return HttpResponseRedirect(reverse('payment:process_payment'))
-
-

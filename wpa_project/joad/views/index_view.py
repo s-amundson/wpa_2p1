@@ -23,11 +23,13 @@ class IndexView(LoginRequiredMixin, View):
             sessions = sessions.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
         sessions = sessions.order_by('start_date')
         session_list = []
+        has_joad = request.user.is_staff
         for session in sessions:
             s = model_to_dict(session)
             reg_list = []
             for student in students:
                 if student.is_joad:
+                    has_joad = True
                     reg = session.registration_set.filter(student=student, pay_status='paid')
                     if len(reg) > 0:
                         logging.debug(reg)
@@ -42,6 +44,7 @@ class IndexView(LoginRequiredMixin, View):
         if not request.user.is_board:
             events = events.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
         event_list = []
+        logging.debug(events)
         for event in events:
             e = model_to_dict(event)
             reg_list = []
@@ -60,5 +63,5 @@ class IndexView(LoginRequiredMixin, View):
             logging.debug(e)
             event_list.append(e)
         return render(request, 'joad/index.html',
-                      {'session_list': session_list, 'students': students, 'is_auth': is_auth,
+                      {'session_list': session_list, 'students': students, 'has_joad': has_joad, 'is_auth': is_auth,
                        'event_list': event_list})

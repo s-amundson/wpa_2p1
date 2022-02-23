@@ -14,6 +14,6 @@
 # from .tests.tests_student_registration import TestsRegisterStudent
 # from .tests.tests_theme import TestsTheme
 # from .tests.tests_user import TestsUserView
-from .tests.tests_waiver import TestsWaiver
+# from .tests.tests_waiver import TestsWaiver
 
 

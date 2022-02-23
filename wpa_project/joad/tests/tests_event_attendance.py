@@ -39,6 +39,7 @@ class TestsEventAttendance(TestCase):
                                    secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'joad/pin_attendance.html')
+        self.assertContains(response, 'disabled', 2)
 
     def test_post_student_bad(self):
         self.test_user = User.objects.get(pk=7)
@@ -145,5 +146,33 @@ class TestsEventAttendance(TestCase):
         self.assertTrue(pa[0].attended)
         self.assertEqual(pa[0].stars, 9)
         self.assertRedirects(response, reverse('joad:index'), 302)
-        # messages = list(response.context['messages'])
-        # self.assertEqual(str(messages[0]), "No pins earned today. Thank you")
+
+    def test_staff_get_award(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        pa = PinAttendance.objects.create(event=JoadEvent.objects.get(pk=1),
+                                          student=Student.objects.get(pk=10),
+                                          attended=True,
+                                          previous_stars=2,
+                                          pay_status='paid',
+                                          idempotency_key='992c77a8-87cc-45af-b390-13d80554e3e0',
+                                          award_received=False)
+        response = self.client.get(reverse('joad:event_attendance', kwargs={'event_id': 1, 'student_id': 10}),
+                                   secure=True)
+        self.assertContains(response, 'disabled', 4)
+
+    def test_staff_post_award(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        pa = PinAttendance.objects.create(event=JoadEvent.objects.get(pk=1),
+                                          student=Student.objects.get(pk=10),
+                                          attended=True,
+                                          previous_stars=2,
+                                          pay_status='paid',
+                                          idempotency_key='992c77a8-87cc-45af-b390-13d80554e3e0',
+                                          award_received=False)
+        response = self.client.post(reverse('joad:event_attendance', kwargs={'event_id': 1, 'student_id': 10}),
+                                    {'award_received': True}, secure=True)
+        self.assertEqual(response.status_code, 302)
+        pa2 = PinAttendance.objects.get(pk=pa.id)
+        self.assertTrue(pa2.award_received)
