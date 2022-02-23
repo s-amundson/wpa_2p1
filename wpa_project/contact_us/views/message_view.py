@@ -4,6 +4,7 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 
 from ..forms import MessageForm
 from ..models import Message
@@ -31,6 +32,11 @@ class MessageView(FormView):
     form_class = MessageForm
     success_url = reverse_lazy('registration:index')
     message = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['email'] = settings.DEFAULT_FROM_EMAIL
+        return context
 
     def get_form(self):
         message = self.kwargs.get("message_id", None)

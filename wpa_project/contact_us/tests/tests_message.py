@@ -34,6 +34,7 @@ class TestsMessage(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'contact_us/message.html')
         self.assertTrue(response.context['form'].has_instance)
+        self.assertTrue(len(response.context['email']) > 5)
 
     def test_get_message_nonuser(self):
         self.client.logout()

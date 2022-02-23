@@ -5,9 +5,22 @@
 
     <div class="navbar-expand-md" id="navbar">
         <ul class="navbar-nav md-auto mt-2">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'registration:help' %}">Help</a>
-            </li>
+            {% if user.is_board %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        Contact Us
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'contact_us:contact' %}">Contact Us</a>
+                        <a class="dropdown-item" href="{% url 'contact_us:category_list' %}">Categories</a>
+                        <a class="dropdown-item" href="{% url 'contact_us:message_list' %}">Messages</a>
+                    </div>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contact_us:contact' %}">Contact Us</a>
+                </li>
+            {% endif %}
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'payment:donation' %}">Donate</a>
             </li>
@@ -24,20 +37,20 @@
 
             {% if user.is_authenticated %}
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                            Membership
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            {% if user.is_member %}
-                                Membership coming soon.
-                                <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
-                            {% else %}
-                                Membership coming soon.
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        Membership
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        {% if user.is_member %}
+                            Membership coming soon.
+                            <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
+                        {% else %}
+                            Membership coming soon.
 
-                            {% endif %}
-                        </div>
-                    </li>
+                        {% endif %}
+                    </div>
+                </li>
 
                 {% if user.is_staff %}
                     <li class="nav-item dropdown">
