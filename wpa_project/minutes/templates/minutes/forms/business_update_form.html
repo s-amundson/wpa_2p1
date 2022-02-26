@@ -1,8 +1,8 @@
 <div class="row">
     <div class="col">
-        <div class="row">
+        <div class="row div-update-row">
             {% csrf_token %}
-            <input id="business-update-id" value="{{ update.id }}" style="display: none;">
+            {{ update.form.update_id}}
             {{ update.form.business }}
             <div class="col-1"></div>
             <div class="col">

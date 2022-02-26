@@ -6,10 +6,9 @@ from django.views.generic.base import View
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
-from allauth.account.models import EmailAddress
 from ..forms import CategoryForm
 from ..models import Category
-from student_app.models import Student
+
 logger = logging.getLogger(__name__)
 
 
@@ -44,7 +43,7 @@ class CategoryListView(UserPassesTestMixin, ListView):
 
 
 class CategoryView(UserPassesTestMixin, FormView):
-    template_name = 'contact_us/message.html'
+    template_name = 'contact_us/category.html'
     form_class = CategoryForm
     success_url = reverse_lazy('contact_us:category_list')
 

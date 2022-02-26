@@ -1,7 +1,6 @@
-<div class="row report-div" id="report-div">
+<div class="row report-div" id="report-div-{{ report.form.report_index }}">
     {% csrf_token %}
-    <input type="hidden" id="report-id" value="{{ report.id }}">
-
+    {{ report.form.report_id }}
     {{ report.form.minutes }}
     {{ report.form.owner }}
     {{ report.form.report }}
