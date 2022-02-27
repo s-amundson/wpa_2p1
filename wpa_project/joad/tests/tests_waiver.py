@@ -41,8 +41,8 @@ class TestsWaiver(TestCase):
         self._set_session(1)
         response = self.client.post(reverse('joad:waiver', kwargs={'student_id': 10}), self.img, secure=True)
         self.assertEqual(response.status_code, 302)
-        a = Attendance.objects.get(pk=1)
-        self.assertTrue(a.attended)
+        a = Attendance.objects.all()
+        self.assertTrue(a[0].attended)
 
     def test_post_sign_in_page_none(self):
         self._set_session(1)
@@ -60,8 +60,8 @@ class TestsWaiver(TestCase):
     def test_post_sign_in_page_no_class(self):
         response = self.client.post(reverse('joad:waiver', kwargs={'student_id': 10}), self.img, secure=True)
         self.assertEqual(response.status_code, 302)
-        a = Attendance.objects.get(pk=1)
-        self.assertTrue(a.attended)
+        a = Attendance.objects.all()
+        self.assertTrue(a[0].attended)
 
     def test_post_sign_in_attending(self):
         jc = JoadClass.objects.get(pk=1)
@@ -70,5 +70,5 @@ class TestsWaiver(TestCase):
         a.save()
         self._set_session(1)
         response = self.client.post(reverse('joad:waiver', kwargs={'student_id': 10}), self.img, secure=True)
-        a = Attendance.objects.get(pk=1)
-        self.assertTrue(a.attended)
+        a = Attendance.objects.all()
+        self.assertTrue(a[0].attended)

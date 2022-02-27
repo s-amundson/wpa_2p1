@@ -63,7 +63,6 @@ class TestsDecision(TestCase):
         d = {'text': 'test decision'}
         response = self.client.post(reverse('minutes:decision'), d, secure=True)
         self.assertEqual(len(Decision.objects.all()), 0)
-        self.assertEqual(Decision.objects.last().text, 'test decision')
 
     def test_post_report_existing(self):
         r = Decision(decision_date='2021-12-20', text='old decision')
