@@ -55,7 +55,7 @@ class TestsCategory(TestCase):
     def test_category_view_get_auth(self):
         response = self.client.get(reverse('contact_us:category'), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'contact_us/message.html')
+        self.assertTemplateUsed(response, 'contact_us/category.html')
 
     def test_category_view_get_no_auth(self):
         self.test_user = User.objects.get(pk=3)
@@ -69,7 +69,7 @@ class TestsCategory(TestCase):
 
         response = self.client.get(reverse('contact_us:category', kwargs={'category_id': c.id}), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'contact_us/message.html')
+        self.assertTemplateUsed(response, 'contact_us/category.html')
 
     def test_category_view_post_auth(self):
         post_dict = {'title': ['Events'], 'recipients': ['1']}
@@ -79,7 +79,7 @@ class TestsCategory(TestCase):
     def test_category_view_post_auth_invalid(self):
         post_dict = {'recipients': ['1']}
         response = self.client.post(reverse('contact_us:category'), post_dict, secure=True)
-        self.assertTemplateUsed(response, 'contact_us/message.html')
+        self.assertTemplateUsed(response, 'contact_us/category.html')
         self.assertContains(response, 'This field is required.')
 
     def test_category_view_post_no_auth(self):

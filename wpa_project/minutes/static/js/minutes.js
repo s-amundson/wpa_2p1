@@ -3,11 +3,13 @@ var report_owners = ['president', 'vice', 'secretary', 'treasure'];
 
 $(document).ready(function() {
     // if meeting has started display time started. else put button to start meeting.
-    if ($("#id_start_time").val() == "") {
-        $("#id_start_time").hide();
+    if (minutes_id) {
+        $("#id_start_time").show();
+        $("#btn-start").hide();
     }
     else {
-        $("#btn-start").hide();
+        $("#btn-start").show();
+        $("#id_start_time").hide();
     }
     $("#btn-start").click(function(e){
         e.preventDefault();
@@ -143,7 +145,6 @@ function index_report_div(container) {
         save_report(container);
     });
 }
-
 
 function indicate_saved(status) {
     // show user that the information was saved or error
