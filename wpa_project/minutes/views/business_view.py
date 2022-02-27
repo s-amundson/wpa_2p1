@@ -30,6 +30,7 @@ class BusinessView(UserPassesTestMixin, FormView):
         kwargs = super().get_form_kwargs()
         if self.business_id is not None:
             kwargs['instance'] = Business.objects.get(pk=self.business_id)
+        kwargs['report'] = self.request.GET.get('report_index', None)
         return kwargs
 
     def form_invalid(self, form):
@@ -51,6 +52,8 @@ class BusinessView(UserPassesTestMixin, FormView):
         return JsonResponse({'business_id': self.business_id, 'success': True, 'resolved': resolved})
 
     def test_func(self):
+        logging.debug(self.request.GET)
+        logging.debug(self.kwargs)
         self.business_id = self.kwargs.get('business_id', None)
         if self.request.method == 'GET':
             return self.request.user.is_member
@@ -62,9 +65,9 @@ class BusinessUpdateView(LoginRequiredMixin, View):
         logging.debug(request.GET)
         if update_id:
             report = BusinessUpdate.objects.get(pk=update_id)
-            form = BusinessUpdateForm(instance=report)
+            form = BusinessUpdateForm(instance=report, report=request.GET.get('report_index', None))
         else:
-            form = BusinessUpdateForm()
+            form = BusinessUpdateForm(report=request.GET.get('report_index', None))
         b = {'form': form, 'id': update_id}
         return render(request, 'minutes/forms/business_update_form.html', {'update': b})
 

@@ -30,7 +30,7 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
         except (Student.DoesNotExist, AttributeError):
             request.session['message'] = 'Address form is required'
             return HttpResponseRedirect(reverse('registration:profile'))
-        bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:3],
+        bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:4],
                                           class_date__gte=timezone.localdate(timezone.now()))
         enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
             pay_status='refunded').exclude(pay_status='canceled')

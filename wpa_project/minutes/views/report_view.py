@@ -19,9 +19,9 @@ class ReportView(LoginRequiredMixin, View):
         logging.debug(request.GET)
         if report_id:
             report = Report.objects.get(pk=report_id)
-            form = ReportForm(instance=report, edit=request.user.is_board)
+            form = ReportForm(instance=report, edit=request.user.is_board, report_index=request.GET.get('report_index', None))
         else:
-            form = ReportForm(edit=request.user.is_board)
+            form = ReportForm(edit=request.user.is_board, report_index=request.GET.get('report_index', None))
         r = {'form': form, 'id': report_id}
         logging.debug(r)
         return render(request, 'minutes/forms/report_form.html', {'report': r})
