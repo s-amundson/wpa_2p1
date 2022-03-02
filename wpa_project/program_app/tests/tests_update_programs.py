@@ -26,16 +26,12 @@ class TestsUpdatePrograms(TestCase):
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
         bc = BeginnerClass(class_date=d, class_type='combined', beginner_limit=10, returnee_limit=10, state='open')
         bc.save()
-        # d = timezone.datetime(year=d.year, month=d.month, day=25, hour=9)
-        # bc = BeginnerClass(class_date=d, class_type='combined', beginner_limit=10, returnee_limit=10, state='open')
-        # bc.save()
 
         UpdatePrograms().beginner_class()
         # count is 11 on Saturdays
         self.assertTrue(BeginnerClass.objects.all().count() == 9 or BeginnerClass.objects.all().count() == 11)
         self.assertEqual(BeginnerClass.objects.get(pk=bc.id).state, 'closed')
         for i in range(8):
-            # self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 1 + i).state, 'open')
             self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 1 + i).state, 'open')
         # self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 2).state, 'open')
 
@@ -44,9 +40,6 @@ class TestsUpdatePrograms(TestCase):
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
         bc = BeginnerClass(class_date=d, class_type='combined', beginner_limit=10, returnee_limit=10, state='open')
         bc.save()
-        # d = timezone.datetime(year=d.year, month=d.month, day=25, hour=9)
-        # bc = BeginnerClass(class_date=d, class_type='combined', beginner_limit=10, returnee_limit=10, state='open')
-        # bc.save()
 
         UpdatePrograms().beginner_class()
         # count is 11 on Saturdays
@@ -80,8 +73,9 @@ class TestsUpdatePrograms(TestCase):
 
         UpdatePrograms().beginner_class()
         # logging.debug(mail.outbox[0].message())
-        self.assertEqual(mail.outbox[0].subject, 'WPA Class Status 2022-02-24')
-        s = 'Beginner class on Feb. 24, 2022, 9 a.m. has 2 students signed up and 3 volunteers signed up. The following volunteers are signed up:'
+        logging.debug(d.strftime('%Y-%m-%d'))
+        self.assertEqual(mail.outbox[0].subject, f"WPA Class Status {d.strftime('%Y-%m-%d')}")
+        s = 'has 2 students signed up and 3 volunteers signed up. The following volunteers are signed up:'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
 
     def test_email_notice_no_class(self):
