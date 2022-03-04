@@ -88,5 +88,6 @@ class DonationView(ProcessPaymentView):
     def get(self, request):
         request.session['idempotency_key'] = str(uuid.uuid4())
         request.session['line_items'] = []
+        request.session['db'] = None
         self.donation = True
         return super().get(request)

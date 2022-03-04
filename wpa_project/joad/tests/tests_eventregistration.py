@@ -137,3 +137,17 @@ class TestsJoadEventRegistration(TestCase):
         events = EventRegistration.objects.all()
         self.assertEqual(len(events), 1)
         self.assertContains(response, 'Class is full')
+
+    def test_student_post_closed(self):
+        self._set_joad_age(Student.objects.get(pk=5), 10)
+        j = JoadEvent.objects.get(pk=1)
+        j.state = 'closed'
+        j.save()
+
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+
+        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 1}),
+                                    {'event': 1, 'student_5': 'on'}, secure=True)
+        events = EventRegistration.objects.all()
+        self.assertEqual(len(events), 1)

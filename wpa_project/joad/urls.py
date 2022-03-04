@@ -21,6 +21,7 @@ urlpatterns = [
     path('pin_score_list/', PinScoreListView.as_view(), name='pin_score_list'),
     path('registration/<int:session_id>/', RegistrationView.as_view(), name='registration'),
     path('registration/', RegistrationView.as_view(), name='registration'),
+    path('resume_registration/<int:reg_id>/', ResumeRegistrationView.as_view(), name='resume_registration'),
     path('session/<int:session_id>/', SessionFormView.as_view(), name='session'),
     path('session/', SessionFormView.as_view(), name='session'),
     path('session_status/<int:session_id>/', SessionStatusView.as_view(), name='session_status'),

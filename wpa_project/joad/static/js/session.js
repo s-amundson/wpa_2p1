@@ -11,8 +11,10 @@ $(document).ready(function(){
         $(this).hide();
         load_joad_class_form(null);
     });
-    edit_btn();
-    load_class_table();
+    if (class_list_url != null) {
+        edit_btn();
+        load_class_table();
+    }
 
     $(".attend-check").change(function(e){
         let data = {

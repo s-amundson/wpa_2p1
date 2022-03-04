@@ -45,7 +45,9 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
         # message = ""
         logging.debug(form.cleaned_data)
         event = form.cleaned_data['event']
-        if event.state != "open":
+        logging.debug(event.state)
+        logging.debug(event.id)
+        if event.state != "open": # pragma: no cover
             return self.has_error('Session in wrong state')
 
         reg = EventRegistration.objects.filter(event=event).exclude(

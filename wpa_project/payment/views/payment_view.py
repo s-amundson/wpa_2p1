@@ -6,7 +6,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from ..serializers import PaymentSerializer
 from ..src import SquareHelper, EmailMessage
-
+from ..models import DonationLog
 logger = logging.getLogger(__name__)
 
 
@@ -34,8 +34,10 @@ class PaymentView(APIView):
 
             # if user donated money add it to the line itmes.
             donation = serializer.data.get('donation', None)
-            if donation is not None:
+            logging.debug(donation)
+            if donation is not None and donation > 0:
                 request.session['line_items'].append(self.square_helper.line_item('donation', 1, float(donation)))
+                self.square_helper.set_donation(donation, serializer.data.get('note', ''))
 
             # get the amount form the line items and get line item name and add to notes
             amt = 0
@@ -78,9 +80,9 @@ class PaymentView(APIView):
             logging.debug(request.session['line_items'])
             if square_response['status'] == 'COMPLETED':
                 # if payment is completed lets remove payment data from session
-                del request.session['line_items']
-                del request.session['idempotency_key']
-                del request.session['payment_db']
+                for key in ['line_items', 'idempotency_key', 'payment_db']:
+                    if key in request.session:
+                        del request.session[key]
             response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],
                              'error': square_response['error'], 'continue': False}
             return Response(response_dict)
