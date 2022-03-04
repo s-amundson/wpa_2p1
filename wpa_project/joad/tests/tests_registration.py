@@ -166,3 +166,19 @@ class TestsJoadRegistration(TestCase):
         # form limits students to joad age therefor 'Student is to old' doesn't execute
         self.assertEqual(str(messages[0]), 'Invalid student selected')
         self.assertEqual(response.status_code, 200)
+
+    def test_student_resume_register(self):
+        self.test_user = User.objects.get(pk=6)
+        self.client.force_login(self.test_user)
+        session = Session.objects.get(pk=1)
+        registration = Registration(pay_status='start',
+                                    idempotency_key='992c77a8-87cc-45af-b390-13d80554e3e0',
+                                    student=Student.objects.get(pk=8),
+                                    session=session)
+        registration.save()
+
+        response = self.client.get(reverse('joad:resume_registration', kwargs={'reg_id': registration.id}),
+                                    self.student_dict, secure=True)
+        logging.debug(self.client.session['line_items'][0]['name'])
+        self.assertEqual(self.client.session['line_items'][0]['name'], 'Joad session starting 2022-02-01 student id: 8')
+        self.assertEqual(self.client.session['payment_db'][1], 'Registration')

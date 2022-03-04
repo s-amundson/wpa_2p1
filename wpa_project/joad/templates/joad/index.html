@@ -57,6 +57,16 @@
             </button>
         </div>
     </div>
+    {% if pending %}
+        <div class="row"><h5>Incomplete Registration:</h5></div>
+        {% for registration in pending %}
+            <a href="{% url 'joad:resume_registration' registration.id %}">
+                Registration for {{ registration.student.first_name }} for session starting
+                {{ registration.session.start_date }}
+            </a>
+        {% endfor %}
+    {% endif %}
+
     <div class="row"><h5>Upcoming Sessions:</h5></div>
     <table class="table table-bordered
         {% if user.dark_theme %}

@@ -1,4 +1,5 @@
 from django.views.generic.edit import FormView
+from django.views.generic.base import View
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
@@ -104,8 +105,24 @@ class RegistrationView(UserPassesTestMixin, FormView):
     def test_func(self):
         if self.request.user.is_authenticated:
             if self.request.user.student_set.first().student_family is None:
-                # return HttpResponseRedirect(reverse('registration:profile'))
                 return False
             return True
         else:
             return False
+
+
+class ResumeRegistrationView(LoginRequiredMixin, View):
+    def get(self, request, reg_id=None):
+        registration = get_object_or_404(Registration, pk=reg_id)
+        registrations = Registration.objects.filter(idempotency_key=registration.idempotency_key)
+        logging.debug(registration)
+        self.request.session['idempotency_key'] = str(registration.idempotency_key)
+        self.request.session['line_items'] = []
+        self.request.session['payment_db'] = ['joad', 'Registration']
+        self.request.session['action_url'] = reverse('programs:class_payment')
+        for r in registrations:
+            self.request.session['line_items'].append(
+                SquareHelper().line_item(
+                    f"Joad session starting {str(r.session.start_date)[:10]} student id: {str(r.student.id)}",
+                    1, r.session.cost))
+        return HttpResponseRedirect(reverse('payment:process_payment'))
