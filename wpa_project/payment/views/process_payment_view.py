@@ -38,7 +38,7 @@ class ProcessPaymentView(LoginRequiredMixin, View):
             # No payment necessary
             # self.bypass_payment(request, table_rows)
         bypass = False
-        if request.user.is_board:
+        if request.user.is_board and not request.session.get('payment', False):
             bypass = True
         logging.debug(paydict)
         message = request.session.get('message', '')

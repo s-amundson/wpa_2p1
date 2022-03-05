@@ -20,6 +20,7 @@ class UpdatePrograms:
         staff_query = User.objects.filter(is_staff=True)
         students = Student.objects.filter(user__in=staff_query)
         classes = BeginnerClass.objects.filter(class_date__date=email_date, state__in=states[:3])
+        logging.debug(len(classes))
         if len(classes):
             class_list = []
             for c in classes:
@@ -38,6 +39,7 @@ class UpdatePrograms:
         # set past classes to recorded
         yesterday = today - timedelta(days=1)
         classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=states[:3])
+        logging.debug(len(classes))
         for c in classes:
             c.state = states[5]  # 'recorded'
             c.save()
