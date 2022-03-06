@@ -26,6 +26,9 @@ class ClassAttendanceForm(forms.Form):
                 is_staff = cr.student.user.is_staff
             except (cr.student.DoesNotExist, AttributeError):
                 is_staff = False
+            logging.debug(f'student: {cr.student.id}, class_date: {self.class_date.date()}, safety_class:{cr.student.safety_class}')
+            if cr.student.safety_class is not None:
+                logging.debug(cr.student.safety_class >= self.class_date.date())
             if is_staff:
                 self.staff.append(self.student_dict(cr, True))
                 if cr.attended:

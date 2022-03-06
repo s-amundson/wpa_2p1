@@ -6,7 +6,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from ..serializers import PaymentSerializer
 from ..src import SquareHelper, EmailMessage
-from ..models import DonationLog
+
 logger = logging.getLogger(__name__)
 
 
@@ -80,7 +80,7 @@ class PaymentView(APIView):
             logging.debug(request.session['line_items'])
             if square_response['status'] == 'COMPLETED':
                 # if payment is completed lets remove payment data from session
-                for key in ['line_items', 'idempotency_key', 'payment_db']:
+                for key in ['line_items', 'idempotency_key', 'payment_db', 'payment']:
                     if key in request.session:
                         del request.session[key]
             response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %} Admin Registration Log {% endblock %}
+
+{% block main %}
+    <div class="row p-3">
+        <h3>Class Registration Admin List</h3>
+    </div>
+    <table class="table table-bordered
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th> Administrator </th>
+                <th> Note </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for log in object_list %}
+            <tr>
+                <td>{{ log.id }}</td>
+                <td>
+                    {% for student in log.staff.student_set.all %}
+                        {{ student.first_name }} {{ student.last_name }}
+                    {% endfor %}
+                </td>
+                <td>{{ log.note }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="3"> No Logs </td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="d-flex flex-row m-2">
+        <div class="m-3">
+
+        </div>
+    </div>
+{% endblock %}

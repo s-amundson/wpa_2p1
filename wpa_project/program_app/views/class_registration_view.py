@@ -13,7 +13,7 @@ import logging
 
 
 from ..forms import ClassRegistrationForm
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass, ClassRegistration, ClassRegistrationAdmin
 from ..src import ClassRegistrationHelper
 from student_app.src import StudentHelper
 from payment.src import SquareHelper
@@ -63,9 +63,8 @@ class ClassRegistrationView(AccessMixin, FormView):
         logging.debug('get_form')
         try:
             self.students = Student.objects.get(user=self.request.user).student_family.student_set.all()
-        except (Student.DoesNotExist, AttributeError):
+        except (Student.DoesNotExist, AttributeError):  # pragma: no cover
             self.request.session['message'] = 'Address form is required'
-            # logging.debug(request.session['message'])
             return HttpResponseRedirect(reverse('registration:profile'))
         return self.form_class(self.students, self.request.user, **self.get_form_kwargs())
 
@@ -200,10 +199,19 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
         self.form = form
         logging.debug(form.cleaned_data)
         beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
-        self.success_url = reverse_lazy('programs:beginner_class',
-                                        kwargs={'beginner_class': form.cleaned_data['beginner_class']})
+        logging.debug(beginner_class.cost)
 
         uid = str(uuid.uuid4())
+        if form.cleaned_data['payment']:
+            self.request.session['idempotency_key'] = uid
+            self.request.session['line_items'] = []
+            self.request.session['payment_db'] = ['program_app', 'ClassRegistration']
+            self.request.session['action_url'] = reverse('programs:class_payment')
+            self.request.session['payment'] = True
+        else:
+            self.success_url = reverse_lazy('programs:beginner_class',
+                                            kwargs={'beginner_class': form.cleaned_data['beginner_class']})
+
         cr = ClassRegistration.objects.filter(beginner_class=beginner_class)
         logging.debug(timezone.now())
         for k, v in form.cleaned_data.items():
@@ -221,8 +229,18 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                 elif len(cr.filter(student=s, pay_status='paid')) > 0:
                     return self.has_error(f'{s.first_name} {s.last_name} already registered')
                 else:
-                    ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
-                                                     pay_status='admin', idempotency_key=uid, reg_time=timezone.now())
+                    pay_status = 'admin'
+                    if form.cleaned_data['payment']:
+                        pay_status = 'start'
+                        self.request.session['line_items'].append(
+                            SquareHelper().line_item(
+                                f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
+                                1, beginner_class.cost))
+                    ncr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
+                                                           pay_status=pay_status, idempotency_key=uid,
+                                                           reg_time=timezone.now())
+                    note = form.cleaned_data['notes']
+                    ClassRegistrationAdmin.objects.create(class_registration=ncr, staff=self.request.user, note=note)
 
         return HttpResponseRedirect(self.success_url)
 
@@ -241,16 +259,14 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
     def get(self, request, reg_id=None):
         try:
             students = Student.objects.get(user=request.user).student_family.student_set.all()
-        except (Student.DoesNotExist, AttributeError):
+        except (Student.DoesNotExist, AttributeError):  # pragma: no cover
             request.session['message'] = 'Address form is required'
-            # logging.debug(request.session['message'])
             return HttpResponseRedirect(reverse('registration:profile'))
 
         if reg_id:  # to regain an interrupted payment
             cr = get_object_or_404(ClassRegistration, pk=reg_id)
             logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
-            if cr.student.student_family != students[0].student_family:
-                # logging.error('registration mismatch')
+            if cr.student.student_family != students[0].student_family:  # pragma: no cover
                 return Http404("registration mismatch")
             registrations = ClassRegistration.objects.filter(idempotency_key=cr.idempotency_key)
             request.session['idempotency_key'] = str(cr.idempotency_key)

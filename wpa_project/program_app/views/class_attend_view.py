@@ -16,7 +16,7 @@ class ClassAttendView(UserPassesTestMixin, View):
             logging.debug(f'safety_class date: {cr.student.safety_class} class_date: {cr.beginner_class.class_date}')
             if cr.attended:
                 if cr.student.safety_class is None:
-                    cr.student.safety_class = cr.beginner_class.class_date
+                    cr.student.safety_class = cr.beginner_class.class_date.date()
                     cr.student.save()
             else:
                 if cr.beginner_class.class_date.date() == cr.student.safety_class:

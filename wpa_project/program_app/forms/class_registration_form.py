@@ -14,10 +14,6 @@ class ClassRegistrationForm(forms.Form):
         super().__init__(*args, **kwargs)
         bc = self.get_open_classes(user)
         self.fields['beginner_class'] = forms.ChoiceField(choices=bc)
-        self.fields['terms'] = forms.BooleanField(
-            widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=True,
-            label=f'I agree to the terms of the AWRL, COVID-19 Policy and the Cancellation Policy',
-            initial=False)
         self.students = list(students.values())
 
         for student in students:
@@ -25,6 +21,18 @@ class ClassRegistrationForm(forms.Form):
                 attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
                        'dob': f"{student.dob}"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
+        if user.is_board:
+            self.fields['notes'] = forms.CharField(required=False)
+            self.fields['notes'].widget.attrs.update({'cols': 80, 'rows': 3, 'class': 'form-control m-2 report'})
+            self.fields['payment'] = forms.BooleanField(
+                widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=False,
+                label=f'Payment',
+                initial=False)
+        else:
+            self.fields['terms'] = forms.BooleanField(
+                widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=True,
+                label=f'I agree to the terms of the AWRL, COVID-19 Policy and the Cancellation Policy',
+                initial=False)
 
     def get_boxes(self):
         for field_name in self.fields:

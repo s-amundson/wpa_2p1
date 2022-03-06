@@ -23,10 +23,21 @@
                     <input type="hidden" id="cost_{{ class.id }}" value="{{ class.beginner_class.cost }}">
                 </td>
                 <td class="pay_status" curl="{% url 'programs:resume_registration' class.id %}">
-                    {{ class.pay_status }}
+                    {% if class.beginner_class.state == 'closed' %}
+                    {{ class.pay_status|capfirst }}
+                    {% else %}
+                        {% if class.pay_status == 'start' %}
+                            <a href="{% url 'programs:resume_registration' class.id %}">
+                                Started
+                            </a>
+                        {% else %}
+                            {{ class.pay_status|capfirst }}
+                        {% endif %}
+                    {% endif %}
                 </td>
                 <td>
-                    <input type="checkbox" class_id={{ class.id }} class="m-2 unreg" id="check_{{ class.id }}">
+                    <input type="checkbox" class_id={{ class.id }} class="m-2 unreg" id="check_{{ class.id }}"
+                    {% if class.beginner_class.state == 'closed' %} disabled="disabled" {% endif %}>
                 </td>
             </tr>
         {% endfor %}

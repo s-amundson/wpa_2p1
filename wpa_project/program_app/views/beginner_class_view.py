@@ -32,7 +32,6 @@ class BeginnerClassView(UserPassesTestMixin, View):
         else:
             try:
                 c = BeginnerClass.objects.latest('class_date').class_date
-                # logging.debug(f'c = str(c), type = {type(c)}')
                 c = c + timedelta(days=7)
             except BeginnerClass.DoesNotExist:  # pragma: no cover
                 c = timezone.now()
