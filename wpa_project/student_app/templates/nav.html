@@ -66,6 +66,7 @@
                           <a class="dropdown-item" href="{% url 'minutes:minutes_form'%}">New Minutes</a>
                           <a class="dropdown-item" href="{% url 'minutes:decision_list' %}">Decision List</a>
                           <a class="dropdown-item" href="{% url 'programs:class_registration_admin_list' %}">Admin Registrations</a>
+                          <a class="dropdown-item" href="{% url 'programs:staff_attendance' %}">Staff Attendance</a>
                         {% endif %}
                         {% if user.is_superuser %}
                           <div class="dropdown-divider"></div>

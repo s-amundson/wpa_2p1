@@ -34,11 +34,13 @@ class UpdatePrograms:
                         staff.append(r.student)
                 class_list.append({'class': c, 'instructors': instructors, 'staff': staff,
                                    'count': crh.enrolled_count(c)})
+            logging.debug(class_list)
             EmailMessage().status_email(class_list, staff_query)
+            logging.debug('emailed')
 
         # set past classes to recorded
         yesterday = today - timedelta(days=1)
-        classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=states[:3])
+        classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=states[:4])
         logging.debug(len(classes))
         for c in classes:
             c.state = states[5]  # 'recorded'

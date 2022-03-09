@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %} Class Sign up {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary m-2" type="submit" name="button">Submit</button>
+    </form>
+    <hr>
+    <table class="table table-bordered
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <tr>
+                <th> Name </th>
+                <th> Classes Registered </th>
+                <th> Classes Attended </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for staff in staff_list %}
+            <tr>
+                <td> {{ staff.first_name }} {{ staff.last_name }}</td>
+                <td> {{ staff.registrations }} </td>
+                <td> {{ staff.attended }} </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
