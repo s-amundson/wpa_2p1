@@ -16,6 +16,7 @@ urlpatterns = [
     path('class_registration/', ClassRegistrationView.as_view(), name='class_registration'),
     path('class_sign_in/<int:reg_id>/', ClassSignInView.as_view(), name='class_sign_in'),
     path('class_status/<str:class_id>/', ClassStatusView.as_view(), name='class_status'),
+    path('class_status/', ClassStatusView.as_view(), name='class_status'),
     path('resume_registration/<int:reg_id>/', ResumeRegistrationView.as_view(), name='resume_registration'),
     path('staff_attendance/', StaffReportView.as_view(), name='staff_attendance'),
     path('unregister_class/', UnregisterView.as_view(), name='unregister_class'),

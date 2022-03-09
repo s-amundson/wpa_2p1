@@ -9,6 +9,10 @@
     <script>
         var month = {{ this_month }}
         url_unregister_class = "{% url 'programs:unregister_class' %}"
+        let url_calendar = "{% url 'programs:class_calendar' %}"
+        let url_class_registered_table = "{% url 'programs:class_registered_table' %}"
+        let url_class_status = "{% url 'programs:class_status' %}"
+        let url_unregister = "{% url 'programs:unregister_class' %}"
     </script>
 {% endblock %}
 

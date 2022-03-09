@@ -27,7 +27,7 @@ $(document).ready(function(){
 });
 
 async function get_calendar() {
-    await $.get("class_calendar/" + month, function(data, status){
+    await $.get(url_calendar + month, function(data, status){
         $("#div-calendar").html(data);
         $(".bc-btn").click(select_class)
         let d = new Date().getMonth() + 1 // Jan is 0 in javascript
@@ -51,7 +51,7 @@ async function get_class_status() {
         $("#class-description").html("")
     }
     else {
-        let data = await $.get("class_status/" + $("#id_beginner_class").val() +"/", function(data, status){
+        let data = await $.get(url_class_status + $("#id_beginner_class").val() +"/", function(data, status){
             msg = "Class openings:</br> &nbsp;&nbsp; ";
             msg += "New Students: " +  data['beginner'];
             msg += "</br> &nbsp;&nbsp; Returning: " + data['returnee'];
@@ -87,7 +87,7 @@ async function get_class_status() {
 
 async function get_reg_table() {
     // get the classes that this 'family' is registered for.
-    let data = await $.get("class_registered_table", function(data, status){
+    let data = await $.get(url_class_registered_table, function(data, status){
         $("#registered_table").html(data);
         if($(".unreg").length > 0) {
             $("#unreg_form").show();
@@ -169,7 +169,7 @@ async function post_unregister() {
     if (getConfirm) {
 
         //       Send the unregister request to the server
-        let data = await $.post("unregister_class", {
+        let data = await $.post(url_unregister, {
             "class_list": unreg_list,
             csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
             'donation': $("#donation").prop('checked')
