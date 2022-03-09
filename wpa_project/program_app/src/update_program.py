@@ -16,7 +16,8 @@ class UpdatePrograms:
         today = timezone.localtime(timezone.now()).date()
 
         # send status update for classes 3 days from now.
-        email_date = today - timedelta(days=3)
+        email_date = today + timedelta(days=3)
+        logging.debug(email_date)
         staff_query = User.objects.filter(is_staff=True)
         students = Student.objects.filter(user__in=staff_query)
         classes = BeginnerClass.objects.filter(class_date__date=email_date, state__in=states[:3])
