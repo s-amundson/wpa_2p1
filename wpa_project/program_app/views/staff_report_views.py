@@ -22,11 +22,11 @@ class StaffReportView(UserPassesTestMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        staff_users = User.objects.filter(is_staff=True)
+        staff_users = User.objects.filter(is_staff=True, is_active=True)
         staff_students = Student.objects.filter(user__in=staff_users).order_by('last_name')
         context['staff_list'] = []
         for i in staff_students:
-            cr = ClassRegistration.objects.filter(student=i)
+            cr = ClassRegistration.objects.filter(student=i, pay_status__in=['paid', 'admin'])
             bc = BeginnerClass.objects.all()
             if self.start_date is not None:
                 bc = bc.filter(class_date__gte=self.start_date)
