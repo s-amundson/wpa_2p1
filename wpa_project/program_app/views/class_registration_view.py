@@ -48,7 +48,8 @@ class ClassRegistrationView(AccessMixin, FormView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if request.user.student_set.first().student_family is None:
+        logging.debug(request.user.student_set.first())
+        if request.user.student_set.first() is None or request.user.student_set.first().student_family is None:
             request.session['message'] = 'Address form is required'
             return HttpResponseRedirect(reverse('registration:profile'))
         return super().dispatch(request, *args, **kwargs)
@@ -149,6 +150,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                 return self.transact(beginner_class, students, instructors)
 
     def has_error(self, message):
+        logging.debug(message)
         messages.add_message(self.request, messages.ERROR, message)
         return self.form_invalid(self.form)
         # return render(self.request, self.template_name, {'form': self.form})

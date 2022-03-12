@@ -6,6 +6,7 @@
 # from .tests.tests_class_registration import TestsClassRegistration
 # from .tests.tests_class_registration_admin import TestsClassAdminRegistration
 # from .tests.tests_class_sign_in import TestsClassSignIn
+# from .tests.tests_class_status import TestsClassStatus
 # from .tests.tests_logs import TestsAdminRegistration
 # from .tests.tests_signal import TestsSignal
 # from .tests.tests_staff_report import TestsStaffReport

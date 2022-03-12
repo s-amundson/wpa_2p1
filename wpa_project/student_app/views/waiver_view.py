@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
@@ -17,6 +18,7 @@ class WaiverView(UserPassesTestMixin, FormView):
     success_url = reverse_lazy('registration:profile')
     form = None
     student = None
+    class_date = timezone.localtime(timezone.now()).date()
 
     def get_form(self):
         return self.form_class(self.student, **self.get_form_kwargs())
@@ -28,7 +30,8 @@ class WaiverView(UserPassesTestMixin, FormView):
     def form_valid(self, form):
         self.form = form
         logging.debug('valid')
-        if form.make_pdf():
+        logging.debug(self.class_date)
+        if form.make_pdf(self.class_date):
             self.update_attendance()
             form.send_pdf()
         return HttpResponseRedirect(self.success_url)
