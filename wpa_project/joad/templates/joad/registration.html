@@ -23,11 +23,15 @@
                 {{ form.session.id }}
             </div>
             <div id="status-div"></div>
-            <div> Student(s): </div>
+            {% if form.student_count %}
+                <div> Student(s): </div>
+            {% endif %}
             {% for student in form.get_boxes %}
                 <div class="input-group input-group-md">
                     {{ student }} {{ student.label }}
                 </div>
+            {% empty %}
+            <div>Students must be approved by WPA prior to registering for a session.</div>
             {% endfor %}
             {% if form.student_count %}
                 <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">
