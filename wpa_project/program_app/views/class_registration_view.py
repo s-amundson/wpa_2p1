@@ -48,7 +48,6 @@ class ClassRegistrationView(AccessMixin, FormView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        logging.debug(request.user.student_set.first())
         if request.user.student_set.first() is None or request.user.student_set.first().student_family is None:
             request.session['message'] = 'Address form is required'
             return HttpResponseRedirect(reverse('registration:profile'))
@@ -60,8 +59,6 @@ class ClassRegistrationView(AccessMixin, FormView):
         return context
 
     def get_form(self):
-        # return self.form_class(user=self.request.user, **self.get_form_kwargs())
-        logging.debug('get_form')
         try:
             self.students = Student.objects.get(user=self.request.user).student_family.student_set.all()
         except (Student.DoesNotExist, AttributeError):  # pragma: no cover

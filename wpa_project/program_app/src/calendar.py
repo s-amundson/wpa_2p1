@@ -59,7 +59,6 @@ class Calendar(HTMLCalendar):
 
         for event in event_list:
             cd = timezone.localtime(event.class_date)
-            logging.debug(event.class_type)
             if event.class_type == 'JOAD Class':
                 url = reverse('joad:registration', kwargs={'session_id': event.session.id})
                 data += f'<a href="{url}" role="button"'

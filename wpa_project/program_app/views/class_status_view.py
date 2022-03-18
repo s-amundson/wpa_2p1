@@ -15,8 +15,6 @@ class ClassStatusView(LoginRequiredMixin, View):
         try:
             bc = BeginnerClass.objects.get(pk=class_id)
             ec = ClassRegistrationHelper().enrolled_count(bc)
-            logging.debug(ec)
-            # logging.debug(bc.instructor_limit - ec['instructors'])
             return JsonResponse({'beginner': bc.beginner_limit - ec['beginner'],
                                  'returnee': bc.returnee_limit - ec['returnee'],
                                  'instructor': bc.instructor_limit - ec['staff'],
