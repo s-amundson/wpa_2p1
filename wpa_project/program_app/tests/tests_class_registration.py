@@ -37,6 +37,14 @@ class TestsClassRegistration(TestCase):
         response = self.client.get(reverse('programs:class_registration'), secure=True)
         self.assertEqual(response.status_code, 302)
 
+    def test_class_get_no_student(self):
+        student = self.test_user.student_set.first()
+        student.user = None
+        student.save()
+
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
+        self.assertRedirects(response, reverse('registration:profile'))
+
     def test_class_get_no_student_family(self):
         student = self.test_user.student_set.first()
         student.student_family = None
@@ -260,42 +268,6 @@ class TestsClassRegistration(TestCase):
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': 1}), secure=True)
         self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
-
-    def test_class_status(self):
-        self.client.force_login(User.objects.get(pk=3))
-
-        response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
-        content = json.loads(response.content)
-        self.assertEqual(content['status'], 'open')
-        self.assertEqual(content['beginner'], 2)
-        self.assertEqual(content['returnee'], 2)
-
-        # add 1 beginner students and 1 returnee.
-        cr = ClassRegistration(
-            beginner_class=BeginnerClass.objects.get(pk=1),
-            student=Student.objects.get(pk=4),
-            new_student=True,
-            pay_status="paid",
-            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
-            reg_time='2021-06-09',
-            attended=False)
-        cr.save()
-        cr = ClassRegistration(
-            beginner_class=BeginnerClass.objects.get(pk=1),
-            student=Student.objects.get(pk=5),
-            new_student=False,
-            pay_status="paid",
-            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
-            reg_time='2021-06-09',
-            attended=False)
-        cr.save()
-
-        response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
-        content = json.loads(response.content)
-        logging.debug(content)
-        self.assertEqual(content['status'], 'open')
-        self.assertEqual(content['beginner'], 1)
-        self.assertEqual(content['returnee'], 1)
 
     def test_get_class_registered_table(self):
         self.test_user = User.objects.get(pk=2)

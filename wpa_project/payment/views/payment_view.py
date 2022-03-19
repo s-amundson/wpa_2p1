@@ -34,7 +34,6 @@ class PaymentView(APIView):
 
             # if user donated money add it to the line itmes.
             donation = serializer.data.get('donation', None)
-            logging.debug(donation)
             if donation is not None and donation > 0:
                 request.session['line_items'].append(self.square_helper.line_item('donation', 1, float(donation)))
                 self.square_helper.set_donation(donation, serializer.data.get('note', ''))
@@ -49,7 +48,6 @@ class PaymentView(APIView):
             # Monetary amounts are specified in the smallest unit of the applicable currency.
             amount = {'amount': amt, 'currency': 'USD'}
             message = ""
-            logging.debug(amt)
             if amt == 0:
                 square_response = self.square_helper.comp_response(note, amt)
             elif sq_token == 'bypass' and request.user.is_board:
@@ -71,8 +69,7 @@ class PaymentView(APIView):
                     response_dict['error'] = message
                     response_dict['continue'] = self.square_helper.payment_error(request, square_response['error'])
                     return Response(response_dict)
-                # return redirect('registration:process_payment')
-            logging.debug(square_response)
+            # logging.debug(square_response)
             self.square_helper.log_payment(request, square_response, create_date=None)
             pay_dict = {'line_items': line_items, 'total': amt / 100,
                         'receipt': square_response['receipt_url']}

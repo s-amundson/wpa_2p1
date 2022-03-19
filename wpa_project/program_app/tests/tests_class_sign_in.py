@@ -3,6 +3,7 @@ import logging
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone
 from ..models import ClassRegistration
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ class TestsClassSignIn(TestCase):
         self.assertEqual(response.status_code, 302)
         cr = ClassRegistration.objects.get(pk=1)
         self.assertTrue(cr.student.signature)
+        self.assertEqual(cr.student.safety_class, timezone.datetime(year=2022, month=6, day=5).date())
 
     def test_post_sign_in_page_none(self):
         response = self.client.post(reverse('programs:class_sign_in', kwargs={'reg_id': 1}), secure=True)

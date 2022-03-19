@@ -20,7 +20,6 @@ class TestsUpdatePrograms(TestCase):
         # Every test needs a client.
         self.client = Client()
 
-
     def test_beginner_class(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=1)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
@@ -51,7 +50,7 @@ class TestsUpdatePrograms(TestCase):
         # self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 2).state, 'open')
 
     def test_email_notice(self):
-        d = timezone.localtime(timezone.now()).date() - timedelta(days=3)
+        d = timezone.localtime(timezone.now()).date() + timedelta(days=3)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
         bc1 = BeginnerClass(class_date=d, class_type='beginner', beginner_limit=10, returnee_limit=0, state='open')
         bc1.save()
@@ -80,7 +79,7 @@ class TestsUpdatePrograms(TestCase):
 
     def test_email_notice_no_class(self):
         # set up the class on a different day.
-        d = timezone.localtime(timezone.now()).date() - timedelta(days=1)
+        d = timezone.localtime(timezone.now()).date() + timedelta(days=1)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
         bc1 = BeginnerClass(class_date=d, class_type='beginner', beginner_limit=10, returnee_limit=0, state='open')
         bc1.save()

@@ -16,8 +16,9 @@ class UpdatePrograms:
         today = timezone.localtime(timezone.now()).date()
 
         # send status update for classes 3 days from now.
-        email_date = today - timedelta(days=3)
-        staff_query = User.objects.filter(is_staff=True)
+        email_date = today + timedelta(days=3)
+        logging.debug(email_date)
+        staff_query = User.objects.filter(is_staff=True, is_active=True)
         students = Student.objects.filter(user__in=staff_query)
         classes = BeginnerClass.objects.filter(class_date__date=email_date, state__in=states[:3])
         logging.debug(len(classes))
@@ -34,11 +35,13 @@ class UpdatePrograms:
                         staff.append(r.student)
                 class_list.append({'class': c, 'instructors': instructors, 'staff': staff,
                                    'count': crh.enrolled_count(c)})
+            logging.debug(class_list)
             EmailMessage().status_email(class_list, staff_query)
+            logging.debug('emailed')
 
         # set past classes to recorded
         yesterday = today - timedelta(days=1)
-        classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=states[:3])
+        classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=states[:4])
         logging.debug(len(classes))
         for c in classes:
             c.state = states[5]  # 'recorded'

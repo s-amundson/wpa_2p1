@@ -22,8 +22,5 @@ class JoadClass(models.Model):
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True)
     state = models.CharField(max_length=20, null=True, choices=choices(class_states), default='scheduled')
 
-    # def __str__(self):
-    #     return f'{self.start_date}'
-
     def get_states(self):
         return self.class_states

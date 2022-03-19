@@ -4,7 +4,7 @@ Contact us regarding {{ message.category.title }}
 
 {{ message.message }}
 
-{{ message.contact_name }}
+{{ message.contact_name }} Email: {{ message.email }}
 
 http://woodleyparkarchers.org/">WoodleyParkArchers.org
 http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079
