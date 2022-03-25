@@ -29,8 +29,8 @@ class WaiverView(UserPassesTestMixin, FormView):
 
     def form_valid(self, form):
         self.form = form
-        logging.debug('valid')
-        logging.debug(self.class_date)
+        # logging.debug('valid')
+        # logging.debug(self.class_date)
         if form.make_pdf(self.class_date):
             self.update_attendance()
             form.send_pdf()

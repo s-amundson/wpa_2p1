@@ -76,7 +76,6 @@
         {% endif %}">
         <thead>
             <tr>
-                <th> ID </th>
                 <th> Start Date </th>
                 <th> State</th>
                 {% for student in students %}
@@ -89,12 +88,11 @@
                 <tr>
                     {% if user.is_board %}
                         <td>
-                            <a href="{% url 'joad:session' session.id %}">{{ session.id }}</a>
+                            <a href="{% url 'joad:session' session.id %}">{{ session.start_date }}</a>
                         </td>
                     {% else %}
-                        <td>{{ session.id }}</td>
+                        <td>{{ session.start_date }}</td>
                     {% endif %}
-                    <td>{{ session.start_date }}</td>
                     <td>{{ session.state }}</td>
                     {% for row in session.registrations %}
                         <td>

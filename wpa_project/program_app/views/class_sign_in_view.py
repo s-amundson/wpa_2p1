@@ -13,7 +13,7 @@ class ClassSignInView(WaiverView):
 
     def test_func(self):
         rid = self.kwargs.get('reg_id', None)
-        logging.debug(rid)
+        # logging.debug(rid)
         if rid is not None:
             self.class_registration = get_object_or_404(ClassRegistration, pk=rid)
             self.class_date = self.class_registration.beginner_class.class_date.date()
@@ -28,4 +28,4 @@ class ClassSignInView(WaiverView):
     def update_attendance(self):
         self.class_registration.attended = True
         self.class_registration.save()
-        logging.debug(self.class_registration.student.id)
+        # logging.debug(self.class_registration.student.id)

@@ -33,7 +33,7 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
         bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:4],
                                           class_date__gte=timezone.localdate(timezone.now()))
         enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
-            pay_status='refunded').exclude(pay_status='canceled')
+            pay_status='refunded').exclude(pay_status='canceled').exclude(pay_status='refund donated')
         # logging.debug(enrolled_classes.values())
         return render(request, 'program_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
 
@@ -97,8 +97,10 @@ class ClassRegistrationView(AccessMixin, FormView):
                                 or s.user.instructor_expire_date < timezone.localdate(timezone.now()):
                             return self.has_error('Please update your instructor certification')
 
-                    if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
-                            pay_status="refunded").exclude(pay_status='canceled')) == 0:
+                    if len(ClassRegistration.objects.filter(
+                            beginner_class=beginner_class, student=s).exclude(
+                            pay_status="refunded").exclude(pay_status='canceled').exclude(
+                            pay_status='refund donated')) == 0:
                         instructor += 1
                         instructors.append(s)
                     else:
@@ -106,7 +108,7 @@ class ClassRegistrationView(AccessMixin, FormView):
 
                 else:
                     reg = ClassRegistration.objects.filter(student=s).exclude(
-                            pay_status="refunded").exclude(pay_status='canceled')
+                            pay_status="refunded").exclude(pay_status='canceled').exclude(pay_status='refund donated')
                     if len(reg.filter(beginner_class=beginner_class)) == 0:
                         if s.safety_class is None:
                             logging.debug(len(reg))

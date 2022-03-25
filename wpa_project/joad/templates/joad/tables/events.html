@@ -6,7 +6,6 @@
     {% endif %}">
     <thead>
         <tr>
-            <th> ID </th>
             <th> Event Date </th>
             <th> Event Type </th>
             <th> State </th>
@@ -20,12 +19,11 @@
             <tr>
                 <td>
                     {% if user.is_board %}
-                        <a class="nav-link" href="{% url 'joad:event' event.id %}">{{ event.id }}</a>
+                        <a class="nav-link" href="{% url 'joad:event' event.id %}">{{ event.event_date }}</a>
                     {% else %}
-                        {{ event.id }}
+                        {{ event.event_date }}
                     {% endif %}
                 </td>
-                <td>{{ event.event_date }}</td>
                 <td>{{ event.event_type }}</td>
                 <td>{{ event.state }}</td>
                 {% for row in event.registrations %}
