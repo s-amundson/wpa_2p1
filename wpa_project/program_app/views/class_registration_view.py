@@ -171,8 +171,8 @@ class ClassRegistrationView(AccessMixin, FormView):
                     n = True
                 else:
                     n = False
-                cr = ClassRegistration(beginner_class=beginner_class, student=s, new_student=n,
-                                       pay_status='start', idempotency_key=uid).save()
+                cr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
+                                       pay_status='start', idempotency_key=uid)
                 self.request.session['line_items'].append(
                     SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
                                              1, beginner_class.cost))

@@ -7,6 +7,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Frame, Image, Spacer
+from reportlab.lib.pagesizes import letter
 
 from student_app.src import EmailMessage, StudentHelper
 
@@ -92,8 +93,8 @@ class WaiverForm(forms.Form):
         story.append(new_sig)
         name = f"{self.cleaned_data['sig_first_name']} {self.cleaned_data['sig_last_name']}"
         story.append(Paragraph(f"Signed By {name} on Date: {timezone.localtime(timezone.now()).date()}"))
-        c = Canvas('mydoc.pdf')
-        f = Frame(inch / 2, inch, 7 * inch, 9 * inch, showBoundary=1)
+        c = Canvas('mydoc.pdf', pagesize=letter)
+        f = Frame(inch / 2, inch / 2, 7 * inch, 10 * inch, showBoundary=1)
         f.addFromList(story, c)
         c.save()
         fn = f'{self.student.last_name}_{self.student.first_name}'

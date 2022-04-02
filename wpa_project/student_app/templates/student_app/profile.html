@@ -100,16 +100,32 @@
             </div>
         </div>
         <div class="row p-3 mx-auto" id="instructor-info-div">
-            <div class="col ml-3">USAA Archery Instructor Certificate Expiration Date:</div>
-            <div class="col-2" id="div-instructor_exp_date">
-                {{ user.instructor_expire_date }}
+            <div class="col-1"></div>
+            <div class="col">
+                <table class="table table-bordered
+                    {% if user.dark_theme %}
+                        text-white
+                    {% else %}
+                        text-dark
+                    {% endif %}">
+                    <tbody>
+                        <tr>
+                            <td>USAA Archery Instructor Certificate Expiration Date:</td>
+                            <td>Level</td>
+                            <td rowspan="2">
+                                <button id="btn-instructor" class="btn btn-primary m-2" type="button" name="button">
+                                    Edit
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="instructor_exp_date">{{ user.instructor_expire_date }}</td>
+                            <td id="instructor_level">{{ user.instructor_level }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="col-1">
-                <button id="btn-instructor" class="btn btn-primary" type="button" name="button">
-                    Edit
-                </button>
-            </div>
-            <div class="col"></div>
+            <div class="col-1"></div>
         </div>
         <div class="row p-3 mx-auto" id="instructor-form-div">
         </div>
