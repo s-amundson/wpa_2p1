@@ -2,6 +2,7 @@ import logging
 import base64
 from django.core import mail
 from django.test import TestCase, Client
+from django.urls import reverse
 from reportlab.pdfgen.canvas import Canvas
 from django.core.files.base import File
 
@@ -17,6 +18,7 @@ class TestsEmail(TestCase):
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
+        self.send_dict = {'recipients': 'board', 'subject': 'Test Subject', 'message': 'Test Message'}
 
     def test_awrl_email(self):
         self.test_user = User.objects.get(pk=2)
@@ -49,3 +51,62 @@ class TestsEmail(TestCase):
         em = EmailMessage()
         em.bcc_from_students(Student.objects.all())
         self.assertEqual(len(em.bcc), 5)
+
+    def test_get_send_email_auth(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('registration:send_email'), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('student_app/form_as_p.html')
+
+    def test_get_send_email_no_auth(self):
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('registration:send_email'), secure=True)
+        self.assertEqual(response.status_code, 403)
+
+    def test_send_email_board(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox[0].bcc), 1)
+        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
+        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+
+    def test_send_email_staff(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        self.send_dict['recipients'] = 'staff'
+        response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox[0].bcc), 2)
+        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
+        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+
+    def test_send_email_current_members(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        self.send_dict['recipients'] = 'current members'
+        response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox[0].bcc), 1)
+        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
+        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+
+    def test_send_email_students(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        self.send_dict['recipients'] = 'students'
+        response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox[0].bcc), 5)
+        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
+        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+
+    def test_send_email_invalid(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        self.send_dict['recipients'] = 'invalid'
+        response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
+        self.assertEqual(len(mail.outbox), 0)
