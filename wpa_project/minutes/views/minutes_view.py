@@ -20,7 +20,9 @@ class MinutesFormView(LoginRequiredMixin, View):
         for b in business:
             update_list = []
             for update in b.businessupdate_set.all():
-                o = timezone.localtime(timezone.now()).date() > update.update_date
+                logging.debug(update.update_date)
+                logging.debug(update.update_date.date())
+                o = timezone.now().date() > update.update_date.date()
                 update_list.append({'form': BusinessUpdateForm(instance=update, old=o, report=self.report_index),
                                     'id': update.id})
                 self.report_index += 1
@@ -41,13 +43,14 @@ class MinutesFormView(LoginRequiredMixin, View):
             form = MinutesForm(instance=minutes, edit=request.user.is_board)
             for owner in owners:
                 reports[owner] = self.report_forms(minutes, owner, request.user.is_board)
-            ob = Business.objects.filter(Q(resolved=None, added_date__lt=minutes.meeting_date) |
-                                            Q(resolved__gte=minutes.meeting_date, added_date__lt=minutes.meeting_date))
+            ob = Business.objects.filter(Q(resolved=None, added_date__date__lt=minutes.meeting_date) |
+                                         Q(resolved__date__gte=minutes.meeting_date, added_date__lt=minutes.meeting_date))
             ob = ob.order_by('added_date', 'id')
-            nb = Business.objects.filter(Q(resolved=None, added_date=minutes.meeting_date) |
-                                            Q(resolved__gte=minutes.meeting_date, added_date=minutes.meeting_date))
+            logging.debug(ob)
+            nb = Business.objects.filter(Q(resolved=None, added_date__date=minutes.meeting_date) |
+                                         Q(resolved__date__gte=minutes.meeting_date, added_date__date=minutes.meeting_date))
             nb = nb.order_by('id')
-            decisions_query = Decision.objects.filter(decision_date=minutes.meeting_date).order_by('id')
+            decisions_query = Decision.objects.filter(decision_date=minutes.meeting_date.date()).order_by('id')
             logging.debug(decisions_query)
 
         else:
@@ -57,7 +60,7 @@ class MinutesFormView(LoginRequiredMixin, View):
 
             ob = Business.objects.filter(resolved__lt=timezone.now()).order_by('added_date', 'id')
             nb = []
-            decisions_query = Decision.objects.filter(decision_date=timezone.localdate(timezone.now())).order_by('id')
+            decisions_query = Decision.objects.filter(decision_date=timezone.now()).order_by('id')
 
         old_business = self.business_list(ob, True)
         new_business = self.business_list(nb, False)
@@ -83,9 +86,9 @@ class MinutesFormView(LoginRequiredMixin, View):
 
         if form.is_valid():
             logging.debug(form.cleaned_data)
-            if form.cleaned_data.get('start_time', None) is None:
+            if minutes_id is None:
                 minutes = form.save(commit=False)
-                minutes.start_time = timezone.localtime(timezone.now())
+                minutes.meeting_date = timezone.now()
                 minutes.save()
             else:
                 minutes = form.save()

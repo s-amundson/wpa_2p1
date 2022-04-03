@@ -27,7 +27,7 @@ class TestsReport(TestCase):
 
     def test_get_report_existing(self):
         m = Minutes(
-            meeting_date='2021-09-04', start_time='19:30', attending='', minutes_text='', memberships=0,
+            meeting_date='2021-09-04T19:20:30+03:00', attending='', minutes_text='', memberships=0,
             balance=0, discussion='', end_time=None,
         )
         m.save()
@@ -39,7 +39,7 @@ class TestsReport(TestCase):
 
     def test_post_report(self):
         m = Minutes(
-            meeting_date='2021-09-04', start_time='19:30', attending='', minutes_text='', memberships=0,
+            meeting_date='2021-09-04T19:20:30+03:00', attending='', minutes_text='', memberships=0,
             balance=0, discussion='', end_time=None,
         )
         m.save()
@@ -51,7 +51,7 @@ class TestsReport(TestCase):
 
     def test_post_report_existing(self):
         m = Minutes(
-            meeting_date='2021-09-04', start_time='19:30', attending='', minutes_text='', memberships=0,
+            meeting_date='2021-09-04T19:20:30+03:00', attending='', minutes_text='', memberships=0,
             balance=0, discussion='', end_time=None,
         )
         m.save()

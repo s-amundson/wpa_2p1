@@ -8,7 +8,7 @@
       "new_student": true,
       "pay_status": "start",
       "idempotency_key": "7b16fadf-4851-4206-8dc6-81a92b70e52f",
-      "reg_time": "2021-06-09",
+      "reg_time": "2021-06-09T16:00:00.000Z",
       "attended": false
     }
   },
@@ -21,7 +21,7 @@
       "new_student": true,
       "pay_status": "start",
       "idempotency_key": "7b16fadf-4851-4206-8dc6-81a92b70e52f",
-      "reg_time": "2021-06-09",
+      "reg_time": "2021-06-09T16:00:00.000Z",
       "attended": false
     }
   }
