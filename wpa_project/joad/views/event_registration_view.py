@@ -74,7 +74,8 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
                 if len(sreg) == 0:
                     students.append(s)
                 else:
-                    return self.has_error('Student is already enrolled')
+                    messages.add_message(self.request, messages.ERROR, 'Student is already enrolled')
+                    return HttpResponseRedirect(reverse('joad:index'))
 
         if len(students) == 0:
             return self.has_error('Invalid student selected')

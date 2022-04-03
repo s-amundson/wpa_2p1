@@ -9,6 +9,7 @@
             <th> Event Date </th>
             <th> Event Type </th>
             <th> State </th>
+            <th> Cost </th>
             {% for student in students %}
                 <th>{{student.first_name}} {{student.last_name}}</th>
             {% endfor %}
@@ -26,6 +27,7 @@
                 </td>
                 <td>{{ event.event_type }}</td>
                 <td>{{ event.state }}</td>
+                <td>{{ event.cost }}</td>
                 {% for row in event.registrations %}
                     <td>
                         {% if row.reg_status == 'registered' %}

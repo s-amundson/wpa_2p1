@@ -19,4 +19,5 @@ class JoadEvent(models.Model):
     pin_cost = models.IntegerField(null=True, default=None)
 
     def __str__(self):
-        return timezone.localtime(self.event_date).strftime("%d %b, %Y %I:%M %p")
+        d = timezone.localtime(self.event_date).strftime("%d %b, %Y %I:%M %p")
+        return f'{d} Cost: ${self.cost} Pin Cost: ${self.pin_cost}'
