@@ -33,9 +33,12 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
         bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:4],
                                           class_date__gte=timezone.localdate(timezone.now()))
         enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
-            pay_status='refunded').exclude(pay_status='canceled')
+            pay_status='refunded').exclude(pay_status='canceled').exclude(pay_status='refund donated')
+        unregisterable = len(enrolled_classes.exclude(pay_status='start'))
+        logging.debug(unregisterable)
         # logging.debug(enrolled_classes.values())
-        return render(request, 'program_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
+        return render(request, 'program_app/tables/class_registered_table.html',
+                      {'enrolled_classes': enrolled_classes, 'unregisterable': unregisterable})
 
 
 class ClassRegistrationView(AccessMixin, FormView):
@@ -97,8 +100,10 @@ class ClassRegistrationView(AccessMixin, FormView):
                                 or s.user.instructor_expire_date < timezone.localdate(timezone.now()):
                             return self.has_error('Please update your instructor certification')
 
-                    if len(ClassRegistration.objects.filter(beginner_class=beginner_class, student=s).exclude(
-                            pay_status="refunded").exclude(pay_status='canceled')) == 0:
+                    if len(ClassRegistration.objects.filter(
+                            beginner_class=beginner_class, student=s).exclude(
+                            pay_status="refunded").exclude(pay_status='canceled').exclude(
+                            pay_status='refund donated')) == 0:
                         instructor += 1
                         instructors.append(s)
                     else:
@@ -106,7 +111,7 @@ class ClassRegistrationView(AccessMixin, FormView):
 
                 else:
                     reg = ClassRegistration.objects.filter(student=s).exclude(
-                            pay_status="refunded").exclude(pay_status='canceled')
+                            pay_status="refunded").exclude(pay_status='canceled').exclude(pay_status='refund donated')
                     if len(reg.filter(beginner_class=beginner_class)) == 0:
                         if s.safety_class is None:
                             logging.debug(len(reg))
@@ -169,8 +174,8 @@ class ClassRegistrationView(AccessMixin, FormView):
                     n = True
                 else:
                     n = False
-                cr = ClassRegistration(beginner_class=beginner_class, student=s, new_student=n,
-                                       pay_status='start', idempotency_key=uid).save()
+                cr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
+                                       pay_status='start', idempotency_key=uid)
                 self.request.session['line_items'].append(
                     SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
                                              1, beginner_class.cost))

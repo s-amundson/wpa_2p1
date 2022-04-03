@@ -19,6 +19,8 @@
         <thead>
             <tr>
                 <th> Name </th>
+                <th> Instructor Expire </th>
+                <th> Instructor Level </th>
                 <th> Classes Registered </th>
                 <th> Classes Attended </th>
             </tr>
@@ -27,6 +29,8 @@
         {% for staff in staff_list %}
             <tr>
                 <td> {{ staff.first_name }} {{ staff.last_name }}</td>
+                <td> {{ staff.user.instructor_expire_date }} </td>
+                <td> {{ staff.user.instructor_level }}</td>
                 <td> {{ staff.registrations }} </td>
                 <td> {{ staff.attended }} </td>
             </tr>

@@ -41,7 +41,7 @@ class TestsDecision(TestCase):
 
     def test_post_report(self):
         m = Minutes(
-            meeting_date='2021-09-04', start_time='19:30', attending='', minutes_text='', memberships=0,
+            meeting_date='2021-09-04 19:30', attending='', minutes_text='', memberships=0,
             balance=0, discussion='', end_time=None,
         )
         m.save()
@@ -55,7 +55,7 @@ class TestsDecision(TestCase):
         self.test_user = self.User.objects.get(pk=3)
         self.client.force_login(self.test_user)
         m = Minutes(
-            meeting_date='2021-09-04', start_time='19:30', attending='', minutes_text='', memberships=0,
+            meeting_date='2021-09-04 19:30', attending='', minutes_text='', memberships=0,
             balance=0, discussion='', end_time=None,
         )
         m.save()

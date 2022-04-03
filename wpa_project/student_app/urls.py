@@ -13,6 +13,7 @@ urlpatterns = [
         path('profile/', ProfileView.as_view(), name='profile'),
         path('search/', SearchView.as_view(), name='search'),
         path('search_result/<int:student_family>', SearchResultView.as_view(), name='search_result'),
+        path('send_email', SendEmailView.as_view(), name='send_email'),
         path('student_api/<int:student_id>/', StudentApiView.as_view(), name='student_api'),
         path('student_api/', StudentApiView.as_view(), name='student_api'),
         path('student_family_api/<int:family_id>/', StudentFamilyApiView.as_view(), name='student_family_api'),

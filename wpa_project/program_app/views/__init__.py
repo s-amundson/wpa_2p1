@@ -1,5 +1,5 @@
 from .beginner_class_view import BeginnerClassView, BeginnerClassListView
-from .class_attend_view import ClassAttendView
+from .class_attend_view import ClassAttendListView, ClassAttendView
 from .class_calendar_view import ClassCalendarView
 from .class_registration_view import ClassRegistrationAdminView, ClassRegistrationView, ClassRegisteredTable, \
     ResumeRegistrationView

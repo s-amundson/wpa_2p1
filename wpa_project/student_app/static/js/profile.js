@@ -103,12 +103,14 @@ async function update_instructor() {
     });
     let data = await $.post(url_instructor_update, {
         csrfmiddlewaretoken: $("#instructor-form-div").find('[name="csrfmiddlewaretoken"]').val(),
-        instructor_expire_date: $("#id_instructor_expire_date").val()
+        instructor_expire_date: $("#id_instructor_expire_date").val(),
+        instructor_level: $("#id_instructor_level").val()
     });
     console.log(data);
     if (data.status == "SUCCESS") {
         $("#instructor-form-div").hide();
         $("#instructor-info-div").show();
-        $("#div-instructor_exp_date").html(data.expire_date);
+        $("#instructor_exp_date").html(data.expire_date);
+        $("#instructor_level").html(data.level);
     }
 }

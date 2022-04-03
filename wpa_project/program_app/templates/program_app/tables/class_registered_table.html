@@ -11,7 +11,7 @@
                 <th> Class Date </th>
                 <th> Name </th>
                 <th> Payment Status </th>
-                <th> Unregister </th>
+                <th> Unregister/Cancel </th>
             </tr>
         </thead>
         <tbody>
@@ -28,7 +28,7 @@
                     {% else %}
                         {% if class.pay_status == 'start' %}
                             <a href="{% url 'programs:resume_registration' class.id %}">
-                                Started
+                                Unsuccessful
                             </a>
                         {% else %}
                             {{ class.pay_status|capfirst }}
@@ -38,20 +38,29 @@
                 <td>
                     <input type="checkbox" class_id={{ class.id }} class="m-2 unreg" id="check_{{ class.id }}"
                     {% if class.beginner_class.state == 'closed' %} disabled="disabled" {% endif %}>
+                    <label for="check_{{ class.id }}">
+                        {% if class.pay_status == 'start' %}
+                            Cancel
+                        {% else %}
+                            Unregister
+                        {% endif %}
+                    </label>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
+    {% if unregisterable %}
+        <div class="row p-2 form-check">
+            <label class="form-check-label">
+                <input type="checkbox" class="m-2" id="donation">
+                I wish to donate my refund to Woodley Park Archers
+            </label>
+        </div>
+    {% endif %}
+        <div class="flex-row m-2">
+            <button class="btn btn-primary" type="submit">Unregister/Cancel</button>
+        </div>
 
-    <div class="row p-2 form-check">
-        <label class="form-check-label">
-            <input type="checkbox" class="m-2" id="donation">
-            I wish to donate my refund to Woodley Park Archers
-        </label>
-    </div>
-    <div class="flex-row m-2">
-        <button class="btn btn-primary" type="submit">Unregister</button>
-    </div>
 </form>

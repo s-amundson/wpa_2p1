@@ -96,7 +96,7 @@ function disable_inputs(state) {
 
 function get_time() {
     var dt = new Date();
-    return pad(dt.getHours(), 2) + ":" + pad(dt.getMinutes(), 2) + ":" + pad(dt.getSeconds(), 2);
+    return pad(dt.getFullYear(), 4) + '-' + pad(dt.getMonth() + 1, 2) + "-" + pad(dt.getDate(), 2) + " " + pad(dt.getHours(), 2) + ":" + pad(dt.getMinutes(), 2) + ":" + pad(dt.getSeconds(), 2);
 }
 
 function index_business_div(container, new_business) {

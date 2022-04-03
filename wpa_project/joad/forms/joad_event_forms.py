@@ -28,6 +28,7 @@ class EventRegistrationForm(MyModelForm):
             students = Student.objects.all()
         else:
             students = Student.objects.get(user=user).student_family.student_set.all()
+        students = students.filter(is_joad=True)
         d = timezone.localdate(timezone.now())
         old = d.replace(year=d.year - 21)
         young = d.replace(year=d.year - 9)

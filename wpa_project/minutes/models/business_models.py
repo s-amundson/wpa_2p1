@@ -9,12 +9,12 @@ logger = logging.getLogger(__name__)
 class Business(models.Model):
     minutes = models.ForeignKey(Minutes, on_delete=models.SET_NULL,
                                 null=True)
-    added_date = models.DateField(default=timezone.now)
+    added_date = models.DateTimeField(default=timezone.now)
     business = models.TextField()
-    resolved = models.DateField(default=None, null=True)
+    resolved = models.DateTimeField(default=None, null=True)
 
 
 class BusinessUpdate(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
-    update_date = models.DateField(default=timezone.now)
+    update_date = models.DateTimeField(default=timezone.now)
     update_text = models.TextField()

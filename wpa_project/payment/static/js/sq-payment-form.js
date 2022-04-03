@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', async function () {
              displayPaymentResults('SUCCESS');
              alert_notice("Success", "Thank you for your purchase.\n Your payment was processed successfully.\n An email has been sent for confirmation. ")
 
-             console.debug('Payment Success', paymentResults);
          }
          else{
             alert_notice("Error", 'Maximum payment tries exceeded. Unable to process payment.')

@@ -1,3 +1,4 @@
+{% load tz %}
 <div class="row">
     <div class="col">
         <div class="row div-update-row">
@@ -9,8 +10,8 @@
                 {{ update.form.update_text }}
             </div>
             <div class="col-2">
-                <div class="row">
-                    {{ update.form.update_date.label }} {{ update.form.update_date }}
+                <div class="row m-2">
+                    Update Date: {{ update.form.update_date }}
                 </div>
             </div>
             <div class="col-1"></div>

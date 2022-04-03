@@ -6,7 +6,6 @@
     {% endif %}">
     <thead>
         <tr>
-            <th> ID </th>
             <th> Class Date </th>
             <th> Class State</th>
             {% if user.is_staff %}
@@ -18,7 +17,6 @@
     <tbody id="class-list-body">
         {% for row in object_list %}
             <tr>
-                <td>{{ row.id }}</td>
                 <td>{{ row.class_date }}</td>
                 <td>{{ row.state }}</td>
                 {% if user.is_staff %}

@@ -59,6 +59,13 @@ class EmailMessage(EmailMultiAlternatives):
             if self.to in self.test_emails:
                 self.to = settings.EMAIL_DEBUG_ADDRESSES
 
+    def send_message(self, subject, message):
+        self.subject = subject
+        d = {'name': '', 'message': message}
+        self.body = get_template('student_app/email/simple_message.txt').render(d)
+        self.attach_alternative(get_template('student_app/email/simple_message.html').render(d), 'text/html')
+        self.send()
+
     def invite_user_email(self, send_student, add_student):
         logging.debug(add_student.email)
         self.to = [add_student.email]

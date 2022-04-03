@@ -1,16 +1,41 @@
 <form class="col form" method="post" autocomplete="off" id="instructor_form">
     {% csrf_token %}
     <div class="row">
-        <div class="col ml-3">USAA Archery Instructor Certificate Expiration Date:</div>
-        <div class="col input-group input-group-md">
-            {{ form.instructor_expire_date }}
-            {% for error in form.instructor_expire_date.errors %}
-                <p class="help-block">{{ error }}</p>
-            {% endfor %}
+        <div class="col-1"></div>
+        <div class="col">
+            <table class="table table-bordered
+                {% if user.dark_theme %}
+                    text-white
+                {% else %}
+                    text-dark
+                {% endif %}">
+                <tbody>
+                    <tr>
+                        <td>USAA Archery Instructor Certificate Expiration Date:</td>
+                        <td>Level</td>
+                        <td rowspan="2">
+                            <button id="btn-update-instructor" class="btn btn-primary m-3" onsubmit="update_instructor()">
+                                Update
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {{ form.instructor_expire_date }}
+                            {% for error in form.instructor_expire_date.errors %}
+                                <p class="help-block">{{ error }}</p>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {{ form.instructor_level }}
+                            {% for error in form.instructor_level.errors %}
+                                <p class="help-block">{{ error }}</p>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <div class="col-2">
-            <button id="btn-update-instructor" class="btn btn-primary" onsubmit="update_instructor()">Update</button>
-        </div>
-
+        <div class="col-1"></div>
     </div>
 </form>

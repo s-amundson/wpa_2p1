@@ -105,7 +105,7 @@ class TestsJoadEventRegistration(TestCase):
         # self.assertEqual(response.status_code, 200)
         events = EventRegistration.objects.all()
         self.assertEqual(len(events), 2)
-        self.assertContains(response, 'Student is already enrolled')
+        self.assertRedirects(response, reverse('joad:index'))
 
     def test_student_post_invalid(self):
         self._set_joad_age(Student.objects.get(pk=5), 10)

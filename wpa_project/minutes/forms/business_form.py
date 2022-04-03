@@ -1,5 +1,6 @@
 import logging
 from django.forms import BooleanField, IntegerField
+from django.utils import timezone
 
 from src import MyModelForm
 from ..models import Business, BusinessUpdate
@@ -14,7 +15,7 @@ class BusinessForm(MyModelForm):
 
     class Meta(MyModelForm.Meta):
         model = Business
-        read_fields = ['added_date']
+        read_fields = []
         hidden_fields = ['business_id', 'minutes']
         optional_fields = ['business', 'resolved', 'resolved_bool']
         fields = optional_fields + hidden_fields + read_fields
@@ -49,7 +50,7 @@ class BusinessUpdateForm(MyModelForm):
 
     class Meta(MyModelForm.Meta):
         model = BusinessUpdate
-        read_fields = ['update_date']
+        read_fields = []
         hidden_fields = ['business', 'update_id']
         optional_fields = ['update_text', ]
         fields = optional_fields + hidden_fields + read_fields
@@ -62,8 +63,12 @@ class BusinessUpdateForm(MyModelForm):
         if 'report' in kwargs:
             kwargs.pop('report')
         super().__init__(*args, **kwargs)
+        self.update_date = None
         if self.instance:
             self.fields['update_id'].initial = self.instance.id
+            self.update_date = self.instance.update_date
+        if self.update_date is None:
+            self.update_date = timezone.now()
         self.auto_id = 'update_%s' + f'_{self.report_index}'
         self.fields['update_text'].widget.attrs.update({'cols': 60, 'rows': 3, 'class': 'form-control m-2 update'})
         if old_update:
