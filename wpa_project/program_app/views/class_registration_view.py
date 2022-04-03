@@ -34,8 +34,11 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
                                           class_date__gte=timezone.localdate(timezone.now()))
         enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
             pay_status='refunded').exclude(pay_status='canceled').exclude(pay_status='refund donated')
+        unregisterable = len(enrolled_classes.exclude(pay_status='start'))
+        logging.debug(unregisterable)
         # logging.debug(enrolled_classes.values())
-        return render(request, 'program_app/tables/class_registered_table.html', {'enrolled_classes': enrolled_classes})
+        return render(request, 'program_app/tables/class_registered_table.html',
+                      {'enrolled_classes': enrolled_classes, 'unregisterable': unregisterable})
 
 
 class ClassRegistrationView(AccessMixin, FormView):

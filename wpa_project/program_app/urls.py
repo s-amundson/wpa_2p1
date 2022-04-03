@@ -5,6 +5,7 @@ urlpatterns = [
     path('beginner_class/<int:beginner_class>/', BeginnerClassView.as_view(), name='beginner_class'),
     path('beginner_class/', BeginnerClassView.as_view(), name='beginner_class'),
     path('class_attend/<int:registration>/', ClassAttendView.as_view(), name='class_attend'),
+    path('class_attend_list/<int:beginner_class>/', ClassAttendListView.as_view(), name='class_attend_list'),
     path('class_calendar/<int:month>/', ClassCalendarView.as_view(), name='class_calendar'),
     path('class_calendar/', ClassCalendarView.as_view(), name='class_calendar'),
     path('class_list/<int:past>/', BeginnerClassListView.as_view(), name='class_list'),
