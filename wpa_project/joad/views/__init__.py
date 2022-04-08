@@ -1,5 +1,5 @@
 from .attendance_view import AttendView, AttendanceListView
-from .event_registration_view import EventRegistrationView
+from .event_registration_view import EventRegistrationView, ResumeEventRegistrationView
 from .index_view import IndexView
 from .joad_class_view import ClassListView, JoadClassView
 from .joad_event_view import EventAttendanceView, JoadEventView

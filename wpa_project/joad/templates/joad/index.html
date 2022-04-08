@@ -118,6 +118,15 @@
         </div>
     {% endif %}
     <hr>
+    {% if event_pending %}
+        <div class="row"><h5>Incomplete Registration:</h5></div>
+        {% for registration in event_pending %}
+            <a href="{% url 'joad:resume_event_registration' registration.id %}">
+                Registration for {{ registration.student.first_name }} for event on
+                {{ registration.event.event_date }}
+            </a>
+        {% endfor %}
+    {% endif %}
     <div class="m-1">
         {% include "joad/tables/events.html" %}
     </div>

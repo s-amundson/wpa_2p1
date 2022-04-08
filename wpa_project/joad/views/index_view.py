@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.forms import model_to_dict
 
 from student_app.models import Student
-from ..models import JoadEvent, Registration, Session
+from ..models import EventRegistration, JoadEvent, Registration, Session
 import logging
 logger = logging.getLogger(__name__)
 
@@ -22,8 +22,14 @@ class IndexView(LoginRequiredMixin, ListView):
         self.session_list = []
         self.pending = []
         self.event_list = []
+        self.event_pending = []
         self.students = None
         self.has_joad = False
+
+    def check_event_registrtion_started(self, events):
+        registrations = EventRegistration.objects.filter(student__in=self.students, event__in=events, pay_status='start')
+        logging.debug(registrations)
+        return registrations
 
     def check_registration_started(self, sessions):
         sessions = sessions.filter(state='open')
@@ -37,6 +43,7 @@ class IndexView(LoginRequiredMixin, ListView):
         context['pending'] = self.pending
         context['has_joad'] = self.has_joad
         context['event_list'] = self.get_events()
+        context['event_pending'] = self.event_pending
         context['is_auth'] = len(self.students) > 0 or self.request.user.is_staff
         context['students'] = self.students
         return context
@@ -47,6 +54,7 @@ class IndexView(LoginRequiredMixin, ListView):
             events = events.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
         event_list = []
         logging.debug(events)
+        self.event_pending = self.check_event_registrtion_started(events)
         for event in events:
             e = model_to_dict(event)
             reg_list = []
