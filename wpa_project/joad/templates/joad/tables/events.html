@@ -37,6 +37,10 @@
                                class="btn btn-primary" role="button">
                                 Finish
                             </a>
+                        {% elif row.reg_status == 'start' %}
+                            <a href="{% url 'joad:resume_event_registration' row.reg_id %}">
+                                Unsuccessful
+                            </a>
                         {% else %}
                             <a href="{% url 'joad:event_registration' event.id %}" class="btn btn-primary" role="button">
                                 Register

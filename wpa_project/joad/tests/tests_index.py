@@ -73,12 +73,13 @@ class TestsJoadIndex(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['event_list']), 1)
         registrations = response.context['session_list'][0]['registrations']
+        logging.debug(registrations)
         self.assertTrue(registrations[0]['is_joad'])
         self.assertFalse(registrations[1]['is_joad'])
         self.assertTrue(registrations[2]['is_joad'])
-        self.assertFalse(registrations[0]['reg'])
-        self.assertFalse(registrations[1]['reg'])
-        self.assertFalse(registrations[2]['reg'])
+        self.assertEqual(registrations[0]['reg_status'], 'not registered')
+        self.assertEqual(registrations[1]['reg_status'], 'not registered')
+        self.assertEqual(registrations[2]['reg_status'], 'not registered')
         logging.debug(registrations)
 
     def test_user_normal_is_joad(self):

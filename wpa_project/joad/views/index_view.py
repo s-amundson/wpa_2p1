@@ -26,24 +26,11 @@ class IndexView(LoginRequiredMixin, ListView):
         self.students = None
         self.has_joad = False
 
-    def check_event_registrtion_started(self, events):
-        registrations = EventRegistration.objects.filter(student__in=self.students, event__in=events, pay_status='start')
-        logging.debug(registrations)
-        return registrations
-
-    def check_registration_started(self, sessions):
-        sessions = sessions.filter(state='open')
-        registrations = Registration.objects.filter(student__in=self.students, session__in=sessions, pay_status='start')
-        logging.debug(registrations)
-        return registrations
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['session_list'] = self.session_list
-        context['pending'] = self.pending
         context['has_joad'] = self.has_joad
         context['event_list'] = self.get_events()
-        context['event_pending'] = self.event_pending
         context['is_auth'] = len(self.students) > 0 or self.request.user.is_staff
         context['students'] = self.students
         return context
@@ -54,12 +41,12 @@ class IndexView(LoginRequiredMixin, ListView):
             events = events.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
         event_list = []
         logging.debug(events)
-        self.event_pending = self.check_event_registrtion_started(events)
         for event in events:
             e = model_to_dict(event)
             reg_list = []
             for student in self.students:
-                reg = event.eventregistration_set.filter(student=student)
+                reg = event.eventregistration_set.filter(student=student).order_by('id')
+                reg_id = None
                 reg_status = 'not registered'
                 if len(reg.filter(pay_status='paid')) > 0:
                     attend = event.pinattendance_set.filter(student=student).last()
@@ -68,7 +55,10 @@ class IndexView(LoginRequiredMixin, ListView):
                     else:
                         reg_status = 'registered'
                     logging.debug(attend)
-                reg_list.append({'reg_status': reg_status, 'student_id': student.id})
+                elif len(reg.filter(pay_status='start')) > 0:
+                    reg_status = 'start'
+                    reg_id = reg.filter(pay_status='start').last().id
+                reg_list.append({'reg_status': reg_status, 'reg_id': reg_id, 'student_id': student.id})
             e['registrations'] = reg_list
             logging.debug(e)
             event_list.append(e)
@@ -81,20 +71,23 @@ class IndexView(LoginRequiredMixin, ListView):
         if not self.request.user.is_staff:
             sessions = sessions.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
         sessions = sessions.order_by('start_date')
-        self.pending = self.check_registration_started(sessions)
         self.has_joad = self.request.user.is_staff
         for session in sessions:
             s = model_to_dict(session)
             reg_list = []
+            reg_id = None
+            reg_status = 'not registered'
             for student in self.students:
                 if student.is_joad:
                     self.has_joad = True
-                    reg = session.registration_set.filter(student=student, pay_status='paid')
-                    if len(reg) > 0:
+                    reg = session.registration_set.filter(student=student).order_by('id')
+                    if len(reg.filter(pay_status='paid')) > 0:
+                        reg_status = 'registered'
                         logging.debug(reg)
-                    reg_list.append({'is_joad': student.is_joad, 'reg': len(reg) > 0})
-                else:
-                    reg_list.append({'is_joad': student.is_joad, 'reg': False})
+                    elif len(reg.filter(pay_status='start')) > 0:
+                        reg_status = 'start'
+                        reg_id = reg.filter(pay_status='start').last().id
+                reg_list.append({'is_joad': student.is_joad, 'reg_status': reg_status, 'reg_id': reg_id})
             s['registrations'] = reg_list
             logging.debug(s)
             self.session_list.append(s)
