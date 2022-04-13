@@ -82,6 +82,10 @@ class PinAttendanceStudentForm(PinAttendanceBaseForm):
         optional_fields = ['inner_scoring']
         fields = read_fields + optional_fields + disabled_fields + required_fields
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['attended'].widget.attrs.update({'class': 'm-2', 'readonly': 'readonly'})
+
 
 class PinScoresForm(MyModelForm):
 
