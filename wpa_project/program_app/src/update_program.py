@@ -65,13 +65,13 @@ class UpdatePrograms:
             class_day = class_day.replace(hour=9)
             classes = BeginnerClass.objects.filter(class_date=class_day)
             if len(classes) == 0:
-                bc = BeginnerClass(class_date=class_day, class_type='beginner', beginner_limit=30, returnee_limit=0,
+                bc = BeginnerClass(class_date=class_day, class_type='beginner', beginner_limit=35, returnee_limit=0,
                                    state='open')
                 bc.save()
             class_day = class_day.replace(hour=11)
             classes = BeginnerClass.objects.filter(class_date=class_day)
             if len(classes) == 0:
-                bc = BeginnerClass(class_date=class_day, class_type='returnee', beginner_limit=0, returnee_limit=30,
+                bc = BeginnerClass(class_date=class_day, class_type='returnee', beginner_limit=0, returnee_limit=35,
                                    state='open')
                 bc.save()
 

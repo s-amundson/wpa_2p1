@@ -61,9 +61,15 @@ class EmailMessage(EmailMultiAlternatives):
 
     def send_message(self, subject, message):
         self.subject = subject
-        d = {'name': '', 'message': message}
-        self.body = get_template('student_app/email/simple_message.txt').render(d)
-        self.attach_alternative(get_template('student_app/email/simple_message.html').render(d), 'text/html')
+        paragraphs = []
+        for line in message.split('\n'):
+            logging.debug(f'len: {len(line)} line: {line}')
+            if len(line) > 1:
+                paragraphs.append(line)
+
+        d = {'name': '', 'paragraphs': paragraphs}
+        self.body = get_template('student_app/email/paragraph_message.txt').render(d)
+        self.attach_alternative(get_template('student_app/email/paragraph_message.html').render(d), 'text/html')
         self.send()
 
     def invite_user_email(self, send_student, add_student):
