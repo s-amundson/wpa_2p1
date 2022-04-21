@@ -181,6 +181,7 @@ async function load_decision_form() {
     await $.get(url_decision, { report_index: report_count }, function(data, status){
         $("#div-decisions").append(data);
         index_decision_div($("#decision-div-" + report_count))
+        report_count = report_count + 1;
     });
 }
 
