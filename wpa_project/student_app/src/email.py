@@ -45,6 +45,11 @@ class EmailMessage(EmailMultiAlternatives):
         for row in queryset:
             if row.user is not None:
                 self.bcc.append(EmailAddress.objects.get_primary(row.user))
+            else:
+                family = row.student_family.student_set.filter(user__isnull=False)
+                for s in family:
+                    if EmailAddress.objects.get_primary(s.user) not in self.bcc:
+                        self.bcc.append(EmailAddress.objects.get_primary(s.user))
 
     def bcc_from_users(self, users):
         self.bcc = []
@@ -66,7 +71,7 @@ class EmailMessage(EmailMultiAlternatives):
             logging.debug(f'len: {len(line)} line: {line}')
             if len(line) > 1:
                 paragraphs.append(line)
-
+        logging.debug(paragraphs)
         d = {'name': '', 'paragraphs': paragraphs}
         self.body = get_template('student_app/email/paragraph_message.txt').render(d)
         self.attach_alternative(get_template('student_app/email/paragraph_message.html').render(d), 'text/html')

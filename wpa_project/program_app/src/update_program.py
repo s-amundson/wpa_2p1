@@ -12,14 +12,15 @@ logger = logging.getLogger(__name__)
 class UpdatePrograms:
     def beginner_class(self):
         crh = ClassRegistrationHelper()
+        em = EmailMessage()
         states = BeginnerClass().get_states()
         today = timezone.localtime(timezone.now()).date()
 
-        # send status update for classes 3 days from now.
+        # send status update to staff for classes 3 days from now.
         email_date = today + timedelta(days=3)
         logging.debug(email_date)
         staff_query = User.objects.filter(is_staff=True, is_active=True)
-        students = Student.objects.filter(user__in=staff_query)
+        staff_students = Student.objects.filter(user__in=staff_query)
         classes = BeginnerClass.objects.filter(class_date__date=email_date, state__in=states[:3])
         logging.debug(len(classes))
         if len(classes):
@@ -27,7 +28,7 @@ class UpdatePrograms:
             for c in classes:
                 instructors = []
                 staff = []
-                cr = ClassRegistration.objects.filter(beginner_class=c, student__in=students)
+                cr = ClassRegistration.objects.filter(beginner_class=c, student__in=staff_students)
                 for r in cr:
                     if r.student.user.is_instructor:
                         instructors.append(r.student)
@@ -36,8 +37,25 @@ class UpdatePrograms:
                 class_list.append({'class': c, 'instructors': instructors, 'staff': staff,
                                    'count': crh.enrolled_count(c)})
             logging.debug(class_list)
-            EmailMessage().status_email(class_list, staff_query)
+            em.status_email(class_list, staff_query)
             logging.debug('emailed')
+
+        # send reminder email to students for classes 2 days from now.
+        email_date = today + timedelta(days=2)
+        logging.debug(email_date)
+        classes = BeginnerClass.objects.filter(class_date__date=email_date, state__in=states[:3])
+        logging.debug(classes)
+        for c in classes:
+            cr = c.classregistration_set.all()  #.exclude(student__in=staff_students)
+            logging.debug(cr)
+            logging.debug(c)
+            student_list = []
+            for r in cr:
+                student_list.append(r.student.id)
+            students = Student.objects.filter(id__in=student_list)
+            students = students.exclude(user__in=staff_query)
+            logging.debug(students)
+            em.beginner_reminder(c, students)
 
         # set past classes to recorded
         yesterday = today - timedelta(days=1)
@@ -59,13 +77,13 @@ class UpdatePrograms:
         # create classes for the next month on saturday if doesn't exist
         next_sat = self.next_class_day(5)  # Monday is 0 and Sunday is 6
 
-        for i in range(4):
+        for i in range(6):
             class_day = next_sat + timedelta(days=(7*i))
             class_day = timezone.datetime.combine(class_day, timezone.datetime.min.time())
             class_day = class_day.replace(hour=9)
             classes = BeginnerClass.objects.filter(class_date=class_day)
-            if len(classes) == 0:
-                bc = BeginnerClass(class_date=class_day, class_type='beginner', beginner_limit=35, returnee_limit=0,
+            if i > 4 and len(classes) == 0:
+                bc = BeginnerClass(class_date=class_day, class_type='beginner', beginner_limit=30, returnee_limit=0,
                                    state='open')
                 bc.save()
             class_day = class_day.replace(hour=11)

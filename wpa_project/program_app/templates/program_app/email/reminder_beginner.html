@@ -1,0 +1,25 @@
+{% extends "student_app/email/email_layout.html" %}
+{% block main %}
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Hi,
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Either you or a member of your family is signed up for a class on {{ beginner_class.class_date }} We look
+        forward to seeing you there. Please plan to be at the range {{ minutes }} minutes prior to the class to allow us to
+        sign you in. {% if beginner_class.class_type == 'beginner' %} Students that arrive past
+        {{ beginner_class.class_date|time }} will not be allowed to participate. {% endif %}
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        If for any
+        reason you can't make it, please unregister yourself from the class prior to the 24-hour cutoff by going
+        <a href="http://registration/woodleyparkarchers.org/">here.</a>. The system will not let you unregister within
+        24 hours.
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+    </p>
+    <img src="cid:photo" />
+{% endblock %}
