@@ -46,7 +46,7 @@ class UpdatePrograms:
         classes = BeginnerClass.objects.filter(class_date__date=email_date, state__in=states[:3])
         logging.debug(classes)
         for c in classes:
-            cr = c.classregistration_set.all()  #.exclude(student__in=staff_students)
+            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin'])  #.exclude(student__in=staff_students)
             logging.debug(cr)
             logging.debug(c)
             student_list = []
