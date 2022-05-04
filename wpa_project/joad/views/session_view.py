@@ -47,7 +47,9 @@ class SessionFormView(UserPassesTestMixin, FormView):
     def test_func(self):
         if self.kwargs.get('session_id', None) is not None:
             self.session = get_object_or_404(Session, pk=self.kwargs['session_id'])
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        return False
 
 
 class SessionStatusView(LoginRequiredMixin, View):

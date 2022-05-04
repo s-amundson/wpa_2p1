@@ -36,7 +36,7 @@ class IndexView(LoginRequiredMixin, ListView):
         return context
 
     def get_events(self):
-        events = JoadEvent.objects.filter(event_date__gte=self.today)
+        events = JoadEvent.objects.filter()  # event_date__gte=self.today)
         if not self.request.user.is_board:
             events = events.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
         event_list = []
