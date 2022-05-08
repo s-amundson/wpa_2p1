@@ -1,6 +1,9 @@
 <nav class="navbar navbar-dark bg-dark border">
     <a class="navbar-brand" href="/">
-        <div class="container px-4"><span class="green">Class Registration</span></div>
+        <div class="container px-4">
+            <img src="https://woodleyparkarchers.org/wp-content/uploads/2018/06/cropped-WPA-Logo-4.png" alt="Icon" width="40">
+            <span class="green">Registration</span>
+        </div>
     </a>
 
     <div class="navbar-expand-md" id="navbar">
@@ -43,11 +46,10 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         {% if user.is_member %}
-                            Membership coming soon.
+                            <a class="dropdown-item" href="{% url 'membership:membership' %}">Membership</a>
                             <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
                         {% else %}
-                            Membership coming soon.
-
+                            <a class="dropdown-item" href="{% url 'membership:membership' %}">Join</a>
                         {% endif %}
                     </div>
                 </li>

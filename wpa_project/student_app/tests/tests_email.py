@@ -18,7 +18,7 @@ class TestsEmail(TestCase):
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
-        self.send_dict = {'recipients': 'board', 'subject': 'Test Subject', 'message': 'Test Message'}
+        self.send_dict = {'recipients': 'board', 'subject': 'Test Subject', 'message': 'Hi\n Test Message'}
 
     def test_awrl_email(self):
         self.test_user = User.objects.get(pk=2)
@@ -51,6 +51,12 @@ class TestsEmail(TestCase):
         em = EmailMessage()
         em.bcc_from_students(Student.objects.all())
         self.assertEqual(len(em.bcc), 5)
+
+    def test_bcc_from_students(self):
+        em = EmailMessage()
+        em.bcc_from_students(Student.objects.filter(pk=3))
+        self.assertEqual(len(em.bcc), 1)
+        self.assertEqual(str(em.bcc[0]), "RosalvaAHall@superrito.com")
 
     def test_get_send_email_auth(self):
         self.test_user = User.objects.get(pk=1)
@@ -110,3 +116,18 @@ class TestsEmail(TestCase):
         self.send_dict['recipients'] = 'invalid'
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_send_email_joad(self):
+        student = Student.objects.get(pk=3)
+        student.is_joad = True
+        student.save()
+
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        self.send_dict['recipients'] = 'joad'
+        response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox[0].bcc), 1)
+        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
+        logging.debug(mail.outbox[0].body)
+        # self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)

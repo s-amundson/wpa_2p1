@@ -1,4 +1,5 @@
 from django.views.generic.edit import FormView
+from django.views.generic.base import View
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
@@ -107,3 +108,19 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         logging.debug(self.request.POST)
         return super().post(request, *args, **kwargs)
+
+
+class ResumeEventRegistrationView(LoginRequiredMixin, View):
+    def get(self, request, reg_id=None):
+        registration = get_object_or_404(EventRegistration, pk=reg_id)
+        registrations = EventRegistration.objects.filter(idempotency_key=registration.idempotency_key)
+        logging.debug(registration)
+        self.request.session['idempotency_key'] = str(registration.idempotency_key)
+        self.request.session['line_items'] = []
+        self.request.session['payment_db'] = ['joad', 'Registration']
+        self.request.session['action_url'] = reverse('programs:class_payment')
+        for r in registrations:
+            description = f"Joad event on {str(registration.event.event_date)[:10]} student id: "
+            self.request.session['line_items'].append(
+                SquareHelper().line_item(f"{description} {str(r.student.id)}", 1, r.event.cost))
+        return HttpResponseRedirect(reverse('payment:process_payment'))

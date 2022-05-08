@@ -18,7 +18,7 @@ class ClassSignInView(WaiverView):
             self.class_registration = get_object_or_404(ClassRegistration, pk=rid)
             self.class_date = self.class_registration.beginner_class.class_date.date()
             self.student = self.class_registration.student
-            self.success_url = reverse_lazy('programs:beginner_class',
+            self.success_url = reverse_lazy('programs:class_attend_list',
                                             kwargs={'beginner_class': self.class_registration.beginner_class.id})
         if self.request.user.is_authenticated:
             return self.request.user.is_staff

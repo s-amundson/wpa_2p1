@@ -49,11 +49,9 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
             pins_earned = form.calculate_pins()
             logging.debug(pins_earned)
             if pins_earned > 0:
-                pin_cost = CostsModel.objects.filter(name='JOAD Pin', enabled=True)
-                if pin_cost is not None:
-                    pin_cost = pin_cost[0].standard_cost
-                else: # pragma: no cover
-                    pin_cost = 6
+                pin_cost = self.event.pin_cost
+                if pin_cost is None:  # pragma: no cover
+                    pin_cost = 0
                 uid = str(uuid.uuid4())
                 self.request.session['idempotency_key'] = uid
                 self.request.session['line_items'] = []
@@ -76,8 +74,9 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
             self.event = get_object_or_404(JoadEvent, pk=eid)
             self.student = get_object_or_404(Student, pk=sid)
             self.attendance = self.event.pinattendance_set.filter(student=self.student).last()
-
-        if self.request.user.is_staff:
+        if not self.request.user.is_authenticated:
+            return False
+        if self.request.user and self.request.user.is_staff:
             self.form_class = PinAttendanceStaffForm
             self.success_url = reverse_lazy('joad:event', kwargs={'event_id': eid})
             return True
@@ -131,4 +130,6 @@ class JoadEventView(UserPassesTestMixin, FormView):
         return super().form_valid(form)
 
     def test_func(self):
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        return False

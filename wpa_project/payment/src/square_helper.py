@@ -46,7 +46,7 @@ class SquareHelper:
         # square requires amount in pennies
         l = {'name': name,
              'quantity': str(quantity),
-             'base_price_money': {'amount': amount * quantity * 100,
+             'base_price_money': {'amount': amount * 100,
                                   'currency': 'USD'},
              }
         return l

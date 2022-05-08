@@ -1,0 +1,8 @@
+Hi,
+
+Either you or a member of your family is signed up for a class on {{ beginner_class.class_date }} We look forward to seeing you there. Please plan to be at the range {{minutes}} minutes prior to the class to allow us to sign you in. {% if beginner_class.class_type == 'beginner' %} Students that arrive past {{ beginner_class.class_date|time }} will not be allowed to participate. {% endif %}
+
+If for any reason you can't make it, please unregister yourself from the class prior to the 24-hour cutoff by going to http://registration/woodleyparkarchers.org/ The system will not let you unregister within 24 hours.
+
+http://woodleyparkarchers.org/">WoodleyParkArchers.org
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

@@ -57,15 +57,6 @@
             </button>
         </div>
     </div>
-    {% if pending %}
-        <div class="row"><h5>Incomplete Registration:</h5></div>
-        {% for registration in pending %}
-            <a href="{% url 'joad:resume_registration' registration.id %}">
-                Registration for {{ registration.student.first_name }} for session starting
-                {{ registration.session.start_date }}
-            </a>
-        {% endfor %}
-    {% endif %}
 
     <div class="row"><h5>Upcoming Sessions:</h5></div>
     <table class="table table-bordered
@@ -97,8 +88,12 @@
                     {% for row in session.registrations %}
                         <td>
                             {% if row.is_joad %}
-                                {% if row.reg %}
+                                {% if row.reg_status == 'registered' %}
                                     Registered
+                                {% elif row.reg_status == 'start' %}
+                                    <a href="{% url 'joad:resume_registration' row.reg_id %}">
+                                        Unsuccessful
+                                    </a>
                                 {% else %}
                                     <a href="{% url 'joad:registration' session.id %}" class="btn btn-primary" role="button">
                                         Register
@@ -118,6 +113,7 @@
         </div>
     {% endif %}
     <hr>
+
     <div class="m-1">
         {% include "joad/tables/events.html" %}
     </div>

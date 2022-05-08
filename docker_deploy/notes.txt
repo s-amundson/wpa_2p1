@@ -21,6 +21,8 @@ docker exec -it django python manage.py runapschedular
 sudo docker exec -t postgresdb pg_dumpall -c -U lucky9feather  > ~/bkup/dump_`date +%Y-%m-%d"_"%H_%M_%S`.sql
 privatefiles.txt has information on creating the files that contain private information.
 
+docker exec -it sftp /bin/bash
+
 For server firewall:
     sudo nano /etc/default/docker and add the following line:
         DOCKER_OPTS="--iptables=false"

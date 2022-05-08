@@ -125,7 +125,7 @@ class TestsEventAttendance(TestCase):
         self.assertIn('Joad Pin(s) for ', self.client.session['line_items'][0]['name'])
         self.assertEqual(self.client.session['payment_db'][1], 'PinAttendance')
         self.assertEqual(self.client.session['line_items'][0]['quantity'], '2')
-        self.assertEqual(self.client.session['line_items'][0]['base_price_money']['amount'], 1000)
+        self.assertEqual(self.client.session['line_items'][0]['base_price_money']['amount'], 500)
 
     def test_post_student_with_dict_attend_no_pin(self):
         self.test_user = User.objects.get(pk=7)

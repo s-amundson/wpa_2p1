@@ -145,7 +145,7 @@ class ClassRegistrationView(AccessMixin, FormView):
 
             return self.transact(beginner_class, students, instructors)
 
-        elif beginner_class.state == 'full' and self.request.user.is_staff:
+        elif beginner_class.state in ['full', 'closed'] and self.request.user.is_staff:
             if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
                 return self.has_error('Not enough space available in this class')
             else:
