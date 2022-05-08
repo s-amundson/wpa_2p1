@@ -13,3 +13,4 @@
 # from .tests.tests_unregister import TestsUnregisterStudent
 # from .tests.tests_unregister import TestsUnregisterStudent2
 # from .tests.tests_update_programs import TestsUpdatePrograms
+# from .tests.tests_update_programs import TestsUpdatePrograms2

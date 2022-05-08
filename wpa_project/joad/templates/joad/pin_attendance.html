@@ -56,7 +56,9 @@
                 {{ form.score.errors }}
             </div>
             <div class="col m-2">
-                <p> Stars Earned: {{form.instance.stars }} </p>
+                {% if user.is_staff %}
+                    <p> Stars Earned: {{form.instance.stars }} </p>
+                {% endif %}
                 {{ form.award_received.label }}
                 {{ form.award_received }}
                 {{ form.award_received.errors }}
