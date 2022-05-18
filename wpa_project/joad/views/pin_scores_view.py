@@ -13,7 +13,9 @@ class PinScoreListView(UserPassesTestMixin, ListView):
     template_name = 'joad/pin_scores.html'
 
     def test_func(self):
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        return False
 
 
 class PinScoreView(UserPassesTestMixin, FormView):

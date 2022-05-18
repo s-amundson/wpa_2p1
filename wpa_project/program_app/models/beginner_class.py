@@ -11,11 +11,10 @@ def choices(choice_list):
     return choice
 
 
-class BeginnerClass(models.Model):
+class BeginnerCommonClass(models.Model):
     class_types = ['beginner', 'returnee', 'combined']
     class_states = ['scheduled', 'open', 'full', 'closed', 'canceled', 'recorded']
 
-    class_date = models.DateTimeField()
     class_type = models.CharField(max_length=20, null=True, choices=choices(class_types))
     beginner_limit = models.IntegerField()
     returnee_limit = models.IntegerField()
@@ -23,5 +22,19 @@ class BeginnerClass(models.Model):
     state = models.CharField(max_length=20, null=True, choices=choices(class_states))
     cost = models.IntegerField(default=5)
 
+    class Meta:
+        abstract = True
+
     def get_states(self):
         return self.class_states
+
+
+class BeginnerClass(BeginnerCommonClass):
+    class_date = models.DateTimeField()
+
+
+class BeginnerSchedule(BeginnerCommonClass):
+    class_time = models.TimeField()
+    day_of_week = models.IntegerField(default=5) # Monday is 0 and Sunday is 6
+    frequency = models.IntegerField(default=1)
+    future_classes = models.IntegerField(default=6)

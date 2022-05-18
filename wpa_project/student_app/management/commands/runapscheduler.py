@@ -11,7 +11,7 @@ from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
 from django.utils import timezone
 
-from program_app.src import UpdatePrograms
+from program_app.src import SchedulePrograms, UpdatePrograms
 from membership.src import RunDaily
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 #@util.ensure_old_connections_are_closed
 def my_job():
-    UpdatePrograms().beginner_class()
+    UpdatePrograms().daily_update()
     RunDaily().expire()
 
 
@@ -54,6 +54,7 @@ class Command(BaseCommand):
             replace_existing=True,
         )
         logger.info("Added job 'my_job'.")
+        SchedulePrograms(scheduler)
 
         # scheduler.add_job(
         #     delete_old_job_executions,

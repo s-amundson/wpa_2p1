@@ -21,6 +21,12 @@ class ClassRegistrationHelper:
             if update:
                 bc.state = 'full'
                 bc.save()
+        elif ec['beginner'] + class_registration_dict['beginner'] < bc.beginner_limit and \
+           ec['returnee'] + class_registration_dict['returnee'] < bc.returnee_limit:
+            logging.debug(bc.state)
+            if update and bc.state == 'full':
+                bc.state = 'open'
+                bc.save()
         logging.debug(is_space)
         return is_space
 

@@ -38,3 +38,15 @@ For server firewall:
     sudo ufw enable
 
 Create issue with Django on migration from date to datetime field with postgres. Note: behaves properly in testing.
+
+To update wordpress:
+    backup the wordpress directory
+        cp -r ~/wpa_2p1/wordpress ~/bkup/wordpress
+    backup the wordpress database
+    delete * from worpress directroy except the wp-content folder. or delete all then copy wp-content back
+        sudo rm -r ~/wpa_2p1/wordpress/*
+        sudo cp -r ~/bkup/wordpress/wp-content ~/wpa_2p1/wordpress/wp-content
+    restart docker
+        cd ~/wpa_2p1/docker_deploy
+        docker-compose down
+        docker-compose up

@@ -6,10 +6,12 @@ from django.test import TestCase
 from django.utils import timezone
 from datetime import timedelta
 from django.test import TestCase, Client
+from apscheduler.schedulers.blocking import BlockingScheduler
+from django.conf import settings
 
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass, BeginnerSchedule, ClassRegistration
 from student_app.models import Student, User
-from ..src import UpdatePrograms
+from ..src import SchedulePrograms, UpdatePrograms
 logger = logging.getLogger(__name__)
 
 
@@ -19,39 +21,32 @@ class TestsUpdatePrograms(TestCase):
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
-        self.beginner_class_count = [10, 12]
+        self.beginner_class_count = [16, 17, 18]
 
-    def test_beginner_class(self):
+    def test_close_class(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=1)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
+        d = timezone.make_aware(d, timezone.get_current_timezone())
         bc = BeginnerClass(class_date=d, class_type='combined', beginner_limit=10, returnee_limit=10, state='open')
         bc.save()
 
-        UpdatePrograms().beginner_class()
-        # count is 11 on Saturdays
-        logging.debug(BeginnerClass.objects.all().count())
-        self.assertTrue(BeginnerClass.objects.all().count() in self.beginner_class_count)
+        UpdatePrograms().close_class(timezone.datetime.time(d))
         self.assertEqual(BeginnerClass.objects.get(pk=bc.id).state, 'closed')
-        for i in range(7):
-            logging.debug(i)
-            self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 1 + i).state, 'open')
 
     def test_beginner_class_recorded(self):
         d = timezone.localtime(timezone.now()).date() - timedelta(days=2)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
+        d = timezone.make_aware(d, timezone.get_current_timezone())
         bc = BeginnerClass(class_date=d, class_type='combined', beginner_limit=10, returnee_limit=10, state='open')
         bc.save()
 
-        UpdatePrograms().beginner_class()
-        # count is 11 on Saturdays
-        self.assertTrue(BeginnerClass.objects.all().count() in self.beginner_class_count)
+        UpdatePrograms().daily_update()
         self.assertEqual(BeginnerClass.objects.get(pk=bc.id).state, 'recorded')
-        for i in range(7):
-            self.assertEqual(BeginnerClass.objects.get(pk=bc.id + 1 + i).state, 'open')
 
     def test_email_staff_notice(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=3)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
+        d = timezone.make_aware(d, timezone.get_current_timezone())
         bc1 = BeginnerClass(class_date=d, class_type='beginner', beginner_limit=10, returnee_limit=0, state='open')
         bc1.save()
         bc2 = BeginnerClass(class_date=timezone.datetime(year=d.year, month=d.month, day=d.day, hour=11),
@@ -70,7 +65,7 @@ class TestsUpdatePrograms(TestCase):
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
 
-        UpdatePrograms().beginner_class()
+        UpdatePrograms().status_email()
         # logging.debug(mail.outbox[0].message())
         logging.debug(d.strftime('%Y-%m-%d'))
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Status {d.strftime('%Y-%m-%d')}")
@@ -81,6 +76,7 @@ class TestsUpdatePrograms(TestCase):
         # set up the class on a different day.
         d = timezone.localtime(timezone.now()).date() + timedelta(days=1)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
+        d = timezone.make_aware(d, timezone.get_current_timezone())
         bc1 = BeginnerClass(class_date=d, class_type='beginner', beginner_limit=10, returnee_limit=0, state='open')
         bc1.save()
         bc2 = BeginnerClass(class_date=timezone.datetime(year=d.year, month=d.month, day=d.day, hour=11),
@@ -99,12 +95,13 @@ class TestsUpdatePrograms(TestCase):
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
 
-        UpdatePrograms().beginner_class()
+        UpdatePrograms().status_email()
         self.assertEqual(len(mail.outbox), 0)
 
     def test_email_beginner_reminder(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
+        d = timezone.make_aware(d, timezone.get_current_timezone())
         bc1 = BeginnerClass(class_date=d, class_type='beginner', beginner_limit=10, returnee_limit=0, state='open')
         bc1.save()
         u = User.objects.get(pk=3)
@@ -120,16 +117,17 @@ class TestsUpdatePrograms(TestCase):
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
 
-        UpdatePrograms().beginner_class()
+        # UpdatePrograms().beginner_class()
+        UpdatePrograms().reminder_email(timezone.datetime.time(d))
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Reminder {d.strftime('%Y-%m-%d')}")
         s = 'Either you or a member of your family is signed up for a class'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
         self.assertTrue(mail.outbox[0].body.find('will not be allowed to participate') > 0)
 
-
     def test_email_returnee_reminder(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=11)
+        d = timezone.make_aware(d, timezone.get_current_timezone())
         bc1 = BeginnerClass(class_date=d, class_type='returnee', beginner_limit=10, returnee_limit=0, state='open')
         bc1.save()
         u = User.objects.get(pk=3)
@@ -145,9 +143,22 @@ class TestsUpdatePrograms(TestCase):
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
 
-        UpdatePrograms().beginner_class()
+        UpdatePrograms().reminder_email(timezone.datetime.time(d))
         # logging.debug(mail.outbox[0].message())
         logging.debug(d.strftime('%Y-%m-%d'))
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Reminder {d.strftime('%Y-%m-%d')}")
         s = 'Either you or a member of your family is signed up for a class'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
+
+
+class TestsUpdatePrograms2(TestCase):
+    fixtures = ['beginner_schedule']
+
+    def setUp(self):
+        # Every test needs a client.
+        self.client = Client()
+
+    def test_add_class(self):
+        UpdatePrograms().add_weekly()
+        logging.debug(BeginnerClass.objects.all().count())
+        self.assertTrue(BeginnerClass.objects.all().count() in [18])

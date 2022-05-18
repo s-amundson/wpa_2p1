@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from ..serializers import UnregisterSerializer
 from payment.src import SquareHelper, EmailMessage
+from ..src import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
 from student_app.models import Student
 logger = logging.getLogger(__name__)
@@ -98,9 +99,9 @@ class UnregisterView(LoginRequiredMixin, APIView):
                 canceled_count = 0
                 for c in class_list:
                     cr = ClassRegistration.objects.get(pk=c)
-                    if cr.beginner_class.state == 'full':
-                        cr.beginner_class.state = 'open'
-                    cr.beginner_class.save()
+                    # if cr.beginner_class.state == 'full':
+                    #     cr.beginner_class.state = 'open'
+                    # cr.beginner_class.save()
                     if cr.pay_status == 'start' or cr.pay_status == 'canceled':
                         cr.pay_status = 'canceled'
                         canceled_count += 1
@@ -109,6 +110,8 @@ class UnregisterView(LoginRequiredMixin, APIView):
                     else:
                         cr.pay_status = 'refunded'
                     cr.save()
+                    ClassRegistrationHelper().check_space(
+                        {'beginner_class': cr.beginner_class.id, 'beginner': 0, 'returnee': 0}, True)
                 logging.debug(f'class_list length: {len(class_list)}, canceled_count: {canceled_count}')
                 if len(class_list) > canceled_count:
                     EmailMessage().refund_email(request.user, donation)

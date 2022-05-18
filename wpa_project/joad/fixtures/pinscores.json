@@ -4,7 +4,7 @@
   {"model": "joad.pinscores", "pk":  3, "fields": {"bow": "barebow", "category": "joad_indoor", "distance": 18, "target":  60, "inner_scoring": false, "score":  30, "stars":  2}},
   {"model": "joad.pinscores", "pk":  4, "fields": {"bow": "barebow", "category": "joad_indoor", "distance":  9, "target":  60, "inner_scoring": false, "score": 110, "stars":  3}},
   {"model": "joad.pinscores", "pk":  5, "fields": {"bow": "barebow", "category": "joad_indoor", "distance": 18, "target":  60, "inner_scoring": false, "score":  50, "stars":  3}},
-  {"model": "joad.pinscores", "pk":  6, "fields": {"bow": "barebow", "category": "joad_indoor", "distance":  9, "target":  60, "inner_scoring": false, "score": 145, "stars":  3}},
+  {"model": "joad.pinscores", "pk":  6, "fields": {"bow": "barebow", "category": "joad_indoor", "distance":  9, "target":  60, "inner_scoring": false, "score": 145, "stars":  4}},
   {"model": "joad.pinscores", "pk":  7, "fields": {"bow": "barebow", "category": "joad_indoor", "distance": 18, "target":  60, "inner_scoring": false, "score": 100, "stars":  4}},
   {"model": "joad.pinscores", "pk":  8, "fields": {"bow": "barebow", "category": "joad_indoor", "distance": 18, "target":  60, "inner_scoring": false, "score": 140, "stars":  5}},
   {"model": "joad.pinscores", "pk":  9, "fields": {"bow": "barebow", "category": "joad_indoor", "distance": 18, "target":  60, "inner_scoring": false, "score": 185, "stars":  6}},
