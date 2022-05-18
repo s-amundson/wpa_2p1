@@ -27,27 +27,27 @@ class PaymentView(APIView):
                 response_dict['error'] = 'payment processing error'
                 return Response(response_dict)
             sq_token = serializer.data['sq_token']
-
-            if request.session.get('line_items', None) is None:
+            line_items = request.session.get('line_items', None)
+            if line_items is None:
                 response_dict['error'] = 'missing line items.'
                 return Response(response_dict)
 
             # if user donated money add it to the line itmes.
             donation = serializer.data.get('donation', None)
-            if donation is not None:
+            if donation is not None and donation > 0:
                 request.session['line_items'].append(self.square_helper.line_item('donation', 1, float(donation)))
+                self.square_helper.set_donation(donation, serializer.data.get('note', ''))
 
             # get the amount form the line items and get line item name and add to notes
             amt = 0
             note = ""
-            for line in request.session['line_items']:
+            for line in line_items:
                 amt += line['base_price_money']['amount'] * int(line['quantity'])
                 note += f" {line['name']},"
 
             # Monetary amounts are specified in the smallest unit of the applicable currency.
             amount = {'amount': amt, 'currency': 'USD'}
             message = ""
-            logging.debug(amt)
             if amt == 0:
                 square_response = self.square_helper.comp_response(note, amt)
             elif sq_token == 'bypass' and request.user.is_board:
@@ -69,11 +69,17 @@ class PaymentView(APIView):
                     response_dict['error'] = message
                     response_dict['continue'] = self.square_helper.payment_error(request, square_response['error'])
                     return Response(response_dict)
-                # return redirect('registration:process_payment')
+            # logging.debug(square_response)
             self.square_helper.log_payment(request, square_response, create_date=None)
-            pay_dict = {'line_items': request.session['line_items'], 'total': amt / 100,
+            pay_dict = {'line_items': line_items, 'total': amt / 100,
                         'receipt': square_response['receipt_url']}
             EmailMessage().payment_email_user(request.user, pay_dict)
+            logging.debug(request.session['line_items'])
+            if square_response['status'] == 'COMPLETED':
+                # if payment is completed lets remove payment data from session
+                for key in ['line_items', 'idempotency_key', 'payment_db', 'payment']:
+                    if key in request.session:
+                        del request.session[key]
             response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],
                              'error': square_response['error'], 'continue': False}
             return Response(response_dict)

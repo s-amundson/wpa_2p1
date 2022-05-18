@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %} Class Sign up {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+
+        <button class="m-2 btn btn-primary" type="submit">
+            Submit
+        </button>
+
+    </form>
+{% endblock %}

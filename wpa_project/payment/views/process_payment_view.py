@@ -1,4 +1,5 @@
 import logging
+import uuid
 from django.conf import settings
 from django.shortcuts import render
 from django.utils.datetime_safe import datetime
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class ProcessPaymentView(LoginRequiredMixin, View):
     """Shows a payment page for making purchases"""
+    donation = False
 
     def bypass_payment(self, request, table_rows):
         sh = SquareHelper()
@@ -21,30 +23,27 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         return render(request, 'student_app/message.html', {'message': 'No payment needed, Thank You'})
 
     def get(self, request):
-
         paydict = {}
         if settings.SQUARE_CONFIG['environment'] == "production":   # pragma: no cover
-            # paydict['production'] = True
             paydict['pay_url'] = "https://web.squarecdn.com/v1/square.js"
         else:  # pragma: no cover
-            # paydict['production'] = False
-            paydict['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"  #"https://js.squareupsandbox.com/v2/paymentform"
+            paydict['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"
         paydict['app_id'] = settings.SQUARE_CONFIG['application_id']
         paydict['location_id'] = settings.SQUARE_CONFIG['location_id']
         paydict['action_url'] = request.session.get('action_url', reverse('payment:payment'))
         # rows, total = self.table_rows(request.session)
         table_rows = self.table_rows(request.session)
         logging.debug(table_rows['total'])
-        if table_rows['total'] == 0:
+        # if table_rows['total'] == 0:
             # No payment necessary
-            self.bypass_payment(request, table_rows)
+            # self.bypass_payment(request, table_rows)
         bypass = False
-        if request.user.is_board: # TODO add comp group or colum
+        if request.user.is_board and not request.session.get('payment', False):
             bypass = True
         logging.debug(paydict)
         message = request.session.get('message', '')
         context = {'paydict': paydict, 'rows': table_rows['rows'], 'total': table_rows['total'],
-                   'bypass': bypass, 'message': message}
+                   'bypass': bypass, 'message': message, 'donation': self.donation}
         return render(request, 'payment/square_pay.html', context)
 
     def table_rows(self, session):
@@ -82,3 +81,13 @@ class ProcessPaymentView(LoginRequiredMixin, View):
         else:  # pragma: no cover
             logging.debug('payment processing error')
             return render(request, 'student_app/message.html', {'message': 'payment processing error'})
+
+
+class DonationView(ProcessPaymentView):
+    """A view to make it possible for a student to make a stand alone donation."""
+    def get(self, request):
+        request.session['idempotency_key'] = str(uuid.uuid4())
+        request.session['line_items'] = []
+        request.session['db'] = None
+        self.donation = True
+        return super().get(request)

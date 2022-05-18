@@ -5,29 +5,35 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/minutes.js' %}"></script>
+    <script>
+        {% if minutes_id %}
+            let minutes_id = "{{ minutes_id }}";
+            let url_minutes = "{% url 'minutes:minutes_form' minutes_id %}";
+        {% else %}
+            let minutes_id = null;
+            let url_minutes = "{% url 'minutes:minutes_form' %}";
+        {% endif %}
+
+        let report_count = {{ report_index }};
+        let url_business = "{% url 'minutes:business' %}";
+        let url_business_update = "{% url 'minutes:business_update' %}";
+        let url_decision = "{% url 'minutes:decision' %}"
+        let url_report = "{% url 'minutes:report' %}"
+    </script>
 {% endblock %}
 
 {% block main %}
-{% load l10n %}
+{% load l10n %}{% load tz %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
 
     <form id="minutes-form" method="post">
         {% csrf_token %}
-        <input type="hidden" id="minutes-id" value="{{ minutes_id }}">
-        <input type="hidden" id="url-business" value="{% url 'minutes:business' %}">
-        <input type="hidden" id="url-business-update" value="{% url 'minutes:business_update' %}">
-        {% if minutes_id %}
-            <input type="hidden" id="url-minutes" value="{% url 'minutes:minutes_form' minutes_id %}">
-        {% else %}
-            <input type="hidden" id="url-minutes" value="{% url 'minutes:minutes_form' %}">
-        {% endif %}
-        <input type="hidden" id="url-report" value="{% url 'minutes:report' %}">
-        <input type="hidden" id="url-decision" value="{% url 'minutes:decision' %}">
+
         <div class="row p-3">
             <div class="col-2">
                 {{ form.meeting_date.label }}
             </div>
-            <div class="col-2">
+            <div class="col-3">
                 {{ form.meeting_date }}
             </div>
             <div class="col"></div>
@@ -47,9 +53,12 @@
             <div class="col-2">
                 {{ form.start_time.label }}
             </div>
-            <div id="div-start-input" class="col-2">
-                {{ form.start_time }}
-                <button id="btn-start" class="btn btn-primary" type="submit">Start Meeting Now</button>
+            <div id="div-start-input" class="col-3">
+                {% if minutes_id %}
+                    {{ form.start_time }}
+                {% else %}
+                    <button id="btn-start" class="btn btn-primary" type="submit">Start Meeting Now</button>
+                {% endif %}
             </div>
             <div class="col"></div>
         </div>

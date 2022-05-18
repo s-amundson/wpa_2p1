@@ -21,6 +21,8 @@ docker exec -it django python manage.py runapschedular
 sudo docker exec -t postgresdb pg_dumpall -c -U lucky9feather  > ~/bkup/dump_`date +%Y-%m-%d"_"%H_%M_%S`.sql
 privatefiles.txt has information on creating the files that contain private information.
 
+docker exec -it sftp /bin/bash
+
 For server firewall:
     sudo nano /etc/default/docker and add the following line:
         DOCKER_OPTS="--iptables=false"
@@ -34,3 +36,17 @@ For server firewall:
     sudo ufw limit 3306
     sudo ufw default deny incoming
     sudo ufw enable
+
+Create issue with Django on migration from date to datetime field with postgres. Note: behaves properly in testing.
+
+To update wordpress:
+    backup the wordpress directory
+        cp -r ~/wpa_2p1/wordpress ~/bkup/wordpress
+    backup the wordpress database
+    delete * from worpress directroy except the wp-content folder. or delete all then copy wp-content back
+        sudo rm -r ~/wpa_2p1/wordpress/*
+        sudo cp -r ~/bkup/wordpress/wp-content ~/wpa_2p1/wordpress/wp-content
+    restart docker
+        cd ~/wpa_2p1/docker_deploy
+        docker-compose down
+        docker-compose up

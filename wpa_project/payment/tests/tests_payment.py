@@ -4,8 +4,8 @@ import uuid
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from student_app.models import Student, User
-from ..models import PaymentLog
+from student_app.models import User
+from ..models import DonationLog, PaymentLog
 
 logger = logging.getLogger(__name__)
 
@@ -136,3 +136,45 @@ class TestsPayment(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].status, 'COMPLETED')
+
+
+class TestsDonationPayment(TestCase):
+    fixtures = ['f1']
+
+    def setUp(self):
+        # Every test needs a client.
+        self.client = Client()
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+
+    def test_with_donation(self):
+        session = self.client.session
+        session['idempotency_key'] = str(uuid.uuid4())
+        session['line_items'] = []
+        session.save()
+
+        response = self.client.post(reverse('payment:payment'),
+                                    {'sq_token': 'cnon:card-nonce-ok', 'donation': 5, 'note': 'donation note'},
+                                    secure=True)
+        dl = DonationLog.objects.all()
+        self.assertEqual(len(dl), 1)
+        self.assertEqual(dl[0].note, 'donation note')
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(dl[0].pk, pl[0].pk)
+
+    def test_with_donation_zero(self):
+        session = self.client.session
+        session['idempotency_key'] = str(uuid.uuid4())
+        session['line_items'] = []
+        session.save()
+
+        response = self.client.post(reverse('payment:payment'),
+                                    {'sq_token': 'cnon:card-nonce-ok', 'donation': 0, 'note': 'donation note'},
+                                    secure=True)
+        dl = DonationLog.objects.all()
+        self.assertEqual(len(dl), 0)
+        # self.assertEqual(dl[0].note, 'donation note')
+        # pl = PaymentLog.objects.all()
+        # self.assertEqual(len(pl), 1)
+        # self.assertEqual(dl[0].pk, pl[0].pk)

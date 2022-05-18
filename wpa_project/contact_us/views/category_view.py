@@ -5,10 +5,10 @@ from django.views.generic.list import ListView
 from django.views.generic.base import View
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
-from allauth.account.models import EmailAddress
+from django.http import HttpResponseRedirect
 from ..forms import CategoryForm
 from ..models import Category
-from student_app.models import Student
+
 logger = logging.getLogger(__name__)
 
 
@@ -16,6 +16,7 @@ class CategoryDeleteView(UserPassesTestMixin, View):
     def post(self, request, category_id):
         category = get_object_or_404(Category, pk=category_id)
         category.delete()
+        return HttpResponseRedirect(reverse_lazy('contact_us:category_list'))
 
     def test_func(self):
         return self.request.user.is_board
@@ -32,7 +33,6 @@ class CategoryListView(UserPassesTestMixin, ListView):
             r = []
             for u in c.recipients.all():
                 s = u.student_set.first()
-                logging.debug(s)
                 r.append(f'{s.first_name} {s.last_name}')
             categories.append({'id': c.id, 'title': c.title, 'recipients': r})
         context['categories'] = categories
@@ -43,19 +43,19 @@ class CategoryListView(UserPassesTestMixin, ListView):
 
 
 class CategoryView(UserPassesTestMixin, FormView):
-    template_name = 'contact_us/message.html'
+    template_name = 'contact_us/category.html'
     form_class = CategoryForm
     success_url = reverse_lazy('contact_us:category_list')
 
-    def get_form(self):
-        try:
-            category_id = self.kwargs['category_id']
-        except KeyError:
-            category_id = None
-        logging.debug(category_id)
-        if category_id is not None:
-            return self.form_class(instance=get_object_or_404(Category, pk=category_id))
-        return self.form_class()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if 'category_id' in self.kwargs:
+            kwargs['instance'] = get_object_or_404(Category, pk=self.kwargs['category_id'])
+        return kwargs
+
+    def form_invalid(self, form):
+        logging.debug(form.errors)
+        return super().form_invalid(form)
 
     def form_valid(self, form):
         logging.debug(form.cleaned_data)

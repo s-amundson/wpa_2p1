@@ -14,7 +14,7 @@ class StudentFamilyRegisterView(LoginRequiredMixin, View):
     """To register a student"""
 
     def get(self, request, family_id=None):
-        logging.debug('here')
+        # logging.debug('here')
         if family_id is None:
             try:
                 student_family = Student.objects.get(user=request.user).student_family

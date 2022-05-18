@@ -6,7 +6,7 @@ from django.utils.datetime_safe import datetime
 from square.client import Client
 import django.dispatch
 
-from ..models import PaymentLog, PaymentErrorLog, RefundLog
+from ..models import DonationLog, PaymentLog, PaymentErrorLog, RefundLog
 from student_app.models import Student
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,8 @@ class SquareHelper:
             environment=settings.SQUARE_CONFIG['environment'],
         )
         self.square_response = {'payment': None}
+        self.donation_amount = 0
+        self.donation_note = ''
 
         error_signal = django.dispatch.Signal()
 
@@ -44,7 +46,7 @@ class SquareHelper:
         # square requires amount in pennies
         l = {'name': name,
              'quantity': str(quantity),
-             'base_price_money': {'amount': amount * quantity * 100,
+             'base_price_money': {'amount': amount * 100,
                                   'currency': 'USD'},
              }
         return l
@@ -68,6 +70,8 @@ class SquareHelper:
                                         total_money=square_response['approved_money']['amount'],
                                         )
         request.session['payment_error'] = 0
+        if self.donation_amount > 0:
+            DonationLog.objects.create(payment=log, amount=self.donation_amount, note=self.donation_note)
 
     def log_refund(self, square_response, payment_log):
         # refund = square_response['refund']
@@ -167,3 +171,7 @@ class SquareHelper:
             logging.debug(type(result.errors))
             square_response['error'] = result.errors
         return square_response
+
+    def set_donation(self, amount, note):
+        self.donation_amount = amount
+        self.donation_note = note

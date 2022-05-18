@@ -1,7 +1,7 @@
 import logging
-from django.forms import ModelForm
 from src.model_form import MyModelForm
-from ..models import Category, Message
+from ..models import Message
+from ..src import EmailMessage
 logger = logging.getLogger(__name__)
 
 
@@ -13,5 +13,17 @@ class MessageForm(MyModelForm):
         optional_fields = []
         fields = optional_fields + required_fields
 
-    def send_email(self):
-        logging.debug(self.cleaned_data)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        logging.debug(self.instance)
+
+        self.has_instance = self.instance.id is None
+        logging.debug(self.has_instance)
+        if not self.has_instance:
+            logging.debug(self.fields)
+            for f in self.fields:
+                self.fields[f].required = False
+                self.fields[f].widget.attrs.update({'class': 'form-control m-2', 'disabled': 'disabled'})
+
+    def send_email(self, message):
+        EmailMessage().contact_email(message)

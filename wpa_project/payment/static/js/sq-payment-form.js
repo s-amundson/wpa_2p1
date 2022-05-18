@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', async function () {
              displayPaymentResults('SUCCESS');
              alert_notice("Success", "Thank you for your purchase.\n Your payment was processed successfully.\n An email has been sent for confirmation. ")
 
-             console.debug('Payment Success', paymentResults);
          }
          else{
             alert_notice("Error", 'Maximum payment tries exceeded. Unable to process payment.')
@@ -81,7 +80,8 @@ async function createPayment(token) {
     var paymentResponse = await $.post(window.action_url, {
         sq_token: token,
         csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
-        donation: $("#donation").val()
+        donation: $("#donation").val(),
+        note: $("#id_note").val()
         }, function(data, status){
             return data;
             }, "json");

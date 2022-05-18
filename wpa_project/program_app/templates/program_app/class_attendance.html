@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %} Beginner Class {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/beginner_class.js' %}"></script>
+    <script src="{% static 'js/class_attendance.js' %}"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    {% if user.is_board %}
+        <a href="{% url 'programs:beginner_class' beginner_class %}" class="btn btn-primary" role="button">
+            Edit Class
+        </a>
+        <hr/>
+    {% endif %}
+
+    <div class="row p-2">
+        {% if form %}
+            <form id="attendance_form" class="col" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form" value="on">
+                <div class="row">
+                    <div class="col"> New Students </div>
+                    <div class="col"> Attending: {{ form.attend_count.beginner }} </div>
+                </div>
+                <div class="row">
+                    <table class="table table-bordered col
+                        {% if user.dark_theme %}
+                            text-white
+                        {% else %}
+                            text-dark
+                        {% endif %}">
+                        <thead>
+                            <th> ID </th>
+                            <th> First Name </th>
+                            <th> Last Name </th>
+                            <th> Date of Birth </th>
+                            <th>
+                                {% if form.is_closed %}
+                                    Attending
+                                {% endif %}
+                            </th>
+                            <th>
+                                {% if form.is_closed %}
+                                    Covid-19 Vaccination
+                                {% endif %}
+                            </th>
+                        </thead>
+                        <tbody>
+                            {% for s in form.new_students %}
+                                {% include "program_app/tables/student_attend_table_row.html" %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row pt-2">
+                    <div class="col"> Returning Students </div>
+                    <div class="col"> Attending: {{ form.attend_count.returnee }} </div>
+                </div>
+                <div class="row">
+                    <table class="table table-bordered
+                        {% if user.dark_theme %}
+                            text-white
+                        {% else %}
+                            text-dark
+                        {% endif %}">
+                        <thead>
+                            <th> ID </th>
+                            <th> First Name </th>
+                            <th> Last Name </th>
+                            <th> Date of Birth </th>
+                            <th>
+                                {% if form.is_closed %}
+                                    Attending
+                                {% endif %}
+                            </th>
+                            <th>
+                                {% if form.is_closed %}
+                                    Covid-19 Vaccination
+                                {% endif %}
+                            </th>
+                        </thead>
+                        <tbody>
+                            {% for s in form.return_students %}
+                                {% include "program_app/tables/student_attend_table_row.html" %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row pt-2">
+                    <div class="col"> Instructors/Staff </div>
+                    <div class="col"> Attending: {{ form.attend_count.staff }} </div>
+                </div>
+                <div class="row">
+                    <table class="table table-bordered
+                        {% if user.dark_theme %}
+                            text-white
+                        {% else %}
+                            text-dark
+                        {% endif %}">
+                        <thead>
+                            <th> ID </th>
+                            <th> First Name </th>
+                            <th> Last Name </th>
+                            <th> Date of Birth </th>
+                            <th>
+                                {% if form.is_closed %}
+                                    Attending
+                                {% endif %}
+                            </th>
+                            <th>
+                                {% if form.is_closed %}
+                                    Covid-19 Vaccination
+                                {% endif %}
+                            </th>
+                        </thead>
+                        <tbody>
+                            {% for s in form.staff %}
+                                {% include "program_app/tables/student_attend_table_row.html" %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -7,6 +7,7 @@
     <script src="{% static 'js/joad_registration.js' %}"></script>
     <script>
         let class_list_url = "{% url 'joad:class_list' %}";
+        let session_status_url = "{% url 'joad:session_status' %}";
     </script>
 {% endblock %}
 
@@ -19,11 +20,18 @@
                 {{ form.session.errors }}
                 {{ form.session.label_tag }}
                 {{ form.session }}
+                {{ form.session.id }}
             </div>
+            <div id="status-div"></div>
+            {% if form.student_count %}
+                <div> Student(s): </div>
+            {% endif %}
             {% for student in form.get_boxes %}
                 <div class="input-group input-group-md">
                     {{ student }} {{ student.label }}
                 </div>
+            {% empty %}
+            <div>Students must be approved by WPA prior to registering for a session.</div>
             {% endfor %}
             {% if form.student_count %}
                 <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">

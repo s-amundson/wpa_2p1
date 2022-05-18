@@ -1,0 +1,59 @@
+{% extends "student_app/email/email_layout.html" %}
+{% block main %}
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Hi,
+    </p>
+    {% for c in class_list %}
+        <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+            {{ c.class.class_type|capfirst }} class on {{ c.class.class_date }} has
+            {{ c.count.beginner|add:c.count.returnee }} students signed up and {{ c.count.staff }} volunteers
+            signed up. The following volunteers are signed up:
+        </p>
+        <table style="font-family: arial, sans-serif; border-collapse: collapse; color: black; margin: 10px;">
+            <tr>
+                <th style="text-align: left; padding: 8px;">
+                    Instructors:
+                </th>
+            </tr>
+            {% for i in c.instructors %}
+                <tr>
+                    <td style="text-align: left; padding: 8px;">
+                        {{i.first_name}} {{i.last_name|slice:":1" }}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td style="text-align: left; padding: 8px;">
+                        No Instructors
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <table style="font-family: arial, sans-serif; border-collapse: collapse; color: black; margin: 10px;">
+            <tr>
+                <th style="text-align: left; padding: 8px;">
+                    Staff:
+                </th>
+            </tr>
+            {% for s in c.staff %}
+                <tr>
+                    <td style="text-align: left; padding: 8px;">
+                        {{s.first_name}} {{s.last_name|slice:":1"}}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td style="text-align: left; padding: 8px;">
+                        No Staff
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+    </p>
+{% endblock %}

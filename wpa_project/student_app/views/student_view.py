@@ -31,8 +31,8 @@ class StudentApiView(LoginRequiredMixin, APIView):
         return Response(serializer.data)
 
     def post(self, request, student_id=None, format=None):
-        logging.debug(student_id)
-        logging.debug(request.data)
+        # logging.debug(student_id)
+        # logging.debug(request.data)
         old_email = None
         if student_id is not None:
             if request.user.is_staff:
@@ -74,14 +74,16 @@ class StudentApiView(LoginRequiredMixin, APIView):
 class AddStudentView(LoginRequiredMixin, View):
     def get(self, request, student_id=None):
         student = {'is_user': False, 'this_user': False, 'id': student_id, 'is_joad': False, 'joad_age': False}
+        logging.debug(student_id)
         if student_id is not None:
-            if request.user.is_board:
+            if request.user.is_staff:
                 g = get_object_or_404(Student, pk=student_id)
                 student['is_joad'] = g.is_joad
-                student_is_user = g.user_id
+                student['is_user'] = g.user_id
             else:
                 sf = Student.objects.get(user=request.user).student_family
                 g = get_object_or_404(Student, id=student_id, student_family=sf)
+                logging.debug(g.user)
                 student['is_user'] = g.user_id
                 student['is_joad'] = g.is_joad
                 student['this_user'] = (g.user == request.user)
@@ -90,7 +92,7 @@ class AddStudentView(LoginRequiredMixin, View):
             form = StudentForm(instance=g, student_is_user=student['is_user'])
         else:
             s = Student.objects.filter(user=request.user)
-            logging.debug(s.count())
+            # logging.debug(s.count())
             if s.count() == 0:
                 form = StudentForm(initial={'email': request.user.email}, student_is_user=True)
                 student['is_user'] = 0
@@ -103,7 +105,7 @@ class AddStudentView(LoginRequiredMixin, View):
 
     def post(self, request, student_id=None):
         if student_id is not None:
-            if request.user.is_board:
+            if request.user.is_staff:
                 g = get_object_or_404(Student, pk=student_id)
             else:
                 sf = Student.objects.get(user=request.user).student_family
@@ -111,7 +113,6 @@ class AddStudentView(LoginRequiredMixin, View):
             form = StudentForm(request.POST, instance=g)
         else:
             form = StudentForm(request.POST)
-        logging.debug(request.POST)
         if form.is_valid():
             logging.debug(form.cleaned_data)
             if request.user.is_board:
@@ -124,7 +125,6 @@ class AddStudentView(LoginRequiredMixin, View):
                 request.session['student_family'] = sf.id
                 f.save()
 
-            # logging.debug(f'id = {f.id}, fam = {f.student_family__id}')
             return HttpResponseRedirect(reverse('registration:profile'))
         else:
             logging.debug(form.errors)

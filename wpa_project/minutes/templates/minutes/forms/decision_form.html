@@ -1,6 +1,6 @@
-<div class="row decision-div" id="decision-div">
+<div class="row decision-div" id="decision-div-{{ decision.form.report_index }}">
     {% csrf_token %}
-    <input type="hidden" id="decision-id" value="{{ decision.id }}">
+    {{ decision.form.decision_id }}
 
     {{ decision.form.decision_date }}
     {{ decision.form.text }}

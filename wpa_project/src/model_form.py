@@ -15,10 +15,11 @@ class MyModelForm(ModelForm):
         #     # model = None
         #     self.fields = self.optional_fields + self.hidden_fields + self.disabled_fields + self.required_fields
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.update_attributes()
 
+    def update_attributes(self):
         for f in self.Meta.disabled_fields:
             self.fields[f].required = False
             self.fields[f].widget.attrs.update({'class': 'form-control m-2', 'disabled': 'disabled'})

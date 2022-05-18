@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %} Message List {% endblock %}
+
+
+{% block main %}
+    <div class="m-2"><h5>Messages:</h5></div>
+    {% for message in object_list %}
+        <div class="d-flex flex-row m-2">
+            <div class="col">
+                <a href="{% url 'contact_us:contact' message.id %}"> {{ message.id }} </a>
+            </div>
+            <div class="col">
+                {{ message.category.title }}
+            </div>
+            <div class="col">
+                {{ message.created_time }}
+            </div>
+        </div>
+    {% empty %}
+        <h6>No messages yet.</h6>
+    {% endfor %}
+
+
+{% endblock %}

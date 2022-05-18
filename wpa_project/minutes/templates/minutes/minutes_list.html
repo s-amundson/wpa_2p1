@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} Class Sign up {% endblock %}
+{% block title %} Minutes List {% endblock %}
 
 {% block script %}
     {% load static %}
@@ -18,4 +18,11 @@
             </div>
         </div>
     {% endfor %}
+    <div class="d-flex flex-row m-2">
+        <div class="m-3">
+            <a href="{% url 'minutes:minutes_form'%}" class="btn btn-primary" role="button">
+                Add Minutes
+            </a>
+        </div>
+    </div>
 {% endblock %}

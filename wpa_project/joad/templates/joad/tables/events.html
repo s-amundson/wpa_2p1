@@ -1,0 +1,62 @@
+<table class="table table-bordered
+    {% if user.dark_theme %}
+        text-white
+    {% else %}
+        text-dark
+    {% endif %}">
+    <thead>
+        <tr>
+            <th> Event Date </th>
+            <th> Event Type </th>
+            <th> State </th>
+            <th> Cost </th>
+            {% for student in students %}
+                <th>{{student.first_name}} {{student.last_name}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody id="class-list-body">
+        {% for event in event_list %}
+            <tr>
+                <td>
+                    {% if user.is_board %}
+                        <a class="nav-link" href="{% url 'joad:event' event.id %}">{{ event.event_date }}</a>
+                    {% else %}
+                        {{ event.event_date }}
+                    {% endif %}
+                </td>
+                <td>{{ event.event_type }}</td>
+                <td>{{ event.state }}</td>
+                <td>{{ event.cost }}</td>
+                {% for row in event.registrations %}
+                    <td>
+                        {% if row.reg_status == 'registered' %}
+                            Registered
+                        {% elif row.reg_status == 'attending' %}
+                            <a href="{% url 'joad:event_attendance' event.id row.student_id %}"
+                               class="btn btn-primary" role="button">
+                                Finish
+                            </a>
+                        {% elif row.reg_status == 'start' %}
+                            <a href="{% url 'joad:resume_event_registration' row.reg_id %}">
+                                Unsuccessful
+                            </a>
+                        {% else %}
+                            <a href="{% url 'joad:event_registration' event.id %}" class="btn btn-primary" role="button">
+                                Register
+                            </a>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="m-2">
+    {% if user.is_staff %}
+        <a href="{% url 'joad:event' %}" class="btn btn-primary" role="button">
+            Add Event
+        </a>
+    {% endif %}
+</div>
+

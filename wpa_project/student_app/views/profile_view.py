@@ -13,7 +13,7 @@ class ProfileView(LoginRequiredMixin, View):
     def get(self, request):
         try:
             s = Student.objects.get(user=request.user)
-            logging.debug(s)
+            # logging.debug(s)
             student_family = s.student_family
             this_student = s
         except Student.DoesNotExist:  # pragma: no cover

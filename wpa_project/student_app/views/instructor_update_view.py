@@ -23,8 +23,13 @@ class InstructorUpdateView(LoginRequiredMixin, View):
         form = InstructorForm(request.POST)
         if form.is_valid():
             request.user.instructor_expire_date = form.cleaned_data.get('instructor_expire_date', request.user.instructor_expire_date)
+            request.user.instructor_level = form.cleaned_data.get('instructor_level', request.user.instructor_level)
             request.user.save()
-            return JsonResponse({'status': 'SUCCESS', 'expire_date': request.user.instructor_expire_date})
+            return JsonResponse({
+                'status': 'SUCCESS',
+                'expire_date': request.user.instructor_expire_date,
+                'level': request.user.instructor_level
+            })
         else:
             logging.debug(form.errors)
             return JsonResponse({'status': "error"})

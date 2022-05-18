@@ -8,7 +8,6 @@ from django.views.generic.base import View
 from ..forms import DecisionForm
 from ..models import Decision
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -19,9 +18,9 @@ class DecisionView(LoginRequiredMixin, View):
 
         if decision_id:
             report = Decision.objects.get(pk=decision_id)
-            form = DecisionForm(instance=report)
+            form = DecisionForm(instance=report, report_index=request.GET.get('report_index', None))
         else:
-            form = DecisionForm(edit=request.user.is_board)
+            form = DecisionForm(edit=request.user.is_board, report_index=request.GET.get('report_index', None))
         r = {'form': form, 'id': decision_id}
         return render(request, 'minutes/forms/decision_form.html', {'decision': r})
 

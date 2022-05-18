@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %} Class Sign up {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form method="post">{% csrf_token %}
+        {{ form.as_table }}
+        <button class="btn btn-primary m-2" type="submit" name="button">Submit</button>
+    </form>
+    <div>
+        <table class="table table-bordered
+            {% if user.dark_theme %}
+                text-white
+            {% else %}
+                text-dark
+            {% endif %}">
+            <thead>
+                <tr>
+                    <th> ID </th>
+                    <th> First Name </th>
+                    <th> Last Name </th>
+                    <th> Signature </th>
+                    <th> Covid Vaccination </th>
+                    <th> Attending </th>
+
+                </tr>
+            </thead>
+            <tbody id="class-list-body">
+                {% for student in student_list %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.first_name }}</td>
+                        <td>{{ student.last_name }}</td>
+                        <td>
+                            <a class="nav-link" href="{% url 'joad:waiver' student.id %}">
+                                {% if student.signature %}
+                                    Update Signature
+                                {% else %}
+                                    Signature Required
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <input type="checkbox" class="m-2 attend-check" id="{{ student.covid_vax_check }}"
+                                attend_url="{% url 'registration:covid_vax' student.id %}"
+                                {% if student.covid_vax %} checked="checked" {% endif %}>
+                        </td>
+                        <td>
+                            {% if student.attend_record %}
+                                <input type="checkbox" class="m-2 attend-check" id="student_{{ student.id }}"
+                                {% if student.attend %} checked="checked" {% endif %} disabled="disabled">
+                                <a class="nav-link" href="{% url 'joad:event_attendance' form.instance.id student.id %}">
+                                    Edit Attendance
+                                </a>
+
+                            {% else %}
+                                <a href="{% url 'joad:event_attendance' form.instance.id student.id %}"
+                                   class="btn btn-primary" role="button">Add Attendance</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

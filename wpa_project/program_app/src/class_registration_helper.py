@@ -16,32 +16,41 @@ class ClassRegistrationHelper:
             is_space = False
         if class_registration_dict['returnee'] and ec['returnee'] + class_registration_dict['returnee'] > bc.returnee_limit:
             is_space = False
-        if ec['beginner'] + class_registration_dict['beginner'] == bc.beginner_limit and \
-           ec['returnee'] + class_registration_dict['returnee'] == bc.returnee_limit:
+        if is_space and ec['beginner'] + class_registration_dict['beginner'] >= bc.beginner_limit and \
+           ec['returnee'] + class_registration_dict['returnee'] >= bc.returnee_limit:
             if update:
                 bc.state = 'full'
+                bc.save()
+        elif ec['beginner'] + class_registration_dict['beginner'] < bc.beginner_limit and \
+           ec['returnee'] + class_registration_dict['returnee'] < bc.returnee_limit:
+            logging.debug(bc.state)
+            if update and bc.state == 'full':
+                bc.state = 'open'
                 bc.save()
         logging.debug(is_space)
         return is_space
 
     def enrolled_count(self, beginner_class):
-        # bc = self.objects.get(beginner_class)
         beginner = 0
-        instructors = 0
+        staff_count = 0
         returnee = 0
         records = ClassRegistration.objects.filter(beginner_class=beginner_class)
-        pay_statuses = ['paid']
+        pay_statuses = ['paid', 'admin']
         for record in records:
-            # logging.debug(f'safety_class {record.student.safety_class}, pay_status {record.pay_status}')
             if record.pay_status in pay_statuses:
                 try:
-                    instructor = record.student.user.is_instructor
+                    is_staff = record.student.user.is_staff
                 except (record.student.DoesNotExist, AttributeError):
-                    instructor = False
-                if instructor:
-                    instructors += 1
-                elif record.student.safety_class:
-                    returnee += 1
-                else:
+                    is_staff = False
+                # if record.student.safety_class is not None:
+                #     bcd = beginner_class.class_date.date()
+                #     scd = record.student.safety_class
+                #     logging.debug(f'safety_class={scd}, beginner_class={bcd}, beginner={scd>=bcd}')
+                if is_staff:
+                    staff_count += 1
+                elif record.student.safety_class is None \
+                        or record.student.safety_class >= beginner_class.class_date.date():
                     beginner += 1
-        return {'beginner': beginner, 'instructors': instructors, 'returnee': returnee}
+                else:
+                    returnee += 1
+        return {'beginner': beginner, 'staff': staff_count, 'returnee': returnee}

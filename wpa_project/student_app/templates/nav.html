@@ -1,12 +1,31 @@
 <nav class="navbar navbar-dark bg-dark border">
     <a class="navbar-brand" href="/">
-        <div class="container px-4"><span class="green">Class Registration</span></div>
+        <div class="container px-4">
+            <img src="https://woodleyparkarchers.org/wp-content/uploads/2018/06/cropped-WPA-Logo-4.png" alt="Icon" width="40">
+            <span class="green">Registration</span>
+        </div>
     </a>
 
     <div class="navbar-expand-md" id="navbar">
         <ul class="navbar-nav md-auto mt-2">
-           <li class="nav-item">
-                <a class="nav-link" href="{% url 'registration:help' %}">Help</a>
+            {% if user.is_board %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        Contact Us
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'contact_us:contact' %}">Contact Us</a>
+                        <a class="dropdown-item" href="{% url 'contact_us:category_list' %}">Categories</a>
+                        <a class="dropdown-item" href="{% url 'contact_us:message_list' %}">Messages</a>
+                    </div>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contact_us:contact' %}">Contact Us</a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'payment:donation' %}">Donate</a>
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
@@ -21,20 +40,19 @@
 
             {% if user.is_authenticated %}
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                            Membership
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            {% if user.is_member %}
-                                Membership coming soon.
-                                <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
-                            {% else %}
-                                Membership coming soon.
-
-                            {% endif %}
-                        </div>
-                    </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        Membership
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        {% if user.is_member %}
+                            <a class="dropdown-item" href="{% url 'membership:membership' %}">Membership</a>
+                            <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
+                        {% else %}
+                            <a class="dropdown-item" href="{% url 'membership:membership' %}">Join</a>
+                        {% endif %}
+                    </div>
+                </li>
 
                 {% if user.is_staff %}
                     <li class="nav-item dropdown">
@@ -47,7 +65,11 @@
                         {% if user.is_board %}
                           <div class="dropdown-divider"></div>
                           <a class="dropdown-item" href="{% url 'registration:student_list'%}">Student List</a>
+                          <a class="dropdown-item" href="{% url 'registration:send_email'%}">Send Email</a>
                           <a class="dropdown-item" href="{% url 'minutes:minutes_form'%}">New Minutes</a>
+                          <a class="dropdown-item" href="{% url 'minutes:decision_list' %}">Decision List</a>
+                          <a class="dropdown-item" href="{% url 'programs:class_registration_admin_list' %}">Admin Registrations</a>
+                          <a class="dropdown-item" href="{% url 'programs:staff_attendance' %}">Staff Attendance</a>
                         {% endif %}
                         {% if user.is_superuser %}
                           <div class="dropdown-divider"></div>
@@ -55,10 +77,22 @@
                         {% endif %}
                       </div>
                     </li>
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        JOAD
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                          <a class="dropdown-item" href="{% url 'joad:index'%}">JOAD</a>
+                          <div class="dropdown-divider"></div>
+                          <a class="dropdown-item" href="{% url 'joad:pin_score_list'%}">Pin Scores</a>
+                      </div>
+                    </li>
+                {% else %}
+                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'joad:index'%}">JOAD</a>
+                    </li>
                 {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'joad:index'%}">Joad</a>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'programs:class_registration' %}">Classes</a>
                 </li>

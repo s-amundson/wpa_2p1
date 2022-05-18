@@ -5,6 +5,7 @@ omit=
     manage.py
     *temp_tests.py
     student_app/management/commands/*
+    */tests/*
 
     # minutes/*
     # membership/*

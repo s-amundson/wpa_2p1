@@ -29,6 +29,8 @@ class TestsClassPayment(TestCase):
         # Every test needs a client.
         self.client = Client()
         self.test_user = User.objects.get(pk=2)
+        self.test_user.is_staff = False
+        self.test_user.save()
         self.client.force_login(self.test_user)
         session = self.client.session
         session['payment_db'] = ['program_app', 'ClassRegistration']

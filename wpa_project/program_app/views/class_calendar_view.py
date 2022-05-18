@@ -23,15 +23,7 @@ class ClassCalendarView(LoginRequiredMixin, View):
                 d = d.replace(year=d.year + 1)
                 month = month - 12
         # Instantiate our calendar class with today's year and selected month
-        cal = Calendar(d.year, month, request.user.dark_theme)
-        bc = BeginnerClass.objects.filter(class_date__gt=timezone.now(),
-                                          class_date__year=d.year,
-                                          class_date__month=month).order_by('class_date')
-        if request.user.is_instructor:
-            bc = bc.filter(Q(state='open') | Q(state='full'))
-        else:
-            bc = bc.filter(state='open')
-        cal.set_event(bc)
+        cal = Calendar(d.year, month, request.user.dark_theme, request.user.is_staff)
 
         # Call the formatmonth method, which returns our calendar as a table
         html_cal = mark_safe(cal.formatmonth(withyear=True))

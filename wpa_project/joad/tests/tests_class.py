@@ -3,7 +3,8 @@ import json
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
-from ..models import Session
+from django.utils.timezone import datetime, timezone
+from ..models import JoadClass, Session
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -22,14 +23,14 @@ class TestsJoadClass(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
 
-        response = self.client.get(reverse('joad:joad_class'), secure=True)
+        response = self.client.get(reverse('joad:joad_class', kwargs={'session_id': 1}), secure=True)
         self.assertEqual(response.status_code, 403)
 
     def test_board_user_get(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         # allow user to access
-        response = self.client.get(reverse('joad:joad_class', kwargs={'class_id': 1}), secure=True)
+        response = self.client.get(reverse('joad:joad_class', kwargs={'session_id': 1, 'class_id': 1}), secure=True)
 
         self.assertTemplateUsed(response, 'joad/forms/class_form.html')
         self.assertEqual(response.status_code, 200)
@@ -38,7 +39,7 @@ class TestsJoadClass(TestCase):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
 
-        response = self.client.post(reverse('joad:joad_class'), self.class_dict, secure=True)
+        response = self.client.post(reverse('joad:joad_class', kwargs={'session_id': 1}), self.class_dict, secure=True)
         # {'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True}
         content = json.loads(response.content)
         logging.debug(content)
@@ -46,6 +47,27 @@ class TestsJoadClass(TestCase):
         self.assertEqual(content['class_date'], "2022-04-01T00:00:00-07:00")
         self.assertEqual(content['state'], 'scheduled')
         self.assertTrue(content['success'])
+
+    def test_board_user_update_class(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+
+        self.class_dict['class_date'] = "2022-04-04 18:00:00"
+
+        response = self.client.post(reverse('joad:joad_class', kwargs={'session_id': 1, 'class_id': 1}),
+                                    self.class_dict, secure=True)
+        # {'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True}
+        content = json.loads(response.content)
+        logging.debug(content)
+        self.assertEqual(content['id'], 1)
+        self.assertEqual(content['class_date'], "2022-04-04T18:00:00-07:00")
+        self.assertEqual(content['state'], 'scheduled')
+        self.assertTrue(content['success'])
+        jc = JoadClass.objects.get(pk=1)
+        self.assertEqual(jc.class_date, datetime(2022, 4, 5, 1, 0, tzinfo=timezone.utc))
+
+    def test_get_states(self):
+        self.assertEqual(JoadClass().get_states(), ['scheduled', 'past', 'canceled'])
 
 
 class TestsJoadClassList(TestCase):

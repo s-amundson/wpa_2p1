@@ -43,7 +43,7 @@ class TestsBeginnerClass(TestCase):
         response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
         self.assertEqual(response.status_code, 403)
 
-    def test_staff_user_is_authorized(self):
+    def test_board_user_is_authorized(self):
         # allow user to access
         response = self.client.get(reverse('programs:beginner_class'), secure=True)
         self.assertEqual(response.context['form'].initial['beginner_limit'], 20)
@@ -80,15 +80,28 @@ class TestsBeginnerClass(TestCase):
         self.assertEqual(bc.class_date.year, date(2022, 5, 30).year)
         self.assertEqual(bc.state, 'open')
 
-    def test_2nd_class(self):
+    def test_2nd_class_error(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        logging.debug(bc.class_date)
         # New class same day
         response = self.client.post(reverse('programs:beginner_class'),
-                        {'class_date': '2022-06-05', 'class_type': 'combined', 'beginner_limit': 5, 'returnee_limit': 5,
-                         'state': 'scheduled', 'cost': 5}, secure=True)
+                        {'class_date': '2022-06-05 09:00', 'class_type': 'combined', 'beginner_limit': 5,
+                         'returnee_limit': 5, 'instructor_limit': 5, 'state': 'scheduled', 'cost': 5}, secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_list.html')
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 2)
+
+    def test_2nd_class_good(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        logging.debug(bc.class_date)
+        # New class same day
+        response = self.client.post(reverse('programs:beginner_class'),
+                        {'class_date': '2022-06-05 07:00', 'class_type': 'combined', 'beginner_limit': 5,
+                         'returnee_limit': 5, 'instructor_limit': 5, 'state': 'scheduled', 'cost': 5}, secure=True)
+        self.assertRedirects(response, reverse('programs:class_list'))
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 3)
 
     def test_add_class_invalid(self):
         # New class different day invalid
@@ -102,6 +115,8 @@ class TestsBeginnerClass(TestCase):
 
     def test_refund_success_class(self):
         self.test_user = User.objects.get(pk=2)
+        self.test_user.is_staff = False
+        self.test_user.save()
         self.client.force_login(self.test_user)
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
@@ -124,19 +139,19 @@ class TestsBeginnerClass(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
         self.client.post(reverse('programs:class_registration'),
-                         {'beginner_class': 1, 'student_4': 'on', 'student_5': 'on', 'terms': 'on'},
+                         {'beginner_class': 1, 'student_5': 'on', 'terms': 'on'},
                          secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
         cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 4)
+        self.assertEqual(len(cr), 3)
 
         # process a good payment
         response = self.client.post(reverse('programs:class_payment'),
                                     {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
 
         cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 4)
+        self.assertEqual(len(cr), 3)
         logging.debug(cr[0].pay_status)
 
         # give square some time to process the payment got bad requests without it.
@@ -149,7 +164,7 @@ class TestsBeginnerClass(TestCase):
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
                                     self.class_dict, secure=True)
         cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 4)
+        self.assertEqual(len(cr), 3)
         for c in cr:
             self.assertEqual(c.pay_status, 'refund')
         bc = BeginnerClass.objects.get(pk=1)

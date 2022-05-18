@@ -1,6 +1,7 @@
 from django.views.generic.edit import FormView
+from django.views.generic.base import View
 from django.urls import reverse, reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect
@@ -17,7 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RegistrationView(LoginRequiredMixin, FormView):
+class RegistrationView(UserPassesTestMixin, FormView):
     template_name = 'joad/registration.html'
     form_class = RegistrationForm
     success_url = reverse_lazy('payment:process_payment')
@@ -44,7 +45,7 @@ class RegistrationView(LoginRequiredMixin, FormView):
         # message = ""
         logging.debug(form.cleaned_data['session'])
         session = form.cleaned_data['session']
-        if session.state != "open":
+        if session.state != "open": # pragma: no cover
             return self.has_error('Session in wrong state')
 
         reg = Registration.objects.filter(session=session).exclude(
@@ -57,10 +58,11 @@ class RegistrationView(LoginRequiredMixin, FormView):
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
                 age = StudentHelper().calculate_age(s.dob, session.start_date)
+                logging.debug(age)
                 if age < 9:
-                    self.has_error('Student is to young')
-                if age > 20:
-                    self.has_error('Student is to old.')
+                    return self.has_error('Student is to young')
+                if age > 20: # pragma: no cover
+                    return self.has_error('Student is to old.')
 
                 logging.debug(s)
                 sreg = reg.filter(student=s)
@@ -89,9 +91,6 @@ class RegistrationView(LoginRequiredMixin, FormView):
                     SquareHelper().line_item(f"Joad session starting {str(session.start_date)[:10]} student id: {str(s.id)}",
                                              1, session.cost))
                 logging.debug(cr)
-        # This method is called when valid form data has been POSTed.
-        # It should return an HttpResponse.
-        # form.send_email()
         return HttpResponseRedirect(reverse('payment:process_payment'))
 
     def has_error(self, message):
@@ -102,3 +101,28 @@ class RegistrationView(LoginRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         logging.debug(self.request.POST)
         return super().post(request, *args, **kwargs)
+
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            if self.request.user.student_set.first().student_family is None:
+                return False
+            return True
+        else:
+            return False
+
+
+class ResumeRegistrationView(LoginRequiredMixin, View):
+    def get(self, request, reg_id=None):
+        registration = get_object_or_404(Registration, pk=reg_id)
+        registrations = Registration.objects.filter(idempotency_key=registration.idempotency_key)
+        logging.debug(registration)
+        self.request.session['idempotency_key'] = str(registration.idempotency_key)
+        self.request.session['line_items'] = []
+        self.request.session['payment_db'] = ['joad', 'Registration']
+        self.request.session['action_url'] = reverse('programs:class_payment')
+        for r in registrations:
+            self.request.session['line_items'].append(
+                SquareHelper().line_item(
+                    f"Joad session starting {str(r.session.start_date)[:10]} student id: {str(r.student.id)}",
+                    1, r.session.cost))
+        return HttpResponseRedirect(reverse('payment:process_payment'))

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %} JOAD Session {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/joad_registration.js' %}"></script>
+    <script>
+        let class_list_url = "{% url 'joad:class_list' %}";
+    </script>
+{% endblock %}
+
+{% block main %}
+    <div class="row p-3" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-3">
+        <form id="registration-form" method="post">
+            {% csrf_token %}
+            <div class="fieldWrapper">
+                {{ form.event.errors }}
+                {{ form.event.label_tag }}
+                {{ form.event }}
+            </div>
+            <div>Students: </div>
+            {% for student in form.get_boxes %}
+                <div class="input-group input-group-md">
+                    {{ student }} {{ student.label }}
+                </div>
+            {% endfor %}
+            {% if form.student_count %}
+                <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">
+            {% endif %}
+        </form>
+    </div>
+    <hr>
+    <div id="jc-form" class="row p-3"></div>
+{% endblock %}
+
