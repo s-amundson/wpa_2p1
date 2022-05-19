@@ -6,19 +6,19 @@ from django.shortcuts import render, get_object_or_404
 from django.http import Http404
 import logging
 
-from ..forms import SendEmailForm
-from ..models import User
+from ..forms import SendClassEmailForm
+from ..models import BeginnerClass
 
 
 class SendEmailView(UserPassesTestMixin, FormView):
+    beginner_class = None
     template_name = 'student_app/form_as_p.html'
-    form_class = SendEmailForm
+    form_class = SendClassEmailForm
     success_url = reverse_lazy('registration:index')
-    is_super = False
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['is_super'] = self.is_super
+        kwargs['beginner_class'] = self.beginner_class
         return kwargs
 
     def form_valid(self, form):
@@ -26,5 +26,11 @@ class SendEmailView(UserPassesTestMixin, FormView):
         return super().form_valid(form)
 
     def test_func(self):
-        self.is_super = self.request.user.is_superuser
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            bid = self.kwargs.get('beginner_class', None)
+            if bid is not None:
+                self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
+                self.success_url = reverse_lazy('programs:class_attend_list', kwargs={'beginner_class': bid})
+            return self.request.user.is_board
+        else:
+            return False

@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import Form
 
 from ..models import Student, User
 from ..src import EmailMessage
@@ -8,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class SendEmailForm(Form):
+class SendEmailForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         is_super = False

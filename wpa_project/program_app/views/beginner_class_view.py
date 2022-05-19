@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.contrib import messages
 from django.forms import model_to_dict
 
-from ..forms import BeginnerClassForm
+from ..forms import BeginnerClassForm, SendClassEmailForm
 from ..models import BeginnerClass, ClassRegistration
 from ..src import ClassRegistrationHelper
 from payment.src import SquareHelper, EmailMessage
@@ -22,6 +22,11 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
     form_class = BeginnerClassForm
     success_url = reverse_lazy('programs:class_list')
     beginner_class = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['email_form'] = SendClassEmailForm(beginner_class=self.beginner_class)
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
