@@ -15,6 +15,7 @@
         {{ form.as_p }}
         <input class="btn btn-primary" type="submit" value="Update">
     </form>
+    {% if form.instance.id is not None %}
     <hr>
     <p class="pt-2"><h5>Send email to students</h5></p>
     <form class="pt-2" method="post" action="{% url 'programs:send_email' email_form.beginner_class.id %}">
@@ -22,4 +23,5 @@
         {{ email_form.as_p }}
         <input class="btn btn-primary" type="submit" value="Send Email">
     </form>
+    {% endif %}
 {% endblock %}
