@@ -18,7 +18,7 @@ docker exec -it django_dev coverage run --source='.' manage.py test student_app 
 docker exec -it django_dev python manage.py dumpdata membership > wpa_project/membership/fixtures/level.json
 docker exec -it django python manage.py runapschedular
 
-sudo docker exec -t postgresdb pg_dumpall -c -U lucky9feather  > ~/bkup/dump_`date +%Y-%m-%d"_"%H_%M_%S`.sql
+sudo docker exec -t postgresdb pg_dumpall -c -U   > ~/bkup/dump_`date +%Y-%m-%d"_"%H_%M_%S`.sql
 privatefiles.txt has information on creating the files that contain private information.
 
 docker exec -it sftp /bin/bash

@@ -5,6 +5,7 @@ from ..models import BeginnerClass
 import logging
 logger = logging.getLogger(__name__)
 
+
 class BeginnerClassForm(ModelForm):
 
     class Meta:

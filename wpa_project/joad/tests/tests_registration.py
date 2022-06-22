@@ -75,7 +75,7 @@ class TestsJoadRegistration(TestCase):
         response = self.client.post(reverse('joad:registration'), self.student_dict, secure=True)
         logging.debug(self.client.session['line_items'][0]['name'])
         self.assertEqual(self.client.session['line_items'][0]['name'], 'Joad session starting 2022-02-01 student id: 8')
-        self.assertEqual(self.client.session['payment_db'][1], 'Registration')
+        # self.assertEqual(self.client.session['payment_db'][1], 'Registration')
 
     def test_user_post_good(self):
         self.test_user = User.objects.get(pk=6)
@@ -84,7 +84,7 @@ class TestsJoadRegistration(TestCase):
         response = self.client.post(reverse('joad:registration'), self.student_dict, secure=True)
         logging.debug(self.client.session['line_items'][0]['name'])
         self.assertEqual(self.client.session['line_items'][0]['name'], 'Joad session starting 2022-02-01 student id: 8')
-        self.assertEqual(self.client.session['payment_db'][1], 'Registration')
+        # self.assertEqual(self.client.session['payment_db'][1], 'Registration')
 
     def test_user_post_bad(self):
         self.test_user = User.objects.get(pk=5)
@@ -181,4 +181,4 @@ class TestsJoadRegistration(TestCase):
                                     self.student_dict, secure=True)
         logging.debug(self.client.session['line_items'][0]['name'])
         self.assertEqual(self.client.session['line_items'][0]['name'], 'Joad session starting 2022-02-01 student id: 8')
-        self.assertEqual(self.client.session['payment_db'][1], 'Registration')
+        # self.assertEqual(self.client.session['payment_db'][1], 'Registration')

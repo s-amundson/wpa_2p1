@@ -41,9 +41,7 @@ class TestsSignal(TestCase):
         membership.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
-                                        db_model='Membership',
                                         description="square_response",
                                         location_id='location_id',
                                         idempotency_key=uid,
@@ -59,7 +57,7 @@ class TestsSignal(TestCase):
         members = Member.objects.all()
         self.assertEqual(len(members), 2)
 
-    def test_membership_signal_different_db(self):
+    def test_membership_signal_different_uuid(self):
         # Get the page, if not super or board, page is forbidden
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('membership:membership'), secure=True)
@@ -75,12 +73,10 @@ class TestsSignal(TestCase):
         membership.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
-                                        db_model='Test',
                                         description="square_response",
                                         location_id='location_id',
-                                        idempotency_key=uid,
+                                        idempotency_key=uuid.uuid4(),
                                         order_id='order_id',
                                         payment_id='id',
                                         receipt='receipt_url',
@@ -120,9 +116,7 @@ class TestsSignal(TestCase):
         membership.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
-                                        db_model='Membership',
                                         description="square_response",
                                         location_id='location_id',
                                         idempotency_key=uid,
@@ -155,9 +149,7 @@ class TestsSignal(TestCase):
         membership.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
-                                        db_model='Membership',
                                         description="square_response",
                                         location_id='location_id',
                                         idempotency_key=uid,

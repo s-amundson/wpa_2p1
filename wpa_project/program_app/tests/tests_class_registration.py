@@ -63,8 +63,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].beginner_class, bc)
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Class on 2022-06-05 student id: 4')
-        self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
+                         'Class on 2023-06-05 student id: 4')
 
     def test_class_register_with_error(self):
         # Get the page
@@ -207,9 +206,8 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(cr[0].beginner_class, bc)
 
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Class on 2022-06-05 student id: 4')
-        self.assertEqual(self.client.session['line_items'][0]['base_price_money']['amount'], 0)
-        self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
+                         'Class on 2023-06-05 student id: 4')
+        self.assertEqual(self.client.session['line_items'][0]['amount_each'], 0)
         logging.debug(response.content)
         # self.assertTemplateUsed(response, 'student_app/message.html')
 
@@ -266,7 +264,6 @@ class TestsClassRegistration(TestCase):
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': 1}), secure=True)
-        self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
 
     def test_get_class_registered_table(self):
@@ -294,8 +291,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].beginner_class, bc)
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Class on 2022-06-05 instructor id: 1')
-        self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
+                         'Class on 2023-06-05 instructor id: 1')
 
     def test_class_register_instructor_overdue(self):
         # make user instructor

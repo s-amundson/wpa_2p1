@@ -16,7 +16,6 @@ from ..forms import ClassRegistrationForm
 from ..models import BeginnerClass, ClassRegistration, ClassRegistrationAdmin
 from ..src import ClassRegistrationHelper
 from student_app.src import StudentHelper
-from payment.src import SquareHelper
 
 logger = logging.getLogger(__name__)
 Student = apps.get_model(app_label='student_app', model_name='Student')
@@ -44,7 +43,7 @@ class ClassRegisteredTable(LoginRequiredMixin, View):
 class ClassRegistrationView(AccessMixin, FormView):
     template_name = 'program_app/class_registration.html'
     form_class = ClassRegistrationForm
-    success_url = reverse_lazy('payment:process_payment')
+    success_url = reverse_lazy('payment:make_payment')
     form = None
     students = None
 
@@ -155,19 +154,12 @@ class ClassRegistrationView(AccessMixin, FormView):
         logging.debug(message)
         messages.add_message(self.request, messages.ERROR, message)
         return self.form_invalid(self.form)
-        # return render(self.request, self.template_name, {'form': self.form})
-
-    # def post(self, request, *args, **kwargs):
-    #     logging.debug(self.request.POST)
-    #     return super().post(request, *args, **kwargs)
 
     def transact(self, beginner_class, students, instructors):
         with transaction.atomic():
             uid = str(uuid.uuid4())
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
-            self.request.session['payment_db'] = ['program_app', 'ClassRegistration']
-            self.request.session['action_url'] = reverse('programs:class_payment')
             logging.debug(students)
             for s in students:
                 if s.safety_class is None:
@@ -176,18 +168,24 @@ class ClassRegistrationView(AccessMixin, FormView):
                     n = False
                 cr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
                                        pay_status='start', idempotency_key=uid)
-                self.request.session['line_items'].append(
-                    SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
-                                             1, beginner_class.cost))
+                self.request.session['line_items'].append({
+                    'name': f'Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}',
+                    'quantity': 1,
+                    'amount_each': beginner_class.cost,
+                     }
+                )
                 logging.debug(cr)
             for i in instructors:
                 cr = ClassRegistration(beginner_class=beginner_class, student=i, new_student=False, pay_status='paid',
                                        idempotency_key=uid).save()
-                self.request.session['line_items'].append(
-                    SquareHelper().line_item(f"Class on {str(beginner_class.class_date)[:10]} instructor id: {str(i.id)}",
-                                             1, 0))
+                self.request.session['line_items'].append({
+                    'name': f"Class on {str(beginner_class.class_date)[:10]} instructor id: {str(i.id)}",
+                    'quantity': 1,
+                    'amount_each': 0,
+                     }
+                )
 
-        return HttpResponseRedirect(reverse('payment:process_payment'))
+        return HttpResponseRedirect(reverse('payment:make_payment'))
 
 
 class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
@@ -209,8 +207,6 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
         if form.cleaned_data['payment']:
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
-            self.request.session['payment_db'] = ['program_app', 'ClassRegistration']
-            self.request.session['action_url'] = reverse('programs:class_payment')
             self.request.session['payment'] = True
         else:
             self.success_url = reverse_lazy('programs:beginner_class',
@@ -236,10 +232,12 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                     pay_status = 'admin'
                     if form.cleaned_data['payment']:
                         pay_status = 'start'
-                        self.request.session['line_items'].append(
-                            SquareHelper().line_item(
-                                f"Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}",
-                                1, beginner_class.cost))
+                        self.request.session['line_items'].append({
+                            'name': f'Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}',
+                            'quantity': 1,
+                            'amount_each': beginner_class.cost,
+                             }
+                        )
                     ncr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
                                                            pay_status=pay_status, idempotency_key=uid,
                                                            reg_time=timezone.now())
@@ -275,15 +273,18 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             registrations = ClassRegistration.objects.filter(idempotency_key=cr.idempotency_key)
             request.session['idempotency_key'] = str(cr.idempotency_key)
             request.session['line_items'] = []
-            request.session['payment_db'] = ['program_app', 'ClassRegistration']
-            request.session['action_url'] = reverse('programs:class_payment')
+            # request.session['payment_db'] = ['program_app', 'ClassRegistration']
+            # request.session['action_url'] = reverse('programs:class_payment')
             beginner = 0
             returnee = 0
 
             for r in registrations:
-                request.session['line_items'].append(
-                    SquareHelper().line_item(f"Class on {str(r.beginner_class.class_date)[:10]} student id: {str(r.student.id)}", 1,
-                                             r.beginner_class.cost))
+                request.session['line_items'].append({
+                        'name': f'Class on {str(r.beginner_class.class_date)[:10]} student id: {str(r.student.id)}',
+                        'quantity': 1,
+                        'amount_each': r.beginner_class.cost,
+                    }
+                )
                 if r.student.safety_class is None:
                     beginner += 1
                 else:
@@ -291,4 +292,4 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
 
             request.session['class_registration'] = {'beginner_class': r.beginner_class.id, 'beginner': beginner,
                                                      'returnee': returnee}
-            return HttpResponseRedirect(reverse('payment:process_payment'))
+            return HttpResponseRedirect(reverse('payment:make_payment'))

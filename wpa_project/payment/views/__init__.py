@@ -1,3 +1,2 @@
-from .costs_view import CostsView
-from .payment_view import PaymentView
-from .process_payment_view import DonationView, ProcessPaymentView
+from .card_remove_view import CardRemoveView
+from .payment_view import CreatePaymentView, PaymentView

@@ -97,11 +97,11 @@ class TestsEventAttendance(TestCase):
         self.assertEqual(len(pa), 1)
         self.assertTrue(pa[0].attended)
         self.assertEqual(pa[0].stars, 1)
-        self.assertRedirects(response, reverse('payment:process_payment'), 302)
+        self.assertRedirects(response, reverse('payment:make_payment'), 302)
         self.assertIn('Joad Pin(s) for ', self.client.session['line_items'][0]['name'])
-        self.assertEqual(self.client.session['payment_db'][1], 'PinAttendance')
-        self.assertEqual(self.client.session['line_items'][0]['quantity'], '1')
-        self.assertEqual(self.client.session['line_items'][0]['base_price_money']['amount'], 500)
+        # self.assertEqual(self.client.session['payment_db'][1], 'PinAttendance')
+        self.assertEqual(self.client.session['line_items'][0]['quantity'], 1)
+        self.assertEqual(self.client.session['line_items'][0]['amount_each'], 5)
 
 
     def test_post_student_with_dict_attend_gold(self):
@@ -121,11 +121,11 @@ class TestsEventAttendance(TestCase):
         self.assertEqual(len(pa), 1)
         self.assertTrue(pa[0].attended)
         self.assertEqual(pa[0].stars, 11)
-        self.assertRedirects(response, reverse('payment:process_payment'), 302)
+        self.assertRedirects(response, reverse('payment:make_payment'), 302)
         self.assertIn('Joad Pin(s) for ', self.client.session['line_items'][0]['name'])
-        self.assertEqual(self.client.session['payment_db'][1], 'PinAttendance')
-        self.assertEqual(self.client.session['line_items'][0]['quantity'], '2')
-        self.assertEqual(self.client.session['line_items'][0]['base_price_money']['amount'], 500)
+        # self.assertEqual(self.client.session['payment_db'][1], 'PinAttendance')
+        self.assertEqual(self.client.session['line_items'][0]['quantity'], 2)
+        self.assertEqual(self.client.session['line_items'][0]['amount_each'], 5)
 
     def test_post_student_with_dict_attend_no_pin(self):
         self.test_user = User.objects.get(pk=7)

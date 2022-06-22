@@ -6,9 +6,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.forms import model_to_dict
 
-from payment.src import SquareHelper
 from ..forms import EventRegistrationForm
 from ..models import EventRegistration, JoadEvent
 from student_app.models import Student
@@ -22,7 +20,7 @@ logger = logging.getLogger(__name__)
 class EventRegistrationView(LoginRequiredMixin, FormView):
     template_name = 'joad/event_registration.html'
     form_class = EventRegistrationForm
-    success_url = reverse_lazy('payment:process_payment')
+    success_url = reverse_lazy('payment:make_payment')
     form = None
 
     def get_form(self):
@@ -89,16 +87,14 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
             uid = str(uuid.uuid4())
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
-            self.request.session['payment_db'] = ['joad', 'EventRegistration']
-            self.request.session['action_url'] = reverse('programs:class_payment')
             logging.debug(students)
             description = f"Joad event on {str(event.event_date)[:10]} student id: "
             for s in students:
                 cr = EventRegistration(event=event, student=s, pay_status='start', idempotency_key=uid).save()
-                self.request.session['line_items'].append(
-                    SquareHelper().line_item(description + f'{str(s.id)}', 1, event.cost))
+                self.request.session['line_items'].append({'name': description + f'{str(s.id)}',
+                                                           'quantity': 1, 'amount_each': event.cost})
                 logging.debug(cr)
-        return HttpResponseRedirect(reverse('payment:process_payment'))
+        return HttpResponseRedirect(reverse('payment:make_payment'))
 
     def has_error(self, message):
         messages.add_message(self.request, messages.ERROR, message)
@@ -117,10 +113,10 @@ class ResumeEventRegistrationView(LoginRequiredMixin, View):
         logging.debug(registration)
         self.request.session['idempotency_key'] = str(registration.idempotency_key)
         self.request.session['line_items'] = []
-        self.request.session['payment_db'] = ['joad', 'Registration']
-        self.request.session['action_url'] = reverse('programs:class_payment')
+        # self.request.session['payment_db'] = ['joad', 'Registration']
+        # self.request.session['action_url'] = reverse('programs:class_payment')
         for r in registrations:
             description = f"Joad event on {str(registration.event.event_date)[:10]} student id: "
-            self.request.session['line_items'].append(
-                SquareHelper().line_item(f"{description} {str(r.student.id)}", 1, r.event.cost))
-        return HttpResponseRedirect(reverse('payment:process_payment'))
+            self.request.session['line_items'].append({'name': description + f'{str(r.student.id)}',
+                                                           'quantity': 1, 'amount_each': r.event.cost})
+        return HttpResponseRedirect(reverse('payment:make_payment'))

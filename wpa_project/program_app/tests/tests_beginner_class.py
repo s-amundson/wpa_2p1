@@ -128,8 +128,8 @@ class TestsBeginnerClass(TestCase):
         self.assertEqual(len(cr), 2)
 
         # process a good payment
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
+        pay_dict = {'amount': 10, 'card': 0, 'donation': 0, 'save_card': False, 'source_id': 'cnon:card-nonce-ok'}
+        response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
 
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
@@ -147,8 +147,8 @@ class TestsBeginnerClass(TestCase):
         self.assertEqual(len(cr), 3)
 
         # process a good payment
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
+        pay_dict['amount'] = 5
+        response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
 
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)

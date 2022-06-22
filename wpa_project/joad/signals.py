@@ -10,17 +10,11 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=PaymentLog)
 def registration_update(sender, instance, created, **kwargs):
-    if instance.db_model == 'Registration':
-        cr = Registration.objects.filter(idempotency_key=instance.idempotency_key)
-    elif instance.db_model == 'EventRegistration':
-        cr = EventRegistration.objects.filter(idempotency_key=instance.idempotency_key)
-    elif instance.db_model == 'PinAttendance':
-        cr = PinAttendance.objects.filter(idempotency_key=instance.idempotency_key)
-    else:
-        return
-    logging.debug(instance.status)
     if instance.status in ["SUCCESS", "COMPLETED"]:
-        for c in cr:
-            c.pay_status = 'paid'
-            c.save()
+        for cr in [Registration.objects.filter(idempotency_key=instance.idempotency_key),
+                   EventRegistration.objects.filter(idempotency_key=instance.idempotency_key),
+                   PinAttendance.objects.filter(idempotency_key=instance.idempotency_key)]:
+            for c in cr:
+                c.pay_status = 'paid'
+                c.save()
 

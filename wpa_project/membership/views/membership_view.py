@@ -16,12 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class MembershipView(LoginRequiredMixin, View):
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.table = LevelModel.objects.all()
-
     def get(self, request, sf_id=None):
-        template = 'membership/construction_membership.html'
+        template = 'membership/membership.html'
         if request.user.is_board:
             template = 'membership/membership.html'
         if sf_id is not None and request.user.is_board:
@@ -60,7 +56,7 @@ class MembershipView(LoginRequiredMixin, View):
                     messages.add_message(request, messages.ERROR, 'incorrect membership selected')
                 else:
                     self.transact(form, request, members, cost)
-                    return HttpResponseRedirect(reverse('payment:process_payment'))
+                    return HttpResponseRedirect(reverse('payment:make_payment'))
 
             else:
                 max_age = 999
@@ -82,7 +78,7 @@ class MembershipView(LoginRequiredMixin, View):
                     messages.add_message(request, messages.ERROR, 'incorrect membership selected')
                 else:
                     self.transact(form, request, members, level.cost)
-                    return HttpResponseRedirect(reverse('payment:process_payment'))
+                    return HttpResponseRedirect(reverse('payment:make_payment'))
 
         else:  # pragma: no cover
             logging.debug(form.errors)
@@ -100,6 +96,6 @@ class MembershipView(LoginRequiredMixin, View):
             membership.students.add(m)
 
         request.session['idempotency_key'] = uid
-        request.session['line_items'] = [SquareHelper().line_item(f"{membership.level.name} Membership", 1, cost)]
-        request.session['payment_db'] = ['membership', 'Membership']
+        request.session['line_items'] = [{'name': f'{membership.level.name} Membership',
+                                          'quantity': 1, 'amount_each': cost}]
         membership.save()
