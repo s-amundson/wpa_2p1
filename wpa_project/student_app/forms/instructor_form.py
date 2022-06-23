@@ -1,6 +1,7 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, SelectDateWidget
 from django.conf import settings
 from django.apps import apps
+from django.utils.datetime_safe import date
 
 
 class InstructorForm(ModelForm):
@@ -11,6 +12,6 @@ class InstructorForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['instructor_expire_date'].widget.attrs.update({'placeholder': 'YYYY-MM-DD'})
-        self.fields['instructor_expire_date'].error_messages = {'required': '*', 'invalid': "Enter a valid date in YYYY-MM-DD format"}
+        self.fields['instructor_expire_date'].widget = SelectDateWidget(
+            years=range(date.today().year, date.today().year + 3, 1))
         self.fields['instructor_level'].widget.attrs.update({'placeholder': 'Level'})

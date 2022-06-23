@@ -85,7 +85,7 @@ class TestsBeginnerClass(TestCase):
         logging.debug(bc.class_date)
         # New class same day
         response = self.client.post(reverse('programs:beginner_class'),
-                        {'class_date': '2022-06-05 09:00', 'class_type': 'combined', 'beginner_limit': 5,
+                        {'class_date': '2023-06-05 09:00', 'class_type': 'combined', 'beginner_limit': 5,
                          'returnee_limit': 5, 'instructor_limit': 5, 'state': 'scheduled', 'cost': 5}, secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_list.html')

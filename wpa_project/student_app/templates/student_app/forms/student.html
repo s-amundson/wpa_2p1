@@ -21,13 +21,13 @@
                 {% endfor %}
             </div>
             <div class="form-floating input-group-md m-2">
-                    {{ form.dob }}
-                    <label for="id_dob">
-                        <span style="color:Black;">Date of Birth</span>
-                    </label>
+                <p>{{ form.dob.label }}</p>
+                <p>{{ form.dob }}</p>
+                <p>
                     {% for error in form.dob.errors %}
                         <p class="help-block">{{ error }}</p>
                     {% endfor %}
+                </p>
                 <div id="dob-error" class="row text-danger"></div>
             </div>
         </div>
