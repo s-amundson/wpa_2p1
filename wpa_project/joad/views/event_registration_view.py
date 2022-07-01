@@ -87,6 +87,8 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
             uid = str(uuid.uuid4())
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
+            self.request.session['payment_category'] = 'joad'
+            self.request.session['payment_description'] = f'Joad event on {str(event.event_date)[:10]}'
             logging.debug(students)
             description = f"Joad event on {str(event.event_date)[:10]} student id: "
             for s in students:
@@ -113,6 +115,7 @@ class ResumeEventRegistrationView(LoginRequiredMixin, View):
         logging.debug(registration)
         self.request.session['idempotency_key'] = str(registration.idempotency_key)
         self.request.session['line_items'] = []
+        self.request.session['payment_category'] = 'joad'
         # self.request.session['payment_db'] = ['joad', 'Registration']
         # self.request.session['action_url'] = reverse('programs:class_payment')
         for r in registrations:

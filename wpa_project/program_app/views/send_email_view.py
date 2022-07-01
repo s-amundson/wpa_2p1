@@ -21,7 +21,12 @@ class SendEmailView(UserPassesTestMixin, FormView):
         kwargs['beginner_class'] = self.beginner_class
         return kwargs
 
+    def form_invalid(self, form):
+        logging.debug(form.errors)
+        return super().form_invalid(form)
+
     def form_valid(self, form):
+        logging.debug(form.cleaned_data)
         form.send_message()
         return super().form_valid(form)
 
@@ -31,6 +36,5 @@ class SendEmailView(UserPassesTestMixin, FormView):
             if bid is not None:
                 self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
                 self.success_url = reverse_lazy('programs:class_attend_list', kwargs={'beginner_class': bid})
-            return self.request.user.is_board
-        else:
-            return False
+                return self.request.user.is_board
+        return False

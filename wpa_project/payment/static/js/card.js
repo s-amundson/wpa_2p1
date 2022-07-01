@@ -6,30 +6,8 @@ async function initializeCard(payments) {
  return card;
 }
 
-$(document).ready(async function(){
-//    var cost_no_donation = parseFloat($("#id_amount").val());
-    $("#id_amount").prop("disabled", true);
-    $("#id_donation").change(function () {
-        if ($("#id_donation").val() < 0 ){
-            $("#id_donation").val(0)
-        }
-        $("#id_amount").val(cost_no_donation + parseFloat($("#id_donation").val()))
-    });
-    $("#id_card").change(function () {
-        eval_saved_card();
-    });
-    eval_saved_card();
-    $("#card-remove-button").click(function() {
-        $("#payment-form").attr('action', url_remove_card);
-        $("#payment-form").submit();
-    });
-    if (!user_auth) {
-        $("#id_card").hide();
-        $("#id_save_card").parent().hide();
-    }
-});
-
 document.addEventListener('DOMContentLoaded', async function () {
+    $("#id_source_id").hide()
     if (!window.Square) {
       throw new Error('Square.js failed to load properly');
     }
@@ -42,13 +20,11 @@ document.addEventListener('DOMContentLoaded', async function () {
       return;
     }
     console.log('initialized');
-    eval_saved_card();
+
     async function handlePaymentMethodSubmission(event, paymentMethod) {
        event.preventDefault();
        console.log('handle payment');
-       if ($("#id_card").val() != "0") {
-         return;
-       }
+
        try {
          // disable the submit button as we await tokenization and make a
          // payment request.
@@ -71,40 +47,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     );
     cardButton.addEventListener('click', async function (event) {
         console.log('card button clicked');
-        if(cost_no_donation + parseFloat($("#id_donation").val()) > 0) {
-            console.log('pay');
-            await handlePaymentMethodSubmission(event, card);
-            $("#id_amount").prop("disabled", false);
-        }
-        else {
-//            await createPayment('no-payment')
-            $("#id_source_id").val('no-payment');
-        }
-        $("#id_amount").prop("disabled", false);
+        await handlePaymentMethodSubmission(event, card);
+//        $("#id_source_id").show()
         $("#payment-form").submit();
     });
-//    $("#payment-form").submit(function(e){
-//        e.preventDefault();
-//        createPayment('no-payment')
-//    });
+
 });
 
-function eval_saved_card() {
-    console.log($("#id_card").val())
-    if ($("#id_card").val() == "0") {
-        console.log("new card");
-        $("#id_save_card").prop("disabled", false);
-//        $("#card-button").prop("disabled", true);
-        $("#card-container").show();
-        $("#card-remove-button").hide();
-    }
-    else {
-        $("#id_save_card").prop("disabled", true);
-        $("#card-button").prop("disabled", false);
-        $("#card-container").hide();
-        $("#card-remove-button").show();
-    }
-}
 
 // This function tokenizes a payment method.
 // The ‘error’ thrown from this async function denotes a failed tokenization,

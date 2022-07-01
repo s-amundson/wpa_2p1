@@ -18,6 +18,7 @@ class SearchResultView(UserPassesTestMixin, View):
     def test_func(self):
         return self.request.user.is_board
 
+
 class SearchView(LoginRequiredMixin, View):
     def get(self, request):
         if not (request.user.is_board or request.user.is_staff):

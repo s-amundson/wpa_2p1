@@ -64,6 +64,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(cr[0].beginner_class, bc)
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          'Class on 2023-06-05 student id: 4')
+        self.assertEqual(self.client.session['payment_category'], 'intro')
 
     def test_class_register_with_error(self):
         # Get the page
@@ -208,8 +209,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          'Class on 2023-06-05 student id: 4')
         self.assertEqual(self.client.session['line_items'][0]['amount_each'], 0)
-        logging.debug(response.content)
-        # self.assertTemplateUsed(response, 'student_app/message.html')
+        self.assertEqual(self.client.session['payment_category'], 'intro')
 
     def test_underage_student(self):
         sf = StudentFamily.objects.get(pk=3)
@@ -218,7 +218,6 @@ class TestsClassRegistration(TestCase):
                     last_name='Conlan',
                     dob='2014-06-30')
         s.save()
-        logging.debug(s)
         response = self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_4': 'on', f'student_{s.id}': 'on',
                           'terms': 'on'}, secure=True)
@@ -265,6 +264,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 2)
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': 1}), secure=True)
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
+        self.assertEqual(self.client.session['payment_category'], 'intro')
 
     def test_get_class_registered_table(self):
         self.test_user = User.objects.get(pk=2)

@@ -8,8 +8,6 @@ from django.forms import model_to_dict
 from ..forms import JoadEventForm, PinAttendanceStaffForm, PinAttendanceStudentForm
 from ..models import JoadEvent, PinAttendance
 from ..src import Choices
-from payment.models import CostsModel
-from payment.src import SquareHelper
 from student_app.models import Student
 
 import uuid
@@ -59,6 +57,8 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
                 self.request.session['line_items'] = self.request.session.get('line_items', [])
                 self.request.session['line_items'].append({'name': f"Joad Pin(s) for {self.student.first_name}",
                                           'quantity': pins_earned, 'amount_each': pin_cost})
+                self.request.session['payment_category'] = 'joad'
+                self.request.session['payment_description'] = f'Joad Pin(s)'
                 self.success_url = reverse('payment:make_payment')
                 self.success_message = f'Congratulations on earning {pins_earned} pins'
 

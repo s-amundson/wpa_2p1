@@ -1,2 +1,2 @@
-from .card_remove_view import CardRemoveView
+from .card_views import CardManageView, CardRemoveView
 from .payment_view import CreatePaymentView, PaymentView

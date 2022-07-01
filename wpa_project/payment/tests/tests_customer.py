@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-class TestsPayment(TestCase):
+class TestsCustomer(TestCase):
     fixtures = ['f1', 'square_1']
 
     def __init__(self, *args, **kwargs):
@@ -117,33 +117,3 @@ class TestsPayment(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 0)
         self.assertTemplateUsed(response, 'payment/make_payment.html')
-
-    def test_payment_idempotency_key(self):
-        # Use an old idempotency_key and see that it gets changed with error.
-        ik = 'caf90994-d30e-4a43-8fb8-bc3e28922993'
-        logging.debug(ik)
-        session = self.client.session
-        session['idempotency_key'] = ik
-        session['line_items'] = [{'name': 'Class on None student id: 1',
-                                  'quantity': 1, 'amount_each': 5}]
-        session.save()
-
-        response = self.client.post(self.url, self.pay_dict, secure=True)
-        pl = PaymentLog.objects.all()
-        self.assertEqual(len(pl), 0)
-        self.assertNotEqual(self.client.session['idempotency_key'], ik)
-        self.assertTemplateUsed(response, 'payment/make_payment.html')
-
-    def test_payment_amount_zero(self):
-        session = self.client.session
-        session['line_items'] = [{'name': 'Class on None student id: 1',
-                                  'quantity': 1, 'amount_each': 0}]
-        session.save()
-
-        self.pay_dict['amount'] = 0
-        self.pay_dict['source_id'] = 'no-payment'
-        response = self.client.post(reverse('payment:make_payment'), self.pay_dict, secure=True)
-        pl = PaymentLog.objects.all()
-        self.assertEqual(len(pl), 1)
-        # self.assertTemplateUsed(response, 'payment/view_payment.html')
-        self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))

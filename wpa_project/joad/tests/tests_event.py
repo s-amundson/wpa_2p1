@@ -66,6 +66,7 @@ class TestsJoadEvent(TestCase):
         self.assertEqual(len(event), 1)
         self.assertContains(response, 'This field is required.')
 
+
 class TestsJoadClassList(TestCase):
     fixtures = ['f1', 'joad1']
 

@@ -40,7 +40,8 @@ class TestsMembership(TestCase):
         response = self.client.post(reverse('membership:membership'), {'student_2': 'on', 'level': '1'},
                                     secure=True)
         # self.assertEqual(response.status_code, 200)
-        # self.assertEqual(self.client.session['payment_db'][1], 'Membership')
+        self.assertEqual(self.client.session['payment_category'], 'membership')
+        self.assertEqual(self.client.session['payment_description'], 'Adult Membership')
 
     def test_membership_to_young(self):
         s = Student.objects.get(pk=2)
@@ -56,7 +57,8 @@ class TestsMembership(TestCase):
     def test_membership_family(self):
         response = self.client.post(reverse('membership:membership'), {'student_2': 'on', 'student_3': 'on', 'level': '3'},
                                     secure=True)
-        # self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session['payment_category'], 'membership')
+        self.assertEqual(self.client.session['payment_description'], 'Family Membership')
 
     def test_membership_family_large(self):
         students = Student.objects.filter(pk__gt=1)
@@ -72,6 +74,8 @@ class TestsMembership(TestCase):
         self.assertEqual(self.client.session['line_items'][0]['amount_each'], 50)
         self.assertEqual(len(Membership.objects.all()), 1)
         self.assertEqual(Membership.objects.last().students.count(), 5)
+        self.assertEqual(self.client.session['payment_category'], 'membership')
+        self.assertEqual(self.client.session['payment_description'], 'Family Membership')
 
     def test_membership_no_student(self):
         response = self.client.post(reverse('membership:membership'), {'level': '3'}, secure=True)

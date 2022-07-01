@@ -128,7 +128,8 @@ class TestsBeginnerClass(TestCase):
         self.assertEqual(len(cr), 2)
 
         # process a good payment
-        pay_dict = {'amount': 10, 'card': 0, 'donation': 0, 'save_card': False, 'source_id': 'cnon:card-nonce-ok'}
+        pay_dict = {'amount': 10, 'card': 0, 'category': 'intro', 'donation': 0, 'save_card': False,
+                    'source_id': 'cnon:card-nonce-ok'}
         response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
 
         cr = ClassRegistration.objects.all()

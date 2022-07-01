@@ -37,7 +37,8 @@ class TestsUnregisterStudent(TestCase):
         self.assertEqual(len(cr), 2)
 
         # process a good payment
-        pay_dict = {'amount': 10, 'card': 0, 'donation': 0, 'save_card': False, 'source_id': 'cnon:card-nonce-ok'}
+        pay_dict = {'amount': 10, 'card': 0, 'donation': 0, 'category': 'intro', 'save_card': False,
+                    'source_id': 'cnon:card-nonce-ok'}
         response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
 
         pl = PaymentLog.objects.all()
@@ -80,7 +81,8 @@ class TestsUnregisterStudent(TestCase):
                          {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
 
         # process a good payment
-        pay_dict = {'amount': 10, 'card': 0, 'donation': 0, 'save_card': False, 'source_id': 'cnon:card-nonce-ok'}
+        pay_dict = {'amount': 10, 'card': 0, 'category': 'intro', 'donation': 0, 'save_card': False,
+                    'source_id': 'cnon:card-nonce-ok'}
         response = self.client.post(reverse('payment:make_payment'),
                                     pay_dict, secure=True)
         pl = PaymentLog.objects.all()

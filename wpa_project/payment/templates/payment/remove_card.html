@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %} Remove Card {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row text-center"><h3> Remove Credit Card </h3></div>
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary m-2" type="submit" name="button">Remove</button>
+    </form>
+
+{% endblock %}

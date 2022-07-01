@@ -99,7 +99,8 @@ class TestsEventAttendance(TestCase):
         self.assertEqual(pa[0].stars, 1)
         self.assertRedirects(response, reverse('payment:make_payment'), 302)
         self.assertIn('Joad Pin(s) for ', self.client.session['line_items'][0]['name'])
-        # self.assertEqual(self.client.session['payment_db'][1], 'PinAttendance')
+        self.assertEqual(self.client.session['payment_category'], 'joad')
+        self.assertEqual(self.client.session['payment_description'], 'Joad Pin(s)')
         self.assertEqual(self.client.session['line_items'][0]['quantity'], 1)
         self.assertEqual(self.client.session['line_items'][0]['amount_each'], 5)
 

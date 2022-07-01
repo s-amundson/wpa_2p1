@@ -24,3 +24,10 @@ class CardRemoveForm(forms.Form):
         card_choices.append((0, "New Card"))
         logging.debug(card_choices)
         return card_choices
+
+
+class CardNewForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['source_id'] = forms.CharField()
+        self.card_errors = []

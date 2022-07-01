@@ -81,6 +81,8 @@ class RegistrationView(UserPassesTestMixin, FormView):
             uid = str(uuid.uuid4())
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
+            self.request.session['payment_category'] = 'joad'
+            self.request.session['payment_description'] = f'Joad session starting {str(session.start_date)[:10]}'
             logging.debug(students)
             for s in students:
                 cr = Registration(session=session, student=s, pay_status='start', idempotency_key=uid).save()
@@ -115,9 +117,10 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
         logging.debug(registration)
         self.request.session['idempotency_key'] = str(registration.idempotency_key)
         self.request.session['line_items'] = []
-        # self.request.session['payment_db'] = ['joad', 'Registration']
-        # self.request.session['action_url'] = reverse('programs:class_payment')
+        self.request.session['payment_category'] = 'joad'
+
         for r in registrations:
+            self.request.session['payment_description'] = f'Joad session starting {str(r.session.start_date)[:10]}'
             self.request.session['line_items'].append(
                     {'name': f'Joad session starting {str(r.session.start_date)[:10]} student id: {str(r.student.id)}',
                      'quantity': 1, 'amount_each': r.session.cost})

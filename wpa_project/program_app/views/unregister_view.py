@@ -9,7 +9,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 
 from ..serializers import UnregisterSerializer
-from payment.src import EmailMessage, Refund
+from payment.src import EmailMessage, RefundHelper
 from ..src import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
 from student_app.models import Student
@@ -28,7 +28,7 @@ class UnregisterView(LoginRequiredMixin, APIView):
 
     def __init__(self):
         # self.square_helper = SquareHelper()
-        self.refund = Refund()
+        self.refund = RefundHelper()
         self.ik_list = []
 
     def add_key(self, key):
@@ -85,6 +85,7 @@ class UnregisterView(LoginRequiredMixin, APIView):
                     self.add_key(cr.idempotency_key)
             if not donation:
                 for ik in self.ik_list:
+
                     square_response = self.refund.refund_with_idempotency_key(ik.idempotency_key, ik.amount * ik.count)
                     if square_response['status'] == 'error':  # pragma: no cover
                         logging.error(square_response)

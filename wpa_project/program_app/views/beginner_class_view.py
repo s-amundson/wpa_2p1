@@ -11,7 +11,7 @@ from django.forms import model_to_dict
 from ..forms import BeginnerClassForm, SendClassEmailForm
 from ..models import BeginnerClass, ClassRegistration
 from ..src import ClassRegistrationHelper
-from payment.src import EmailMessage, Refund
+from payment.src import EmailMessage, RefundHelper
 from payment.models import CostsModel
 
 logger = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
             bc.save()
         if bc.state == 'canceled':
             ec = ClassRegistrationHelper().enrolled_count(bc)
-            refund = Refund()
+            refund = RefundHelper()
             email_message = EmailMessage()
             # need to refund students if any
             # logging.debug(f'beginners: {ec["beginner"]}, returnees: {ec["returnee"]}')

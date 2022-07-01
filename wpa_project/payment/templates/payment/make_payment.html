@@ -10,7 +10,7 @@
         window.action_url = '{{ action_url }}';
         const cost_no_donation = {{ form.amount.initial }};
         const url_remove_card = '{{ url_remove_card }}';
-        const user_auth = '{{ user.is_authenticated|lower }}';
+        const user_auth = {{ user.is_authenticated|lower }};
     </script>
 
     <!-- link to the local SqPaymentForm initialization -->
@@ -32,6 +32,7 @@
           {% csrf_token %}
           {{ form.source_id }}
           {{ form.items }}
+          {{ form.category }}
 
           {% for error in form.payment_errors %}
             <p>{{ error }}</p>
@@ -81,7 +82,7 @@
           </table>
 
           <div class="row p-3">
-            Payments are processed with Square. Your credit card information is not stored on our servers.
+            Payments are processed with Square.
           </div>
 
           <div class="d-flex flex-row p-3">

@@ -23,16 +23,23 @@ class CreatePaymentView(FormView):
     success_url = reverse_lazy('registration:index')
 
     def form_invalid(self, form):
-        logging.debug(form.cleaned_data)
         logging.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
         logging.debug(form.cleaned_data)
+        logging.debug(self.request.session.get('idempotency_key', ''))
         if form.process_payment(self.request.session.get('idempotency_key', str(uuid.uuid4()))):
             if self.request.user.is_authenticated:
                 self.success_url = reverse_lazy('payment:view_payment', args=[form.log.id])
+                for k in ['line_items', 'idempotency_key']:
+                    if k in self.request.session:
+                        self.request.session.pop(k)
             return super().form_valid(form)
+        else:
+            logging.debug(form.errors)
+            # replace idempotency_key
+            self.request.session['idempotency_key'] = str(uuid.uuid4())
         return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
@@ -55,7 +62,12 @@ class CreatePaymentView(FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        logging.debug(self.request.user)
+        logging.debug(self.request.user.is_authenticated)
+        if self.request.user.is_authenticated:
+            kwargs['user'] = self.request.user
+        else:
+            kwargs['user'] = None
         items = []
         line_items = self.request.session.get('line_items', [])
         total = 0
@@ -67,8 +79,8 @@ class CreatePaymentView(FormView):
 
         kwargs['description'] = self.request.session.get('payment_description', '')
         kwargs['line_items'] = line_items
-        # kwargs['initial']['items'] = json.dumps(line_items)
         kwargs['initial']['amount'] = total
+        kwargs['initial']['category'] = self.request.session.get('payment_category', 'donation')
         logging.debug(items)
         return kwargs
 

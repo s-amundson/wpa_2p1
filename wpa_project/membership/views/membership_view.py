@@ -9,7 +9,6 @@ from django.utils.datetime_safe import date
 from django.contrib import messages
 from ..forms import MembershipForm
 from ..models import Level
-from payment.src import SquareHelper
 from student_app.models import Student, StudentFamily
 
 logger = logging.getLogger(__name__)
@@ -98,4 +97,6 @@ class MembershipView(LoginRequiredMixin, View):
         request.session['idempotency_key'] = uid
         request.session['line_items'] = [{'name': f'{membership.level.name} Membership',
                                           'quantity': 1, 'amount_each': cost}]
+        request.session['payment_category'] = 'membership'
+        request.session['payment_description'] = f'{membership.level.name} Membership'
         membership.save()
