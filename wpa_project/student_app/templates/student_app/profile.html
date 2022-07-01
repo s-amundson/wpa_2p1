@@ -86,6 +86,13 @@
         &nbsp;for a class. You can also click on Classes in the nav bar.
     </div>
 
+    <div class="row px-3 pt-3 align-items-center mx-auto">
+        <div class="col">
+        <h3> Payment </h3>
+        <p class="px-4"><a href="{% url 'payment:card_manage' %}">Manage Credit Cards</a></p>
+        </div>
+    </div>
+
     <div class="flex-row p-3 mx-3" id="theme-div">
         <form method="post">{% csrf_token %}
             {{ theme_form.as_p }}
