@@ -22,7 +22,10 @@ class MembershipView(LoginRequiredMixin, View):
         if sf_id is not None and request.user.is_board:
             sf = StudentFamily.objects.get(pk=sf_id)
         else:
-            sf = Student.objects.get(user=request.user).student_family
+            student = Student.objects.filter(user=request.user).last()
+            if student is None:
+                return HttpResponseRedirect(reverse('registration:profile'))
+            sf = student.student_family
         forms = []
         forms.append(MembershipForm(students=sf.student_set.all()))
         levels = Level.objects.filter(enabled=True)

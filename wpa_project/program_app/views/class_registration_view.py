@@ -161,6 +161,7 @@ class ClassRegistrationView(AccessMixin, FormView):
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
+            self.request.session['description'] = f'Class on {str(beginner_class.class_date)[:10]}'
             logging.debug(students)
             for s in students:
                 if s.safety_class is None:
@@ -210,6 +211,7 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment'] = True
+            self.request.session['description'] = f'Class on {str(beginner_class.class_date)[:10]}'
         else:
             self.success_url = reverse_lazy('programs:beginner_class',
                                             kwargs={'beginner_class': form.cleaned_data['beginner_class']})
@@ -275,7 +277,8 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             registrations = ClassRegistration.objects.filter(idempotency_key=cr.idempotency_key)
             request.session['idempotency_key'] = str(cr.idempotency_key)
             request.session['line_items'] = []
-            self.request.session['payment_category'] = 'intro'
+            request.session['payment_category'] = 'intro'
+            request.session['description'] = f'Class on {str(cr.beginner_class.class_date)[:10]}'
             beginner = 0
             returnee = 0
 

@@ -46,6 +46,7 @@ def member_update(sender, instance, created, **kwargs):
                 if student.user is not None:
                     student.user.is_member = True
                     student.user.save()
+            membership.save()
     #
     # if created:
     #     pass

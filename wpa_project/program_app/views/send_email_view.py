@@ -1,9 +1,7 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import FormView
 from django.urls import reverse_lazy
-from django.views.generic.base import View
-from django.shortcuts import render, get_object_or_404
-from django.http import Http404
+from django.shortcuts import get_object_or_404
 import logging
 
 from ..forms import SendClassEmailForm

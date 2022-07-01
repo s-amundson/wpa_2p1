@@ -1,14 +1,9 @@
-import uuid
 import logging
-from django.apps import apps
 from django.conf import settings
-from django.utils.datetime_safe import datetime
-from square.client import Client
-import django.dispatch
 
 from .square_helper import SquareHelper
-from ..models import Card, Customer, DonationLog, PaymentLog, PaymentErrorLog, RefundLog
-from student_app.models import Student
+from ..models import Card, PaymentLog
+
 logger = logging.getLogger(__name__)
 
 

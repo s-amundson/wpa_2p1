@@ -27,7 +27,7 @@ class CardHelper(SquareHelper):
             }
         )
         if result.is_success():
-            logging.debug(result.body)
+            # logging.debug(result.body)
             card = result.body['card']
             self.card = Card.objects.create(
                 bin=card['bin'],
@@ -56,7 +56,7 @@ class CardHelper(SquareHelper):
           card_id=self.card.card_id
         )
         if result.is_success():
-            logging.debug(result.body)
+            # logging.debug(result.body)
             sq_card = result.body['card']
             self.card.enabled = sq_card['enabled']
             self.card.save()
@@ -71,7 +71,7 @@ class CardHelper(SquareHelper):
         )
 
         if result.is_success():
-            logging.debug(result.body)
+            # logging.debug(result.body)
             card = result.body['card']
             self.card.bin = card['bin']
             self.card.card_brand = card['card_brand']

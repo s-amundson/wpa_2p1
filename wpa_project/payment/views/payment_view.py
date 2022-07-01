@@ -27,8 +27,6 @@ class CreatePaymentView(FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
-        logging.debug(self.request.session.get('idempotency_key', ''))
         if form.process_payment(self.request.session.get('idempotency_key', str(uuid.uuid4()))):
             if self.request.user.is_authenticated:
                 self.success_url = reverse_lazy('payment:view_payment', args=[form.log.id])
@@ -57,13 +55,10 @@ class CreatePaymentView(FormView):
         else:
             context['cards'] = []
         context['url_remove_card'] = reverse_lazy('payment:card_remove')
-        logging.debug(context['cards'])
         return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        logging.debug(self.request.user)
-        logging.debug(self.request.user.is_authenticated)
         if self.request.user.is_authenticated:
             kwargs['user'] = self.request.user
         else:
@@ -71,7 +66,6 @@ class CreatePaymentView(FormView):
         items = []
         line_items = self.request.session.get('line_items', [])
         total = 0
-        logging.debug(line_items)
         for item in line_items:
             item['total'] = item['quantity'] * item['amount_each']
             total += item['total']
@@ -81,7 +75,6 @@ class CreatePaymentView(FormView):
         kwargs['line_items'] = line_items
         kwargs['initial']['amount'] = total
         kwargs['initial']['category'] = self.request.session.get('payment_category', 'donation')
-        logging.debug(items)
         return kwargs
 
 
@@ -92,5 +85,4 @@ class PaymentView(UserPassesTestMixin, DetailView):
 
     def test_func(self):
         self.object = self.get_object()
-        logging.debug(self.object)
         return self.request.user.is_staff or self.object.user == self.request.user

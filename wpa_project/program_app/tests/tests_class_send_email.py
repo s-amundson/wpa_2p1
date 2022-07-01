@@ -25,7 +25,7 @@ class TestsClassSendEmail(TestCase):
 
     def test_get_send_email_bad(self):
         response = self.client.get(reverse('programs:send_email'), secure=True)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
     def test_get_send_email_good(self):
         response = self.client.get(reverse('programs:send_email', kwargs={'beginner_class': 1}), secure=True)

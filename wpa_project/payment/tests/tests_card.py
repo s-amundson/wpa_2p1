@@ -60,7 +60,7 @@ class TestsCard(TestCase):
         self.client.force_login(self.test_user)
         response = self.client.post(reverse('payment:card_manage'), {'source_id': 'cnon:card-nonce-ok'}, secure=True)
         customers = Customer.objects.all()
-        self.assertEqual(len(customers), 1)
+        self.assertEqual(len(customers), 2)
         cl = Card.objects.all()
         self.assertEqual(len(cl), 2)
         self.assertRedirects(response, reverse('payment:card_manage'))

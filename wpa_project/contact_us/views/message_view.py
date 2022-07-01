@@ -48,9 +48,10 @@ class MessageView(FormView):
     def get_initial(self):
         self.initial = super().get_initial()
         if self.request.user.is_authenticated:
-            student = Student.objects.get(user=self.request.user)
-            self.initial['contact_name'] = f'{student.first_name} {student.last_name}'
-            self.initial['email'] = EmailAddress.objects.get_primary(self.request.user)
+            student = Student.objects.filter(user=self.request.user).last()
+            if student is not None:
+                self.initial['contact_name'] = f'{student.first_name} {student.last_name}'
+                self.initial['email'] = EmailAddress.objects.get_primary(self.request.user)
         return self.initial
 
     def form_invalid(self, form):
