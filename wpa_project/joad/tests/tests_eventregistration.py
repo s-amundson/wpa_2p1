@@ -63,7 +63,7 @@ class TestsJoadEventRegistration(TestCase):
         reg = EventRegistration.objects.all()
         self.assertEqual(len(reg), 2)
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Joad event on 2022-02-16 student id: 5')
+                         'Joad event on 2022-02-16 student: Gary')
         self.assertEqual(self.client.session['payment_category'], 'joad')
         self.assertEqual(self.client.session['payment_description'], 'Joad event on 2022-02-16')
 

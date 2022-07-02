@@ -63,7 +63,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].beginner_class, bc)
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Class on 2023-06-05 student id: 4')
+                         'Class on 2023-06-05 student: Charles')
         self.assertEqual(self.client.session['payment_category'], 'intro')
 
     def test_class_register_with_error(self):
@@ -207,7 +207,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(cr[0].beginner_class, bc)
 
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Class on 2023-06-05 student id: 4')
+                         'Class on 2023-06-05 student: Charles')
         self.assertEqual(self.client.session['line_items'][0]['amount_each'], 0)
         self.assertEqual(self.client.session['payment_category'], 'intro')
 
@@ -291,7 +291,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].beginner_class, bc)
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Class on 2023-06-05 instructor id: 1')
+                         'Class on 2023-06-05 instructor: Emily')
 
     def test_class_register_instructor_overdue(self):
         # make user instructor

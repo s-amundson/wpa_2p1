@@ -2,6 +2,7 @@ import logging
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.core import mail
 
 from ..models import Card, PaymentLog
 
@@ -24,7 +25,7 @@ class TestsPayment(TestCase):
                          'source_id': 'cnon:card-nonce-ok'}
         self.url = reverse('payment:make_payment')
         session = self.client.session
-        session['line_items'] = [{'name': 'Class on None student id: 1',
+        session['line_items'] = [{'name': 'Class on None student: test_user',
                                   'quantity': 1, 'amount_each': 5}]
         session.save()
 
@@ -38,6 +39,9 @@ class TestsPayment(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Payment Confirmation')
+        self.assertTrue(mail.outbox[0].body.find('Class on None student: test_user') >= 0)
 
     def test_payment_success_donation(self):
         # process a good payment

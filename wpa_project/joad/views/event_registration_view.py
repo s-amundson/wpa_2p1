@@ -90,10 +90,10 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
             self.request.session['payment_category'] = 'joad'
             self.request.session['payment_description'] = f'Joad event on {str(event.event_date)[:10]}'
             logging.debug(students)
-            description = f"Joad event on {str(event.event_date)[:10]} student id: "
+            description = f"Joad event on {str(event.event_date)[:10]} student: "
             for s in students:
                 cr = EventRegistration(event=event, student=s, pay_status='start', idempotency_key=uid).save()
-                self.request.session['line_items'].append({'name': description + f'{str(s.id)}',
+                self.request.session['line_items'].append({'name': description + f'{s.first_name}',
                                                            'quantity': 1, 'amount_each': event.cost})
                 logging.debug(cr)
         return HttpResponseRedirect(reverse('payment:make_payment'))
@@ -119,7 +119,7 @@ class ResumeEventRegistrationView(LoginRequiredMixin, View):
         # self.request.session['payment_db'] = ['joad', 'Registration']
         # self.request.session['action_url'] = reverse('programs:class_payment')
         for r in registrations:
-            description = f"Joad event on {str(registration.event.event_date)[:10]} student id: "
-            self.request.session['line_items'].append({'name': description + f'{str(r.student.id)}',
+            description = f"Joad event on {str(registration.event.event_date)[:10]} student: "
+            self.request.session['line_items'].append({'name': description + f'{r.student.first_name}',
                                                            'quantity': 1, 'amount_each': r.event.cost})
         return HttpResponseRedirect(reverse('payment:make_payment'))

@@ -171,7 +171,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                 cr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
                                        pay_status='start', idempotency_key=uid)
                 self.request.session['line_items'].append({
-                    'name': f'Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}',
+                    'name': f'Class on {str(beginner_class.class_date)[:10]} student: {s.first_name}',
                     'quantity': 1,
                     'amount_each': beginner_class.cost,
                      }
@@ -181,7 +181,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                 cr = ClassRegistration(beginner_class=beginner_class, student=i, new_student=False, pay_status='paid',
                                        idempotency_key=uid).save()
                 self.request.session['line_items'].append({
-                    'name': f"Class on {str(beginner_class.class_date)[:10]} instructor id: {str(i.id)}",
+                    'name': f"Class on {str(beginner_class.class_date)[:10]} instructor: {i.first_name}",
                     'quantity': 1,
                     'amount_each': 0,
                      }
@@ -237,7 +237,7 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                     if form.cleaned_data['payment']:
                         pay_status = 'start'
                         self.request.session['line_items'].append({
-                            'name': f'Class on {str(beginner_class.class_date)[:10]} student id: {str(s.id)}',
+                            'name': f'Class on {str(beginner_class.class_date)[:10]} student: {s.first_name}',
                             'quantity': 1,
                             'amount_each': beginner_class.cost,
                              }
@@ -284,7 +284,7 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
 
             for r in registrations:
                 request.session['line_items'].append({
-                        'name': f'Class on {str(r.beginner_class.class_date)[:10]} student id: {str(r.student.id)}',
+                        'name': f'Class on {str(r.beginner_class.class_date)[:10]} student: {r.student.first_name}',
                         'quantity': 1,
                         'amount_each': r.beginner_class.cost,
                     }

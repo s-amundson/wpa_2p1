@@ -29,7 +29,7 @@ class TestsRefund(TestCase):
         self.client.force_login(self.test_user)
         session = self.client.session
         session['idempotency_key'] = str(uuid.uuid4())
-        session['line_items'] = [{'name': 'Class on None student id: 1',
+        session['line_items'] = [{'name': 'Class on None student: test_user',
                                   'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]
         session.save()
 

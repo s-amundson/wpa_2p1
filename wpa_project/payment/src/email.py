@@ -7,13 +7,9 @@ logger = logging.getLogger(__name__)
 
 
 class EmailMessage(EmailMessage):
-
     def line_items(self, line_items):
         for line in line_items:
-            bpm = line['base_price_money']
-            line['amount'] = bpm['amount']/100  # convert to dollars from cents
-            line['cost'] = int(line['quantity']) * line['amount']
-            del line['base_price_money']
+            line['cost'] = int(line['quantity']) * line['amount_each']
         return line_items
 
     def payment_email_user(self, user, pay_dict):

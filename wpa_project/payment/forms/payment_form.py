@@ -2,7 +2,7 @@ from django import forms
 from django.utils import timezone
 
 from ..models import Card, Customer, PaymentLog
-from ..src import CardHelper, CustomerHelper, PaymentHelper
+from ..src import CardHelper, CustomerHelper, EmailMessage, PaymentHelper
 
 import logging
 logger = logging.getLogger(__name__)
@@ -86,6 +86,10 @@ class PaymentForm(forms.ModelForm):
         )
 
         if self.log is not None:
+            pay_dict = {'line_items': self.line_items, 'total': self.cleaned_data['amount'],
+                        'receipt': self.log.receipt}
+            if self.user is not None:
+                EmailMessage().payment_email_user(self.user, pay_dict)
             if self.cleaned_data['save_card']:
                 customer = Customer.objects.filter(user=self.user).last()
                 logging.debug(customer)
