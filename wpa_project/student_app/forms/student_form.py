@@ -23,13 +23,12 @@ class StudentForm(MyModelForm):
         if 'student_is_user' in kwargs:
             kwargs.pop('student_is_user')
         super().__init__(*args, **kwargs)
-        # self.fields['dob'].widget = SelectDateWidget(years=range(date.today().year, date.today().year - 100, -1))
+        self.fields['dob'].widget = SelectDateWidget(years=range(date.today().year, date.today().year - 100, -1))
         self.fields['first_name'].widget.attrs.update({'placeholder': 'First Name'})
         self.fields['last_name'].widget.attrs.update({'placeholder': 'Last Name'})
-        self.fields['dob'].widget.attrs.update({'placeholder': 'Date of Birth YYYY-MM-DD'})
-        self.fields['dob'].error_messages = {'required': '*', 'invalid': "Enter a valid date in YYYY-MM-DD format"}
-        self.fields['safety_class'].widget.attrs.update({'placeholder': 'Safety Class YYYY-MM-DD'})
-        self.fields['safety_class'].error_messages = {'required': '*', 'invalid': "Enter a valid date in YYYY-MM-DD format"}
+        self.fields['dob'].label = "Date of Birth"
+        self.fields['safety_class'].widget = SelectDateWidget(years=range(date.today().year, 2019, -1))
+
         if student_is_user:
             self.fields['email'].widget.attrs.update({'disabled': 'disabled'})
         else:

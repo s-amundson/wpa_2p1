@@ -1,4 +1,4 @@
-<form class="form border p-2 col" method="post" autocomplete="off" id="student_form">
+<form class="form border p-2 col" method="post" action="{% url 'registration:add_student' %}" autocomplete="off" id="student_form">
     {% csrf_token %}
     <div class="row mr-2">
         <div class="d-md-inline-flex">
@@ -56,7 +56,7 @@
     {% if user.is_staff %}
         <div class="d-flex flex-row px-3 input-group input-group-md">
             <div class="col-2">
-                Safety Class
+                {{ form.safety_class.label }}
             </div>
             <div class="col">
                 {{ form.safety_class }}

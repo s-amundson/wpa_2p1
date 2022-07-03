@@ -7,15 +7,19 @@ $(document).ready(function(){
 });
 
 async function add_student_function(student_id) {
-    var url_string = url_student_api
+    var url_string = add_student_url
     let getConfirm = false;
     if(student_id) {
-        url_string = url_student_api + student_id + "/";
+        url_string = add_student_url + student_id + "/";
         $("#student-row-" + student_id).show();
     }
-    var of_age = new Date()
+    let dob = new Date();
+    dob.setFullYear($("#id_dob_year").val());
+    dob.setMonth(parseInt($("#id_dob_month").val()) - 1);
+    dob.setDate($("#id_dob_day").val());
+    var of_age = new Date();
     of_age.setFullYear(of_age.getFullYear() - 9)
-    if (Date.parse($("#id_dob").val()) > of_age) {
+    if (dob > of_age) {
         getConfirm = confirm("Students under the age of 9 are not permitted to participate in classes.\n"
           +  "Do you wish to continue to add this student?");
     }
@@ -23,16 +27,7 @@ async function add_student_function(student_id) {
         getConfirm = true;
     }
     if (getConfirm) {
-        let student_info = {
-                csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
-                'first_name': $("#id_first_name").val(),
-                'last_name' : $("#id_last_name").val(),
-                'dob': $("#id_dob").val(),
-                'email': $("#id_email").val()
-            }
-        if ($("#student_form").find("#id_safety_class").length == 1) {
-            student_info['safety_class'] = $("#id_safety_class").val()
-        }
+        let student_info = $("#student_form").serializeArray();
         let data = await $.post(url_string, student_info, function(data, status){
                 return data;
                 }, "json");
