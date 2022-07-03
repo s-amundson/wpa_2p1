@@ -21,6 +21,7 @@
                 <th> Category </th>
                 <th> Distance </th>
                 <th> Target </th>
+                <th> Inner Scoring </th>
                 <th> Score </th>
                 <th> Stars </th>
             </tr>
@@ -35,6 +36,7 @@
                     <td>{{ row.category }}</td>
                     <td>{{ row.distance }}</td>
                     <td>{{ row.target }}</td>
+                    <td>{% if  row.inner_scoring %} X {% endif %}</td>
                     <td>{{ row.score }}</td>
                     <td>{{ row.stars }}</td>
                 </tr>

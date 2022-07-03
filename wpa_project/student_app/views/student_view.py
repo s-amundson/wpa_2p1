@@ -93,7 +93,7 @@ class AddStudentView(LoginRequiredMixin, FormView):
             f.student_family = sf
             self.request.session['student_family'] = sf.id
             f.save()
-        if self.request.META.get('HTTP_ACCEPT').find('application/json') >= 0:
+        if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
             return JsonResponse({'id': 1, 'first_name': form.cleaned_data['first_name'],
                                  'last_name': form.cleaned_data['last_name']})
         return super().form_valid(form)
