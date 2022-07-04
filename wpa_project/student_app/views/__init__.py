@@ -10,7 +10,7 @@ from .student_family_api_view import StudentFamilyApiView
 from .student_family_register_view import StudentFamilyRegisterView
 from .student_list_view import StudentList
 from .student_table_view import StudentTableView
-from .student_view import AddStudentView, StudentApiView, StudentIsJoadView
+from .student_view import AddStudentView, StudentIsJoadView
 from .terms_view import TermsView
 from .theme_view import ThemeView
 from .user_view import UserView

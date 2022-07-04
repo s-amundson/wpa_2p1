@@ -127,16 +127,3 @@ class TestsRegisterStudent(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '123 main')
 
-    def test_add_student_api(self):
-        self.client.force_login(self.test_user)
-        # add a student
-        d = {'first_name': 'Christy', 'last_name': 'Smith', 'dob': '2020-02-02'}
-        response = self.client.post(reverse('registration:student_api'), d, secure=True)
-
-        d = {'street': '123 main', 'city': 'city', 'state': 'ca', 'post_code': 12345, 'phone': '123.123.1234'}
-        response = self.client.post(reverse('registration:student_family_api'), d, secure=True)
-
-        # self.assertEqual(response.status_code, 200)
-        sf = StudentFamily.objects.all()
-        s = sf[0].student_set.all()
-        self.assertEquals(len(s), 1)

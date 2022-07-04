@@ -7,7 +7,6 @@
     <script>
         let student_table_url = "{% url 'registration:student_table' %}"
         let add_student_url = "{% url 'registration:add_student' %}"
-        let url_student_api = "{% url 'registration:student_api' %}"
         let url_student_register = "{% url 'registration:student_register' %}"
         let url_student_family_api = "{% url 'registration:student_family_api' %}"
         let url_theme = "{% url 'registration:theme' %}"
@@ -94,7 +93,7 @@
     </div>
 
     <div class="flex-row p-3 mx-3" id="theme-div">
-        <form method="post">{% csrf_token %}
+        <form method="post" action="{% url 'registration:theme' %}">{% csrf_token %}
             {{ theme_form.as_p }}
             <button id="theme-submit"  type="submit" class="btn btn-primary">Update Theme</button>
         </form>

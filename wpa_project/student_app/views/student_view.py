@@ -1,75 +1,15 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 import logging
-from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import reverse, reverse_lazy
+from django.http import JsonResponse
+from django.urls import reverse_lazy
 from django.views.generic.base import View
 from django.views.generic import FormView
-from rest_framework.views import APIView
-from rest_framework import permissions, status
-from rest_framework.response import Response
 
 from ..forms import StudentForm
 from ..models import Student
-from ..serializers import StudentSerializer
 from ..src import EmailMessage, StudentHelper
 logger = logging.getLogger(__name__)
-
-
-class StudentApiView(LoginRequiredMixin, APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, student_id=None, format=None):
-        if student_id is not None:
-            student = get_object_or_404(Student, pk=student_id)
-            # students = StudentFamily.objects.get(user=request.user).student_set.all()
-            if request.user.is_staff or student_id == request.user.id:
-                serializer = StudentSerializer(student)
-            else:
-                return Response({'error': "Not Authorized"}, status=400)
-        else:
-            serializer = StudentSerializer()
-        return Response(serializer.data)
-
-    def post(self, request, student_id=None, format=None):
-        # logging.debug(student_id)
-        logging.debug(request.data)
-        old_email = None
-        if student_id is not None:
-            if request.user.is_staff:
-                student = get_object_or_404(Student, id=student_id)
-            else:
-                sf = get_object_or_404(Student, user=request.user).student_family
-                student = get_object_or_404(Student, id=student_id, student_family=sf)
-                old_email = student.email
-            serializer = StudentSerializer(student, data=request.data)
-
-        else:
-            serializer = StudentSerializer(data=request.data)
-
-        if serializer.is_valid():
-            logging.debug(serializer.validated_data)
-            if student_id is None:
-                owner = Student.objects.filter(user=request.user)
-                if owner.count() == 0:
-                    logging.debug('student is user')
-                    f = serializer.save(user=request.user)
-                else:
-                    f = serializer.save(student_family=owner[0].student_family)
-
-            else:
-                f = serializer.update(student, serializer.validated_data)
-
-            if f.user is None:
-                logging.debug('student is not user')
-                if f.email != old_email:
-                    logging.debug('email updated')
-                    EmailMessage().invite_user_email(request.user, f)
-            # request.session['student_family'] = f.student_family.id
-            # logging.debug(f'id = {f.id}, fam = {f.student_family.id}')
-            return Response(serializer.data)
-        logging.debug(serializer.errors)
-        return Response({'error': serializer.errors})
 
 
 class AddStudentView(LoginRequiredMixin, FormView):
@@ -88,11 +28,20 @@ class AddStudentView(LoginRequiredMixin, FormView):
             form.save()
         else:
             f = form.save(commit=False)
-            sf = Student.objects.get(user=self.request.user).student_family
-            logging.debug(sf.id)
-            f.student_family = sf
-            self.request.session['student_family'] = sf.id
+            if self.student:
+                sf = Student.objects.get(user=self.request.user).student_family
+                logging.debug(sf.id)
+                f.student_family = sf
+                self.request.session['student_family'] = sf.id
+            else:
+                if self.request.user.student_set.first() is None:
+                    f.user = self.request.user
             f.save()
+
+            if f.user is None:
+                if f.email != self.request.user.email:
+                    logging.debug('invite')
+                    EmailMessage().invite_user_email(self.request.user.student_set.first(), f)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
             return JsonResponse({'id': 1, 'first_name': form.cleaned_data['first_name'],
                                  'last_name': form.cleaned_data['last_name']})

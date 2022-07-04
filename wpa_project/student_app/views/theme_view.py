@@ -1,25 +1,24 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import FormView
+from django.urls import reverse_lazy
+
+from ..forms import ThemeForm
+
 import logging
-
-from rest_framework.views import APIView
-from rest_framework import permissions, status
-from rest_framework.response import Response
-from ..serializers import ThemeSerializer
-
 logger = logging.getLogger(__name__)
 
 
-class ThemeView(LoginRequiredMixin, APIView):
-    permission_classes = [permissions.IsAuthenticated]
+class ThemeView(LoginRequiredMixin, FormView):
+    template_name = 'student_app/form_as_p.html'
+    form_class = ThemeForm
+    success_url = reverse_lazy('registration:profile')
 
-    def post(self, request):
-        serializer = ThemeSerializer(data=request.data)
+    def form_invalid(self, form):
+        logging.debug(form.errors)
+        return super().form_invalid(form)
 
-        if serializer.is_valid():
-            request.user.dark_theme = serializer.validated_data['theme']
-            request.user.save()
-            return Response({'status': 'SUCCESS'})
-
-        else:
-            logging.debug(serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def form_valid(self, form):
+        logging.debug(form.cleaned_data)
+        self.request.user.dark_theme = form.cleaned_data.get('theme', 'light') == 'dark'
+        self.request.user.save()
+        return super().form_valid(form)
