@@ -72,6 +72,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = get_secret("CSRF_TRUSTED_ORIGINS")
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 DATABASES = {
