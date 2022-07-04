@@ -32,13 +32,16 @@ class ReportForm(forms.Form):
 
     def get_results(self):
         queryset = PaymentLog.objects.filter(checkout_created_time__gte=self.beginning_date)
-        queryset = queryset.filter(checkout_created_time__lte=self.end_date)
+        queryset = queryset.filter(checkout_created_time__lte=self.end_date).exclude(source_type='comped')
         self.result = []
         for category in self.categories:
             d = {'name': category}
             q = queryset.filter(category=category)
             transactions = q.filter(status='COMPLETED')
-            d['transaction_sum'] = self.get_sum(transactions)
+            d['donation_sum'] = self.get_sum(transactions, 'donation')
+            d['donation_count'] = transactions.filter(donation__gt=0).count()
+            d['total_sum'] = self.get_sum(transactions)
+            d['transaction_sum'] = d['total_sum'] - d['donation_sum']
             d['transaction_count'] = transactions.count()
             refunds = q.filter(status='refund')
             d['refund_sum'] = self.get_sum(refunds)
@@ -46,15 +49,18 @@ class ReportForm(forms.Form):
             self.result.append(d)
         d = {'name': 'total'}
         transactions = queryset.filter(status='COMPLETED')
-        d['transaction_sum'] = self.get_sum(transactions)
+        d['donation_sum'] = self.get_sum(transactions, 'donation')
+        d['donation_count'] = transactions.filter(donation__gt=0).count()
+        d['total_sum'] = self.get_sum(transactions)
+        d['transaction_sum'] = d['total_sum'] - d['donation_sum']
         d['transaction_count'] = transactions.count()
         refunds = queryset.filter(status='refund')
         d['refund_sum'] = self.get_sum(refunds)
         d['refund_count'] = refunds.count()
         self.result.append(d)
 
-    def get_sum(self, queryset):
-        query_sum = queryset.aggregate(sum=Sum('total_money'))['sum']
+    def get_sum(self, queryset, column='total_money'):
+        query_sum = queryset.aggregate(sum=Sum(column))['sum']
         if query_sum is None:
             query_sum = 0
         else:

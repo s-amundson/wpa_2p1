@@ -39,7 +39,7 @@ class PaymentHelper(SquareHelper):
                 category=category,
                 checkout_created_time=response['created_at'],
                 description=note[:250],  # database set to 255 characters
-                donation=donation,
+                donation=donation * 100,  # storing pennies in the database
                 idempotency_key=idempotency_key,
                 location_id=response['location_id'],
                 order_id=response['order_id'],
