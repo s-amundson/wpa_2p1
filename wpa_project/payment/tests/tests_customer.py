@@ -46,7 +46,7 @@ class TestsCustomer(TestCase):
         response = self.client.post(self.url, self.pay_dict, secure=True)
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
-        self.assertEqual(pl[0].donation, 5)
+        self.assertEqual(pl[0].donation, 500)
         self.assertRedirects(response, reverse('registration:index'))
 
     def test_payment_success_save_card(self):
