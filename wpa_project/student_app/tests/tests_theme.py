@@ -20,7 +20,7 @@ class TestsTheme(TestCase):
     def test_get_theme(self):
         # Get the page, if not super or board, page is forbidden
         response = self.client.get(reverse('registration:theme'), secure=True)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
 
     def test_post_good(self):
         response = self.client.post(reverse('registration:theme'), {'theme': 'dark', }, secure=True)

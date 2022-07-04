@@ -71,7 +71,7 @@ function alert_notice(title, message) {
 function load_student_family_form(family_id) {
     console.log(family_id)
     $("#student-family-address").hide();
-    let url_string = url_student_register
+    let url_string = url_student_family_api
     if (family_id != "") { // if empty new family so load empty form
         url_string = url_string + family_id + "/";
     }

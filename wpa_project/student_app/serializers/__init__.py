@@ -1,2 +1,0 @@
-from .student_family_serializers import StudentFamilySerializer
-from .student_serializers import StudentSerializer

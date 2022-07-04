@@ -25,7 +25,7 @@ class AddStudentView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         logging.debug(form.cleaned_data)
         if self.request.user.is_board:
-            form.save()
+            f = form.save()
         else:
             f = form.save(commit=False)
             if self.student:
@@ -43,7 +43,7 @@ class AddStudentView(LoginRequiredMixin, FormView):
                     logging.debug('invite')
                     EmailMessage().invite_user_email(self.request.user.student_set.first(), f)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
-            return JsonResponse({'id': 1, 'first_name': form.cleaned_data['first_name'],
+            return JsonResponse({'id': f.id, 'first_name': form.cleaned_data['first_name'],
                                  'last_name': form.cleaned_data['last_name']})
         return super().form_valid(form)
 
