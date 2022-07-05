@@ -22,13 +22,13 @@ class TestsLevel(TestCase):
         self.test_user = self.User.objects.get(pk=2)
         self.client.force_login(self.test_user)
 
-    def test_level_api(self):
-        # Get the page, if not super or board, page is forbidden
-        self.client.force_login(self.test_user)
-        response = self.client.get(reverse('membership:level_api'), secure=True)
-        content = json.loads(response.content)
-        # messages = list(response.context['messages'])
-        self.assertEqual(response.status_code, 200)
+    # def test_level_api(self):
+    #     # Get the page, if not super or board, page is forbidden
+    #     self.client.force_login(self.test_user)
+    #     response = self.client.get(reverse('membership:level_api'), secure=True)
+    #     content = json.loads(response.content)
+    #     # messages = list(response.context['messages'])
+    #     self.assertEqual(response.status_code, 200)
 
     def test_level_get(self):
         # Get the page, if not super or board, page is forbidden

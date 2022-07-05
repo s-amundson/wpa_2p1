@@ -31,14 +31,15 @@ async function add_student_function(student_id) {
         let data = await $.post(url_string, student_info, function(data, status){
                 return data;
                 }, "json");
-        $("#student_add_div").hide();
 
         if ('error' in data) {
             Object.entries(data["error"]).forEach(([key, value]) => {
-               alert(value[0])
+               alert(value[0]);
             });
+            return false;
         }
         else {
+            $("#student_add_div").hide();
             if ($("#this-student").val() == 'None') {
                 $("#btn-address-edit").prop('disabled', false);
                 $("#this-student").val(data.id)
@@ -58,6 +59,7 @@ async function add_student_function(student_id) {
                 load_student_table();
             } catch (e) {
             }
+            return true;
         }
     }
 }
@@ -109,10 +111,11 @@ function load_student_form(student_div, student_id) {
         }
         $("#student_form").submit(function(e){
             e.preventDefault();
-            add_student_function(student_id)
-            try {
-                load_student_table();
-            } catch (e) {
+            if(add_student_function(student_id)) {
+                try {
+                    load_student_table();
+                } catch (e) {
+                }
             }
         });
         $("#btn-student-form-close").click(function() {

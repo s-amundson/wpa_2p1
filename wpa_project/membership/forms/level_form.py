@@ -1,4 +1,3 @@
-from django.forms import ModelForm
 from src.model_form import MyModelForm
 from ..models import Level
 

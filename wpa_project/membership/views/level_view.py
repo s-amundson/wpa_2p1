@@ -9,16 +9,16 @@ from rest_framework.response import Response
 
 from ..forms import LevelForm
 from ..models import Level
-from ..serializers import LevelSerializer
+# from ..serializers import LevelSerializer
 
 logger = logging.getLogger(__name__)
 
 
-class LevelApiView(APIView):
-    def get(self, request):
-        levels = Level.objects.filter(enabled=True)
-        ls = LevelSerializer(levels, many=True)
-        return Response(ls.data)
+# class LevelApiView(APIView):
+#     def get(self, request):
+#         levels = Level.objects.filter(enabled=True)
+#         ls = LevelSerializer(levels, many=True)
+#         return Response(ls.data)
 
 
 class LevelView(LoginRequiredMixin, View):

@@ -20,6 +20,12 @@ class AddStudentView(LoginRequiredMixin, FormView):
 
     def form_invalid(self, form):
         logging.warning(form.errors)
+        if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
+            logging.debug('json error response')
+            d = {'error': {}}
+            for k,v in form.errors.items():
+                d['error'][k] = v
+            return JsonResponse(d)
         return super().form_invalid(form)
 
     def form_valid(self, form):
@@ -43,6 +49,7 @@ class AddStudentView(LoginRequiredMixin, FormView):
                     logging.debug('invite')
                     EmailMessage().invite_user_email(self.request.user.student_set.first(), f)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
+            logging.debug('json response')
             return JsonResponse({'id': f.id, 'first_name': form.cleaned_data['first_name'],
                                  'last_name': form.cleaned_data['last_name']})
         return super().form_valid(form)
