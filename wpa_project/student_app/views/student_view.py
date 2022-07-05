@@ -73,7 +73,6 @@ class AddStudentView(LoginRequiredMixin, FormView):
                 context['student']['this_user'] = (self.student.user == self.request.user)
             age = StudentHelper().calculate_age(self.student.dob)
             context['student']['joad_age'] = 8 < age < 21
-        logging.debug(context)
         return context
 
     def get_form_kwargs(self):
@@ -92,7 +91,6 @@ class AddStudentView(LoginRequiredMixin, FormView):
             s = Student.objects.filter(user=self.request.user)
             if s.count() == 0:
                 kwargs['initial'] = {'email': self.request.user.email}
-        logging.debug(kwargs)
         return kwargs
 
 
@@ -101,7 +99,6 @@ class StudentIsJoadView(UserPassesTestMixin, View):
         logging.debug(request.POST)
         student = Student.objects.get(pk=student_id)
         age = StudentHelper().calculate_age(student.dob)
-        logging.debug(age)
         if age < 9:
             return JsonResponse({'error': True, 'message': 'Student to young'})
         elif age > 20:

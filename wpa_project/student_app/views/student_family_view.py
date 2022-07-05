@@ -24,6 +24,13 @@ class StudentFamilyView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         logging.debug(form.cleaned_data)
         f = form.save()
+        s = self.request.user.student_set.last()
+        logging.debug(s.student_family)
+        if s.student_family is None:
+            logging.debug(f)
+            s.student_family = f
+            s.save()
+
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
             d = form.cleaned_data
             d['id'] = f.id
@@ -43,7 +50,7 @@ class StudentFamilyView(LoginRequiredMixin, FormView):
                 self.student_family = get_object_or_404(StudentFamily, pk=family_id)
             else:
                 self.student_family = get_object_or_404(Student, user=self.request.user).student_family
-                if self.student_family.id != family_id:
+                if self.student_family and self.student_family.id != family_id:
                     raise Http404("Authorization Error.")
         if self.student_family is not None:
             kwargs['instance'] = self.student_family

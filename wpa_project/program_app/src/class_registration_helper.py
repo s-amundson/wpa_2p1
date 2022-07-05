@@ -54,3 +54,18 @@ class ClassRegistrationHelper:
                 else:
                     returnee += 1
         return {'beginner': beginner, 'staff': staff_count, 'returnee': returnee}
+
+    def update_class_state(self, beginner_class):
+        records = ClassRegistration.objects.filter(beginner_class=beginner_class)
+        records = records.filter(pay_status__in=['paid', 'admin'])
+        if beginner_class.class_type == 'beginner' and len(records) >= beginner_class.beginner_limit:
+            beginner_class.class_state = 'full'
+            beginner_class.save()
+        elif beginner_class.class_type == 'returnee' and len(records) >= beginner_class.returnee_limit:
+            beginner_class.class_state = 'full'
+            beginner_class.save()
+        elif beginner_class.class_type == 'returnee' and \
+              len(records.filter(student__safety_class__isnull=True)) >= beginner_class.beginner_limit and \
+              len(records.filter(student__safety_class__isnull=False)) >= beginner_class.returnee_limit:
+            beginner_class.class_state = 'full'
+            beginner_class.save()

@@ -39,6 +39,7 @@ async function add_student_function(student_id) {
             return false;
         }
         else {
+            $("#student_form").hide();
             $("#student_add_div").hide();
             if ($("#this-student").val() == 'None') {
                 $("#btn-address-edit").prop('disabled', false);
