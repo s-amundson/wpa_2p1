@@ -89,7 +89,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
                     if reg.idempotency_key not in ik_list:
                         ik_list.append(reg.idempotency_key)
                         qty = len(cr.filter(idempotency_key=reg.idempotency_key).filter(pay_status='paid'))
-                        square_response = refund.refund_with_idempotency_key(reg.idempotency_key, qty * bc.cost)
+                        square_response = refund.refund_with_idempotency_key(reg.idempotency_key, qty * bc.cost * 100)
                         if square_response['status'] == 'error':
                             if square_response['error'] != 'Previously refunded':  # pragma: no cover
                                 cancel_error = True

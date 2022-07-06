@@ -44,8 +44,6 @@ class RefundHelper(SquareHelper):
             refunded_amount = 0
             for r in rl:
                 refunded_amount += r.amount
-            # logging.debug(refunded_amount)
-            # logging.debug(log.total_money)
             if log.total_money <= refunded_amount:  # check if only partial refund was applied
                 return {'status': 'error', 'error': 'Previously refunded'}
         result = self.client.refunds.refund_payment(

@@ -86,7 +86,8 @@ class UnregisterView(LoginRequiredMixin, APIView):
             if not donation:
                 for ik in self.ik_list:
 
-                    square_response = self.refund.refund_with_idempotency_key(ik.idempotency_key, ik.amount * ik.count)
+                    square_response = self.refund.refund_with_idempotency_key(ik.idempotency_key,
+                                                                              ik.amount * 100 * ik.count)
                     if square_response['status'] == 'error':  # pragma: no cover
                         logging.error(square_response)
                         if type(square_response['error']) == str:
