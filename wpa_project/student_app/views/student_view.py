@@ -34,18 +34,27 @@ class AddStudentView(LoginRequiredMixin, FormView):
             f = form.save()
         else:
             f = form.save(commit=False)
+            logging.debug(self.student)
             if self.student:
-                sf = Student.objects.get(user=self.request.user).student_family
-                logging.debug(sf.id)
-                f.student_family = sf
-                self.request.session['student_family'] = sf.id
+                logging.debug('is student')
+                s = self.request.user.student_set.last()
+                if s is not None:
+                    logging.debug(s.student_family.id)
+                    f.student_family = s.student_family
+                    self.request.session['student_family'] = s.student_family.id
             else:
+                logging.debug('here')
                 if self.request.user.student_set.first() is None:
+                    logging.debug('user is student')
                     f.user = self.request.user
+                s = self.request.user.student_set.last()
+                if s is not None:
+                    logging.debug(s.student_family.id)
+                    f.student_family = s.student_family
             f.save()
 
             if f.user is None:
-                if f.email != self.request.user.email:
+                if f.email is not None and f.email != self.request.user.email:
                     logging.debug('invite')
                     EmailMessage().invite_user_email(self.request.user.student_set.first(), f)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:

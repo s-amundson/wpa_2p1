@@ -58,14 +58,32 @@ class ClassRegistrationHelper:
     def update_class_state(self, beginner_class):
         records = ClassRegistration.objects.filter(beginner_class=beginner_class)
         records = records.filter(pay_status__in=['paid', 'admin'])
-        if beginner_class.class_type == 'beginner' and len(records) >= beginner_class.beginner_limit:
-            beginner_class.class_state = 'full'
-            beginner_class.save()
-        elif beginner_class.class_type == 'returnee' and len(records) >= beginner_class.returnee_limit:
-            beginner_class.class_state = 'full'
-            beginner_class.save()
-        elif beginner_class.class_type == 'returnee' and \
-              len(records.filter(student__safety_class__isnull=True)) >= beginner_class.beginner_limit and \
-              len(records.filter(student__safety_class__isnull=False)) >= beginner_class.returnee_limit:
-            beginner_class.class_state = 'full'
-            beginner_class.save()
+        logging.debug(len(records))
+        logging.debug(beginner_class.beginner_limit)
+        if beginner_class.class_type == 'beginner' and beginner_class.state in ['open', 'full']:
+            if len(records) >= beginner_class.beginner_limit and beginner_class.state == 'open':
+                beginner_class.state = 'full'
+                beginner_class.save()
+            elif len(records) < beginner_class.beginner_limit and beginner_class.state == 'full':
+                logging.debug('open')
+                beginner_class.state = 'open'
+                beginner_class.save()
+        elif beginner_class.class_type == 'returnee' and beginner_class.state in ['open', 'full']:
+            if len(records) >= beginner_class.returnee_limit and beginner_class.state == 'open':
+                beginner_class.state = 'full'
+                beginner_class.save()
+            elif len(records) < beginner_class.returnee_limit and beginner_class.state == 'full':
+                logging.debug('open')
+                beginner_class.state = 'open'
+                beginner_class.save()
+        elif beginner_class.class_type == 'returnee' and beginner_class.state in ['open', 'full']:
+            if len(records.filter(student__safety_class__isnull=True)) >= beginner_class.beginner_limit and \
+                    len(records.filter(student__safety_class__isnull=False)) >= beginner_class.returnee_limit and \
+                    beginner_class.state == 'open':
+                beginner_class.state = 'full'
+                beginner_class.save()
+            elif len(records.filter(student__safety_class__isnull=True)) < beginner_class.beginner_limit and \
+                    len(records.filter(student__safety_class__isnull=False)) < beginner_class.returnee_limit and \
+                    beginner_class.state == 'full':
+                beginner_class.state = 'open'
+                beginner_class.save()
