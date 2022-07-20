@@ -8,10 +8,10 @@ from django.utils import timezone
 from django.contrib import messages
 from django.forms import model_to_dict
 
-from ..forms import BeginnerClassForm
+from ..forms import BeginnerClassForm, SendClassEmailForm
 from ..models import BeginnerClass, ClassRegistration
 from ..src import ClassRegistrationHelper
-from payment.src import SquareHelper, EmailMessage
+from payment.src import EmailMessage, RefundHelper
 from payment.models import CostsModel
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,11 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
     form_class = BeginnerClassForm
     success_url = reverse_lazy('programs:class_list')
     beginner_class = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['email_form'] = SendClassEmailForm(beginner_class=self.beginner_class)
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -72,7 +77,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
             bc.save()
         if bc.state == 'canceled':
             ec = ClassRegistrationHelper().enrolled_count(bc)
-            square_helper = SquareHelper()
+            refund = RefundHelper()
             email_message = EmailMessage()
             # need to refund students if any
             # logging.debug(f'beginners: {ec["beginner"]}, returnees: {ec["returnee"]}')
@@ -83,8 +88,8 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
                 for reg in cr:
                     if reg.idempotency_key not in ik_list:
                         ik_list.append(reg.idempotency_key)
-                        qty = len(cr.filter(idempotency_key=reg.idempotency_key))
-                        square_response = square_helper.refund_payment(reg.idempotency_key, qty * bc.cost)
+                        qty = len(cr.filter(idempotency_key=reg.idempotency_key).filter(pay_status='paid'))
+                        square_response = refund.refund_with_idempotency_key(reg.idempotency_key, qty * bc.cost * 100)
                         if square_response['status'] == 'error':
                             if square_response['error'] != 'Previously refunded':  # pragma: no cover
                                 cancel_error = True

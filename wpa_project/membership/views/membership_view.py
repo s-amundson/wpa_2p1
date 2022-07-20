@@ -9,25 +9,23 @@ from django.utils.datetime_safe import date
 from django.contrib import messages
 from ..forms import MembershipForm
 from ..models import Level
-from payment.src import SquareHelper
 from student_app.models import Student, StudentFamily
 
 logger = logging.getLogger(__name__)
 
 
 class MembershipView(LoginRequiredMixin, View):
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.table = LevelModel.objects.all()
-
     def get(self, request, sf_id=None):
-        template = 'membership/construction_membership.html'
+        template = 'membership/membership.html'
         if request.user.is_board:
             template = 'membership/membership.html'
         if sf_id is not None and request.user.is_board:
             sf = StudentFamily.objects.get(pk=sf_id)
         else:
-            sf = Student.objects.get(user=request.user).student_family
+            student = Student.objects.filter(user=request.user).last()
+            if student is None:
+                return HttpResponseRedirect(reverse('registration:profile'))
+            sf = student.student_family
         forms = []
         forms.append(MembershipForm(students=sf.student_set.all()))
         levels = Level.objects.filter(enabled=True)
@@ -60,7 +58,7 @@ class MembershipView(LoginRequiredMixin, View):
                     messages.add_message(request, messages.ERROR, 'incorrect membership selected')
                 else:
                     self.transact(form, request, members, cost)
-                    return HttpResponseRedirect(reverse('payment:process_payment'))
+                    return HttpResponseRedirect(reverse('payment:make_payment'))
 
             else:
                 max_age = 999
@@ -82,7 +80,7 @@ class MembershipView(LoginRequiredMixin, View):
                     messages.add_message(request, messages.ERROR, 'incorrect membership selected')
                 else:
                     self.transact(form, request, members, level.cost)
-                    return HttpResponseRedirect(reverse('payment:process_payment'))
+                    return HttpResponseRedirect(reverse('payment:make_payment'))
 
         else:  # pragma: no cover
             logging.debug(form.errors)
@@ -100,6 +98,8 @@ class MembershipView(LoginRequiredMixin, View):
             membership.students.add(m)
 
         request.session['idempotency_key'] = uid
-        request.session['line_items'] = [SquareHelper().line_item(f"{membership.level.name} Membership", 1, cost)]
-        request.session['payment_db'] = ['membership', 'Membership']
+        request.session['line_items'] = [{'name': f'{membership.level.name} Membership',
+                                          'quantity': 1, 'amount_each': cost}]
+        request.session['payment_category'] = 'membership'
+        request.session['payment_description'] = f'{membership.level.name} Membership'
         membership.save()

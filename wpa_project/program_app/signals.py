@@ -10,10 +10,9 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=PaymentLog)
 def registration_update(sender, instance, created, **kwargs):
-    if instance.db_model == 'ClassRegistration':
-        cr = ClassRegistration.objects.filter(idempotency_key=instance.idempotency_key)
-        logging.debug(instance.status)
-        if instance.status in ["SUCCESS", "COMPLETED"]:
-            for c in cr:
-                c.pay_status = 'paid'
-                c.save()
+    cr = ClassRegistration.objects.filter(idempotency_key=instance.idempotency_key)
+    logging.debug(instance.status)
+    if instance.status in ["SUCCESS", "COMPLETED"]:
+        for c in cr:
+            c.pay_status = 'paid'
+            c.save()

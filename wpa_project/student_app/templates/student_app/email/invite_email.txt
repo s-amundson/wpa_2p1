@@ -1,6 +1,7 @@
 Hi {{ add_name }},
 
 {{ send_name }} has added you to their account and has invited you to join Woodly Park Archers and access the account.
+You can register by going to https://registration/woodleyparkarchers.org/
 
 
 http://woodleyparkarchers.org/">WoodleyParkArchers.org

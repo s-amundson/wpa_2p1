@@ -37,9 +37,7 @@ class TestsSignal(TestCase):
         cr.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
-                                        db_model='ClassRegistration',
                                         description="square_response",
                                         location_id='location_id',
                                         idempotency_key=uid,
@@ -56,8 +54,7 @@ class TestsSignal(TestCase):
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].pay_status, "paid")
 
-    def test_membership_signal_different_db(self):
-        # sf = self.test_user.studentfamily_set.all()
+    def test_membership_signal_different_uuid(self):
         uid = uuid.uuid4()
         cr = ClassRegistration.objects.create(
             beginner_class=BeginnerClass.objects.get(pk=1),
@@ -69,12 +66,10 @@ class TestsSignal(TestCase):
         cr.save()
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
-                                        db_model='Test',
                                         description="square_response",
                                         location_id='location_id',
-                                        idempotency_key=uid,
+                                        idempotency_key=uuid.uuid4(),
                                         order_id='order_id',
                                         payment_id='id',
                                         receipt='receipt_url',

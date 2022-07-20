@@ -2,10 +2,10 @@ from django.urls import path
 from .views import *
 app_name = 'payment'
 urlpatterns = [
-    path('costs/<int:cost_id>/', CostsView.as_view(), name='costs'),
-    path('costs/', CostsView.as_view(), name='costs'),
-    path('donation/', DonationView.as_view(), name='donation'),
-    path('payment/', PaymentView.as_view(), name='payment'),
-    path('process_payment/', ProcessPaymentView.as_view(), name='process_payment'),
-    path('process_payment/<str:message>/', ProcessPaymentView.as_view(), name='process_payment'),
+    path('card_manage/', CardManageView.as_view(), name='card_manage'),
+    path('card_remove/', CardRemoveView.as_view(), name='card_remove'),
+    path('card_remove/<int:card_id>/', CardRemoveView.as_view(), name='card_remove'),
+    path('make_payment/', CreatePaymentView.as_view(), name='make_payment'),
+    path('report', ReportView.as_view(), name='report'),
+    path('view_payment/<pk>/', PaymentView.as_view(), name='view_payment'),
 ]

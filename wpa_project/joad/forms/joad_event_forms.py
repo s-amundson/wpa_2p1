@@ -46,9 +46,6 @@ class EventRegistrationForm(MyModelForm):
             if field_name.startswith('student_'):
                 yield self[field_name]
 
-    # def save(self, commit=True):
-    #     logging.debug('save')
-
 
 class JoadEventForm(MyModelForm):
 
@@ -72,5 +69,3 @@ class JoadEventForm(MyModelForm):
         d = UpdatePrograms().next_class_day(1) + timedelta(days=14)
         d = timezone.datetime.now().replace(year=d.year, month=d.month, day=d.day, hour=16, minute=0, second=0)
         self.fields['event_date'].initial = d
-
-

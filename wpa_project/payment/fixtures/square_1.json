@@ -1,0 +1,21 @@
+[
+  {"model": "payment.customer", "pk": 1, "fields": {"user": 1, "customer_id": "9Z9Q0D09F0WMV0FHFA2QMZH8SC", "created_at": "2022-05-30T19:50:46Z",
+    "creation_source": "THIRD_PARTY", "updated_at": "2022-05-30T19:50:46Z"}},
+  {"model": "payment.card", "pk": 1, "fields": {
+        "bin": 411111,
+        "card_brand": "VISA",
+        "card_id": "ccof:8sLQqf1boPfmwDKI4GB",
+        "card_type": "CREDIT",
+        "cardholder_name": "",
+        "customer": 1,
+        "enabled": 0,
+        "exp_month": 11,
+        "exp_year": 2022,
+        "fingerprint": "sq-1-npXvWJT5AhTtISQwBYohbA8kkQ24CyPCN6G6kP_6Bm_K2KPYsT1y_1xKUhvAnMIzfA",
+        "id": 1,
+        "last_4": 1111,
+        "merchant_id": "TYXMY2T8CN2PK",
+        "prepaid_type": "NOT_PREPAID",
+        "version": 0}
+  }
+]

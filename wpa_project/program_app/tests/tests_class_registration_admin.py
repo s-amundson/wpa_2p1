@@ -159,5 +159,4 @@ class TestsClassAdminRegistration(TestCase):
         for c in cr:
             self.assertEqual(c.pay_status, 'start')
         self.assertEqual(len(self.client.session['line_items']), 2)
-        self.assertEqual(self.client.session['payment_db'][1], 'ClassRegistration')
-        self.assertRedirects(response, reverse('payment:process_payment'))
+        self.assertRedirects(response, reverse('payment:make_payment'))

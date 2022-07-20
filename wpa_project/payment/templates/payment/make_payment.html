@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block script %}
+    {% load static %}
+    <!-- link to the SqPaymentForm library -->
+    <script type="text/javascript" src="{{ pay_url }}"></script>
+
+    <script type="application/javascript">
+        window.applicationId = '{{ app_id }}';
+        window.locationId = '{{ location_id }}';
+        window.action_url = '{{ action_url }}';
+        const cost_no_donation = {{ form.amount.initial }};
+        const url_remove_card = '{{ url_remove_card }}';
+        const user_auth = {{ user.is_authenticated|lower }};
+    </script>
+
+    <!-- link to the local SqPaymentForm initialization -->
+    <script src="{% static 'js/payment.js' %}"></script>
+
+    <!-- link to the custom styles for SqPaymentForm -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/sq-payment-form.css' %}">
+{% endblock %}
+
+{% block title %} Payment {% endblock %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="col-4 text-center">
+            <h2>
+                {% if form.line_items %} Payment {% else %} Donation {% endif %}
+            </h2>
+        </div>
+    </div>
+    {% if not form.line_items %}
+      <div class="p-1"> This is a donation only and will not register you for any classes.</div>
+    {% endif %}
+    <div class="row">
+      <form class="form m-2" id="payment-form" method="post">
+          {% csrf_token %}
+          {{ form.source_id }}
+          {{ form.items }}
+          {{ form.category }}
+
+          {% for error in form.payment_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+          <table class="col table table-bordered
+                {% if user.dark_theme %}
+                    text-white
+                {% else %}
+                    text-dark
+                {% endif %}">
+            <thead>
+                <tr>
+                  <th> Item </th>
+                  <th> Quanity </th>
+                  <th> Amount each </th>
+                  <th> Amount </th>
+                </tr>
+            </thead>
+            <tbody id="class-list-body">
+                {% for item in form.line_items %}
+                  <tr>
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>${{ item.amount_each }}</td>
+                      <td>${{ item.total }}</td>
+                  </tr>
+                {% endfor %}
+                <tr>
+                    <td>Donation</td>
+                    <td colspan="2">
+                        {{ form.donation_note }}
+                    </td>
+                    <td>{{ form.donation }}</td>
+                </tr>
+                <tr>
+                    <td>Total</td>
+                    <td></td>
+                    <td></td>
+                    <td id="total-div">
+                        <div class="d-flex d-flex-row">
+                            <div>{{ form.amount }}</div>
+<!--                            <div> USD </div>-->
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+          </table>
+
+          <div class="row p-3">
+            Payments are processed with Square.
+          </div>
+
+          <div class="d-flex flex-row p-3">
+              <div class="pt-2">{{ form.card }}</div>
+              <div><button class="btn btn-danger m-2" id="card-remove-button" type="button"> Remove Card </button></div>
+          </div>
+
+          <div id="card-container"></div>
+          <div class="form-check">
+              {{ form.save_card }} <span class="form-check-label">{{ form.save_card.label }}</span>
+          </div>
+          <button class="btn btn-primary m-2" id="card-button" type="button"> Pay Now </button>
+      </form>
+
+    </div>
+{% endblock %}
+
+{% block right %}
+  <div id="login-div"></div>
+{% endblock %}

@@ -1,6 +1,7 @@
 from src import MyModelForm
-from django.forms import BooleanField
-from django.forms.widgets import CheckboxInput
+from django.forms.widgets import CheckboxInput, SelectDateWidget
+from django.utils.datetime_safe import date
+
 from ..models import User
 import logging
 logger = logging.getLogger(__name__)
@@ -24,3 +25,6 @@ class UserForm(MyModelForm):
             self.fields[f].required = False
 
         self.fields['is_member'].widget.attrs.update({'disabled': 'disabled'})
+        self.fields['instructor_expire_date'].widget = SelectDateWidget(
+            years=range(date.today().year, date.today().year + 3, 1))
+        # self.fields['instructor_expire_date'].widget.attrs.update({'class': 'form-control'})

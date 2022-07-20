@@ -32,8 +32,6 @@ $(document).ready(function() {
         load_student_family_form($(this).attr("family_id"));
     });
 
-    $("#theme-submit").click(theme_function);
-
     $("#instructor-form-div").hide();
     $("#btn-instructor").click(function(e) {
         e.preventDefault();
@@ -79,21 +77,21 @@ function load_student_table() {
     });
 }
 
-async function theme_function(e) {
-    e.preventDefault();
-    console.log('theme update')
-    console.log($("#id_theme_1").prop('checked'))
-    let data = await $.post(url_theme, {
-                csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
-                theme: $("#id_theme_1").prop('checked')});
-    if ($("#id_theme_1").prop('checked')) {
-        $("#block-main").attr("class", "col-md bg-dark text-white")
-    }
-    else{
-        $("#block-main").attr("class", "col-md bg-light text-dark")
-    }
+//async function theme_function(e) {
+//    e.preventDefault();
+//    console.log('theme update')
+//    console.log($("#id_theme_1").prop('checked'))
+//    let data = await $.post(url_theme, {
+//                csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
+//                theme: $("#id_theme_1").prop('checked')});
+//    if ($("#id_theme_1").prop('checked')) {
+//        $("#block-main").attr("class", "col-md bg-dark text-white")
+//    }
+//    else{
+//        $("#block-main").attr("class", "col-md bg-light text-dark")
+//    }
 
-}
+//}
 
 async function update_instructor() {
     console.log('update instructor');

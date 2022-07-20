@@ -85,7 +85,7 @@ class TestsBeginnerClass(TestCase):
         logging.debug(bc.class_date)
         # New class same day
         response = self.client.post(reverse('programs:beginner_class'),
-                        {'class_date': '2022-06-05 09:00', 'class_type': 'combined', 'beginner_limit': 5,
+                        {'class_date': '2023-06-05 09:00', 'class_type': 'combined', 'beginner_limit': 5,
                          'returnee_limit': 5, 'instructor_limit': 5, 'state': 'scheduled', 'cost': 5}, secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_list.html')
@@ -128,8 +128,9 @@ class TestsBeginnerClass(TestCase):
         self.assertEqual(len(cr), 2)
 
         # process a good payment
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
+        pay_dict = {'amount': 10, 'card': 0, 'category': 'intro', 'donation': 0, 'save_card': False,
+                    'source_id': 'cnon:card-nonce-ok'}
+        response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
 
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
@@ -147,8 +148,8 @@ class TestsBeginnerClass(TestCase):
         self.assertEqual(len(cr), 3)
 
         # process a good payment
-        response = self.client.post(reverse('programs:class_payment'),
-                                    {'sq_token': 'cnon:card-nonce-ok'}, secure=True)
+        pay_dict['amount'] = 5
+        response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
 
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)

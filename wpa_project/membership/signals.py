@@ -24,10 +24,9 @@ def add_years(d, years):
 
 @receiver(post_save, sender=PaymentLog)
 def member_update(sender, instance, created, **kwargs):
-    if instance.db_model == 'Membership':
-        membership = Membership.objects.get(idempotency_key=instance.idempotency_key)
-        logging.debug(instance.status)
-        if instance.status in ["SUCCESS", 'COMPLETED']:
+    memberships = Membership.objects.filter(idempotency_key=instance.idempotency_key)
+    if instance.status in ["SUCCESS", 'COMPLETED']:
+        for membership in memberships:
             membership.pay_status = 'paid'
             for student in membership.students.all():
                 member, created = Member.objects.update_or_create(student=student)
@@ -47,9 +46,8 @@ def member_update(sender, instance, created, **kwargs):
                 if student.user is not None:
                     student.user.is_member = True
                     student.user.save()
-        else:
-            membership.pay_status = 'error'
-
-    if created:
-        pass
-    #     MembershipModel.objects.create(user=instance)
+            membership.save()
+    #
+    # if created:
+    #     pass
+    # #     MembershipModel.objects.create(user=instance)

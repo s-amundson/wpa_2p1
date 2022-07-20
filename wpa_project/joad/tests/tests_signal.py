@@ -32,9 +32,9 @@ class TestsSignal(TestCase):
                                                  idempotency_key=uid)
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=Student.objects.get(user=self.test_user).student_family,
+                                        # student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
-                                        db_model='EventRegistration',
+                                        # db_model='EventRegistration',
                                         description="square_response",
                                         location_id='location_id',
                                         idempotency_key=uid,
@@ -60,9 +60,9 @@ class TestsSignal(TestCase):
                                             idempotency_key=uid)
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=Student.objects.get(user=self.test_user).student_family,
+                                        # student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
-                                        db_model='Registration',
+                                        # db_model='Registration',
                                         description="square_response",
                                         location_id='location_id',
                                         idempotency_key=uid,
@@ -88,9 +88,9 @@ class TestsSignal(TestCase):
                                           idempotency_key=uid)
 
         log = PaymentLog.objects.create(user=self.test_user,
-                                        student_family=Student.objects.get(user=self.test_user).student_family,
+                                        # student_family=Student.objects.get(user=self.test_user).student_family,
                                         checkout_created_time=timezone.now(),
-                                        db_model='PinAttendance',
+                                        # db_model='PinAttendance',
                                         description="square_response",
                                         location_id='location_id',
                                         idempotency_key=uid,

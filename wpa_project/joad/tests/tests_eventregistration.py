@@ -63,8 +63,9 @@ class TestsJoadEventRegistration(TestCase):
         reg = EventRegistration.objects.all()
         self.assertEqual(len(reg), 2)
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Joad event on 2022-02-16 student id: 5')
-        self.assertEqual(self.client.session['payment_db'][1], 'EventRegistration')
+                         'Joad event on 2022-02-16 student: Gary')
+        self.assertEqual(self.client.session['payment_category'], 'joad')
+        self.assertEqual(self.client.session['payment_description'], 'Joad event on 2022-02-16')
 
     def test_student_post_old(self):
         self.test_user = User.objects.get(pk=3)

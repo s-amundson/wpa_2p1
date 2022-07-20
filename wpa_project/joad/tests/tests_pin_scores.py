@@ -18,7 +18,7 @@ class TestsPinScores(TestCase):
         self.client = Client()
         self.post_dict = {'bow': 'barebow', 'category': 'joad_indoor', 'distance': 9, 'target': 60, 'score': 45,
                           'stars': 1}
-        self.pin_score_count = 54
+        self.pin_score_count = 52
         # self.test_user = User.objects.get(pk=1)
         # self.client.force_login(self.test_user)
 

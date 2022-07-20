@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Payment
+{% endblock %}
+
+{% block main %}
+    <h3>Payment{% if object.status == 'COMPLETED' %} Successful{% endif %}</h3>
+    <p>Status: {{ object.status|lower|capfirst }}</p>
+    <p>Description: {{ object.description }}</p>
+    {% if object.reciept %}
+        <p>Reciept: <a href="{{object.receipt }}">{{ object.receipt }}</a></p>
+    {% endif %}
+{% endblock %}

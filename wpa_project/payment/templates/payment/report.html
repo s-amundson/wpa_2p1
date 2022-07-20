@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %} Payment Report {% endblock %}
+
+{% block main %}
+    <form class="m-2" method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary m-2" type="submit" name="button">Update</button>
+    </form>
+    <div class="m-2">
+        <p> Above dates are inclusive. </p>
+    </div>
+
+    <table class="table table-bordered m-2
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <tr>
+                <th class="text-center" rowspan="2"> Category </th>
+                <th class="text-center" colspan="2"> Payments </th>
+                <th class="text-center" colspan="2"> Donations </th>
+                <th class="text-center"> Total </th>
+            </tr>
+            <tr>
+                <th class="text-center"> Count </th>
+                <th class="text-center"> Sum </th>
+                <th class="text-center"> Count </th>
+                <th class="text-center"> Sum </th>
+                <th class="text-center"> Sum </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in form.result %}
+                <tr>
+                    <td class="text-center">{{ category.name|capfirst }}</td>
+                    <td class="text-end">{{ category.transaction_count }}</td>
+                    <td class="text-end">{{ category.transaction_sum|floatformat:"2g" }}</td>
+                    <td class="text-end">{{ category.donation_count }}</td>
+                    <td class="text-end">{{ category.donation_sum|floatformat:"2g" }}</td>
+                    <td class="text-end">{{ category.total_sum|floatformat:"2g" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="m-2">
+        <p> Refund values are not calculated in with the payment values. </p>
+    </div>
+
+    <table class="table table-bordered m-2
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <tr>
+                <th class="text-center" rowspan="2"> Category </th>
+                <th class="text-center" colspan="2"> Refunds </th>
+            </tr>
+            <tr>
+                <th class="text-center"> Count </th>
+                <th class="text-center"> Sum </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in form.result %}
+                <tr>
+                    <td class="text-center">{{ category.name|capfirst }}</td>
+                    <td class="text-end">{{ category.refund_count }}</td>
+                    <td class="text-end">{{ category.refund_sum|floatformat:"2g" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

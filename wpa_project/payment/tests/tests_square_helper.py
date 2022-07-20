@@ -8,88 +8,118 @@ from django.urls import reverse
 from django.apps import apps
 
 from student_app.models import Student
-from ..models import PaymentLog, RefundLog
-from ..src import SquareHelper
+from ..models import Card, Customer, PaymentLog, RefundLog
+from ..src import SquareHelper, CardHelper, CustomerHelper, PaymentHelper, RefundHelper
 
 logger = logging.getLogger(__name__)
 
 
 class TestsSquareHelper(TestCase):
-    fixtures = ['f1']
+    fixtures = ['f1', 'square_1']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.User = apps.get_model(app_label='student_app', model_name='User')
-
+#
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
         self.test_user = self.User.objects.get(pk=2)
         self.client.force_login(self.test_user)
-        session = self.client.session
-        session['idempotency_key'] = str(uuid.uuid4())
-        session['line_items'] = [{'name': 'Class on None student id: 1',
-                                  'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]
-        session.save()
+        self.customer = Customer.objects.get(pk=1)
+        # session = self.client.session
+        # session['idempotency_key'] = str(uuid.uuid4())
+        # session['line_items'] = [{'name': 'Class on None student id: 1',
+        #                           'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]
+        # session.save()
 
-    def test_refund_bypass(self):
-        response = self.client.post(reverse('payment:process_payment'),
-                                    {'bypass': ''}, secure=True)
-        self.assertTemplateUsed('student_app/message.html')
+    def test_payment_create_good(self):
+        payment = PaymentHelper(user=self.test_user)
+        payment_log = payment.create_payment(
+            amount=5,
+            category='donation',
+            donation=0,
+            idempotency_key=str(uuid.uuid4()),
+            note='test payment',
+            source_id='cnon:card-nonce-ok'
+        )
+        self.assertEqual(payment_log.status, 'COMPLETED')
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
-        logging.debug(pl[0].id)
 
-        sh = SquareHelper()
-        rp = sh.refund_payment(pl[0].idempotency_key, 500)
-        pl = PaymentLog.objects.get(pk=pl[0].id)
-        self.assertEqual(pl.status, 'refund')
-        self.assertEqual(rp, {'status': "SUCCESS", 'error': ''})
-        logging.debug(pl.total_money)
+    def test_payment_create_bad(self):
+        payment = PaymentHelper(user=self.test_user)
+        payment_log = payment.create_payment(
+            amount=5,
+            category='donation',
+            donation=0,
+            idempotency_key=str(uuid.uuid4()),
+            note='test payment',
+            source_id='cnon:card-nonce-rejected-cvv'
+        )
+        self.assertIsNone(payment_log)
+        self.assertIn('Payment Error: CVV', payment.errors)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 0)
 
-        rp = sh.refund_payment(pl.idempotency_key, 500)
-        logging.debug(rp)
-        # self.assertEqual(rp['error'][0]['code'], 'VALUE_EMPTY')
-        self.assertIsNone(rp['refund'])
+    def test_card_good(self):
+        payment = PaymentHelper(user=self.test_user)
+        payment_log = payment.create_payment(
+            amount=5,
+            category='donation',
+            donation=0,
+            idempotency_key=str(uuid.uuid4()),
+            note='test payment',
+            source_id='cnon:card-nonce-ok'
+        )
+        card_helper = CardHelper()
+        card = card_helper.create_card_from_payment(self.customer, payment_log)
+        cl = Card.objects.all()
+        self.assertEqual(len(cl), 2)
 
-        pl.total_money = 0
-        pl.save()
-        rp = sh.refund_payment(pl.idempotency_key, 500)
-        self.assertEqual(rp, {'status': 'error', 'error': 'Previously refunded'})
+        # Disable card
+        card = card_helper.disable_card()
+        self.assertIsNotNone(card)
+        self.assertFalse(card.enabled)
+        cl = Card.objects.all()
+        self.assertEqual(len(cl), 2)
 
-    def test_square_helper_refund_payment_error(self):
-        rp = SquareHelper().refund_payment(str(uuid.uuid4()), 1000)
-        self.assertEqual(rp, {'status': "FAIL"})
+    def test_card_retrieve_good(self):
+        # Retrieve the card
+        card_helper = CardHelper(Card.objects.get(pk=1))
+        card = card_helper.retrieve_card()
+        self.assertIsNotNone(card)
+        cl = Card.objects.all()
+        self.assertEqual(len(cl), 1)
 
-    def test_square_helper_refund_payment(self):
+    def test_card_retrieve_bad(self):
+        # change the value of the card id on file
+        c = Card.objects.get(pk=1)
+        c.card_id = 'ccof:uIbfJXhXETSP197M3GB'
+        c.save()
 
-        uid = str(uuid.uuid4())
-        sh = SquareHelper()
-        square_response = sh.process_payment(uid, 'cnon:card-nonce-ok', 'test payment', {'amount': 1000, 'currency': 'USD'})
-        logging.debug(square_response)
-        log = PaymentLog.objects.create(
-            user=self.test_user,
-            student_family=Student.objects.get(user=self.test_user).student_family,
-            checkout_created_time=datetime.strptime(square_response['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ'),
-            db_model='test',
-            description=square_response['note'],
-            location_id=square_response['location_id'],
-            idempotency_key=uid,
-            order_id=square_response['order_id'],
-            payment_id=square_response['id'],
-            receipt=square_response['receipt_url'],
-            source_type=square_response['source_type'],
-            status=square_response['status'],
-            total_money=square_response['approved_money']['amount'],
-            )
-        log.save()
-        self.assertEqual(PaymentLog.objects.count(), 1)
-        # give square some time to process the payment got bad requests without it.
-        time.sleep(5)
+        # Retrieve the card
+        card_helper = CardHelper(c)
+        card = card_helper.retrieve_card()
+        self.assertIsNone(card)
+        self.assertIn('Object not found', card_helper.errors)
+        cl = Card.objects.all()
+        self.assertEqual(len(cl), 1)
 
-        logging.debug(sh.refund_payment(uid, 5))
-        self.assertEqual(RefundLog.objects.count(), 1)
-        time.sleep(5)
+    def test_customer_good(self):
+        customer_helper = CustomerHelper(self.test_user)
+        customer = customer_helper.create_customer()
+        self.assertIsNotNone(customer)
+        cl = Customer.objects.all()
+        self.assertEqual(len(cl), 2)
 
-        logging.debug(sh.refund_payment(uid, 1))
-        self.assertEqual(RefundLog.objects.count(), 2)
+        # Retrieve Customer
+        customer2 = customer_helper.retrieve_customer()
+        self.assertIsNotNone(customer2)
+        cl = Customer.objects.all()
+        self.assertEqual(len(cl), 2)
+
+        # Delete Customer
+        deleted_customer = customer_helper.delete_customer()
+        self.assertTrue(deleted_customer)
+

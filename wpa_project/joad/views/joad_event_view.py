@@ -8,8 +8,6 @@ from django.forms import model_to_dict
 from ..forms import JoadEventForm, PinAttendanceStaffForm, PinAttendanceStudentForm
 from ..models import JoadEvent, PinAttendance
 from ..src import Choices
-from payment.models import CostsModel
-from payment.src import SquareHelper
 from student_app.models import Student
 
 import uuid
@@ -54,14 +52,14 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
                     pin_cost = 0
                 uid = str(uuid.uuid4())
                 self.request.session['idempotency_key'] = uid
-                self.request.session['line_items'] = []
-                self.request.session['payment_db'] = ['joad', 'PinAttendance']
-                # self.request.session['action_url'] = reverse('programs:class_payment')
                 record.idempotency_key = uid
                 record.pay_status = 'started'
-                self.request.session['line_items'].append(SquareHelper().line_item(
-                        f"Joad Pin(s) for {self.student.first_name}", pins_earned, pin_cost))
-                self.success_url = reverse('payment:process_payment')
+                self.request.session['line_items'] = self.request.session.get('line_items', [])
+                self.request.session['line_items'].append({'name': f"Joad Pin(s) for {self.student.first_name}",
+                                          'quantity': pins_earned, 'amount_each': pin_cost})
+                self.request.session['payment_category'] = 'joad'
+                self.request.session['payment_description'] = f'Joad Pin(s)'
+                self.success_url = reverse('payment:make_payment')
                 self.success_message = f'Congratulations on earning {pins_earned} pins'
 
         record.save()

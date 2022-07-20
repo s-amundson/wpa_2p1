@@ -1,89 +1,89 @@
+import uuid
+import json
+
+from django.conf import settings
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.urls import reverse_lazy
+from django.views.generic import FormView
+from django.views.generic.detail import DetailView
+
+from ..forms import PaymentForm
+from ..models import Card, PaymentLog
+
 import logging
-
-from django.http import JsonResponse
-from rest_framework.views import APIView
-from rest_framework import permissions
-from rest_framework.response import Response
-from ..serializers import PaymentSerializer
-from ..src import SquareHelper, EmailMessage
-
 logger = logging.getLogger(__name__)
 
 
-class PaymentView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+class CreatePaymentView(FormView):
+    """ Expects line_items and payment_description to be in session, defaults to making a donation if not present.
+        line_items = [{'name': <string>, 'quantity': <int>, 'amount_each': <int>}
+        description = <string> """
+    template_name = 'payment/make_payment.html'
+    form_class = PaymentForm
+    success_url = reverse_lazy('registration:index')
 
-    def __init__(self):
-        self.square_helper = SquareHelper()
+    def form_invalid(self, form):
+        logging.warning(form.errors)
+        return super().form_invalid(form)
 
-    def post(self, request, format=None):
-        response_dict = {'status': 'ERROR', 'receipt_url': '', 'error': '', 'continue': False}
-        serializer = PaymentSerializer(data=request.data)
-        logging.debug(request.data)
-        if serializer.is_valid():
-            idempotency_key = request.session.get('idempotency_key', None)
-            if idempotency_key is None:
-                logging.debug('missing idempotency_key.')
-                response_dict['error'] = 'payment processing error'
-                return Response(response_dict)
-            sq_token = serializer.data['sq_token']
-            line_items = request.session.get('line_items', None)
-            if line_items is None:
-                response_dict['error'] = 'missing line items.'
-                return Response(response_dict)
+    def form_valid(self, form):
+        if form.process_payment(self.request.session.get('idempotency_key', str(uuid.uuid4()))):
+            if self.request.user.is_authenticated:
+                self.success_url = reverse_lazy('payment:view_payment', args=[form.log.id])
 
-            # if user donated money add it to the line itmes.
-            donation = serializer.data.get('donation', None)
-            if donation is not None and donation > 0:
-                request.session['line_items'].append(self.square_helper.line_item('donation', 1, float(donation)))
-                self.square_helper.set_donation(donation, serializer.data.get('note', ''))
-
-            # get the amount form the line items and get line item name and add to notes
-            amt = 0
-            note = ""
-            for line in line_items:
-                amt += line['base_price_money']['amount'] * int(line['quantity'])
-                note += f" {line['name']},"
-
-            # Monetary amounts are specified in the smallest unit of the applicable currency.
-            amount = {'amount': amt, 'currency': 'USD'}
-            message = ""
-            if amt == 0:
-                square_response = self.square_helper.comp_response(note, amt)
-            elif sq_token == 'bypass' and request.user.is_board:
-                square_response = self.square_helper.comp_response(note, amt)
-            else:
-                square_response = self.square_helper.process_payment(idempotency_key, sq_token, note, amount)
-                if len(square_response['error']) > 0:
-                    for e in square_response['error']:
-                        if e['code'] == 'GENERIC_DECLINE':
-                            message += 'Card was declined, '
-                        elif e['code'] == 'CVV_FAILURE':
-                            message += 'Error with CVV, '
-                        elif e['code'] == 'INVALID_EXPIRATION':
-                            message += 'Invalid expiration date, '
-                        elif e['code'] == 'ADDRESS_VERIFICATION_FAILURE':  # pragma: no cover
-                            message += 'Invalid zip code, '
-                        else:  # pragma: no cover
-                            message += 'Other payment error'
-                    response_dict['error'] = message
-                    response_dict['continue'] = self.square_helper.payment_error(request, square_response['error'])
-                    return Response(response_dict)
-            # logging.debug(square_response)
-            self.square_helper.log_payment(request, square_response, create_date=None)
-            pay_dict = {'line_items': line_items, 'total': amt / 100,
-                        'receipt': square_response['receipt_url']}
-            EmailMessage().payment_email_user(request.user, pay_dict)
-            logging.debug(request.session['line_items'])
-            if square_response['status'] == 'COMPLETED':
-                # if payment is completed lets remove payment data from session
-                for key in ['line_items', 'idempotency_key', 'payment_db', 'payment']:
-                    if key in request.session:
-                        del request.session[key]
-            response_dict = {'status': square_response['status'], 'receipt_url': square_response['receipt_url'],
-                             'error': square_response['error'], 'continue': False}
-            return Response(response_dict)
+                for k in ['description', 'line_items', 'idempotency_key', 'payment_category']:
+                    if k in self.request.session:
+                        self.request.session.pop(k)
+            return super().form_valid(form)
         else:
-            logging.debug(serializer.errors)
-            response_dict['error'] = 'payment processing error'
-            return JsonResponse(response_dict)
+            logging.debug(form.errors)
+            # replace idempotency_key
+            self.request.session['idempotency_key'] = str(uuid.uuid4())
+        return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if settings.SQUARE_CONFIG['environment'] == "production":   # pragma: no cover
+            context['pay_url'] = "https://web.squarecdn.com/v1/square.js"
+        else:  # pragma: no cover
+            context['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"
+        context['app_id'] = settings.SQUARE_CONFIG['application_id']
+        context['location_id'] = settings.SQUARE_CONFIG['location_id']
+        context['action_url'] = self.request.session.get('action_url', reverse_lazy('payment:make_payment'))
+        if self.request.user.is_authenticated:
+            context['cards'] = Card.objects.filter(customer__user=self.request.user)
+        else:
+            context['cards'] = []
+        context['url_remove_card'] = reverse_lazy('payment:card_remove')
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.user.is_authenticated:
+            kwargs['user'] = self.request.user
+        else:
+            kwargs['user'] = None
+        items = []
+        line_items = self.request.session.get('line_items', [])
+        total = 0
+        for item in line_items:
+            item['total'] = item['quantity'] * item['amount_each']
+            total += item['total']
+            items.append(json.dumps(item))
+
+        kwargs['description'] = self.request.session.get('payment_description', '')
+        kwargs['line_items'] = line_items
+        kwargs['initial']['amount'] = total
+        kwargs['initial']['category'] = self.request.session.get('payment_category', 'donation')
+        return kwargs
+
+
+class PaymentView(UserPassesTestMixin, DetailView):
+    model = PaymentLog
+    object = None
+    template_name = 'payment/view_payment.html'
+
+    def test_func(self):
+        self.object = self.get_object()
+        return self.request.user.is_staff or self.object.user == self.request.user

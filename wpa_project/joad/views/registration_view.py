@@ -7,7 +7,6 @@ from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
-from payment.src import SquareHelper
 from ..forms import RegistrationForm
 from ..models import Registration, Session
 from student_app.models import Student
@@ -21,7 +20,7 @@ logger = logging.getLogger(__name__)
 class RegistrationView(UserPassesTestMixin, FormView):
     template_name = 'joad/registration.html'
     form_class = RegistrationForm
-    success_url = reverse_lazy('payment:process_payment')
+    success_url = reverse_lazy('payment:make_payment')
     form = None
 
     def get_form(self):
@@ -45,7 +44,7 @@ class RegistrationView(UserPassesTestMixin, FormView):
         # message = ""
         logging.debug(form.cleaned_data['session'])
         session = form.cleaned_data['session']
-        if session.state != "open": # pragma: no cover
+        if session.state != "open":  # pragma: no cover
             return self.has_error('Session in wrong state')
 
         reg = Registration.objects.filter(session=session).exclude(
@@ -82,16 +81,16 @@ class RegistrationView(UserPassesTestMixin, FormView):
             uid = str(uuid.uuid4())
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
-            self.request.session['payment_db'] = ['joad', 'Registration']
-            self.request.session['action_url'] = reverse('programs:class_payment')
+            self.request.session['payment_category'] = 'joad'
+            self.request.session['payment_description'] = f'Joad session starting {str(session.start_date)[:10]}'
             logging.debug(students)
             for s in students:
                 cr = Registration(session=session, student=s, pay_status='start', idempotency_key=uid).save()
                 self.request.session['line_items'].append(
-                    SquareHelper().line_item(f"Joad session starting {str(session.start_date)[:10]} student id: {str(s.id)}",
-                                             1, session.cost))
+                    {'name': f'Joad session starting {str(session.start_date)[:10]} student id: {str(s.id)}',
+                     'quantity': 1, 'amount_each': session.cost})
                 logging.debug(cr)
-        return HttpResponseRedirect(reverse('payment:process_payment'))
+        return HttpResponseRedirect(reverse('payment:make_payment'))
 
     def has_error(self, message):
         messages.add_message(self.request, messages.ERROR, message)
@@ -118,11 +117,11 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
         logging.debug(registration)
         self.request.session['idempotency_key'] = str(registration.idempotency_key)
         self.request.session['line_items'] = []
-        self.request.session['payment_db'] = ['joad', 'Registration']
-        self.request.session['action_url'] = reverse('programs:class_payment')
+        self.request.session['payment_category'] = 'joad'
+
         for r in registrations:
+            self.request.session['payment_description'] = f'Joad session starting {str(r.session.start_date)[:10]}'
             self.request.session['line_items'].append(
-                SquareHelper().line_item(
-                    f"Joad session starting {str(r.session.start_date)[:10]} student id: {str(r.student.id)}",
-                    1, r.session.cost))
-        return HttpResponseRedirect(reverse('payment:process_payment'))
+                    {'name': f'Joad session starting {str(r.session.start_date)[:10]} student id: {str(r.student.id)}',
+                     'quantity': 1, 'amount_each': r.session.cost})
+        return HttpResponseRedirect(reverse('payment:make_payment'))

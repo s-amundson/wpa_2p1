@@ -19,8 +19,8 @@ class TestsEmail(TestCase):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.email_dict = {'total': 5, 'receipt': 'https://example.com',
-                           'line_items': [{'name': 'Class on None student id: 1',
-                                           'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]}
+                           'line_items': [{'name': 'Class on None student: test_user',
+                                           'quantity': '1', 'amount_each': 5}]}
 
     def test_payment_email(self):
         EmailMessage().payment_email_user(self.test_user, self.email_dict)

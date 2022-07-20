@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block script %}
+    {% load static %}
+    <!-- link to the SqPaymentForm library -->
+    <script type="text/javascript" src="{{ pay_url }}"></script>
+
+    <script type="application/javascript">
+        window.applicationId = '{{ app_id }}';
+        window.locationId = '{{ location_id }}';
+        window.action_url = '{{ action_url }}';
+        const url_remove_card = '{{ url_remove_card }}';
+        const user_auth = {{ user.is_authenticated|lower }};
+    </script>
+
+    <!-- link to the local SqPaymentForm initialization -->
+    <script src="{% static 'js/card.js' %}"></script>
+
+    <!-- link to the custom styles for SqPaymentForm -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/sq-payment-form.css' %}">
+{% endblock %}
+
+{% block title %} Cards {% endblock %}
+
+    {% block main %}
+    <div class="row justify-content-center">
+        <div class="col-4 text-center"><h2> Manage Credit Cards </h2></div>
+    </div>
+
+    <div class="row">
+        <form class="form m-2" id="payment-form" method="post">
+            {% csrf_token %}
+            {{ form.source_id }}
+
+            <table class="col table table-bordered
+                {% if user.dark_theme %}
+                text-white
+                {% else %}
+                text-dark
+                {% endif %}">
+                <thead>
+                    <tr>
+                        <th colspan="2" class="text-center"> Saved Cards </th>
+                    </tr>
+                </thead>
+                <tbody id="class-list-body">
+                    {% for card in cards %}
+                    <tr>
+                        <td>{{ card }}</td>
+                        <td>
+                            <a class="m-2 btn btn-primary" href="{% url 'payment:card_remove' card.id %}" role="button">
+                                Remove Card
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center">No Saved Cards</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="d-flex flex-row p-3">
+                Add Card:
+            </div>
+
+            {% if form.card_errors %}
+                {% for error in form.card_errors %}
+                    <p class="m-2"> {{ error }}</p>
+                {% endfor %}
+            {% endif %}
+            <div id="card-container"></div>
+            <div class="form-check">
+                {{ form.save_card }} <span class="form-check-label">{{ form.save_card.label }}</span>
+            </div>
+            <button class="btn btn-primary m-2" id="card-button" type="button"> Add Card </button>
+        </form>
+
+    </div>
+{% endblock %}
+
+{% block right %}
+    <div id="login-div"></div>
+{% endblock %}
