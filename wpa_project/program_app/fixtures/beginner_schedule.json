@@ -1,8 +1,8 @@
 [
-  {"model": "program_app.beginnerschedule", "pk": 1, "fields": {"class_time": "16:00:00.000Z", "class_type": "beginner",
+  {"model": "program_app.beginnerschedule", "pk": 1, "fields": {"class_time": "16:00:00.000", "class_type": "beginner",
   "beginner_limit": 30, "returnee_limit": 0, "state": "open", "day_of_week": 5, "frequency": 1, "future_classes": 6}},
-  {"model": "program_app.beginnerschedule", "pk": 2, "fields": {"class_time": "18:00:00.000Z", "class_type": "returnee",
+  {"model": "program_app.beginnerschedule", "pk": 2, "fields": {"class_time": "18:00:00.000", "class_type": "returnee",
   "beginner_limit": 0, "returnee_limit": 35, "state": "open", "day_of_week": 5, "frequency": 1, "future_classes": 6}},
-  {"model": "program_app.beginnerschedule", "pk": 3, "fields": {"class_time": "23:00:00.000Z", "class_type": "returnee",
+  {"model": "program_app.beginnerschedule", "pk": 3, "fields": {"class_time": "23:00:00.000", "class_type": "returnee",
     "beginner_limit": 0, "returnee_limit": 35, "state": "open", "day_of_week": 5, "frequency": 1, "future_classes": 6}}
 ]

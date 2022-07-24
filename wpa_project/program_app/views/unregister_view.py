@@ -113,8 +113,9 @@ class UnregisterView(LoginRequiredMixin, APIView):
                     else:
                         cr.pay_status = 'refunded'
                     cr.save()
-                    ClassRegistrationHelper().check_space(
-                        {'beginner_class': cr.beginner_class.id, 'beginner': 0, 'returnee': 0}, True)
+                    # ClassRegistrationHelper().check_space(
+                    #     {'beginner_class': cr.beginner_class.id, 'beginner': 0, 'returnee': 0}, True)
+                    ClassRegistrationHelper().update_class_state(cr.beginner_class)
                 logging.debug(f'class_list length: {len(class_list)}, canceled_count: {canceled_count}')
                 if len(class_list) > canceled_count:
                     EmailMessage().refund_email(request.user, donation)

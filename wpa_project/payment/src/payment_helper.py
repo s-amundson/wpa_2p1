@@ -16,6 +16,7 @@ class PaymentHelper(SquareHelper):
 
     def create_payment(self, amount, category, donation, idempotency_key, note, source_id,
                        autocomplete=True, saved_card_id=0):
+        logging.debug(note)
         body = {
                 "idempotency_key": idempotency_key,
                 "amount_money": {"amount": amount * 100, "currency": "USD"},
