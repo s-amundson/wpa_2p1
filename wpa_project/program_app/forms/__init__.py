@@ -3,3 +3,4 @@ from .class_attendance_form import ClassAttendanceForm
 from .class_registration_form import ClassRegistrationForm
 from .send_email_form import SendClassEmailForm
 from .staff_report_form import StaffReportForm
+from .unregister_form import UnregisterForm

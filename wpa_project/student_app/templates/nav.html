@@ -48,6 +48,7 @@
                         {% if user.is_member %}
                             <a class="dropdown-item" href="{% url 'membership:membership' %}">Membership</a>
                             <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
+                            <a class="dropdown-item" href="{% url 'membership:member_list' %}">Member List</a>
                         {% else %}
                             <a class="dropdown-item" href="{% url 'membership:membership' %}">Join</a>
                         {% endif %}
