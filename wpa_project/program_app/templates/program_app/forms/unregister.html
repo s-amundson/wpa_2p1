@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block main %}
+<form class="col form" id="unreg_form" method="post" action="{% url 'programs:unreg' %}" autocomplete="off">
+    {% csrf_token %}
+    <table class="table table-bordered
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <tr>
+                <th> Class Date </th>
+                <th> Name </th>
+                <th> Payment Status </th>
+                <th> Unregister/Cancel </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for field in form %}
+        <tr>
+            <td> {{ field.class_date }}</td>
+            <td> {{ field.student }} </td>
+            <td>
+                {% if field.class_state == 'closed' %}
+                    {{ field.pay_status|capfirst }}
+                {% else %}
+                    {% if field.class_state == 'start' %}
+                        <a href="{% url 'programs:resume_registration' field.reg %}">
+                            Unsuccessful
+                        </a>
+                    {% else %}
+                        {{ field.pay_status|capfirst }}
+                    {% endif %}
+                {% endif %}
+            </td>
+            <td> {{ field }} </td>
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    {% if unregisterable %}
+        <div class="row p-2 form-check">
+            <label class="form-check-label">
+                <input type="checkbox" class="m-2" id="donation">
+                I wish to donate my refund to Woodley Park Archers
+            </label>
+        </div>
+    {% endif %}
+        <div class="flex-row m-2">
+            <button class="btn btn-primary" type="submit">Unregister/Cancel</button>
+        </div>
+
+</form>
+{% endblock %}

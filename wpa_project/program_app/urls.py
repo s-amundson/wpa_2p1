@@ -23,4 +23,5 @@ urlpatterns = [
     path('send_email/<int:beginner_class>/', SendEmailView.as_view(), name='send_email'),
     path('staff_attendance/', StaffReportView.as_view(), name='staff_attendance'),
     path('unregister_class/', UnregisterView.as_view(), name='unregister_class'),
+    # path('unreg/', UnregView.as_view(), name='unreg'),
 ]
