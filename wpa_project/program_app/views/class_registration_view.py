@@ -22,24 +22,6 @@ Student = apps.get_model(app_label='student_app', model_name='Student')
 StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamily')
 
 
-class ClassRegisteredTable(LoginRequiredMixin, View):
-    def get(self, request):
-        try:
-            students = Student.objects.get(user=request.user).student_family.student_set.all()
-        except (Student.DoesNotExist, AttributeError):
-            request.session['message'] = 'Address form is required'
-            return HttpResponseRedirect(reverse('registration:profile'))
-        bc = BeginnerClass.objects.filter(state__in=BeginnerClass().get_states()[:4],
-                                          class_date__gte=timezone.localdate(timezone.now()))
-        enrolled_classes = ClassRegistration.objects.filter(student__in=students, beginner_class__in=bc).exclude(
-            pay_status='refunded').exclude(pay_status='canceled').exclude(pay_status='refund donated')
-        unregisterable = len(enrolled_classes.exclude(pay_status='start'))
-        logging.debug(unregisterable)
-        # logging.debug(enrolled_classes.values())
-        return render(request, 'program_app/tables/class_registered_table.html',
-                      {'enrolled_classes': enrolled_classes, 'unregisterable': unregisterable})
-
-
 class ClassRegistrationView(AccessMixin, FormView):
     template_name = 'program_app/class_registration.html'
     form_class = ClassRegistrationForm

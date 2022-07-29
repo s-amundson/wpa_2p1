@@ -8,25 +8,13 @@ logger = logging.getLogger(__name__)
 
 
 class RefundHelper(SquareHelper):
-    def log_refund(self, square_response, payment_log):
-        # refund = square_response['refund']
-        RefundLog.objects.create(amount=square_response['amount_money']['amount'],
-                                 created_time=square_response['created_at'],
-                                 location_id=square_response['location_id'],
-                                 order_id=square_response['order_id'],
-                                 payment_id=square_response['payment_id'],
-                                 processing_fee=square_response.get('processing_fee', None),
-                                 refund_id=square_response['id'],
-                                 status=square_response.get('status', None)
-                                 )
-
     def refund_with_idempotency_key(self, idempotency_key, amount):
         """ does either a full or partial refund. Takes and idempotency_key and amount as arguments, Looks up the log
         then calls refund_payment"""
         try:
             log = PaymentLog.objects.get(idempotency_key=idempotency_key)
         except PaymentLog.DoesNotExist:
-            return {'status': "FAIL"}
+            return {'status': "FAIL", 'error': 'Record does not exist'}
         return self.refund_payment(log, amount)
 
     def refund_entire_payment(self, log):
@@ -52,11 +40,20 @@ class RefundHelper(SquareHelper):
                   "payment_id": log.payment_id
                   })
         square_response = result.body.get('refund', {'refund': None})
+        # logging.debug(square_response)
         if result.is_success():
             square_response['error'] = ""
             log.status = 'refund'
             log.save()
-            self.log_refund(square_response, log)
+            RefundLog.objects.create(amount=square_response['amount_money']['amount'],
+                                     created_time=square_response['created_at'],
+                                     location_id=square_response['location_id'],
+                                     order_id=square_response['order_id'],
+                                     payment_id=square_response['payment_id'],
+                                     processing_fee=square_response.get('processing_fee', None),
+                                     refund_id=square_response['id'],
+                                     status=square_response.get('status', None)
+                                     )
         elif result.is_error():  # pragma: no cover
             square_response['status'] = 'error'
             logging.debug(result.errors)

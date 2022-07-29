@@ -10,8 +10,6 @@ urlpatterns = [
     path('class_calendar/', ClassCalendarView.as_view(), name='class_calendar'),
     path('class_list/<int:past>/', BeginnerClassListView.as_view(), name='class_list'),
     path('class_list/', BeginnerClassListView.as_view(), name='class_list'),
-    # path('class_payment/', PaymentView.as_view(), name='class_payment'),
-    path('class_registered_table/', ClassRegisteredTable.as_view(), name='class_registered_table'),
     path('class_registration_admin/<int:family_id>/', ClassRegistrationAdminView.as_view(), name='class_registration_admin'),
     path('class_registration_admin_list/', AdminRegistrationListView.as_view(), name='class_registration_admin_list'),
     path('class_registration/', ClassRegistrationView.as_view(), name='class_registration'),
@@ -22,6 +20,6 @@ urlpatterns = [
     path('send_email/', SendEmailView.as_view(), name='send_email'),
     path('send_email/<int:beginner_class>/', SendEmailView.as_view(), name='send_email'),
     path('staff_attendance/', StaffReportView.as_view(), name='staff_attendance'),
-    path('unregister_class/', UnregisterView.as_view(), name='unregister_class'),
-    # path('unreg/', UnregView.as_view(), name='unreg'),
+    path('unregister/', UnregisterView.as_view(), name='unregister'),
+    path('unregister_table/', UnregisterTableView.as_view(), name='unregister_table'),
 ]

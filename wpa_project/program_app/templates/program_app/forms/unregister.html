@@ -1,6 +1,4 @@
-{% extends 'base.html' %}
-{% block main %}
-<form class="col form" id="unreg_form" method="post" action="{% url 'programs:unreg' %}" autocomplete="off">
+<form class="col form" id="unreg_form" method="post" action="{% url 'programs:unregister' %}" autocomplete="off">
     {% csrf_token %}
     <table class="table table-bordered
         {% if user.dark_theme %}
@@ -17,7 +15,7 @@
             </tr>
         </thead>
         <tbody>
-        {% for field in form %}
+        {% for field in form.get_boxes %}
         <tr>
             <td> {{ field.class_date }}</td>
             <td> {{ field.student }} </td>
@@ -34,24 +32,29 @@
                     {% endif %}
                 {% endif %}
             </td>
-            <td> {{ field }} </td>
+            <td>
+                {{ field }} {{field.label}} {{ field.errors }}
+                <input class="unreg_cost" type="hidden" id="cost_{{ field.reg }}" value="{{ field.class_cost }}">
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4"> Not registered for any upcoming classes </td>
         </tr>
         {% endfor %}
 
         </tbody>
     </table>
-
-    {% if unregisterable %}
+    {% if form.can_unregister %}
         <div class="row p-2 form-check">
             <label class="form-check-label">
-                <input type="checkbox" class="m-2" id="donation">
+                {{ form.donation }}
                 I wish to donate my refund to Woodley Park Archers
             </label>
         </div>
-    {% endif %}
+
         <div class="flex-row m-2">
             <button class="btn btn-primary" type="submit">Unregister/Cancel</button>
         </div>
-
+    {% endif %}
 </form>
-{% endblock %}

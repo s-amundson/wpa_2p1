@@ -1,15 +1,12 @@
 import logging
 import time
 import uuid
-from datetime import datetime
 
 from django.test import TestCase, Client
-from django.urls import reverse
-from django.apps import apps
 from django.contrib.auth import get_user_model
 
 from ..forms import PaymentForm
-from ..models import PaymentLog, RefundLog
+from ..models import RefundLog
 from ..src import RefundHelper
 
 logger = logging.getLogger(__name__)
@@ -35,7 +32,7 @@ class TestsRefund(TestCase):
 
     def test_square_helper_refund_payment_error(self):
         rp = RefundHelper().refund_with_idempotency_key(str(uuid.uuid4()), 1000)
-        self.assertEqual(rp, {'status': "FAIL"})
+        self.assertEqual(rp, {'status': "FAIL", 'error': 'Record does not exist'})
 
     def test_square_helper_refund_payment(self):
         pf = PaymentForm(user=self.test_user)
