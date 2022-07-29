@@ -1,16 +1,11 @@
-import datetime
 import logging
 import json
-import time
-import uuid
 
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.utils import timezone
 
-from ..src import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
-from student_app.models import Student, StudentFamily, User
+from student_app.models import Student, User
 
 logger = logging.getLogger(__name__)
 

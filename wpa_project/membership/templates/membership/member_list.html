@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %} Member List {% endblock %}
+
+
+{% block main %}
+
+    <form class="form m-2" method="get">
+        <div class="m-2"><h5>Show only:</h5></div>
+        <div class="d-flex flex-row m-2">
+            <div class="m-2 fieldWrapper">
+                {{form.query_date.label_tag }} {{ form.query_date }}
+            </div>
+            <div class="m-2 fieldWrapper">
+                {{form.csv_export.label_tag }} {{ form.csv_export }}
+            </div>
+        </div>
+      <input class="btn btn-primary" type="submit" value="Submit">
+  </form>
+
+  <div id="student_table">
+    <table class="table table-bordered
+        {% if user.dark_theme %}
+            text-white
+        {% else %}
+            text-dark
+        {% endif %}">
+        <thead>
+            <th> Last Name </th>
+            <th> First Name </th>
+            <th> Expire Date </th>
+
+        </thead>
+        <tbody>
+            {% for member in object_list %}
+                <tr>
+                    <td>
+                        {{ member.student.last_name }}</td>
+                    <td>{{ member.student.first_name }}</td>
+                    <td>{{ member.expire_date }}</td>
+                </tr>
+            {% empty %}
+                <tr>No Members yet.</tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+{% block right %}
+{% endblock %}

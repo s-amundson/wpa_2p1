@@ -39,6 +39,7 @@ def member_update(sender, instance, created, **kwargs):
                     member.expire_date = add_years(member.expire_date, 1)
                 else:
                     member.expire_date = add_years(datetime_safe.date.today(), 1)
+                    member.begin_date = datetime_safe.date.today()
                 logging.debug(member.expire_date)
                 member.save()
 

@@ -5,30 +5,6 @@ logger = logging.getLogger(__name__)
 
 
 class ClassRegistrationHelper:
-    def check_space(self, class_registration_dict, update=False):
-        # {'beginner_class': beginner_class.id, 'beginner': beginner,
-        #  'returnee': returnee}
-        is_space = True
-        bc = BeginnerClass.objects.get(pk=class_registration_dict['beginner_class'])
-        ec = self.enrolled_count(bc)
-        logging.debug(class_registration_dict)
-        if class_registration_dict['beginner'] and ec['beginner'] + class_registration_dict['beginner'] > bc.beginner_limit:
-            is_space = False
-        if class_registration_dict['returnee'] and ec['returnee'] + class_registration_dict['returnee'] > bc.returnee_limit:
-            is_space = False
-        if is_space and ec['beginner'] + class_registration_dict['beginner'] >= bc.beginner_limit and \
-           ec['returnee'] + class_registration_dict['returnee'] >= bc.returnee_limit:
-            if update:
-                bc.state = 'full'
-                bc.save()
-        elif ec['beginner'] + class_registration_dict['beginner'] < bc.beginner_limit and \
-           ec['returnee'] + class_registration_dict['returnee'] < bc.returnee_limit:
-            logging.debug(bc.state)
-            if update and bc.state == 'full':
-                bc.state = 'open'
-                bc.save()
-        logging.debug(is_space)
-        return is_space
 
     def enrolled_count(self, beginner_class):
         beginner = 0
@@ -76,7 +52,7 @@ class ClassRegistrationHelper:
                 logging.debug('open')
                 beginner_class.state = 'open'
                 beginner_class.save()
-        elif beginner_class.class_type == 'returnee' and beginner_class.state in ['open', 'full']:
+        elif beginner_class.state in ['open', 'full']:
             if len(records.filter(student__safety_class__isnull=True)) >= beginner_class.beginner_limit and \
                     len(records.filter(student__safety_class__isnull=False)) >= beginner_class.returnee_limit and \
                     beginner_class.state == 'open':
@@ -87,3 +63,4 @@ class ClassRegistrationHelper:
                     beginner_class.state == 'full':
                 beginner_class.state = 'open'
                 beginner_class.save()
+        logging.debug(beginner_class.state)

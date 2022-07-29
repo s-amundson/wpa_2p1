@@ -10,11 +10,15 @@ class SendClassEmailForm(SendEmailForm):
         self.beginner_class = kwargs.pop('beginner_class')
         super().__init__(*args, **kwargs)
         self.fields.pop('recipients')
+        self.fields['attending_only'] = forms.BooleanField(widget=forms.CheckboxInput(
+                attrs={'class': "m-2 student-check"}), required=False)
 
     def send_message(self):
         em = EmailMessage()
         users = User.objects.filter(is_active=True)
         class_registrations = self.beginner_class.classregistration_set.filter(pay_status__in=['paid', 'admin'])
+        if self.cleaned_data['attending_only']:
+            class_registrations = class_registrations.filter(attended=True)
         student_list = []
         for cr in class_registrations:
             student_list.append(cr.student.id)

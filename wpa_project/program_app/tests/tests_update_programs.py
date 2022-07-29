@@ -1,17 +1,13 @@
 import logging
 import uuid
-import time
 from django.core import mail
-from django.test import TestCase
 from django.utils import timezone
 from datetime import timedelta
 from django.test import TestCase, Client
-from apscheduler.schedulers.blocking import BlockingScheduler
-from django.conf import settings
 
-from ..models import BeginnerClass, BeginnerSchedule, ClassRegistration
+from ..models import BeginnerClass, ClassRegistration
 from student_app.models import Student, User
-from ..src import SchedulePrograms, UpdatePrograms
+from ..src import UpdatePrograms
 logger = logging.getLogger(__name__)
 
 

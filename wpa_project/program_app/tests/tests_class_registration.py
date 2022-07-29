@@ -1,6 +1,5 @@
 import datetime
 import logging
-import json
 import time
 import uuid
 
@@ -224,22 +223,6 @@ class TestsClassRegistration(TestCase):
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 0)
         self.assertContains(response, 'Student must be at least 9 years old to participate')
-
-    def test_check_space_full(self):
-        self.client.post(reverse('programs:class_registration'),
-                         {'beginner_class': '1', 'student_1': 'on'}, secure=True)
-        bc = BeginnerClass.objects.get(id=1)
-        enrolled = ClassRegistrationHelper().enrolled_count(bc)
-        logging.debug(enrolled)
-
-        d = {'beginner_class': 1, 'beginner': 2, 'returnee': 2}
-        self.assertTrue(ClassRegistrationHelper().check_space(d))
-        bc = BeginnerClass.objects.get(id=1)
-        self.assertEqual(bc.state, 'open')
-
-        self.assertTrue(ClassRegistrationHelper().check_space(d, True))
-        bc = BeginnerClass.objects.get(id=1)
-        self.assertEqual(bc.state, 'full')
 
     def test_get_no_student(self):
         sf = StudentFamily.objects.get(pk=3)

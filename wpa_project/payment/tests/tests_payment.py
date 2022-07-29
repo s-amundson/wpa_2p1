@@ -27,6 +27,7 @@ class TestsPayment(TestCase):
         session = self.client.session
         session['line_items'] = [{'name': 'Class on None student: test_user',
                                   'quantity': 1, 'amount_each': 5}]
+        session['payment_description'] = 'Class on test_date'
         session.save()
 
     def test_get_payment(self):
@@ -38,6 +39,7 @@ class TestsPayment(TestCase):
         response = self.client.post(self.url, self.pay_dict, secure=True)
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].description, 'Class on test_date')
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Payment Confirmation')

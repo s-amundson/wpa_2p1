@@ -15,4 +15,5 @@ class Member(models.Model):
 
     # hidden fields
     join_date = models.DateField(default=timezone.now)
+    begin_date = models.DateField(default=None, null=True)
 

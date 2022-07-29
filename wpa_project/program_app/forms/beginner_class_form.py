@@ -14,5 +14,5 @@ class BeginnerClassForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        logging.debug(self.instance)
-        logging.debug(self.instance is not None)
+        # logging.debug(self.instance)
+        # logging.debug(self.instance is not None)
