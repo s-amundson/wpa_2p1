@@ -18,12 +18,17 @@ class MemberList(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = self.form_class(initial={'query_date': self.initial_date})
+        logging.debug(self.request.GET)
+        logging.debug(bool(self.request.GET))
+        if self.request.GET:
+            context['form'] = self.form_class(self.request.GET)
+        else:
+            context['form'] = self.form_class(initial={'query_date': self.initial_date})
         return context
 
     def get_queryset(self):
         form = self.form_class(self.request.GET)
-        object_list = self.model.objects.filter(expire_date__gte=timezone.datetime.today())
+        object_list = self.model.objects.filter(expire_date__gte=timezone.datetime.today()).order_by('student__last_name')
         if form.is_valid():
             logging.debug(form.cleaned_data)
             if form.cleaned_data['query_date']:
@@ -31,9 +36,17 @@ class MemberList(UserPassesTestMixin, ListView):
                 self.initial_date = d
                 logging.debug(d)
                 object_list = self.model.objects.filter(expire_date__gte=d).filter(begin_date__lte=d)
+                if form.cleaned_data['order_by'] == 'first':
+                    object_list = object_list.order_by('student__first_name')
+                elif form.cleaned_data['order_by'] == 'expire':
+                    object_list = object_list.order_by('expire_date')
+                else:
+                    object_list = object_list.order_by('student__last_name')
             if form.cleaned_data['csv_export']:
                 self.csv_response = True
-        return object_list.order_by('expire_date')
+        else:
+            logging.debug(form.errors)
+        return object_list
 
     def render_to_response(self, context, **response_kwargs):
         if self.csv_response:

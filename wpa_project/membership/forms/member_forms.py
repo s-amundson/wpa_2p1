@@ -8,3 +8,4 @@ class MemberExpireDateForm(forms.Form):
         required=False)
     csv_export = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2 student-check"}), required=False)
+    order_by = forms.ChoiceField(choices=[('last', 'Last Name'), ('first', 'First Name'), ('expire', 'Expire Date')])
