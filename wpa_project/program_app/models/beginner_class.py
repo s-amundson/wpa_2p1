@@ -12,7 +12,7 @@ def choices(choice_list):
 
 
 class BeginnerCommonClass(models.Model):
-    class_types = ['beginner', 'returnee', 'combined']
+    class_types = ['beginner', 'returnee', 'combined', 'special']
     class_states = ['scheduled', 'open', 'full', 'closed', 'canceled', 'recorded']
 
     class_type = models.CharField(max_length=20, null=True, choices=choices(class_types))

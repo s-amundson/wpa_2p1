@@ -22,6 +22,8 @@ class Calendar(HTMLCalendar):
         self.events = BeginnerClass.objects.filter(class_date__gt=timezone.now(),
                                                    class_date__year=year,
                                                    class_date__month=month).order_by('class_date')
+        if not staff:
+            self.events = self.events.exclude(class_type='special')
         self.joad_class_events = JoadClass.objects.filter(class_date__gt=timezone.now(),
                                                           class_date__year=year,
                                                           class_date__month=month).order_by('class_date')
@@ -84,12 +86,15 @@ class Calendar(HTMLCalendar):
                     btn_color = 'btn-info'
                 elif event.class_type == 'returnee':
                     btn_color = 'btn-success'
+                elif event.class_type == 'special':
+                    btn_color = 'btn-outline-primary'
                 cd = timezone.localtime(event.class_date)
-                data += f'<li><button class="btn {btn_color} bc-btn m-1" type="button" bc_id="{event.id}" '
+                url = reverse('programs:class_registration', kwargs={'beginner_class': event.id})
+                data += f'<li><a href="{url}" role="button" type="button" bc_id="{event.id}" class="btn {btn_color} '
                 if not self.staff and event.state not in ['open']:
-                    data += f'disabled >{event.class_type.capitalize()} {cd.strftime("%I:%M %p")} FULL</button></li>'
+                    data += f'bc-btn m-1 disabled" >{event.class_type.capitalize()} {cd.strftime("%I:%M %p")} FULL</a></li>'
                 else:
-                    data += f'>{event.class_type.capitalize()} {cd.strftime("%I:%M %p")}</button></li>'
+                    data += f'bc-btn m-1" >{event.class_type.capitalize()} {cd.strftime("%I:%M %p")}</a></li>'
 
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {data} </ul></td>"
@@ -113,4 +118,5 @@ class Calendar(HTMLCalendar):
         cal += f'{self.formatweekheader()}\n'
         for week in self.monthdays2calendar(self.year, self.month):
             cal += f'{self.formatweek(week)}\n'
+        cal += '</table>'
         return cal

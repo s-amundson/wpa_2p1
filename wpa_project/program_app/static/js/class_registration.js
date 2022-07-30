@@ -5,24 +5,8 @@ $(document).ready(function(){
     $(".student-check").each(show_new_student);
     get_reg_table();
     $("#id_beginner_class").click(get_class_status);
+    get_class_status();
 
-    get_calendar();
-    $("#beginner-class-form").hide()
-    $("#calendar-show-btn").hide()
-    $("#calendar-prev-btn").hide()
-    $("#calendar-show-btn").click(function (){
-        $("#div-calendar").show()
-    });
-
-    $("#calendar-prev-btn").click(function () {
-        month = month - 1;
-        get_calendar();
-    });
-
-    $("#calendar-next-btn").click(function () {
-        month = month + 1;
-        get_calendar();
-    });
     $("#myModal").modal("show");
 });
 
@@ -89,26 +73,12 @@ async function get_reg_table() {
     // get the classes that this 'family' is registered for.
     let data = await $.get(url_class_registered_table, function(data, status){
         $("#registered_table").html(data);
-//        if($(".unreg").length > 0) {
-//            $("#unreg_form").show();
-//        }
-//        else{
-//            $("#unreg_form").hide();
-//        }
+
         $("#unreg_form").submit(function(e){
             e.preventDefault();
             post_unregister()
         });
     });
-//    if ($(".pay_status").length == 0) {
-//        $("#registered_classes").hide()
-//    }
-//    else {
-//        if (started_status){
-//            $("#incompleteRegistration").modal("show");
-//        }
-//        $("#registered_classes").show()
-//    }
 
 }
 
@@ -170,23 +140,7 @@ async function post_unregister() {
     if (getConfirm) {
         $("#unreg_form").unbind();
         $("#unreg_form").submit();
-//        //       Send the unregister request to the server
-//        let data = await $.post(url_unregister, {
-//            "class_list": unreg_list,
-//            csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
-//            'donation': $("#donation").prop('checked')
-//        }, function(data, status){
-//            console.log(data);
-//            return data;
-//            }, "json");
-//
-//        get_reg_table();
-//        if (data.status == 'SUCCESS') {
-//            alert_notice("Success", "You have successfully been unregistered from the class.")
-//        }
-//        else {
-//            alert_notice('Error', data.error)
-//        }
+
     }
     else {
         console.log('canceled');

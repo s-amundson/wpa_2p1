@@ -42,6 +42,14 @@ class ClassRegistrationView(AccessMixin, FormView):
         context['this_month'] = timezone.localtime(timezone.now()).month
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        logging.debug(kwargs)
+        if self.kwargs.get('beginner_class', None) is not None:
+            kwargs['initial']['beginner_class'] = self.kwargs.get('beginner_class')
+        logging.debug(kwargs)
+        return kwargs
+
     def get_form(self):
         try:
             self.students = Student.objects.get(user=self.request.user).student_family.student_set.all()
