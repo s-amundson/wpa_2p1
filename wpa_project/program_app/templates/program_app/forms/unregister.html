@@ -23,7 +23,7 @@
                 {% if field.class_state == 'closed' %}
                     {{ field.pay_status|capfirst }}
                 {% else %}
-                    {% if field.class_state == 'start' %}
+                    {% if field.pay_status == 'start' %}
                         <a href="{% url 'programs:resume_registration' field.reg %}">
                             Unsuccessful
                         </a>
