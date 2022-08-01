@@ -1,0 +1,24 @@
+<table class="table table-bordered
+    {% if user.dark_theme %}
+        text-white
+    {% else %}
+        text-dark
+    {% endif %}">
+    <thead>
+        <tr>
+            <th> Name </th>
+            <th> Classes Registered </th>
+            <th> Classes Attended </th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for r in attend_history %}
+        <tr>
+            <td> {{ r.student.first_name }} {{ r.student.last_name }}</td>
+            <td> {{ r.registrations }} </td>
+            <td> {{ r.attended_count }} </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+

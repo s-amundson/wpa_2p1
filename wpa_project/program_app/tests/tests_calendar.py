@@ -29,7 +29,13 @@ class TestsCalendar(TestCase):
     def test_get_calendar(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        response = self.client.get(reverse('programs:class_calendar'), secure=True)
+        response = self.client.get(reverse('programs:calendar'), secure=True)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_calendar_date(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('programs:calendar', kwargs={'year': 2023, 'month': 14}), secure=True)
         self.assertEqual(response.status_code, 200)
 
     def test_insert_event(self):

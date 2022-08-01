@@ -5,7 +5,7 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/class_registration.js' %}"></script>
-
+    <script src="{% static 'js/class_cancel.js' %}"></script>
     <script>
         let url_class_registered_table = "{% url 'programs:unregister_table' %}"
         let url_class_status = "{% url 'programs:class_status' %}"

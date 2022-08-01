@@ -4,7 +4,7 @@ from .instructor_update_view import InstructorUpdateView
 from .pdf_view import PdfGetView
 from .policy_view import PolicyView
 from .profile_view import ProfileView
-from .search_view import SearchView, SearchResultView
+from .search_view import SearchEmailView, SearchNameView, SearchPhoneView, SearchResultListView, SearchResultView
 from .send_email_view import SendEmailView
 from .student_family_view import StudentFamilyView
 from .student_list_view import StudentList

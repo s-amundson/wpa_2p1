@@ -4,12 +4,14 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/profile.js' %}"></script>
+    <script src="{% static 'js/class_cancel.js' %}"></script>
     <script>
         let student_table_url = "{% url 'registration:student_table' %}"
         let add_student_url = "{% url 'registration:add_student' %}"
         let url_student_family_api = "{% url 'registration:student_family' %}"
         let url_theme = "{% url 'registration:theme' %}"
         let url_instructor_update = "{% url 'registration:instructor_update' %}"
+        let url_class_registered_table = "{% url 'programs:unregister_table' %}"
     </script>
 {% endblock %}
 
@@ -19,7 +21,7 @@
 
 {% block main %}
     <div id="div-can-register-top" class="d-flex flex-row-reverse pt-3 can-register-top">
-        <h4><a href="{% url 'programs:class_registration' %}" class="can-register-top">
+        <h4><a href="{% url 'programs:calendar' %}" class="can-register-top">
             Register for an Introductory Archery class.
         </a></h4>
     </div>
@@ -83,6 +85,27 @@
         <a href="{% url 'programs:class_registration' %}">register</a>
         &nbsp;for a class. You can also click on Classes in the nav bar.
     </div>
+
+    {% if student_family %}
+        <div class="row px-3 pt-3 align-items-center mx-auto">
+            <div class="col">
+            <h3> Classes </h3>
+            </div>
+        </div>
+        <div class="row px-3 pt-3 align-items-center mx-auto" id="registered_classes">
+            <div class="col-1"></div>
+            <div class="col">
+                <div class="row">You are registered for these upcoming classes.</div>
+                <div class="row pt-1" id="registered_table"></div>
+                <div class="row pt-1 align-items-center mx-auto">
+                    Past class attendance:
+                    {% include 'program_app/tables/history_table.html' %}
+                </div>
+            </div>
+            <div class="col-1"></div>
+        </div>
+
+    {% endif %}
 
     <div class="row px-3 pt-3 align-items-center mx-auto">
         <div class="col">

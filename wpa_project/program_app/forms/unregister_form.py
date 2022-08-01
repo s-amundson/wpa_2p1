@@ -28,7 +28,7 @@ class BooleanField(forms.BooleanField):
         return bf
 
 
-class RegBoundField(forms.BoundField):
+class RegBoundField(forms.BoundField):  # pragma: no cover
     @property
     def class_cost(self):
         return self.class__cost
@@ -97,14 +97,15 @@ class UnregisterForm(forms.Form):
             if k[:5] == 'unreg' and v:
                 # logging.debug(k.split('_'))
                 class_list.append(int(k.split('_')[1]))
-        # logging.debug(class_list)
+        logging.debug(class_list)
         cr = ClassRegistration.objects.filter(
             id__in=class_list,
             beginner_class__class_date__gte=timezone.now() + timezone.timedelta(hours=24),
-            beginner_class__state__in=BeginnerClass.class_states[:3])  # not class closed
-        cr = cr.filter()
-        if not user.is_board:
-            cr = cr.filter(student__in=student_family.student_set.all())
+            beginner_class__state__in=BeginnerClass.class_states[:3],  # not class closed
+            student__in=student_family.student_set.all())
+
+        # if not user.is_board:
+        #     cr = cr.filter(
         refund = RefundHelper()
         error_count = 0
         for ikey in cr.values('idempotency_key', 'pay_status').annotate(ik_count=Count('idempotency_key')).order_by():
@@ -118,7 +119,12 @@ class UnregisterForm(forms.Form):
                                                                      cost * 100 * ikey['ik_count'])
 
             if square_response['status'] in ['PENDING', 'SUCCESS']:
-                EmailMessage().refund_email(user, self.cleaned_data['donation'])
+                if user.student_set.first().student_family == self.family:
+                    EmailMessage().refund_email(user, self.cleaned_data['donation'])
+                else:
+                    for s in self.family.student_set.all():
+                        if s.user is not None:
+                            EmailMessage().refund_email(s.user, self.cleaned_data['donation'])
                 crh = ClassRegistrationHelper()
                 for r in icr:
                     if ikey['pay_status'] == 'paid' and self.cleaned_data['donation']:

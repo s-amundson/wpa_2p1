@@ -1,10 +1,30 @@
 import logging
+from django.db.models import Count
 from ..models import BeginnerClass, ClassRegistration
+from student_app.models import Student
+
 from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
 class ClassRegistrationHelper:
+    def attendance_history_queryset(self, student_family):
+        if student_family is None:
+            return ClassRegistration.objects.none()
+        object_list = []
+        students = student_family.student_set.all()
+        logging.debug(students)
+        cr = ClassRegistration.objects.filter(
+            beginner_class__class_date__lt=timezone.now().today(),
+            student__in=students,
+            pay_status__in=['paid', 'admin'])
+        for student in students:
+            sr = cr.filter(student=student).aggregate(attended_count=Count('attended', distinct=True),
+                                                      registrations=Count('id', distinct=True))
+            logging.debug(sr)
+            sr['student'] = student
+            object_list.append(sr)
+        return object_list
 
     def enrolled_count(self, beginner_class):
         beginner = 0

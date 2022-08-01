@@ -1,4 +1,4 @@
-<form class="col form" id="unreg_form" method="post" action="{% url 'programs:unregister' %}" autocomplete="off">
+<form class="form" id="unreg_form" method="post" action="{% url 'programs:unregister' form.family.id %}" autocomplete="off">
     {% csrf_token %}
     <table class="table table-bordered
         {% if user.dark_theme %}

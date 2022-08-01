@@ -1,9 +1,10 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import FormView
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 
 from ..forms import UnregisterForm
-
+from student_app.models import StudentFamily
 import logging
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,8 @@ class UnregisterView(UserPassesTestMixin, FormView):
     def test_func(self):
         if self.request.user.is_authenticated and self.request.user.student_set.last() is not None:
             self.student_family = self.request.user.student_set.first().student_family
+            if self.request.user.is_board and self.kwargs.get('family_id'):
+                self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id'))
         return self.student_family is not None
 
 
