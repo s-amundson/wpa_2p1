@@ -7,6 +7,7 @@
 # from .tests.tests_index import TestsJoadIndex
 # from .tests.tests_pin_scores import TestsPinScores
 # from .tests.tests_registration import TestsJoadRegistration
+# from .tests.tests_registration_cancel import TestsJoadRegistrationCancel
 # from .tests.tests_session import TestsJoadSession
 # from .tests.tests_signal import TestsSignal
 # from .tests.tests_waiver import TestsWaiver

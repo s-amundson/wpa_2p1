@@ -17,26 +17,51 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RegistrationView(UserPassesTestMixin, FormView):
+class RegistrationSuperView(UserPassesTestMixin, FormView):
     template_name = 'joad/registration.html'
     form_class = RegistrationForm
+    session = None
     success_url = reverse_lazy('payment:make_payment')
     form = None
 
-    def get_form(self):
-        return RegistrationForm(user=self.request.user, **self.get_form_kwargs())
-
     def get_initial(self):
-        sid = self.kwargs.get("session_id", None)
-        if sid is not None:
-            session = get_object_or_404(Session, pk=sid)
-            self.initial = {'session': session}
+        self.initial = {'session': self.session}
 
         return super().get_initial()
 
     def form_invalid(self, form):
         logging.debug(form.errors)
         return super().form_invalid(form)
+
+    def has_error(self, message):
+        messages.add_message(self.request, messages.ERROR, message)
+        return self.form_invalid(self.form)
+
+    def post(self, request, *args, **kwargs):
+        logging.debug(self.request.POST)
+        return super().post(request, *args, **kwargs)
+
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            if self.request.user.student_set.first().student_family is None:
+                return False
+            sid = self.kwargs.get("session_id", None)
+            if sid is not None:
+                self.session = get_object_or_404(Session, pk=sid)
+            return True
+        else:
+            return False
+
+
+class RegistrationView(RegistrationSuperView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.user.is_board:
+            kwargs['students'] = Student.objects.filter(is_joad=True)
+        else:
+            kwargs['students'] = self.request.user.student_set.first().student_family.student_set.filter(is_joad=True)
+
+        return kwargs
 
     def form_valid(self, form):
         self.form = form
@@ -47,8 +72,9 @@ class RegistrationView(UserPassesTestMixin, FormView):
         if session.state != "open":  # pragma: no cover
             return self.has_error('Session in wrong state')
 
-        reg = Registration.objects.filter(session=session).exclude(
-            pay_status="refunded").exclude(pay_status='canceled')
+        # reg = Registration.objects.filter(session=session).exclude(
+        #     pay_status="refunded").exclude(pay_status='canceled')
+        reg = session.registration_set.exclude(pay_status="refunded").exclude(pay_status='canceled')
         logging.debug(len(reg.filter(pay_status='paid')))
 
         for k, v in form.cleaned_data.items():
@@ -91,25 +117,6 @@ class RegistrationView(UserPassesTestMixin, FormView):
                      'quantity': 1, 'amount_each': session.cost})
                 logging.debug(cr)
         return HttpResponseRedirect(reverse('payment:make_payment'))
-
-    def has_error(self, message):
-        messages.add_message(self.request, messages.ERROR, message)
-        return self.form_invalid(self.form)
-        # return render(self.request, self.template_name, {'form': self.form})
-
-    def post(self, request, *args, **kwargs):
-        logging.debug(self.request.POST)
-        return super().post(request, *args, **kwargs)
-
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            if self.request.user.student_set.first().student_family is None:
-                return False
-            return True
-        else:
-            return False
-
-
 class ResumeRegistrationView(LoginRequiredMixin, View):
     def get(self, request, reg_id=None):
         registration = get_object_or_404(Registration, pk=reg_id)
@@ -125,3 +132,58 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
                     {'name': f'Joad session starting {str(r.session.start_date)[:10]} student id: {str(r.student.id)}',
                      'quantity': 1, 'amount_each': r.session.cost})
         return HttpResponseRedirect(reverse('payment:make_payment'))
+
+
+class RegistrationCancelView(RegistrationSuperView):
+    success_url = reverse_lazy('joad:index')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.user.is_board:
+            students = Student.objects.filter(is_joad=True)
+        else:
+            students = self.request.user.student_set.last().student_family.student_set.filter(is_joad=True)
+        logging.debug(students)
+        kwargs['students'] = students.filter(registration__in=self.session.registration_set.all())
+        kwargs['cancel'] = True
+        logging.debug(kwargs)
+        return kwargs
+
+    def form_valid(self, form):
+        logging.debug(form.cleaned_data)
+        if form.process_refund(self.request.user):
+            return super().form_valid(form)
+        else:
+            return self.form_invalid(form)
+        # self.form = form
+        # students = []
+        # # message = ""
+        # logging.debug(form.cleaned_data['session'])
+        # session = form.cleaned_data['session']
+        # if session.state != "open":  # pragma: no cover
+        #     return self.has_error('Session in wrong state')
+        #
+        # # reg = Registration.objects.filter(session=session).exclude(
+        # #     pay_status="refunded").exclude(pay_status='canceled')
+        # reg = session.registration_set.exclude(pay_status="refunded").exclude(pay_status='canceled')
+        # logging.debug(len(reg.filter(pay_status='paid')))
+        #
+        # for k, v in form.cleaned_data.items():
+        #     logging.debug(k)
+        #     if str(k).startswith('student_') and v:
+        #         i = int(str(k).split('_')[-1])
+        #         s = Student.objects.get(pk=i)
+        #         logging.debug(s)
+        #         sreg = reg.filter(student=s)
+        #         logging.debug(len(sreg))
+        #         if len(sreg) == 0:
+        #             return self.has_error('Student is not enrolled')
+        #         else:
+        #             students.append(s)
+        # if len(students) == 0:
+        #     return self.has_error('Invalid student selected')
+
+    def test_func(self):
+        if super().test_func():
+            return self.session is not None
+        return False

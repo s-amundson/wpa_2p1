@@ -90,6 +90,9 @@
                             {% if row.is_joad %}
                                 {% if row.reg_status == 'registered' %}
                                     Registered
+                                    <a href="{% url 'joad:registration_cancel' session.id %}" class="btn btn-danger" role="button">
+                                        Cancel
+                                    </a>
                                 {% elif row.reg_status == 'start' %}
                                     <a href="{% url 'joad:resume_registration' row.reg_id %}">
                                         Unsuccessful

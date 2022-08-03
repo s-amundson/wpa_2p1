@@ -58,7 +58,7 @@ class PaymentForm(forms.ModelForm):
     def process_payment(self, idempotency_key, autocomplete=True):
         note = self.description
         if self.cleaned_data['donation'] > 0:
-            note = note + f"Donation of {self.cleaned_data['donation']}"
+            note = note + f", Donation of {self.cleaned_data['donation']}"
         logging.debug(self.cleaned_data)
         logging.debug(self.line_items)
         if self.cleaned_data['source_id'] == 'no-payment' and self.amount_initial == 0 \

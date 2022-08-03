@@ -14,6 +14,13 @@
 {% block main %}
     <div class="row p-3" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
     <div class="row p-3">
+        {% if form.cancel_form %}
+            <h3>JOAD Session Cancellation</h3>
+        {% else %}
+            <h3>JOAD Session Registration</h3>
+        {% endif %}
+    </div>
+    <div class="row p-3">
         <form id="registration-form" method="post">
             {% csrf_token %}
             <div class="fieldWrapper">
@@ -28,13 +35,22 @@
             {% endif %}
             {% for student in form.get_boxes %}
                 <div class="input-group input-group-md">
-                    {{ student }} {{ student.label }}
+                    {{ student }} {{ student.label }} {{ student.errors }}
                 </div>
             {% empty %}
-            <div>Students must be approved by WPA prior to registering for a session.</div>
+                {% if form.cancel_form %}
+                    <div>Students must be approved by WPA prior to registering for a session.</div>
+                {% else %}
+                    <div>Students must be approved by WPA prior to registering for a session.</div>
+                {% endif %}
             {% endfor %}
             {% if form.student_count %}
-                <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">
+                <input id="session-btn" class="btn btn-primary" type="submit"
+                   {% if form.cancel_form %}
+                       value="Cancel Registration(s)"
+                    {% else %}
+                        value="Submit"
+                {% endif %}>
             {% endif %}
         </form>
     </div>
