@@ -117,6 +117,8 @@ class RegistrationView(RegistrationSuperView):
                      'quantity': 1, 'amount_each': session.cost})
                 logging.debug(cr)
         return HttpResponseRedirect(reverse('payment:make_payment'))
+
+
 class ResumeRegistrationView(LoginRequiredMixin, View):
     def get(self, request, reg_id=None):
         registration = get_object_or_404(Registration, pk=reg_id)

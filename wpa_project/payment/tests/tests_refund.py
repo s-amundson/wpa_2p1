@@ -58,7 +58,7 @@ class TestsRefund(TestCase):
         refund.refund_entire_payment(pf.log)
         rl = RefundLog.objects.all()
         self.assertEqual(len(rl), 1)
-        self.assertEqual(rl[0].status, 'PENDING')
+        self.assertIn(rl[0].status, ['PENDING', 'SUCCESS'])
 
         time.sleep(5)
         refund = RefundHelper()

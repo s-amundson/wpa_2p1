@@ -203,7 +203,7 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
             self.request.session['payment'] = True
             self.request.session['payment_description'] = f'Class on {str(beginner_class.class_date)[:10]}'
         else:
-            self.success_url = reverse_lazy('programs:beginner_class',
+            self.success_url = reverse_lazy('programs:class_attend_list',
                                             kwargs={'beginner_class': form.cleaned_data['beginner_class']})
 
         cr = ClassRegistration.objects.filter(beginner_class=beginner_class)
