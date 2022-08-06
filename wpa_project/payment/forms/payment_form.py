@@ -21,7 +21,7 @@ class PaymentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
-        logging.debug(user)
+        # logging.debug(user)
         if 'description' in kwargs:
             self.description = kwargs.pop('description')
         else:
@@ -52,15 +52,15 @@ class PaymentForm(forms.ModelForm):
         for card in saved_cards:
             card_choices.append((card.id, str(card)))
         card_choices.append((0, "New Card"))
-        logging.debug(card_choices)
+        # logging.debug(card_choices)
         return card_choices
 
     def process_payment(self, idempotency_key, autocomplete=True):
         note = self.description
         if self.cleaned_data['donation'] > 0:
-            note = note + f"Donation of {self.cleaned_data['donation']}"
-        logging.debug(self.cleaned_data)
-        logging.debug(self.line_items)
+            note = note + f", Donation of {self.cleaned_data['donation']}"
+        # logging.debug(self.cleaned_data)
+        # logging.debug(self.line_items)
         if self.cleaned_data['source_id'] == 'no-payment' and self.amount_initial == 0 \
                 and self.cleaned_data['amount'] == 0:
             self.log = self.save(commit=False)
@@ -74,7 +74,6 @@ class PaymentForm(forms.ModelForm):
             self.log.save()
             return True
         payment_helper = PaymentHelper(self.user)
-        logging.debug(idempotency_key)
         self.log = payment_helper.create_payment(
             amount=self.cleaned_data['amount'],
             category=self.cleaned_data['category'],
@@ -92,7 +91,7 @@ class PaymentForm(forms.ModelForm):
                 EmailMessage().payment_email_user(self.user, pay_dict)
             if self.cleaned_data['save_card']:
                 customer = Customer.objects.filter(user=self.user).last()
-                logging.debug(customer)
+                # logging.debug(customer)
                 if customer is None:
                     ch = CustomerHelper(self.user)
                     customer = ch.create_customer()

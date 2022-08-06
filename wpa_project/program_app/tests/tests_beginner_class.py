@@ -1,13 +1,16 @@
 import logging
-import time
+import uuid
 from django.db.models import Q
 from datetime import date
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone
+from django.conf import settings
 
 from ..models import BeginnerClass, ClassRegistration
 from payment.models import PaymentLog
+from student_app.models import Student
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -19,6 +22,31 @@ class TestsBeginnerClass(TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_UID = 3
+        settings.SQUARE_TESTING = True
+
+    def create_payment(self, students, amount=500):
+        ik = uuid.uuid4()
+        for student in students:
+            ClassRegistration.objects.create(
+                beginner_class=BeginnerClass.objects.get(pk=1),
+                student=student, new_student=True, pay_status="paid",
+                idempotency_key=ik, reg_time="2021-06-09", attended=False
+            )
+        PaymentLog.objects.create(
+            category='joad',
+            checkout_created_time=timezone.now(),
+            description='programs_test',  # database set to 255 characters
+            donation=0,  # storing pennies in the database
+            idempotency_key=ik,
+            location_id='',
+            order_id='',
+            payment_id='test_payment',
+            receipt='',
+            source_type='',
+            status='SUCCESS',
+            total_money=amount,
+            user=self.test_user
+        )
 
     def setUp(self):
         # Every test needs a client.
@@ -73,7 +101,6 @@ class TestsBeginnerClass(TestCase):
 
         self.assertTemplateUsed('student_app/index.html')
         bc = BeginnerClass.objects.all()
-        logging.debug(bc[0].state)
         self.assertEquals(len(bc), 2)
         bc = BeginnerClass.objects.get(pk=1)
 
@@ -82,7 +109,6 @@ class TestsBeginnerClass(TestCase):
 
     def test_2nd_class_error(self):
         bc = BeginnerClass.objects.get(pk=1)
-        logging.debug(bc.class_date)
         # New class same day
         response = self.client.post(reverse('programs:beginner_class'),
                         {'class_date': '2023-06-05 09:00', 'class_type': 'combined', 'beginner_limit': 5,
@@ -94,7 +120,6 @@ class TestsBeginnerClass(TestCase):
 
     def test_2nd_class_good(self):
         bc = BeginnerClass.objects.get(pk=1)
-        logging.debug(bc.class_date)
         # New class same day
         response = self.client.post(reverse('programs:beginner_class'),
                         {'class_date': '2022-06-05 07:00', 'class_type': 'combined', 'beginner_limit': 5,
@@ -118,47 +143,15 @@ class TestsBeginnerClass(TestCase):
         self.test_user.is_staff = False
         self.test_user.save()
         self.client.force_login(self.test_user)
-        self.client.post(reverse('programs:class_registration'),
-                         {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
-        bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
-        bc.beginner_limit = 4  # make space for next students
-        bc.save()
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
 
-        # process a good payment
-        pay_dict = {'amount': 10, 'card': 0, 'category': 'intro', 'donation': 0, 'save_card': False,
-                    'source_id': 'cnon:card-nonce-ok'}
-        response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
-
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
-        logging.debug(cr[0].pay_status)
+        self.create_payment([Student.objects.get(pk=2), Student.objects.get(pk=3)], 1000)
 
         #  Change user and make another payment
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
-        self.client.post(reverse('programs:class_registration'),
-                         {'beginner_class': 1, 'student_5': 'on', 'terms': 'on'},
-                         secure=True)
-        bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 3)
+        self.create_payment([Student.objects.get(pk=5)], 500)
 
-        # process a good payment
-        pay_dict['amount'] = 5
-        response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
-
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 3)
-        logging.debug(cr[0].pay_status)
-
-        # give square some time to process the payment got bad requests without it.
-        time.sleep(5)
-
-        #  Change user and then cancel the class another payment
+        #  Change user and then cancel the class
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.class_dict['state'] = 'canceled'

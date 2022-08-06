@@ -2,10 +2,8 @@ from django import forms
 from django.utils import timezone
 from django.utils.datetime_safe import date
 from django.db.models import Sum
-from django.conf import settings
 
-from ..models import Card, Customer, PaymentLog
-from ..src import CardHelper, CustomerHelper, PaymentHelper
+from ..models import PaymentLog
 
 import logging
 logger = logging.getLogger(__name__)
@@ -15,7 +13,7 @@ class ReportForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        logging.debug(self.initial)
+        # logging.debug(self.initial)
         self.beginning_date = timezone.datetime(2022, 1, 1)
         self.end_date = self.initial.get('end_date', timezone.datetime.today())
         self.fields['beginning_date'] = forms.DateField(

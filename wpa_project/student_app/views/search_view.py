@@ -1,77 +1,139 @@
 from allauth.account.models import EmailAddress
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import HttpResponseForbidden
-from django.shortcuts import render
-from django.views.generic.base import View
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.shortcuts import get_object_or_404
+from django.views.generic.base import TemplateView
+from django.views.generic import FormView, ListView
+from django.urls import reverse_lazy
+from django.contrib import messages
 import logging
 
 from ..forms import SearchEmailForm, SearchNameForm, SearchPhoneForm
 from ..models import StudentFamily, Student
+from program_app.src import ClassRegistrationHelper
+from program_app.forms import UnregisterForm
 logger = logging.getLogger(__name__)
 
 
-class SearchResultView(UserPassesTestMixin, View):
-    def get(self, request, student_family):
-        s = StudentFamily.objects.filter(pk=student_family)
-        return render(request, 'student_app/search_result.html', {'student_family': s})
+class SearchResultListView(UserPassesTestMixin, ListView):
+    families = []
+    model = StudentFamily
+    template_name = 'student_app/search_result_list.html'
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context['families'] = self.families
+        return context
+
+    def get_queryset(self):
+        self.queryset = self.families
 
     def test_func(self):
-        return self.request.user.is_board
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            if self.request.session.get('families', None) is not None:
+                self.families = StudentFamily.objects.filter(id__in=self.request.session.pop('families'))
+            return True
+        return False
 
 
-class SearchView(LoginRequiredMixin, View):
-    def get(self, request):
-        if not (request.user.is_board or request.user.is_staff):
-            return HttpResponseForbidden()
-        email_form = SearchEmailForm()
-        name_form = SearchNameForm()
-        phone_form = SearchPhoneForm()
-        return render(request, 'student_app/student_search.html',
-                      {'email_form': email_form, 'name_form': name_form, 'phone_form': phone_form})
+class SearchResultView(UserPassesTestMixin, TemplateView):
+    template_name = 'student_app/search_result.html'
+    student_family = None
+    student_family_id = None
 
-    def post(self, request):
-        if not (request.user.is_board or request.user.is_staff):
-            return HttpResponseForbidden()
-        if 'email' in request.POST:
-            form = SearchEmailForm(request.POST)
-            if form.is_valid():
-                user = EmailAddress.objects.filter(email__iexact=form.cleaned_data['email'])
-                if len(user) == 0:
-                    return render(request, 'student_app/message.html', {'message': 'No email found'})
-                student_family = []
-                for u in user:
-                    # student_family.append(StudentFamily.objects.get(user__id=u.user_id))
-                    try:
-                        student = Student.objects.get(user__id=u.user_id)
-                        student_family.append(student.student_family)
-                    except Student.DoesNotExist: # pragma: no cover
-                        pass
-                        # return render(request, 'student_app/message.html', {'message': 'No student found'})
-                    # logging.debug(student)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['attend_history'] = ClassRegistrationHelper().attendance_history_queryset(self.student_family)
+        context['student_family'] = self.student_family
+        context['form'] = UnregisterForm(family=self.student_family)
+        return context
 
-                return render(request, 'student_app/search_result.html', {'student_family': student_family})
-        elif 'first_name' in request.POST:
-            form = SearchNameForm(request.POST)
-            if form.is_valid():
-                student = Student.objects.filter(first_name__iexact=form.cleaned_data['first_name'],
-                                                 last_name__iexact=form.cleaned_data['last_name'])
-                if len(student) == 0:
-                    return render(request, 'student_app/message.html', {'message': 'No student found'})
-                student_family = []
-                for s in student:
-                    student_family.append(s.student_family)
-                return render(request, 'student_app/search_result.html', {'student_family': student_family})
-        elif 'phone' in request.POST:
-            form = SearchPhoneForm(request.POST)
-            if form.is_valid():
-                s = StudentFamily.objects.filter(phone=form.cleaned_data['phone'])
-                if len(s) == 0:
-                    return render(request, 'student_app/message.html', {'message': 'No student found'})
-                return render(request, 'student_app/search_result.html', {'student_family': s})
+    # def get(self, request, student_family):
+    #     s = StudentFamily.objects.filter(pk=student_family)
+    #     logging.debug(s)
+    #     return render(request, 'student_app/search_result.html', {'student_family': s})
 
-        email_form = SearchEmailForm()
-        name_form = SearchNameForm()
-        phone_form = SearchPhoneForm()
-        return render(request, 'student_app/student_search.html',
-                      {'email_form': email_form, 'name_form': name_form, 'phone_form': phone_form})
+    def test_func(self):
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            self.student_family_id = self.kwargs.get('student_family', None)
+            self.student_family = get_object_or_404(StudentFamily, pk=self.student_family_id)
+            return self.student_family_id is not None
+        return False
 
+
+class SearchAbstractView(UserPassesTestMixin, FormView):
+    template_name = 'student_app/student_search.html'
+    success_url = reverse_lazy('registration:search_result_list')
+    form_class = SearchEmailForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['email_form'] = SearchEmailForm()
+        context['name_form'] = SearchNameForm()
+        context['phone_form'] = SearchPhoneForm()
+        return context
+
+    def form_invalid(self, form):
+        logging.debug(form.errors)
+        return super().form_invalid(form)
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_staff
+
+
+class SearchEmailView(SearchAbstractView):
+    def form_valid(self, form):
+        emails = EmailAddress.objects.filter(email__iexact=form.cleaned_data['email'])
+        if len(emails) == 0:
+            form.add_error('email', 'Not Found')
+            messages.add_message(self.request, messages.ERROR, 'no students found')
+            return self.form_invalid(form)
+        fam_list = []
+        for email in emails:
+            try:
+                student = Student.objects.get(user=email.user)
+                fam_list.append(student.student_family.id)
+            except Student.DoesNotExist:  # pragma: no cover
+                pass
+        self.request.session['families'] = fam_list
+        return super().form_valid(form)
+
+
+class SearchNameView(SearchAbstractView):
+    form_class = SearchNameForm
+
+    def form_valid(self, form):
+        logging.debug(form.cleaned_data)
+        student = Student.objects.filter(first_name__iexact=form.cleaned_data['first_name'],
+                                         last_name__iexact=form.cleaned_data['last_name'])
+        if len(student) == 0:
+            form.add_error('last_name', 'Not Found')
+            messages.add_message(self.request, messages.ERROR, 'no students found')
+            return self.form_invalid(form)
+
+        student_family = []
+        for s in student:
+            student_family.append(s.student_family.id)
+        self.request.session['families'] = student_family
+        return super().form_valid(form)
+
+
+class SearchPhoneView(SearchAbstractView):
+    form_class = SearchPhoneForm
+
+    def form_valid(self, form):
+        logging.debug(form.cleaned_data)
+        phone = form.cleaned_data['phone'].replace('-', '').replace('.', '')
+        if len(phone) < 10:
+            form.add_error('phone', 'Invalid phone number')
+            messages.add_message(self.request, messages.ERROR, 'invalid phone number')
+            return self.form_invalid(form)
+        sf = StudentFamily.objects.filter(phone__icontains=phone)
+        if len(sf) == 0:
+            form.add_error('phone', 'Not Found')
+            messages.add_message(self.request, messages.ERROR, 'no students found')
+            return self.form_invalid(form)
+        fam_list = []
+        for s in sf:
+            fam_list.append(s.id)
+        self.request.session['families'] = fam_list
+        return super().form_valid(form)

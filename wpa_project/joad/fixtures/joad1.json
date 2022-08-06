@@ -33,12 +33,12 @@
   {"model": "student_app.studentfamily", "pk": 6, "fields": { "street": "4156 Coolidge Street", "city": "Billings", "state": "MT",
   "post_code": "59102", "phone": "406-946-5332", "registration_date": "2021-05-31"}},
 
-  {"model":  "joad.session", "pk": 1, "fields": {"cost": 120, "start_date": "2022-02-01", "state": "open", "student_limit":10}},
+  {"model":  "joad.session", "pk": 1, "fields": {"cost": 125, "start_date": "2022-02-01", "state": "open", "student_limit":10}},
   {"model":  "joad.joadclass", "pk": 1, "fields": {"class_date": "2022-02-01T16:00:00.000Z", "session": 1, "state": "scheduled"}},
   {"model":  "joad.joadclass", "pk": 2, "fields": {"class_date": "2022-02-08T16:00:00.000Z", "session": 1, "state": "scheduled"}},
   {"model":  "joad.joadclass", "pk": 3, "fields": {"class_date": "2022-02-15T16:00:00.000Z", "session": 1, "state": "scheduled"}},
 
-  {"model":  "joad.session", "pk": 2, "fields": {"cost": 120, "start_date": "2022-04-01", "state": "open", "student_limit":10}},
+  {"model":  "joad.session", "pk": 2, "fields": {"cost": 125, "start_date": "2022-04-01", "state": "open", "student_limit":10}},
   {"model":  "joad.joadclass", "pk": 4, "fields": {"class_date": "2022-04-01T16:00:00.000Z", "session": 2, "state": "scheduled"}},
   {"model":  "joad.joadclass", "pk": 5, "fields": {"class_date": "2022-04-08T16:00:00.000Z", "session": 2, "state": "scheduled"}},
 

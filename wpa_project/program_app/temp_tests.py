@@ -9,6 +9,7 @@
 # from .tests.tests_class_send_email import TestsClassSendEmail
 # from .tests.tests_class_sign_in import TestsClassSignIn
 # from .tests.tests_class_status import TestsClassStatus
+# from .tests.tests_history import TestsAttendanceHistory
 # from .tests.tests_logs import TestsAdminRegistration
 # from .tests.tests_signal import TestsSignal
 # from .tests.tests_staff_report import TestsStaffReport

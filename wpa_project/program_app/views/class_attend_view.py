@@ -38,7 +38,7 @@ class ClassAttendListView(UserPassesTestMixin, FormView):
 
 class ClassAttendView(UserPassesTestMixin, View):
     def post(self, request, registration):
-        logging.debug(request.POST)
+        # logging.debug(request.POST)
         cr = ClassRegistration.objects.get(pk=registration)
         if f'check_{cr.student.id}' in request.POST:
             cr.attended = request.POST[f'check_{cr.student.id}'] in ['true', 'on']

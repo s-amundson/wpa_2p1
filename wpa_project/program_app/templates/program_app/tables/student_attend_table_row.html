@@ -1,6 +1,12 @@
 <tr>
     <td>{{ s.id }}</td>
-    <td>{{ s.first_name }}</td>
+    <td>
+        {% if user.is_board %}
+            <a class="nav-link" href="{% url 'registration:search_result' s.fam_id %}">{{ s.first_name }}</a>
+        {% else %}
+            {{ s.first_name }}
+        {% endif %}
+    </td>
     <td>{{ s.last_name }}</td>
     <td class="{% if s.is_minor %} text-warning {% endif %}">{{ s.dob }}</td>
     <td>

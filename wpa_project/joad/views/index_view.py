@@ -36,9 +36,9 @@ class IndexView(LoginRequiredMixin, ListView):
         return context
 
     def get_events(self):
-        events = JoadEvent.objects.filter()  # event_date__gte=self.today)
+        events = JoadEvent.objects.filter(event_date__gte=self.today).exclude(state='recorded')
         if not self.request.user.is_board:
-            events = events.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
+            events = events.exclude(state='scheduled').exclude(state='canceled')
         event_list = []
         logging.debug(events)
         for event in events:
@@ -69,18 +69,21 @@ class IndexView(LoginRequiredMixin, ListView):
         self.students = self.students.filter(dob__lt=self.max_dob).order_by('last_name', 'first_name')
         sessions = Session.objects.all()
         if not self.request.user.is_staff:
-            sessions = sessions.exclude(state='scheduled').exclude(state='canceled').exclude(state='recorded')
-        sessions = sessions.order_by('start_date')
+            sessions = sessions.exclude(state='scheduled').exclude(state='canceled')
+        sessions = sessions.exclude(state='recorded').order_by('start_date')
         self.has_joad = self.request.user.is_staff
         for session in sessions:
             s = model_to_dict(session)
             reg_list = []
-            reg_id = None
-            reg_status = 'not registered'
+
             for student in self.students:
+                reg_id = None
+                reg_status = 'not registered'
+                logging.debug(student)
                 if student.is_joad:
                     self.has_joad = True
-                    reg = session.registration_set.filter(student=student).order_by('id')
+                    reg = session.registration_set.filter(student=student)#  .order_by('id')
+                    logging.debug(reg)
                     if len(reg.filter(pay_status='paid')) > 0:
                         reg_status = 'registered'
                         logging.debug(reg)

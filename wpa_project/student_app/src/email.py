@@ -26,7 +26,7 @@ class EmailMessage(EmailMultiAlternatives):
         else:
             students = student.student_family.student_set.all().order_by('id')
             for s in students:
-                logging.debug(f'id: {s.id}, user: {s.user}')
+                # logging.debug(f'id: {s.id}, user: {s.user}')
                 if s.user is not None:
                     self.get_email_address(s.user)
                     name = f'{s.first_name} {s.last_name}'
@@ -68,17 +68,14 @@ class EmailMessage(EmailMultiAlternatives):
         self.subject = subject
         paragraphs = []
         for line in message.split('\n'):
-            logging.debug(f'len: {len(line)} line: {line}')
             if len(line) > 1:
                 paragraphs.append(line)
-        logging.debug(paragraphs)
         d = {'name': '', 'paragraphs': paragraphs}
         self.body = get_template('student_app/email/paragraph_message.txt').render(d)
         self.attach_alternative(get_template('student_app/email/paragraph_message.html').render(d), 'text/html')
         self.send()
 
     def invite_user_email(self, send_student, add_student):
-        logging.debug(add_student.email)
         self.to = [add_student.email]
         d = {'add_name': add_student.first_name, 'send_name': send_student.first_name}
         self.subject = 'Woodley Park Archers Invitation'

@@ -114,7 +114,6 @@ class TestsClassRegistration(TestCase):
         cr.save()
 
         # try to add first user to class again.
-        logging.debug('add user again')
         self.client.force_login(User.objects.get(pk=3))
         response = self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
@@ -136,7 +135,6 @@ class TestsClassRegistration(TestCase):
         cr.save()
 
         # try to add first user to class again.
-        logging.debug('add user again')
         self.client.force_login(User.objects.get(pk=2))
         response = self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)
@@ -233,10 +231,6 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(self.client.session['message'], 'Address form is required')
         self.assertRedirects(response, reverse('registration:profile'))
 
-        response = self.client.get(reverse('programs:class_registered_table'), secure=True)
-        self.assertEqual(self.client.session['message'], 'Address form is required')
-        self.assertRedirects(response, reverse('registration:profile'))
-
     def test_class_register_return_for_payment(self):
         # add 1 beginner students and 1 returnee.
         self.client.force_login(User.objects.get(pk=3))
@@ -248,13 +242,6 @@ class TestsClassRegistration(TestCase):
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': 1}), secure=True)
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
         self.assertEqual(self.client.session['payment_category'], 'intro')
-
-    def test_get_class_registered_table(self):
-        self.test_user = User.objects.get(pk=2)
-        self.client.force_login(self.test_user)
-        response = self.client.get(reverse('programs:class_registered_table'), secure=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'program_app/tables/class_registered_table.html')
 
     def test_class_register_instructor_current(self):
         # make user instructor

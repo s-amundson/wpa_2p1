@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Student Search Results
+{% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/search.js' %}"></script>
+    <script>
+        let student_table_url = "{% url 'registration:student_table' %}"
+        let add_student_url = "{% url 'registration:add_student' %}"
+        let url_student_family_api = "{% url 'registration:student_family' %}"
+        let url_theme = "{% url 'registration:theme' %}"
+    </script>
+{% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    {% for sf in families %}
+        <h3>Result {{ forloop.counter }} of {{ families|length }}</h3>
+        <div class="p-2">
+            <table class="table table-bordered
+                {% if user.dark_theme %}
+                    text-white
+                {% else %}
+                    text-dark
+                {% endif %}">
+                <thead>
+                    <th> First Name </th>
+                    <th> Last Name </th>
+                    <th> Date of Birth </th>
+                    <th> Safety Class Date </th>
+                    <th> Waiver </th>
+                    <th> Membership Expire Date </th>
+                </thead>
+                <tbody>
+                    {% for student in sf.student_set.all %}
+                        <tr>
+                            <td>{{ student.first_name }}</td>
+                            <td>{{ student.last_name }}</td>
+                            <td>{{ student.dob }}</td>
+                            <td>{{ student.safety_class }}</td>
+                            <td>
+                                {% if student.signature_pdf %}
+                                    <a target="_blank" href="{% url 'registration:pdf' student.id %}">Waiver</a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for member in student.member_set.all %}
+                                    <a href="{% url 'membership:membership' sf.id %}">
+                                        {{ member.expire_date }}
+                                    </a>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="student-family-address" class="row px-3">
+            <div class="col-1"></div>
+            <div class="col px-3">
+                <div id="address1" class="row">{{ sf.street }} </div>
+                <div id="address2" class="row">
+                    {{ sf.city }} {{ sf.state }} {{ sf.post_code }}
+                </div>
+                <div id="phone" class="row">{{ sf.phone }}</div>
+                <div class="flex-row m-2">
+                    <a href="{% url 'registration:search_result' sf.id %}" class="btn btn-primary" type="button" name="button"
+                            family_id="{{ sf.id }}">
+                        View/Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <hr/>
+    {% endfor %}
+
+
+{% endblock %}

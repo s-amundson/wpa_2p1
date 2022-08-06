@@ -27,7 +27,6 @@ class TestsEmail(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Payment Confirmation')
         self.assertTrue(mail.outbox[0].body.find('Thank you for your purchase with Woodley Park Archers.') > 0)
-        logging.debug(mail.outbox[0].body)
 
     def test_refund_email(self):
         EmailMessage().refund_email(self.test_user)

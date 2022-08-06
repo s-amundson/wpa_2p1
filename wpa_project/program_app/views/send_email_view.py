@@ -24,7 +24,7 @@ class SendEmailView(UserPassesTestMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        # logging.debug(form.cleaned_data)
         form.send_message()
         return super().form_valid(form)
 

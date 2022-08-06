@@ -53,5 +53,6 @@ class ClassAttendanceForm(forms.Form):
                 'cr_id': cr.id,
                 'covid_vax': cr.student.covid_vax,
                 'covid_vax_check': f'covid_vax_{cr.student.id}',
+                'fam_id': cr.student.student_family.id,
                 'signature': is_signed,
                 'is_minor': self.student_helper.calculate_age(cr.student.dob, self.class_date) < 18}

@@ -17,7 +17,7 @@ class PinAttendanceBaseForm(MyModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        logging.debug('here')
+        logging.debug(self.instance)
         self.fields['stars'] = ChoiceField(choices=choices.stars())
         self.fields['previous_stars'] = ChoiceField(choices=choices.stars())
         self.update_attributes()
@@ -26,6 +26,7 @@ class PinAttendanceBaseForm(MyModelForm):
         self.fields['award_received'] = BooleanField(required=False)
         self.fields['award_received'].label = 'Student has received their award.'
         self.fields['award_received'].widget.attrs.update({'class': 'm-2', 'disabled': 'disabled'})
+        self.instruction = ''
 
     def calculate_pins(self):
         """Calculates the pins based off of target size, distance, bow class and score"""
@@ -60,7 +61,10 @@ class PinAttendanceStaffForm(PinAttendanceBaseForm):
         super().__init__(*args, **kwargs)
         logging.debug('here')
         logging.debug(self.instance)
+        self.instruction = 'Staff responsibility is to mark the student as attending. ' \
+                           'All other fields are optional and the responsibility of the student/guardian.'
         if self.instance and self.instance.pay_status == 'paid':
+            self.instruction = 'Please verify that the information filled out is correct'
             for f in self.Meta.optional_fields:
                 self.fields[f].required = False
                 if type(self.fields[f]) == BooleanField:
@@ -85,6 +89,7 @@ class PinAttendanceStudentForm(PinAttendanceBaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['attended'].widget.attrs.update({'class': 'm-2', 'readonly': 'readonly'})
+        self.instruction = 'Please fill out all fields below or verify that the information filled out is correct'
 
 
 class PinScoresForm(MyModelForm):

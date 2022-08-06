@@ -63,7 +63,7 @@ class CardHelper(SquareHelper):
             return self.card
         elif result.is_error():  # pragma: no cover
             self.handle_error(result, 'Card Disable Error')
-        return None
+        return None  # pragma: no cover
 
     def retrieve_card(self):
         result = self.client.cards.retrieve_card(

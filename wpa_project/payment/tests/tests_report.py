@@ -25,9 +25,15 @@ class TestsReport(TestCase):
         self.url = reverse('payment:report')
 
 
-    def test_get_payment(self):
+    def test_get_report(self):
         response = self.client.get(self.url, secure=True)
         self.assertTemplateUsed(response, 'payment/report.html')
+
+    def test_get_report_bad(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        response = self.client.get(self.url, secure=True)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_good(self):
         response = self.client.post(self.url, self.post_dict, secure=True)

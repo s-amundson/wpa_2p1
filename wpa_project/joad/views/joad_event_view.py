@@ -1,5 +1,6 @@
 from django.views.generic.edit import FormView
-from django.contrib.auth.mixins import  UserPassesTestMixin
+from django.views.generic.list import ListView
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
@@ -24,13 +25,30 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
     student = None
     attendance = None  # if there's an attendance record for the student this will be set to that record.
 
-    def get_form(self):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        logging.debug(self.attendance)
         if self.attendance is not None:
-            return self.form_class(instance=self.attendance, **self.get_form_kwargs())
+            kwargs['instance'] = self.attendance
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.student is not None:
+            hs = self.student.pinattendance_set.high_score()
+            if hs is not None:
+                initial['bow'] = hs.bow
+                initial['category'] = hs.category
+                initial['distance'] = hs.distance
+                initial['target'] = hs.target
+                initial['inner_scoring'] = hs.inner_scoring
+                initial['previous_stars'] = hs.stars
         if self.event is not None and self.event.event_type == 'joad_indoor':
             choices = Choices()
-            self.initial = {'event': self.event, 'student': self.student, 'category': choices.pin_shoot_catagory()[0]}
-        return self.form_class(**self.get_form_kwargs())
+            initial['event'] = self.event
+            initial['student'] = self.student
+            initial['category'] = choices.pin_shoot_catagory()[0]
+        return initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -85,6 +103,28 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
                 return True
         return False
 
+
+class EventAttendListView(UserPassesTestMixin, ListView):
+    event = None
+    template_name = 'joad/event_attend_list.html'
+    def get_queryset(self):
+        # qs1 = self.event.eventregistration_set.filter(pay_status='paid')
+        object_list = []
+
+        for row in self.event.eventregistration_set.filter(pay_status='paid'):
+            pa = self.event.pinattendance_set.filter(student=row.student).last()
+            logging.debug(pa)
+            d = {'reg': row, 'pa': pa}
+            object_list.append(d)
+        return object_list
+
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            sid = self.kwargs.get("event_id", None)
+            if sid is not None:
+                self.event = get_object_or_404(JoadEvent, pk=sid)
+            return self.request.user.is_board
+        return False
 
 class JoadEventView(UserPassesTestMixin, FormView):
     template_name = 'joad/event.html'

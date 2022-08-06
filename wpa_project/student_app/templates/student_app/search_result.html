@@ -17,86 +17,90 @@
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-    {% for sf in student_family %}
-        <div class="p-2">
-            <table class="table table-bordered
-                {% if user.dark_theme %}
-                    text-white
-                {% else %}
-                    text-dark
-                {% endif %}">
-                <thead>
-                    <th> </th>
-                    <th> First Name </th>
-                    <th> Last Name </th>
-                    <th> Date of Birth </th>
-                    <th> Safety Class Date </th>
-                    <th> Waiver </th>
-                    <th> Membership Expire Date </th>
-                </thead>
-                <tbody>
-                    {% for student in sf.student_set.all %}
-                        <tr>
-                            <td>
-                                <button id="btn-edit-{{ student.id }}" class="btn btn-primary" type="button"
-                                        student-id="{{ student.id }}">
-                                    Edit
-                                </button>
-                            </td>
-                            <td>{{ student.first_name }}</td>
-                            <td>{{ student.last_name }}</td>
-                            <td>{{ student.dob }}</td>
-                            <td>{{ student.safety_class }}</td>
-                            <td>
-                                {% if student.signature_pdf %}
-                                    <a target="_blank" href="{% url 'registration:pdf' student.id %}">Waiver</a>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% for member in student.member_set.all %}
-                                    <a href="{% url 'membership:membership' sf.id %}">
-                                        {{ member.expire_date }}
-                                    </a>
-                                {% endfor %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="container" id="student_add_div"></div>
-        <div id="student-family-form" class="row px-3"></div>
+    <div class="p-2">
+        <table class="table table-bordered
+            {% if user.dark_theme %}
+                text-white
+            {% else %}
+                text-dark
+            {% endif %}">
+            <thead>
+                <th> </th>
+                <th> First Name </th>
+                <th> Last Name </th>
+                <th> Date of Birth </th>
+                <th> Safety Class Date </th>
+                <th> Waiver </th>
+                <th> Membership Expire Date </th>
+            </thead>
+            <tbody>
+                {% for student in student_family.student_set.all %}
+                    <tr>
+                        <td>
+                            <button id="btn-edit-{{ student.id }}" class="btn btn-primary" type="button"
+                                    student-id="{{ student.id }}">
+                                Edit
+                            </button>
+                        </td>
+                        <td>{{ student.first_name }}</td>
+                        <td>{{ student.last_name }}</td>
+                        <td>{{ student.dob }}</td>
+                        <td>{{ student.safety_class }}</td>
+                        <td>
+                            {% if student.signature_pdf %}
+                                <a target="_blank" href="{% url 'registration:pdf' student.id %}">Waiver</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for member in student.member_set.all %}
+                                <a href="{% url 'membership:membership' student_family.id %}">
+                                    {{ member.expire_date }}
+                                </a>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="container" id="student_add_div"></div>
+    <div id="student-family-form" class="row px-3"></div>
 
-        <div id="student-family-address" class="row px-3">
-            <div class="col-1"></div>
-            <div class="col px-3">
-                <div id="address1" class="row">{{ sf.street }} </div>
-                <div id="address2" class="row">
-                    {{ sf.city }} {{ sf.state }} {{ sf.post_code }}
-                </div>
-                <div id="phone" class="row">{{ sf.phone }}</div>
-                <div class="flex-row m-2">
-                    <button id="btn-address-edit" class="btn btn-primary" type="button" name="button"
-                            family_id="{{ sf.id }}">
-                        Edit Address
-                    </button>
-                </div>
+    <div id="student-family-address" class="row px-3">
+        <div class="col-1"></div>
+        <div class="col px-3">
+            <div id="address1" class="row">{{ student_family.street }} </div>
+            <div id="address2" class="row">
+                {{ student_family.city }} {{ student_family.state }} {{ student_family.post_code }}
+            </div>
+            <div id="phone" class="row">{{ student_family.phone }}</div>
+            <div class="flex-row m-2">
+                <button id="btn-address-edit" class="btn btn-primary" type="button" name="button"
+                        family_id="{{ student_family.id }}">
+                    Edit Address
+                </button>
             </div>
         </div>
-        {% if user.is_board and sf.id %}
-            <div class="row pt-4">
-                <div class="col">Registration date: {{ sf.registration_date}} </div>
-                <a class="col m-2 btn btn-primary" href="{% url 'programs:class_registration_admin' sf.id %}" role="button">
-                    Admin Registration
-                </a>
-            </div>
+    </div>
+    {% if user.is_board and student_family.id %}
+        <div class="row p-4">
+                Past class attendance:
+                {% include 'program_app/tables/history_table.html' %}
+        </div>
+        <div class="row p-4">
+                Upcoming registrations:
+                {% include "program_app/forms/unregister.html" %}
+        </div>
+        <div class="row p-4">
+            <div class="col">Registration date: {{ student_family.registration_date}} </div>
+            <a class="col m-2 btn btn-primary" href="{% url 'programs:class_registration_admin' student_family.id %}" role="button">
+                Admin Registration
+            </a>
+        </div>
 
-            <div class="row pt-4">
-                <a href="{% url 'membership:membership' sf.id %}"> Membership </a>
-            </div>
-        {% endif %}
-        <hr/>
-    {% endfor %}
-
+        <div class="row pt-4">
+            <a href="{% url 'membership:membership' student_family.id %}"> Membership </a>
+        </div>
+    {% endif %}
 
 {% endblock %}

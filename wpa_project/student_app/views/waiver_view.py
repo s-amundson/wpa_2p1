@@ -24,21 +24,15 @@ class WaiverView(UserPassesTestMixin, FormView):
         return self.form_class(self.student, **self.get_form_kwargs())
 
     def form_invalid(self, form):
-        logging.debug(form.errors)
+        logging.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
         self.form = form
-        # logging.debug('valid')
-        # logging.debug(self.class_date)
         if form.make_pdf(self.class_date):
             self.update_attendance()
             form.send_pdf()
         return HttpResponseRedirect(self.success_url)
-
-    def post(self, request, *args, **kwargs):
-        # logging.debug(self.request.POST)
-        return super().post(request, *args, **kwargs)
 
     def test_func(self):
         sid = self.kwargs.get('student_id', None)

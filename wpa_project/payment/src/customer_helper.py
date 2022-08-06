@@ -35,7 +35,7 @@ class CustomerHelper(SquareHelper):
             return self.customer
         elif result.is_error():  # pragma: no cover
             self.handle_error(result, 'Customer create error')
-        return None
+        return None  # pragma: no cover
 
     def delete_customer(self):
         c = Customer.objects.get(user=self.user)
@@ -65,4 +65,4 @@ class CustomerHelper(SquareHelper):
             return self.customer
         elif result.is_error():  # pragma: no cover
             self.handle_error(result, 'Customer retrieve error')
-        return None
+        return None  # pragma: no cover

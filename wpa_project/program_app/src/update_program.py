@@ -79,7 +79,7 @@ class UpdatePrograms:
         for c in classes:
             c.state = self.states[3]  # 'closed'
             c.save()
-            logging.debug(c.state)
+            # logging.debug(c.state)
 
     def daily_update(self):
         self.add_weekly()
@@ -88,7 +88,6 @@ class UpdatePrograms:
         # set past classes to recorded
         yesterday = self.today - timedelta(days=1)
         classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=self.states[:4])
-        logging.debug(len(classes))
         for c in classes:
             c.state = self.states[5]  # 'recorded'
             c.save()
@@ -107,27 +106,24 @@ class UpdatePrograms:
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         class_date = timezone.datetime.combine(self.today + timedelta(days=2), class_time)
         classes = BeginnerClass.objects.filter(class_date=class_date, state__in=self.states[:3])
-        logging.debug(classes)
         for c in classes:
             cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin'])  #.exclude(student__in=staff_students)
-            logging.debug(cr)
-            logging.debug(c)
             student_list = []
             for r in cr:
                 student_list.append(r.student.id)
             students = Student.objects.filter(id__in=student_list)
             students = students.exclude(user__in=staff_query)
-            logging.debug(students)
+            # logging.debug(students)
             self.email.beginner_reminder(c, students)
 
     def status_email(self):
         crh = ClassRegistrationHelper()
         email_date = self.today + timedelta(days=3)
-        logging.debug(email_date)
+        # logging.debug(email_date)
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         staff_students = Student.objects.filter(user__in=staff_query)
         classes = BeginnerClass.objects.filter(class_date__date=email_date, state__in=self.states[:3])
-        logging.debug(len(classes))
+        # logging.debug(len(classes))
         if len(classes):
             class_list = []
             for c in classes:
@@ -141,6 +137,6 @@ class UpdatePrograms:
                         staff.append(r.student)
                 class_list.append({'class': c, 'instructors': instructors, 'staff': staff,
                                    'count': crh.enrolled_count(c)})
-            logging.debug(class_list)
+            # logging.debug(class_list)
             self.email.status_email(class_list, staff_query)
-            logging.debug('emailed')
+            # logging.debug('emailed')

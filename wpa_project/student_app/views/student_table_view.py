@@ -20,7 +20,6 @@ class StudentTableView(LoginRequiredMixin, View):
                 d = model_to_dict(s)
                 if s.member_set.last() is not None:
                     has_member = True
-                    # logging.debug(s.member_set.last().expire_date)
                     d['member_expire'] = s.member_set.last().expire_date
                 students.append(d)
 

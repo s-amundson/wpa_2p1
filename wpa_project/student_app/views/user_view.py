@@ -21,9 +21,9 @@ class UserView(UserPassesTestMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        # logging.debug(form.cleaned_data)
         form.save()
-        logging.debug('valid')
+        # logging.debug('valid')
         return super().form_valid(form)
 
     def test_func(self):

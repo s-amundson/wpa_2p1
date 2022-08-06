@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %} Calendar {% endblock %}
+
+
+{% block main %}
+    <div class="row py-2">
+        <div id="div-calendar">
+            {{ html_cal }}
+        </div>
+    </div>
+    <div id="div-calendar-btn" class="d-flex justify-content-between">
+        <div>
+            {% if not this_month %}
+            <a href="{% url 'programs:calendar' previous.year previous.month %}" role="button" class="btn btn-primary m-1">
+                Previous Month
+            </a>
+            {% endif %}
+        </div>
+        <div>
+            <a href="{% url 'programs:calendar' next.year next.month %}" role="button" class="btn btn-primary m-1">
+                Next Month
+            </a>
+        </div>
+    </div>
+{% endblock %}

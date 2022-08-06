@@ -41,6 +41,38 @@ class TestsEventAttendance(TestCase):
         self.assertTemplateUsed(response, 'joad/pin_attendance.html')
         self.assertContains(response, 'disabled', 2)
 
+    def test_get_auth_with_initial(self):
+        self.test_user = User.objects.get(pk=7)
+        self.client.force_login(self.test_user)
+        pa = PinAttendance.objects.create(bow='barebow',
+                                          category='joad_indoor',
+                                          distance=9,
+                                          inner_scoring=False,
+                                          target=60,
+                                          score=53,
+                                          stars=1,
+                                          event=JoadEvent.objects.get(pk=1),
+                                          student=Student.objects.get(pk=10),
+                                          attended=True)
+        event = JoadEvent.objects.create(cost=15,
+                                         event_date='2022-01-16T16:00:00.000Z',
+                                         event_type="joad_indoor",
+                                         state="open",
+                                         student_limit=10,
+                                         pin_cost=5)
+        pa2 = PinAttendance.objects.create(event=event,
+                                          student=Student.objects.get(pk=10),
+                                          attended=True)
+        response = self.client.get(reverse('joad:event_attendance', kwargs={'event_id': event.id, 'student_id': 10}),
+                                   secure=True)
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.initial['bow'], pa.bow)
+        self.assertEqual(form.initial['distance'], pa.distance)
+        self.assertEqual(form.initial['target'], pa.target)
+        self.assertTemplateUsed(response, 'joad/pin_attendance.html')
+        self.assertContains(response, 'disabled', 2)
+
     def test_post_student_bad(self):
         self.test_user = User.objects.get(pk=7)
         self.client.force_login(self.test_user)
@@ -177,3 +209,21 @@ class TestsEventAttendance(TestCase):
         self.assertEqual(response.status_code, 302)
         pa2 = PinAttendance.objects.get(pk=pa.id)
         self.assertTrue(pa2.award_received)
+
+    def test_get_attend_list_no_auth(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+
+        response = self.client.get(reverse('joad:event_attend_list', kwargs={'event_id': 1}),
+                                   secure=True)
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_attend_list_auth(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+
+        response = self.client.get(reverse('joad:event_attend_list', kwargs={'event_id': 1}),
+                                   secure=True)
+        logging.debug(response.context['object_list'])
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.status_code, 200)

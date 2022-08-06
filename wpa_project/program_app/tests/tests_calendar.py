@@ -24,12 +24,17 @@ class TestsCalendar(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        logging.debug('here')
 
     def test_get_calendar(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        response = self.client.get(reverse('programs:class_calendar'), secure=True)
+        response = self.client.get(reverse('programs:calendar'), secure=True)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_calendar_date(self):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('programs:calendar', kwargs={'year': 2023, 'month': 14}), secure=True)
         self.assertEqual(response.status_code, 200)
 
     def test_insert_event(self):
@@ -43,7 +48,6 @@ class TestsCalendar(TestCase):
         e2 = cal.Event(id=1, class_date=timezone.datetime(year=2022, month=2, day=2, hour=10), class_type='test_type2',
                        state='test_state')
         end_list = cal.insert_event(start_list, e2)
-        logging.debug(end_list[1].class_date)
         self.assertEqual(end_list[1].class_date, e2.class_date)
         self.assertEqual(len(end_list), 3)
 
@@ -58,14 +62,12 @@ class TestsCalendar(TestCase):
         e2 = cal.Event(id=1, class_date=timezone.datetime(year=2022, month=2, day=2, hour=12), class_type='test_type2',
                        state='test_state')
         end_list = cal.insert_event(start_list, e2)
-        logging.debug(end_list[1].class_date)
         self.assertEqual(end_list[2].class_date, e2.class_date)
         self.assertEqual(len(end_list), 3)
 
     def test_day(self):
         date = timezone.datetime.now() + timezone.timedelta(days=1)
         date = date.replace(hour=9, minute=0, second=0, microsecond=0)
-        logging.debug(date)
         BeginnerClass.objects.create(class_date=date, class_type='beginner', beginner_limit=2, returnee_limit=2,
                                           state='open')
         BeginnerClass.objects.create(class_date=date.replace(hour=11), class_type='returnee', beginner_limit=2,
@@ -79,7 +81,6 @@ class TestsCalendar(TestCase):
 
         cal = Calendar(year=date.year, month=date.month)
         html_cal = cal.formatmonth(withyear=True)
-        logging.debug(html_cal)
         self.assertEqual(html_cal.count('Beginner 09:00 AM'), 1)
         self.assertEqual(html_cal.count('Returnee 11:00 AM'), 1)
         self.assertEqual(html_cal.count('Combined 03:00 PM'), 1)
@@ -89,7 +90,6 @@ class TestsCalendar(TestCase):
     def test_day_closed(self):
         date = timezone.datetime.now() + timezone.timedelta(days=1)
         date = date.replace(hour=9, minute=0, second=0, microsecond=0)
-        logging.debug(date)
         BeginnerClass.objects.create(class_date=date, class_type='beginner', beginner_limit=2, returnee_limit=2,
                                           state='closed')
         BeginnerClass.objects.create(class_date=date.replace(hour=11), class_type='returnee', beginner_limit=2,

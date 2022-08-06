@@ -18,7 +18,7 @@ class ReportView(UserPassesTestMixin, FormView):
     template_name = 'payment/report.html'
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        # logging.debug(form.cleaned_data)
         form.beginning_date = form.cleaned_data.get('beginning_date', form.beginning_date)
         form.end_date = form.cleaned_data.get('end_date', form.end_date)
         form.get_results()

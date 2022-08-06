@@ -7,8 +7,8 @@
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
     <div class="row p-3">
-        <form method="post" autocomplete="off" class="form">
-        {% csrf_token %}
+        <form method="post" autocomplete="off" class="form" action="{% url 'registration:search' %}">
+        {% csrf_token %} {{ email_form.non_field_errors }}
             <div class="row m-1">
                 <h4>
                     Search by Email
@@ -16,7 +16,7 @@
             </div>
             <div class="row">
                 <div class="col input-group input-group-md">
-                        {{ email_form.email }}
+                    {{ email_form.email }}{{ email_form.email.errors }}
                 </div>
                 <div class="col">
                     <button class="btn btn-primary" type="submit">Search</button>
@@ -26,8 +26,8 @@
     </div>
 
     <div class="row p-3">
-        <form method="post" autocomplete="off" class="form">
-        {% csrf_token %}
+        <form method="post" autocomplete="off" class="form" action="{% url 'registration:search_name' %}">
+        {% csrf_token %} {{ name_form.non_field_errors }}
             <div class="row m-1">
                 <h4>
                     Search by Name
@@ -52,8 +52,8 @@
     </div>
 
     <div class="row p-3">
-        <form method="post" autocomplete="off" class="form">
-        {% csrf_token %}
+        <form method="post" autocomplete="off" class="form" action="{% url 'registration:search_phone' %}">
+        {% csrf_token %} {{ phone_form.non_field_errors }} {{ phone_form.name_of_field.errors }}
             <div class="row m-1">
                 <h4>
                     Search by Phone
@@ -61,7 +61,7 @@
             </div>
             <div class="row">
                 <div class="col input-group input-group-md">
-                        {{ phone_form.phone }}
+                        {{ phone_form.phone }}{{ phone_form.phone.errors }}
                 </div>
                 <div class="col">
                     <button class="btn btn-primary" type="submit">Search</button>

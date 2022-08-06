@@ -129,5 +129,4 @@ class TestsEmail(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(len(mail.outbox[0].bcc), 1)
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
-        logging.debug(mail.outbox[0].body)
-        # self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+

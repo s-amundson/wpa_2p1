@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 class CovidVaxView(UserPassesTestMixin, View):
     def post(self, request, student_id):
-        # logging.debug(request.POST)
         student = Student.objects.get(pk=student_id)
 
         if f'covid_vax_{student.id}' in request.POST:

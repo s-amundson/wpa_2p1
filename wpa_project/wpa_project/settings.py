@@ -230,7 +230,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 SQUARE_CONFIG = get_secret('SQUARE_CONFIG')
-
+SQUARE_TESTING = False  # to facilitate testing of refunds and such without external requests
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 STATIC_URL = '/static/'

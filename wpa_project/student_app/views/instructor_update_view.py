@@ -17,7 +17,6 @@ class InstructorUpdateView(LoginRequiredMixin, View):
         return render(request, 'student_app/forms/instructor.html', {'form': form})
 
     def post(self, request):
-        logging.debug(request.POST)
         if not request.user.is_instructor:
             raise Http404("Not an instructor.")
         form = InstructorForm(request.POST)
@@ -31,5 +30,5 @@ class InstructorUpdateView(LoginRequiredMixin, View):
                 'level': request.user.instructor_level
             })
         else:
-            logging.debug(form.errors)
+            logging.warning(form.errors)
             return JsonResponse({'status': "error"})

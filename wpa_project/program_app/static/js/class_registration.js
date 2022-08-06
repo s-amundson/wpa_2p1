@@ -3,26 +3,9 @@ $.ajaxSetup({traditional: true});
 var started_status = false;
 $(document).ready(function(){
     $(".student-check").each(show_new_student);
-    get_reg_table();
     $("#id_beginner_class").click(get_class_status);
+    get_class_status();
 
-    get_calendar();
-    $("#beginner-class-form").hide()
-    $("#calendar-show-btn").hide()
-    $("#calendar-prev-btn").hide()
-    $("#calendar-show-btn").click(function (){
-        $("#div-calendar").show()
-    });
-
-    $("#calendar-prev-btn").click(function () {
-        month = month - 1;
-        get_calendar();
-    });
-
-    $("#calendar-next-btn").click(function () {
-        month = month + 1;
-        get_calendar();
-    });
     $("#myModal").modal("show");
 });
 
@@ -83,112 +66,6 @@ async function get_class_status() {
         });
     }
     $("#class-available").html(msg);
-}
-
-async function get_reg_table() {
-    // get the classes that this 'family' is registered for.
-    let data = await $.get(url_class_registered_table, function(data, status){
-        $("#registered_table").html(data);
-        if($(".unreg").length > 0) {
-            $("#unreg_form").show();
-        }
-        else{
-            $("#unreg_form").hide();
-        }
-        $("#unreg_form").submit(function(e){
-            e.preventDefault();
-            post_unregister()
-        });
-    });
-    if ($(".pay_status").length == 0) {
-        $("#registered_classes").hide()
-    }
-    else {
-        if (started_status){
-            $("#incompleteRegistration").modal("show");
-        }
-        $("#registered_classes").show()
-    }
-
-}
-
-
-async function post_unregister() {
-    // to unregister student(s) from a class.
-    let refund = 0;
-    let incomplete = 0;
-    let unreg_list = [];
-    let getConfirm = false;
-    let class_id = "";
-    $(".unreg").each(function(i, obj) {
-        class_id = $(this).attr("class_id");
-        console.log($(this).parents("tr").find(".pay_status").find("a").length)
-        if($(this).prop('checked') == true) {
-            if($(this).parents("tr").find(".pay_status").find("a").length) {
-                incomplete = incomplete + 1;
-                console.log(incomplete)
-            }
-            refund += parseInt($("#cost_" + class_id).val());
-            unreg_list.push(class_id);
-        }
-    });
-    if(unreg_list.length == 0){
-        alert_notice("Notice", "Please select a class to unregister")
-    }
-    if ('confirm' in window) {
-        if(unreg_list.length == 1){
-            if (unreg_list.length == incomplete) {
-                getConfirm = confirm("Please confirm that you wish to unregister for this class.");
-                }
-            else if ($("#donation").prop('checked') == true) {
-                getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be donating " +
-                refund + " to the club");
-                }
-            else {
-                getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
-                refund + " to your card in 5 to 10 business days");
-                }
-            }
-        else if (unreg_list.length > 1) {
-            if (unreg_list.length == incomplete) {
-                    getConfirm = confirm("Please confirm that you wish to unregister for this class.");
-                }
-            else if ($("#donation").prop('checked') == true) {
-                getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be donating " +
-                refund + " to the club");
-                }
-            else {
-                getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be refunded " +
-                refund + " to your card(s) in 5 to 10 business days");
-                }
-            }
-    }
-    else {
-        getConfirm = true;
-    }
-    if (getConfirm) {
-
-        //       Send the unregister request to the server
-        let data = await $.post(url_unregister, {
-            "class_list": unreg_list,
-            csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
-            'donation': $("#donation").prop('checked')
-        }, function(data, status){
-            console.log(data);
-            return data;
-            }, "json");
-
-        get_reg_table();
-        if (data.status == 'SUCCESS') {
-            alert_notice("Success", "You have successfully been unregistered from the class.")
-        }
-        else {
-            alert_notice('Error', data.error)
-        }
-    }
-    else {
-        console.log('canceled');
-    }
 }
 
 function select_class() {

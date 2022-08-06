@@ -62,8 +62,6 @@ class TestsUpdatePrograms(TestCase):
             cr.save()
 
         UpdatePrograms().status_email()
-        # logging.debug(mail.outbox[0].message())
-        logging.debug(d.strftime('%Y-%m-%d'))
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Status {d.strftime('%Y-%m-%d')}")
         s = 'has 2 students signed up and 3 volunteers signed up. The following volunteers are signed up:'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
@@ -140,8 +138,6 @@ class TestsUpdatePrograms(TestCase):
             cr.save()
 
         UpdatePrograms().reminder_email(timezone.datetime.time(d))
-        # logging.debug(mail.outbox[0].message())
-        logging.debug(d.strftime('%Y-%m-%d'))
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Reminder {d.strftime('%Y-%m-%d')}")
         s = 'Either you or a member of your family is signed up for a class'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
@@ -156,5 +152,4 @@ class TestsUpdatePrograms2(TestCase):
 
     def test_add_class(self):
         UpdatePrograms().add_weekly()
-        logging.debug(BeginnerClass.objects.all().count())
         self.assertTrue(BeginnerClass.objects.all().count() in [18])

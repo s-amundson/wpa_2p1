@@ -38,7 +38,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
                 c = c + timedelta(days=7)
             except BeginnerClass.DoesNotExist:  # pragma: no cover
                 c = timezone.now()
-                logging.debug('class does not exist')
+                # logging.debug('class does not exist')
             try:
                 cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1] #[0].standard_cost
                 costs = cost[0].standard_cost
@@ -56,10 +56,10 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
 
     def form_valid(self, form):
         # dont' add a class on a date that already has a class.
-        logging.debug(form.cleaned_data['class_date'])
+        # logging.debug(form.cleaned_data['class_date'])
         if len(BeginnerClass.objects.filter(class_date=form.cleaned_data['class_date'])) > 0 \
                 and self.beginner_class is None:
-            logging.debug('Class Exists')
+            # logging.debug('Class Exists')
             messages.add_message(self.request, messages.ERROR, 'A class at this time already exists')
             return self.form_invalid(form)
 
@@ -108,7 +108,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
                                 for s in c.student.student_family.student_set.all():
                                     if s.user is not None:
                                         email_message.refund_canceled_email(s.user, f'Class on {bc.class_date}')
-                logging.debug(cr)
+                # logging.debug(cr)
             if not cancel_error:
                 messages.add_message(self.request, messages.SUCCESS, 'Class was canceled')
         return super().form_valid(form)

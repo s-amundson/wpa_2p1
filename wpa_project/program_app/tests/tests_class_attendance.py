@@ -31,7 +31,6 @@ class TestsClassAttendance(TestCase):
         # list the class students but since class is not closed Attending column is missing
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_attendance.html')
-        # logging.debug(response.content)
         self.assertContains(response, 'Attending', 3)
 
         # change user, then add 2 new.

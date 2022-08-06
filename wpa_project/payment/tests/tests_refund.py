@@ -1,15 +1,12 @@
 import logging
 import time
 import uuid
-from datetime import datetime
 
 from django.test import TestCase, Client
-from django.urls import reverse
-from django.apps import apps
 from django.contrib.auth import get_user_model
 
 from ..forms import PaymentForm
-from ..models import PaymentLog, RefundLog
+from ..models import RefundLog
 from ..src import RefundHelper
 
 logger = logging.getLogger(__name__)
@@ -35,7 +32,7 @@ class TestsRefund(TestCase):
 
     def test_square_helper_refund_payment_error(self):
         rp = RefundHelper().refund_with_idempotency_key(str(uuid.uuid4()), 1000)
-        self.assertEqual(rp, {'status': "FAIL"})
+        self.assertEqual(rp, {'status': "FAIL", 'error': 'Record does not exist'})
 
     def test_square_helper_refund_payment(self):
         pf = PaymentForm(user=self.test_user)
@@ -53,7 +50,6 @@ class TestsRefund(TestCase):
             'source_id': 'cnon:card-nonce-ok'
         }
         pf.process_payment(str(uuid.uuid4()))
-        logging.debug(pf.log)
 
         time.sleep(5)
 
@@ -61,7 +57,7 @@ class TestsRefund(TestCase):
         refund.refund_entire_payment(pf.log)
         rl = RefundLog.objects.all()
         self.assertEqual(len(rl), 1)
-        self.assertEqual(rl[0].status, 'PENDING')
+        self.assertIn(rl[0].status, ['PENDING', 'SUCCESS'])
 
         time.sleep(5)
         refund = RefundHelper()
@@ -87,12 +83,10 @@ class TestsRefund(TestCase):
             'source_id': 'no-payment'
         }
         pf.process_payment(str(uuid.uuid4()))
-        logging.debug(pf.log)
         time.sleep(5)
 
         refund = RefundHelper()
         refund.refund_entire_payment(pf.log)
         rl = RefundLog.objects.all()
-        logging.debug(len(rl))
         self.assertEqual(len(rl), 0)
         self.assertEqual(pf.log.status, 'refund')

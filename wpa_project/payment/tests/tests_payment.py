@@ -66,6 +66,16 @@ class TestsPayment(TestCase):
         self.assertEqual(card[1].customer.user, self.test_user)
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
 
+        # make payment with card
+        self.pay_dict['card'] = card[1].id
+        self.pay_dict['save_card'] = False
+        response = self.client.post(self.url, self.pay_dict, secure=True)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 2)
+        card = Card.objects.all()
+        self.assertEqual(len(card), 2)
+        self.assertRedirects(response, reverse('payment:view_payment', args=[pl[1].id]))
+
     def test_payment_card_decline(self):
         self.pay_dict['source_id'] = 'cnon:card-nonce-declined'
         response = self.client.post(self.url, self.pay_dict, secure=True)
@@ -95,7 +105,6 @@ class TestsPayment(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 0)
         error = 'Payment Error: Strong Authentication not supported at this time, please use a different card.'
-        logging.debug(response.context['form'].payment_errors)
         self.assertTrue(error in response.context['form'].payment_errors)
 
     def test_payment_without_line_items(self):
@@ -127,7 +136,6 @@ class TestsPayment(TestCase):
     def test_payment_idempotency_key(self):
         # Use an old idempotency_key and see that it gets changed with error.
         ik = 'caf90994-d30e-4a43-8fb8-bc3e28922993'
-        logging.debug(ik)
         session = self.client.session
         session['idempotency_key'] = ik
         session['line_items'] = [{'name': 'Class on None student id: 1',

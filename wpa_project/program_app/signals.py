@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def registration_update(sender, instance, created, **kwargs):
     crh = ClassRegistrationHelper()
     cr = ClassRegistration.objects.filter(idempotency_key=instance.idempotency_key)
-    logging.debug(instance.status)
+    # logging.debug(instance.status)
     if instance.status in ["SUCCESS", "COMPLETED"]:
         for c in cr:
             c.pay_status = 'paid'

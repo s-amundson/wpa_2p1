@@ -102,7 +102,6 @@ class TestsStudentFamily(TestCase):
                                     HTTP_ACCEPT='application/json')
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
-        logging.debug(content)
         for k, v in d.items():
             self.assertEqual(content[k], v)
         sf = StudentFamily.objects.get(pk=5)
@@ -127,7 +126,6 @@ class TestsStudentFamily(TestCase):
                                     HTTP_ACCEPT='application/json')
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
-        logging.debug(content)
         for k,v in d.items():
             self.assertEqual(content[k], v)
         sf = StudentFamily.objects.get(pk=2)

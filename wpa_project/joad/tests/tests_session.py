@@ -15,7 +15,7 @@ class TestsJoadSession(TestCase):
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
-        self.session_dict = {"cost": 120, "start_date": "2022-04-01", "state": "open", "student_limit": 10}
+        self.session_dict = {"cost": 125, "start_date": "2022-04-01", "state": "open", "student_limit": 10}
         self.class_dict = {"class_date": "2022-04-01", "session": 1, "state": "scheduled"}
 
     def test_user_normal_no_auth(self):
@@ -62,7 +62,7 @@ class TestsJoadSession(TestCase):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('joad:session_status', kwargs={'session_id': 1}), secure=True)
-        self.assertEqual(response.context['cost'], 120)
+        self.assertEqual(response.context['cost'], 125)
         self.assertEqual(response.context['limit'], 10)
         self.assertEqual(response.context['openings'], 10)
 
@@ -77,7 +77,7 @@ class TestsJoadSession(TestCase):
             session=Session.objects.get(pk=1))
 
         response = self.client.get(reverse('joad:session_status', kwargs={'session_id': 1}), secure=True)
-        self.assertEqual(response.context['cost'], 120)
+        self.assertEqual(response.context['cost'], 125)
         self.assertEqual(response.context['limit'], 10)
         self.assertEqual(response.context['openings'], 9)
 
