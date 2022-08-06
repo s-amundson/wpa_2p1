@@ -95,7 +95,6 @@ class TestsPayment(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 0)
         error = 'Payment Error: Strong Authentication not supported at this time, please use a different card.'
-        logging.debug(response.context['form'].payment_errors)
         self.assertTrue(error in response.context['form'].payment_errors)
 
     def test_payment_without_line_items(self):
@@ -127,7 +126,6 @@ class TestsPayment(TestCase):
     def test_payment_idempotency_key(self):
         # Use an old idempotency_key and see that it gets changed with error.
         ik = 'caf90994-d30e-4a43-8fb8-bc3e28922993'
-        logging.debug(ik)
         session = self.client.session
         session['idempotency_key'] = ik
         session['line_items'] = [{'name': 'Class on None student id: 1',

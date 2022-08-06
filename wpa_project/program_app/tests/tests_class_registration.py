@@ -114,7 +114,6 @@ class TestsClassRegistration(TestCase):
         cr.save()
 
         # try to add first user to class again.
-        logging.debug('add user again')
         self.client.force_login(User.objects.get(pk=3))
         response = self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
@@ -136,7 +135,6 @@ class TestsClassRegistration(TestCase):
         cr.save()
 
         # try to add first user to class again.
-        logging.debug('add user again')
         self.client.force_login(User.objects.get(pk=2))
         response = self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)

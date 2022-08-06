@@ -89,7 +89,7 @@ class TestsCustomer(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 0)
         error = 'Payment Error: Strong Authentication not supported at this time, please use a different card.'
-        logging.debug(response.context['form'].payment_errors)
+        # logging.debug(response.context['form'].payment_errors)
         self.assertTrue(error in response.context['form'].payment_errors)
 
     def test_payment_without_line_items(self):

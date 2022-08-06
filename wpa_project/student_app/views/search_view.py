@@ -22,7 +22,6 @@ class SearchResultListView(UserPassesTestMixin, ListView):
     def get_context_data(self):
         context = super().get_context_data()
         context['families'] = self.families
-        logging.debug(context)
         return context
 
     def get_queryset(self):
@@ -46,7 +45,6 @@ class SearchResultView(UserPassesTestMixin, TemplateView):
         context['attend_history'] = ClassRegistrationHelper().attendance_history_queryset(self.student_family)
         context['student_family'] = self.student_family
         context['form'] = UnregisterForm(family=self.student_family)
-        logging.debug(context['student_family'])
         return context
 
     # def get(self, request, student_family):
@@ -84,7 +82,6 @@ class SearchAbstractView(UserPassesTestMixin, FormView):
 
 class SearchEmailView(SearchAbstractView):
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
         emails = EmailAddress.objects.filter(email__iexact=form.cleaned_data['email'])
         if len(emails) == 0:
             form.add_error('email', 'Not Found')
@@ -97,7 +94,6 @@ class SearchEmailView(SearchAbstractView):
                 fam_list.append(student.student_family.id)
             except Student.DoesNotExist:  # pragma: no cover
                 pass
-        logging.debug(fam_list)
         self.request.session['families'] = fam_list
         return super().form_valid(form)
 
@@ -117,7 +113,6 @@ class SearchNameView(SearchAbstractView):
         student_family = []
         for s in student:
             student_family.append(s.student_family.id)
-        logging.debug(student_family)
         self.request.session['families'] = student_family
         return super().form_valid(form)
 

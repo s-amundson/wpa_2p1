@@ -40,7 +40,6 @@ class TestsStudent(TestCase):
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
         response = self.client.post(reverse('registration:add_student'), d, secure=True)
-        logging.debug(len(Student.objects.all()))
         student = Student.objects.last()
         self.assertEqual(student.first_name, d['first_name'])
         self.assertEqual(student.last_name, d['last_name'])

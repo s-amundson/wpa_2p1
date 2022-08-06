@@ -51,7 +51,7 @@ class RefundHelper(SquareHelper):
                                'payment_id': log.payment_id,
                                'id': 'test_refund',
                                'amount_money': {'amount': log.total_money}}
-        logging.debug(square_response)
+        # logging.debug(square_response)
         if self.testing or result.is_success():
             square_response['error'] = ""
             log.status = 'refund'
@@ -67,6 +67,6 @@ class RefundHelper(SquareHelper):
                                      )
         elif result.is_error():  # pragma: no cover
             square_response['status'] = 'error'
-            logging.debug(result.errors)
+            # logging.debug(result.errors)
             square_response['error'] = result.errors
         return square_response

@@ -43,7 +43,6 @@ class TestsSignal(TestCase):
         student.email = "john@example.org"
         student.save()
         user = self.User.objects.create(username="john", email="john@example.org")
-        logging.debug(user)
         email = EmailAddress.objects.create(
             user=user, email="john@example.org", primary=False, verified=True
         )

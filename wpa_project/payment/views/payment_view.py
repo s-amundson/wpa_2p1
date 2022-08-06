@@ -36,7 +36,7 @@ class CreatePaymentView(FormView):
                         self.request.session.pop(k)
             return super().form_valid(form)
         else:
-            logging.debug(form.errors)
+            # logging.debug(form.errors)
             # replace idempotency_key
             self.request.session['idempotency_key'] = str(uuid.uuid4())
         return self.form_invalid(form)

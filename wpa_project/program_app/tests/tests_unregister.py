@@ -47,7 +47,6 @@ class TestsUnregisterStudent(TestCase):
         self.assertEqual(len(pl), 1)
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
-        logging.debug(cr[0].pay_status)
 
         # give square some time to process the payment got bad requests without it.
         time.sleep(5)
@@ -74,7 +73,6 @@ class TestsUnregisterStudent(TestCase):
         self.assertEqual(bc.state, 'open')
 
         cr = bc.classregistration_set.all()
-        logging.debug(len(cr))
         self.assertEqual(cr[0].pay_status, 'refunded')
         self.assertEqual(cr[1].pay_status, 'refunded')
 
@@ -90,16 +88,12 @@ class TestsUnregisterStudent(TestCase):
         self.assertEqual(len(pl), 1)
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
-        logging.debug(cr[0].pay_status)
         time.sleep(5)
 
         d = {'donation': False, f'unreg_{cr[0].id}': True}
         response = self.client.post(self.test_url, d, secure=True)
         self.assertRedirects(response, self.url_registration)
-        # response = self.client.post(reverse('programs:unregister'),
-        #                             {'class_list': [cr[1].id]}, secure=True)
-        # logging.debug(response.data)
-        # self.assertEqual(response.data['status'], 'SUCCESS')
+
         rl = RefundLog.objects.all()
         self.assertEqual(len(rl), 1)
         self.assertEqual(rl[0].amount, 500)

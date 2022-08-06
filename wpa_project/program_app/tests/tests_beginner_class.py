@@ -73,7 +73,6 @@ class TestsBeginnerClass(TestCase):
 
         self.assertTemplateUsed('student_app/index.html')
         bc = BeginnerClass.objects.all()
-        logging.debug(bc[0].state)
         self.assertEquals(len(bc), 2)
         bc = BeginnerClass.objects.get(pk=1)
 
@@ -82,7 +81,6 @@ class TestsBeginnerClass(TestCase):
 
     def test_2nd_class_error(self):
         bc = BeginnerClass.objects.get(pk=1)
-        logging.debug(bc.class_date)
         # New class same day
         response = self.client.post(reverse('programs:beginner_class'),
                         {'class_date': '2023-06-05 09:00', 'class_type': 'combined', 'beginner_limit': 5,
@@ -94,7 +92,6 @@ class TestsBeginnerClass(TestCase):
 
     def test_2nd_class_good(self):
         bc = BeginnerClass.objects.get(pk=1)
-        logging.debug(bc.class_date)
         # New class same day
         response = self.client.post(reverse('programs:beginner_class'),
                         {'class_date': '2022-06-05 07:00', 'class_type': 'combined', 'beginner_limit': 5,
@@ -134,7 +131,6 @@ class TestsBeginnerClass(TestCase):
 
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
-        logging.debug(cr[0].pay_status)
 
         #  Change user and make another payment
         self.test_user = User.objects.get(pk=3)
@@ -153,7 +149,6 @@ class TestsBeginnerClass(TestCase):
 
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)
-        logging.debug(cr[0].pay_status)
 
         # give square some time to process the payment got bad requests without it.
         time.sleep(5)

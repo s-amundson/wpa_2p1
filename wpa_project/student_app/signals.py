@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 @receiver(email_changed)
 def email_update(request, user, from_email_address, to_email_address, **kwargs):
-    logging.debug(to_email_address.email)
     try:
         student = Student.objects.get(user=user)
         student.email = to_email_address.email
@@ -30,4 +29,3 @@ def email_confirmed_(request, email_address, **kwargs):
             user = User.objects.get(email=email_address.email)
             student.user = user
             student.save()
-            logging.debug('added user to student')

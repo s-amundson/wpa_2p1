@@ -34,7 +34,7 @@ class StaffReportView(UserPassesTestMixin, FormView):
                 bc = bc.filter(class_date__lte=self.end_date)
             cr = cr.filter(beginner_class__in=bc)
             i_dict = model_to_dict(i)
-            logging.debug(i_dict)
+            # logging.debug(i_dict)
             i_dict['registrations'] = len(cr)
             i_dict['attended'] = len(cr.filter(attended=True))
             i_dict['user'] = model_to_dict(i.user)

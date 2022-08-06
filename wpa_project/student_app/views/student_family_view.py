@@ -18,16 +18,16 @@ class StudentFamilyView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('registration:profile')
 
     def form_invalid(self, form):
-        logging.debug(form.errors)
+        logging.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        # logging.debug(form.cleaned_data)
         f = form.save()
         s = self.request.user.student_set.last()
-        logging.debug(s.student_family)
+        # logging.debug(s.student_family)
         if s.student_family is None:
-            logging.debug(f)
+            # logging.debug(f)
             s.student_family = f
             s.save()
 
@@ -39,7 +39,6 @@ class StudentFamilyView(LoginRequiredMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        logging.debug(kwargs)
         family_id = self.kwargs.get('family_id', None)
         if family_id is None:
             student = Student.objects.filter(user=self.request.user).last()

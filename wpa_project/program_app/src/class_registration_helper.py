@@ -13,7 +13,7 @@ class ClassRegistrationHelper:
             return ClassRegistration.objects.none()
         object_list = []
         students = student_family.student_set.all()
-        logging.debug(students)
+        # logging.debug(students)
         cr = ClassRegistration.objects.filter(
             beginner_class__class_date__lt=timezone.now().today(),
             student__in=students,
@@ -21,7 +21,7 @@ class ClassRegistrationHelper:
         for student in students:
             sr = cr.filter(student=student).aggregate(attended_count=Count('attended', distinct=True),
                                                       registrations=Count('id', distinct=True))
-            logging.debug(sr)
+            # logging.debug(sr)
             sr['student'] = student
             object_list.append(sr)
         return object_list
@@ -54,14 +54,14 @@ class ClassRegistrationHelper:
     def update_class_state(self, beginner_class):
         records = ClassRegistration.objects.filter(beginner_class=beginner_class)
         records = records.filter(pay_status__in=['paid', 'admin'])
-        logging.debug(len(records))
-        logging.debug(beginner_class.beginner_limit)
+        # logging.debug(len(records))
+        # logging.debug(beginner_class.beginner_limit)
         if beginner_class.class_type == 'beginner' and beginner_class.state in ['open', 'full']:
             if len(records) >= beginner_class.beginner_limit and beginner_class.state == 'open':
                 beginner_class.state = 'full'
                 beginner_class.save()
             elif len(records) < beginner_class.beginner_limit and beginner_class.state == 'full':
-                logging.debug('open')
+                # logging.debug('open')
                 beginner_class.state = 'open'
                 beginner_class.save()
         elif beginner_class.class_type == 'returnee' and beginner_class.state in ['open', 'full']:
@@ -69,7 +69,7 @@ class ClassRegistrationHelper:
                 beginner_class.state = 'full'
                 beginner_class.save()
             elif len(records) < beginner_class.returnee_limit and beginner_class.state == 'full':
-                logging.debug('open')
+                # logging.debug('open')
                 beginner_class.state = 'open'
                 beginner_class.save()
         elif beginner_class.state in ['open', 'full']:
@@ -83,4 +83,4 @@ class ClassRegistrationHelper:
                     beginner_class.state == 'full':
                 beginner_class.state = 'open'
                 beginner_class.save()
-        logging.debug(beginner_class.state)
+        # logging.debug(beginner_class.state)

@@ -11,7 +11,6 @@ class CardRemoveForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
-        logging.debug(user)
         super().__init__(*args, **kwargs)
         self.user = user
         self.fields['card'].choices = self.card_choices()
@@ -22,7 +21,7 @@ class CardRemoveForm(forms.Form):
         for card in saved_cards:
             card_choices.append((card.id, str(card)))
         card_choices.append((0, "New Card"))
-        logging.debug(card_choices)
+        # logging.debug(card_choices)
         return card_choices
 
 

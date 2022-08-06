@@ -30,7 +30,7 @@ class CardManageView(LoginRequiredMixin, FormView):
         return context
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        # logging.debug(form.cleaned_data)
         card_helper = CardHelper()
         customer = Customer.objects.filter(user=self.request.user).last()
         if customer is None:
@@ -40,7 +40,7 @@ class CardManageView(LoginRequiredMixin, FormView):
             card = card_helper.create_card_from_source(customer, form.cleaned_data['source_id'])
             if card is not None:
                 return super().form_valid(form)
-        logging.debug(card_helper.errors)
+        # logging.debug(card_helper.errors)
         for error in card_helper.errors:
             form.card_errors.append(error)
         return super().form_invalid(form)

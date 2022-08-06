@@ -45,10 +45,10 @@ class ClassRegistrationView(AccessMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        logging.debug(kwargs)
+        # logging.debug(kwargs)
         if self.kwargs.get('beginner_class', None) is not None:
             kwargs['initial']['beginner_class'] = self.kwargs.get('beginner_class')
-        logging.debug(kwargs)
+        # logging.debug(kwargs)
         return kwargs
 
     def get_form(self):
@@ -78,14 +78,14 @@ class ClassRegistrationView(AccessMixin, FormView):
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
 
-                logging.debug(s)
+                # logging.debug(s)
                 if StudentHelper().calculate_age(s.dob, beginner_class.class_date) < 9:
                     return self.has_error('Student must be at least 9 years old to participate')
 
                 if s.user is not None and s.user.is_staff:
                     logging.debug('student is staff')
                     if s.user.is_instructor:
-                        logging.debug(s.user.instructor_expire_date)
+                        # logging.debug(s.user.instructor_expire_date)
                         if s.user.instructor_expire_date is None \
                                 or s.user.instructor_expire_date < timezone.localdate(timezone.now()):
                             return self.has_error('Please update your instructor certification')
@@ -104,7 +104,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                             pay_status="refunded").exclude(pay_status='canceled').exclude(pay_status='refund donated')
                     if len(reg.filter(beginner_class=beginner_class)) == 0:
                         if s.safety_class is None:
-                            logging.debug(len(reg))
+                            # logging.debug(len(reg))
                             if len(reg.filter(beginner_class__class_date__gt=timezone.localdate(timezone.now()))) > 0:
                                 return self.has_error(f'{s.first_name} is enrolled in another beginner class')
                             else:
@@ -153,7 +153,7 @@ class ClassRegistrationView(AccessMixin, FormView):
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment_description'] = f'Class on {str(beginner_class.class_date)[:10]}'
-            logging.debug(students)
+            # logging.debug(students)
             for s in students:
                 if s.safety_class is None:
                     n = True
@@ -167,7 +167,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                     'amount_each': beginner_class.cost,
                      }
                 )
-                logging.debug(cr)
+                # logging.debug(cr)
             for i in instructors:
                 cr = ClassRegistration(beginner_class=beginner_class, student=i, new_student=False, pay_status='paid',
                                        idempotency_key=uid).save()
@@ -187,14 +187,14 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
     students = None
 
     def get_form(self):
-        logging.debug('get_form')
+        # logging.debug('get_form')
         return self.form_class(self.students, self.request.user, **self.get_form_kwargs())
 
     def form_valid(self, form):
         self.form = form
         logging.debug(form.cleaned_data)
         beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
-        logging.debug(beginner_class.cost)
+        # logging.debug(beginner_class.cost)
 
         uid = str(uuid.uuid4())
         if form.cleaned_data['payment']:
@@ -208,7 +208,7 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                                             kwargs={'beginner_class': form.cleaned_data['beginner_class']})
 
         cr = ClassRegistration.objects.filter(beginner_class=beginner_class)
-        logging.debug(timezone.now())
+        # logging.debug(timezone.now())
         for k, v in form.cleaned_data.items():
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
@@ -262,7 +262,7 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
 
         if reg_id:  # to regain an interrupted payment
             cr = get_object_or_404(ClassRegistration, pk=reg_id)
-            logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
+            # logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
             if cr.student.student_family != students[0].student_family:  # pragma: no cover
                 return Http404("registration mismatch")
             registrations = ClassRegistration.objects.filter(idempotency_key=cr.idempotency_key)

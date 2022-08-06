@@ -42,7 +42,6 @@ class TestsSearchList(TestCase):
     def test_student_list_get_staff(self):
         self.test_dict['staff'] = True
         response = self.client.get(reverse('registration:student_list'), self.test_dict, secure=True)
-        logging.debug(response.context['object_list'])
         self.assertEqual(len(response.context['object_list']), 2)
         self.assertEqual(response.status_code, 200)
 

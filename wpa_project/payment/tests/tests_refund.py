@@ -50,7 +50,6 @@ class TestsRefund(TestCase):
             'source_id': 'cnon:card-nonce-ok'
         }
         pf.process_payment(str(uuid.uuid4()))
-        logging.debug(pf.log)
 
         time.sleep(5)
 
@@ -84,12 +83,10 @@ class TestsRefund(TestCase):
             'source_id': 'no-payment'
         }
         pf.process_payment(str(uuid.uuid4()))
-        logging.debug(pf.log)
         time.sleep(5)
 
         refund = RefundHelper()
         refund.refund_entire_payment(pf.log)
         rl = RefundLog.objects.all()
-        logging.debug(len(rl))
         self.assertEqual(len(rl), 0)
         self.assertEqual(pf.log.status, 'refund')

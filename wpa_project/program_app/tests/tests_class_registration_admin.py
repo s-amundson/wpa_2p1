@@ -49,7 +49,6 @@ class TestsClassAdminRegistration(TestCase):
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
         cr = ClassRegistration.objects.all()
-        # logging.debug(len(cr))
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')
@@ -142,7 +141,6 @@ class TestsClassAdminRegistration(TestCase):
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'closed')
         cr = ClassRegistration.objects.all()
-        # logging.debug(len(cr))
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')

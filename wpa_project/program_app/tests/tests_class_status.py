@@ -53,7 +53,6 @@ class TestsClassStatus(TestCase):
 
         response = self.client.get(reverse('programs:class_status', kwargs={'class_id': '1'}), secure=True)
         content = json.loads(response.content)
-        logging.debug(content)
         self.assertEqual(content['status'], 'open')
         self.assertEqual(content['beginner'], 1)
         self.assertEqual(content['returnee'], 1)

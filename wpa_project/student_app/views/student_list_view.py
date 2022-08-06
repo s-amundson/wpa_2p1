@@ -24,10 +24,8 @@ class StudentList(UserPassesTestMixin, ListView):
             if self.form.cleaned_data['safety_class']:
                 object_list = object_list.filter(safety_class__isnull=False)
             if self.form.cleaned_data['last_name']:
-                logging.debug(self.form.cleaned_data['last_name'])
                 object_list = object_list.filter(last_name__icontains=self.form.cleaned_data['last_name'])
             if self.form.cleaned_data['first_name']:
-                logging.debug(self.form.cleaned_data['first_name'])
                 object_list = object_list.filter(first_name__icontains=self.form.cleaned_data['first_name'])
             if self.form.cleaned_data['staff']:
                 object_list = object_list.filter(user__is_staff=True)

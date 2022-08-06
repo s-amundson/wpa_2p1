@@ -14,11 +14,10 @@ class ThemeView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('registration:profile')
 
     def form_invalid(self, form):
-        logging.debug(form.errors)
+        logging.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
         self.request.user.dark_theme = form.cleaned_data.get('theme', 'light') == 'dark'
         self.request.user.save()
         return super().form_valid(form)

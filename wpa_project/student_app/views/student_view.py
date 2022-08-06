@@ -29,36 +29,34 @@ class AddStudentView(LoginRequiredMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
         if self.request.user.is_board:
             f = form.save()
         else:
             f = form.save(commit=False)
-            logging.debug(self.student)
             if self.student:
-                logging.debug('is student')
+                # logging.debug('is student')
                 s = self.request.user.student_set.last()
                 if s is not None:
-                    logging.debug(s.student_family.id)
+                    # logging.debug(s.student_family.id)
                     f.student_family = s.student_family
                     self.request.session['student_family'] = s.student_family.id
             else:
-                logging.debug('here')
+                # logging.debug('here')
                 if self.request.user.student_set.first() is None:
-                    logging.debug('user is student')
+                    # logging.debug('user is student')
                     f.user = self.request.user
                 s = self.request.user.student_set.last()
                 if s is not None:
-                    logging.debug(s.student_family.id)
+                    # logging.debug(s.student_family.id)
                     f.student_family = s.student_family
             f.save()
 
             if f.user is None:
                 if f.email is not None and f.email != self.request.user.email:
-                    logging.debug('invite')
+                    # logging.debug('invite')
                     EmailMessage().invite_user_email(self.request.user.student_set.first(), f)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
-            logging.debug('json response')
+            # logging.debug('json response')
             return JsonResponse({'id': f.id, 'first_name': form.cleaned_data['first_name'],
                                  'last_name': form.cleaned_data['last_name']})
         return super().form_valid(form)
@@ -76,7 +74,7 @@ class AddStudentView(LoginRequiredMixin, FormView):
                 context['student']['is_user'] = self.student.user_id
                 context['student']['this_user'] = False
             else:
-                logging.debug(self.student.user)
+                # logging.debug(self.student.user)
                 context['student']['is_user'] = self.student.user_id
                 context['student']['is_joad'] = self.student.is_joad
                 context['student']['this_user'] = (self.student.user == self.request.user)
@@ -105,7 +103,7 @@ class AddStudentView(LoginRequiredMixin, FormView):
 
 class StudentIsJoadView(UserPassesTestMixin, View):
     def post(self, request, student_id):
-        logging.debug(request.POST)
+        # logging.debug(request.POST)
         student = Student.objects.get(pk=student_id)
         age = StudentHelper().calculate_age(student.dob)
         if age < 9:

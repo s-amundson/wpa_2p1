@@ -20,7 +20,7 @@ class UnregisterView(UserPassesTestMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        # logging.debug(form.cleaned_data)
         if form.process_refund(self.request.user, self.student_family):
             return super().form_valid(form)
         return self.form_invalid(form)

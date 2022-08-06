@@ -13,7 +13,6 @@ class SendEmailForm(forms.Form):
         is_super = False
         if 'is_super' in kwargs:
             is_super = kwargs.get('is_super', False)
-            logging.debug(is_super)
             kwargs.pop('is_super')
         super().__init__(*args, **kwargs)
         choices = [('board', 'Board'), ('staff', 'Staff'), ('current members', 'Current Members'), ('joad', 'JOAD')]
@@ -32,7 +31,6 @@ class SendEmailForm(forms.Form):
         users = User.objects.filter(is_active=True)
         if self.cleaned_data['recipients'] == 'board':
             em.bcc_from_users(users.filter(is_board=True))
-            logging.debug(em.bcc)
         elif self.cleaned_data['recipients'] == 'staff':
             em.bcc_from_users(users.filter(is_staff=True))
         elif self.cleaned_data['recipients'] == 'current members':
