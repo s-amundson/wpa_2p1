@@ -56,15 +56,15 @@ class CardRemoveView(LoginRequiredMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        # logging.debug(form.cleaned_data)
         try:
             card = Card.objects.get(pk=form.cleaned_data['card'])
-        except Card.model.DoesNotExist:
+        except Card.model.DoesNotExist:  # pragma: no cover
             return self.form_invalid(form)
         card_helper = CardHelper(card)
         if card_helper.disable_card() is not None:
             return super().form_valid(form)
-        return self.form_invalid(form)
+        return self.form_invalid(form)  # pragma: no cover
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

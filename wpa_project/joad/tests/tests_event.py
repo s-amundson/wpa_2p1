@@ -92,15 +92,6 @@ class TestsJoadClassList(TestCase):
         self.assertTemplateUsed(response, 'joad/tables/class_table.html')
         self.assertEqual(response.status_code, 200)
 
-    def test_board_user_get(self):
-        self.test_user = User.objects.get(pk=1)
-        self.client.force_login(self.test_user)
-        # allow user to access
-        response = self.client.get(reverse('joad:class_list', kwargs={'session_id': 1}), secure=True)
-        self.assertEqual(len(response.context['object_list']), 3)
-        self.assertTemplateUsed(response, 'joad/tables/class_table.html')
-        self.assertEqual(response.status_code, 200)
-
     def test_board_user_get_all_sessions(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)

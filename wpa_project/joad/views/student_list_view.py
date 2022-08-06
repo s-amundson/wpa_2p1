@@ -14,6 +14,7 @@ class StudentListView(StudentList):
         context = super().get_context_data(**kwargs)
         context['last_event'] = self.last_event
         return context
+
     def get_queryset(self):
         queryset = super().get_queryset().filter(is_joad=True).order_by('last_name')
         if self.form.is_valid():

@@ -23,7 +23,6 @@ class RefundHelper(SquareHelper):
 
     def refund_payment(self, log, amount):
         """ does either a full or partial refund. """
-
         if log.status == 'comped':  # payment was comped therefore no refund
             log.status = 'refund'
             log.save()
@@ -50,7 +49,7 @@ class RefundHelper(SquareHelper):
                                'order_id': log.order_id,
                                'payment_id': log.payment_id,
                                'id': 'test_refund',
-                               'amount_money': {'amount': log.total_money}}
+                               'amount_money': {'amount': amount}}
         # logging.debug(square_response)
         if self.testing or result.is_success():
             square_response['error'] = ""

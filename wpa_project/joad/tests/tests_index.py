@@ -120,3 +120,29 @@ class TestsJoadIndex(TestCase):
         self.assertEqual(event['registrations'][0]['reg_status'], 'not registered')
         self.assertEqual(event['registrations'][1]['reg_status'], 'registered')
         self.assertEqual(event['registrations'][2]['reg_status'], 'attending')
+
+    def test_user_normal_is_joad_registered_start(self):
+        self.test_user = User.objects.get(pk=7)
+        self.client.force_login(self.test_user)
+        self.set_event_date()
+
+        event_reg = EventRegistration.objects.create(event=JoadEvent.objects.get(pk=1),
+                                         student=Student.objects.get(pk=11),
+                                         pay_status='start',
+                                         idempotency_key='7b16fadf-4851-4206-8dc6-81a92b70e52f')
+        # pa = PinAttendance.objects.create(event=JoadEvent.objects.get(pk=1),
+        #                                   student=Student.objects.get(pk=11),
+        #                                   attended=True)
+
+        response = self.client.get(reverse('joad:index'), secure=True)
+        self.assertEqual(response.context['is_auth'], True)
+        self.assertEqual(len(response.context['students']), 3)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['event_list']), 1)
+        logging.debug(response.context['event_list'][0])
+        event = response.context['event_list'][0]
+        self.assertEqual(len(event['registrations']), 3)
+        self.assertEqual(event['registrations'][0]['reg_status'], 'not registered')
+        self.assertEqual(event['registrations'][1]['reg_status'], 'registered')
+        self.assertEqual(event['registrations'][2]['reg_status'], 'start')
+        self.assertEqual(event['registrations'][2]['reg_id'], event_reg.id)

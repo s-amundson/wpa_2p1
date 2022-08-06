@@ -22,7 +22,7 @@ class TestsJoadRegistrationCancel(TestCase):
         super().__init__(*args, **kwargs)
         settings.SQUARE_TESTING = True
 
-    def create_payment(self):
+    def create_payment(self, amount=12500):
         ik = uuid.uuid4()
         reg = Registration.objects.create(session=Session.objects.get(pk=1),
                                           student=Student.objects.get(pk=8), pay_status='paid', idempotency_key=ik)
@@ -38,7 +38,7 @@ class TestsJoadRegistrationCancel(TestCase):
             receipt='',
             source_type='',
             status='SUCCESS',
-            total_money=12500,
+            total_money=amount,
             user=self.test_user
         )
 

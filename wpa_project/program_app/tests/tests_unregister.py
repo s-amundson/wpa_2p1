@@ -1,10 +1,11 @@
-import json
 import logging
-import time
 import uuid
 from datetime import datetime, timedelta
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone
+from django.conf import settings
+
 from ..models import BeginnerClass, ClassRegistration
 from student_app.models import Student, User
 from payment.models import PaymentLog, RefundLog
@@ -12,11 +13,35 @@ logger = logging.getLogger(__name__)
 
 
 class TestsUnregisterStudent(TestCase):
-    fixtures = ['f1', 'f3']
-    # fixtures = ['f1', 'f2']
+    fixtures = ['f1']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        settings.SQUARE_TESTING = True
+
+    def create_payment(self, students, amount=500):
+        ik = uuid.uuid4()
+        for student in students:
+            reg = ClassRegistration.objects.create(
+                beginner_class=BeginnerClass.objects.get(pk=1),
+                student=student, new_student=True, pay_status="paid",
+                idempotency_key=ik, reg_time="2021-06-09", attended=False
+            )
+        payment = PaymentLog.objects.create(
+            category='joad',
+            checkout_created_time=timezone.now(),
+            description='programs_test',  # database set to 255 characters
+            donation=0,  # storing pennies in the database
+            idempotency_key=ik,
+            location_id='',
+            order_id='',
+            payment_id='test_payment',
+            receipt='',
+            source_type='',
+            status='SUCCESS',
+            total_money=amount,
+            user=self.test_user
+        )
 
     def setUp(self):
         # Every test needs a client.
@@ -31,25 +56,8 @@ class TestsUnregisterStudent(TestCase):
         student.user.is_staff = False
         student.user.save()
 
-        self.client.post(self.url_registration,
-                     {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
-        bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.create_payment([student, Student.objects.get(pk=3)], 1000)
         cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
-
-        # process a good payment
-        pay_dict = {'amount': 10, 'card': 0, 'donation': 0, 'category': 'intro', 'save_card': False,
-                    'source_id': 'cnon:card-nonce-ok'}
-        response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
-
-        pl = PaymentLog.objects.all()
-        self.assertEqual(len(pl), 1)
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
-
-        # give square some time to process the payment got bad requests without it.
-        time.sleep(5)
 
         # make student a returnee and the class full
         student = Student.objects.get(pk=3)
@@ -77,18 +85,8 @@ class TestsUnregisterStudent(TestCase):
         self.assertEqual(cr[1].pay_status, 'refunded')
 
     def test_refund_success_partial_purchase(self):
-        self.client.post(self.url_registration,
-                         {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
-
-        # process a good payment
-        pay_dict = {'amount': 10, 'card': 0, 'category': 'intro', 'donation': 0, 'save_card': False,
-                    'source_id': 'cnon:card-nonce-ok'}
-        response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
-        pl = PaymentLog.objects.all()
-        self.assertEqual(len(pl), 1)
+        self.create_payment([Student.objects.get(pk=2), Student.objects.get(pk=3)], 1000)
         cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
-        time.sleep(5)
 
         d = {'donation': False, f'unreg_{cr[0].id}': True}
         response = self.client.post(self.test_url, d, secure=True)
@@ -102,7 +100,7 @@ class TestsUnregisterStudent(TestCase):
         self.assertEqual(pl[0].status, 'refund')
 
         # refund the other one as well but mark both.
-        d = {'donation': False,}
+        d = {'donation': False}
         for r in cr:
             d[f'unreg_{r.id}'] = True
         response = self.client.post(self.test_url, d, secure=True)
@@ -119,19 +117,8 @@ class TestsUnregisterStudent(TestCase):
         student.user.is_staff = False
         student.user.save()
 
-        self.client.post(self.url_registration,
-                     {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
-        bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.create_payment([student, Student.objects.get(pk=3)], 1000)
         cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr), 2)
-
-        # process a good payment
-        pay_dict = {'amount': 10, 'card': 0, 'donation': 0, 'category': 'intro', 'save_card': False,
-                    'source_id': 'cnon:card-nonce-ok'}
-        response = self.client.post(reverse('payment:make_payment'), pay_dict, secure=True)
-        time.sleep(5)
-
         d = {'donation': True}
         for r in cr:
             d[f'unreg_{r.id}'] = True
@@ -143,7 +130,7 @@ class TestsUnregisterStudent(TestCase):
 
 
 class TestsUnregisterStudent2(TestCase):
-    fixtures = ['f1', 'f2', 'f3']
+    fixtures = ['f1', 'f2']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
