@@ -25,6 +25,9 @@ class PinManager(models.Manager):
         # the method accepts **kwargs, so that it is possible to filter
         return self.filter(stars__gte=1).order_by('-stars', '-score').first()
 
+    def last_event(self):
+        return self.order_by('-id').first()
+
 
 class PinScores(CommonPin):
     pass

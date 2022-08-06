@@ -14,6 +14,9 @@
             <div class="m-2 fieldWrapper">
                 {{form.first_name.label_tag }} {{ form.first_name }}
             </div>
+            <div class="m-2 fieldWrapper">
+                {{form.last_event.label_tag }} {{ form.last_event }}
+            </div>
         </div>
       <input class="btn btn-primary" type="submit" value="Submit">
   </form>
@@ -42,13 +45,23 @@
                     <td>
                         {{ student.first_name|capfirst }} {{ student.last_name|capfirst }}
                     </td>
-                    <td>{{ student.pinattendance_set.high_score.bow }}</td>
-                    <td>{{ student.pinattendance_set.high_score.category }}</td>
-                    <td>{{ student.pinattendance_set.high_score.distance }}</td>
-                    <td>{{ student.pinattendance_set.high_score.target }}</td>
-                    <td>{% if student.pinattendance_set.high_score.inner_scoring %} X {% endif %}</td>
-                    <td>{{ student.pinattendance_set.high_score.score }}</td>
-                    <td>{{ student.pinattendance_set.high_score.stars }}</td>
+                    {% if last_event %}
+                        <td>{{ student.pinattendance_set.last_event.bow }}</td>
+                        <td>{{ student.pinattendance_set.last_event.category }}</td>
+                        <td>{{ student.pinattendance_set.last_event.distance }}</td>
+                        <td>{{ student.pinattendance_set.last_event.target }}</td>
+                        <td>{% if student.pinattendance_set.last_event.inner_scoring %} X {% endif %}</td>
+                        <td>{{ student.pinattendance_set.last_event.score }}</td>
+                        <td>{{ student.pinattendance_set.last_event.stars }}</td>
+                    {% else %}
+                        <td>{{ student.pinattendance_set.high_score.bow }}</td>
+                        <td>{{ student.pinattendance_set.high_score.category }}</td>
+                        <td>{{ student.pinattendance_set.high_score.distance }}</td>
+                        <td>{{ student.pinattendance_set.high_score.target }}</td>
+                        <td>{% if student.pinattendance_set.high_score.inner_scoring %} X {% endif %}</td>
+                        <td>{{ student.pinattendance_set.high_score.score }}</td>
+                        <td>{{ student.pinattendance_set.high_score.stars }}</td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </tbody>
