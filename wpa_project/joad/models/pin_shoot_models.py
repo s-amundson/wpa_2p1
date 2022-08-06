@@ -23,7 +23,7 @@ class CommonPin(models.Model):
 class PinManager(models.Manager):
     def high_score(self, **kwargs):
         # the method accepts **kwargs, so that it is possible to filter
-        return self.order_by('-score').first()
+        return self.filter(stars__gte=1).order_by('-stars', '-score').first()
 
 
 class PinScores(CommonPin):

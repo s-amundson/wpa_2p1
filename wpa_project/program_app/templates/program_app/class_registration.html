@@ -9,6 +9,8 @@
     <script>
         let url_class_registered_table = "{% url 'programs:unregister_table' %}"
         let url_class_status = "{% url 'programs:class_status' %}"
+        {% if family %} let family = true {% else %} let family = false {% endif %}
+
     </script>
 {% endblock %}
 

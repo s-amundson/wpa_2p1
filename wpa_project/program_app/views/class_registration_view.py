@@ -32,7 +32,7 @@ class ClassRegistrationView(AccessMixin, FormView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if request.user.student_set.first() is None or request.user.student_set.first().student_family is None:
+        if request.user.student_set.last() is None or request.user.student_set.last().student_family is None:
             request.session['message'] = 'Address form is required'
             return HttpResponseRedirect(reverse('registration:profile'))
         return super().dispatch(request, *args, **kwargs)
@@ -40,6 +40,7 @@ class ClassRegistrationView(AccessMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['this_month'] = timezone.localtime(timezone.now()).month
+        context['family'] = self.request.user.student_set.last().student_family
         return context
 
     def get_form_kwargs(self):
