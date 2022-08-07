@@ -29,4 +29,6 @@ class CardNewForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['source_id'] = forms.CharField()
+        self.fields['default_card'] = forms.BooleanField(required=False, label='Set new card as default')
+        self.fields['default_card'].widget.attrs.update({'class': 'm-2 form-check-input'})
         self.card_errors = []

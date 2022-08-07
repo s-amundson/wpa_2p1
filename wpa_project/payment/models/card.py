@@ -1,6 +1,7 @@
-from django.conf import settings
 from django.db import models
 from .customer import Customer
+
+from ..manager import CardManager
 
 
 class Card(models.Model):
@@ -10,6 +11,7 @@ class Card(models.Model):
     card_id = models.CharField(max_length=50, null=True)
     cardholder_name = models.CharField(max_length=100, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    default = models.BooleanField(default=False)
     enabled = models.BooleanField()
     exp_month = models.IntegerField()
     exp_year = models.IntegerField()
@@ -19,5 +21,10 @@ class Card(models.Model):
     prepaid_type = models.CharField(max_length=20, null=True)
     version = models.IntegerField(default=0)
 
+    objects = CardManager()
+
     def __str__(self):
-        return f'{self.card_brand} Ending in {self.last_4} Expires: {self.exp_month}/{self.exp_year}'
+        s = f'{self.card_brand} Ending in {self.last_4} Expires: {self.exp_month}/{self.exp_year}'
+        if self.default:
+            s += ' (Default)'
+        return s

@@ -12,12 +12,13 @@ class PaymentForm(forms.ModelForm):
     amount = forms.IntegerField(required=True)
     card = forms.ChoiceField(required=True)
     donation_note = forms.CharField(widget=forms.Textarea, required=False)
+    default_card = forms.BooleanField(required=False, initial=False, label='Set card as default')
     save_card = forms.BooleanField(required=False, initial=False, label='Save card for future purchases')
     source_id = forms.CharField(required=False, widget=forms.HiddenInput())
 
     class Meta:
         model = PaymentLog
-        fields = ('amount', 'card', 'category', 'donation', 'donation_note', 'save_card', 'source_id')
+        fields = ('amount', 'card', 'category', 'default_card', 'donation', 'donation_note', 'save_card', 'source_id')
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
@@ -42,12 +43,17 @@ class PaymentForm(forms.ModelForm):
         self.fields['category'].widget = forms.HiddenInput()
         self.fields['donation_note'].widget.attrs.update({'cols': 30, 'rows': 3, 'class': 'form-control'})
         self.fields['save_card'].widget.attrs.update({'class': 'm-2 form-check-input'})
+        if len(self.fields['card'].choices) > 1:
+            self.fields['default_card'].widget.attrs.update({'class': 'm-2 form-check-input'})
+        else:
+            self.fields['default_card'].widget.attrs.update({'class': 'm-2 form-check-input', 'disabled': 'disabled'})
+            self.fields['default_card'].initial = True
         self.payment_errors = []
 
     def card_choices(self):
         if self.user is None:
             return [(0, "New Card")]
-        saved_cards = Card.objects.filter(customer__user=self.user, enabled=True)
+        saved_cards = Card.objects.filter(customer__user=self.user, enabled=True).order_by('-default')
         card_choices = []
         for card in saved_cards:
             card_choices.append((card.id, str(card)))
@@ -97,7 +103,7 @@ class PaymentForm(forms.ModelForm):
                     customer = ch.create_customer()
                 if customer is not None:
                     card_helper = CardHelper()
-                    card = card_helper.create_card_from_payment(customer, self.log)
+                    card = card_helper.create_card_from_payment(customer, self.log, self.cleaned_data['default_card'])
                     return card is not None
             return True
         else:

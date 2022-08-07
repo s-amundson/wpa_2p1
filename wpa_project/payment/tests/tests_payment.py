@@ -21,8 +21,8 @@ class TestsPayment(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
-        self.pay_dict = {'amount': 5, 'card': 0, 'category': 'donation', 'donation': 0, 'save_card': False,
-                         'source_id': 'cnon:card-nonce-ok'}
+        self.pay_dict = {'amount': 5, 'card': 0, 'category': 'donation', 'default_card': False, 'donation': 0,
+                         'save_card': False, 'source_id': 'cnon:card-nonce-ok'}
         self.url = reverse('payment:make_payment')
         session = self.client.session
         session['line_items'] = [{'name': 'Class on None student: test_user',
@@ -55,7 +55,48 @@ class TestsPayment(TestCase):
         self.assertEqual(pl[0].donation, 500)
         self.assertRedirects(response, reverse('registration:index'))
 
+    def test_payment_success_save_card_default(self):
+        old_card = Card.objects.get(pk=1)
+        old_card.default = True
+        old_card.enabled = True
+        old_card.save()
+        customer = old_card.customer
+        customer.user = self.test_user
+        customer.save()
+
+        # process a good payment
+        self.pay_dict['save_card'] = True
+        self.pay_dict['default_card'] = True
+        response = self.client.post(self.url, self.pay_dict, secure=True)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        card = Card.objects.all()
+        self.assertEqual(len(card), 2)
+        self.assertEqual(card[1].customer.user, self.test_user)
+        self.assertFalse(card[0].default)
+        self.assertTrue(card[1].default)
+        self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
+
+        # make payment with card
+        self.pay_dict['card'] = card[1].id
+        self.pay_dict['save_card'] = False
+        self.pay_dict['default_card'] = False
+        response = self.client.post(self.url, self.pay_dict, secure=True)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 2)
+        card = Card.objects.all()
+        self.assertEqual(len(card), 2)
+        self.assertRedirects(response, reverse('payment:view_payment', args=[pl[1].id]))
+
     def test_payment_success_save_card(self):
+        old_card = Card.objects.get(pk=1)
+        old_card.default = True
+        old_card.enabled = True
+        old_card.save()
+        customer = old_card.customer
+        customer.user = self.test_user
+        customer.save()
+
         # process a good payment
         self.pay_dict['save_card'] = True
         response = self.client.post(self.url, self.pay_dict, secure=True)
@@ -64,17 +105,9 @@ class TestsPayment(TestCase):
         card = Card.objects.all()
         self.assertEqual(len(card), 2)
         self.assertEqual(card[1].customer.user, self.test_user)
+        self.assertTrue(card[0].default)
+        self.assertFalse(card[1].default)
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
-
-        # make payment with card
-        self.pay_dict['card'] = card[1].id
-        self.pay_dict['save_card'] = False
-        response = self.client.post(self.url, self.pay_dict, secure=True)
-        pl = PaymentLog.objects.all()
-        self.assertEqual(len(pl), 2)
-        card = Card.objects.all()
-        self.assertEqual(len(card), 2)
-        self.assertRedirects(response, reverse('payment:view_payment', args=[pl[1].id]))
 
     def test_payment_card_decline(self):
         self.pay_dict['source_id'] = 'cnon:card-nonce-declined'
