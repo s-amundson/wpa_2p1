@@ -19,7 +19,7 @@ class PaymentHelper(SquareHelper):
                        autocomplete=True, saved_card_id=0):
         # logging.debug(note)
         body = {
-                "idempotency_key": idempotency_key,
+                "idempotency_key": str(idempotency_key),
                 "amount_money": {"amount": amount * 100, "currency": "USD"},
                 "autocomplete": autocomplete,
                 "location_id": settings.SQUARE_CONFIG['location_id'],

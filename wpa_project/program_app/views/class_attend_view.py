@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 
 from ..models import BeginnerClass, ClassRegistration
 from ..forms import ClassAttendanceForm
+from ..src import ClassRegistrationHelper
 import logging
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ class ClassAttendListView(UserPassesTestMixin, FormView):
             if bid is None:
                 return False
             self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
+            # ClassRegistrationHelper().update_waiting(self.beginner_class)  # TODO remove this line
             return self.request.user.is_staff
         else:
             return False

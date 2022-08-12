@@ -30,7 +30,7 @@ class ClassRegistrationHelper:
     def charge_group(self, queryset):
         for ikey in queryset.values('idempotency_key').annotate(ik_count=Count('idempotency_key')).order_by():
             logging.debug(ikey)
-            icr = queryset.filter(idempotency_key=ikey['idempotency_key'])
+            icr = queryset.filter(idempotency_key=str(ikey['idempotency_key']))
             cost = icr[0].beginner_class.cost
             note = f'Class on {str(icr[0].beginner_class.class_date)[:10]}, Students: '
             for cr in icr:
@@ -39,7 +39,7 @@ class ClassRegistrationHelper:
             if cr.user.customer_set.last():
                 card = cr.user.customer_set.last().card_set.filter(enabled=True, default=True).last()
                 payment = PaymentHelper(cr.user).create_payment(cost * 100 * ikey['ik_count'], 'intro', 0,
-                                                                ikey['idempotency_key'], note, '',
+                                                                str(ikey['idempotency_key']), note, '',
                                                                 saved_card_id=card.id)
                 # send email to user
             if payment is None:  # a payment error happened
@@ -109,8 +109,8 @@ class ClassRegistrationHelper:
 
     def update_class_state(self, beginner_class):
         records = self.student_registrations(beginner_class)
-        # logging.debug(len(records))
-        # logging.debug(beginner_class.beginner_limit)
+        logging.debug(len(records))
+        logging.debug(beginner_class.beginner_limit)
         if beginner_class.class_type == 'beginner' and beginner_class.state in ['open', 'wait', 'full']:
             if len(records) >= beginner_class.beginner_limit and beginner_class.state == 'open':
                 if len(records) >= beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
@@ -162,6 +162,7 @@ class ClassRegistrationHelper:
 
     def update_waiting(self, beginner_class):
         records = self.student_registrations(beginner_class)
+        logging.debug(records)
         waiting = records.filter(pay_status='waiting').order_by('modified')
         admitted = records.filter(pay_status__in=['paid', 'admin']).order_by('modified')
 
