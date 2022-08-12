@@ -77,7 +77,7 @@ class UpdatePrograms:
         class_date = timezone.datetime.combine(self.today + timedelta(days=1), class_time)
         classes = BeginnerClass.objects.filter(class_date=class_date, state__in=self.states[:3])
         for c in classes:
-            c.state = self.states[3]  # 'closed'
+            c.state = self.states[4]  # 'closed'
             c.save()
             # logging.debug(c.state)
 
@@ -89,7 +89,7 @@ class UpdatePrograms:
         yesterday = self.today - timedelta(days=1)
         classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=self.states[:4])
         for c in classes:
-            c.state = self.states[5]  # 'recorded'
+            c.state = self.states[6]  # 'recorded'
             c.save()
 
     def next_class_day(self, target_day):

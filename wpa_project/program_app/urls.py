@@ -26,4 +26,5 @@ urlpatterns = [
     path('unregister/', UnregisterView.as_view(), name='unregister'),
     path('unregister/<int:family_id>/', UnregisterView.as_view(), name='unregister'),
     path('unregister_table/', UnregisterTableView.as_view(), name='unregister_table'),
+    path('wait_list/<int:beginner_class>/', WaitListView.as_view(), name='wait_list'),
 ]

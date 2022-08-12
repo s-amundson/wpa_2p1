@@ -2,9 +2,6 @@ import logging
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from django.core import mail
-
-from ..models import Card, PaymentLog
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -15,6 +12,7 @@ class TestsReport(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
 
     def setUp(self):
         # Every test needs a client.

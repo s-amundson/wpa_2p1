@@ -22,7 +22,6 @@ class TestsBeginnerClass(TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_UID = 3
-        settings.SQUARE_TESTING = True
 
     def create_payment(self, students, amount=500):
         ik = uuid.uuid4()
@@ -53,13 +52,16 @@ class TestsBeginnerClass(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.class_dict = {'class_date': '2021-05-30 09:00',
+        self.class_dict = {'class_date': "2021-05-30T09:00:00.000Z",
                            'class_type': 'combined',
                            'beginner_limit': 2,
+                           'beginner_wait_limit': 0,
                            'returnee_limit': 2,
+                           'returnee_wait_limit': 0,
                            'instructor_limit': 2,
                            'state': 'scheduled',
                            'cost': 5}
+        settings.SQUARE_TESTING = True
 
     def test_user_normal_user_not_authorized(self):
         self.test_user = User.objects.get(pk=3)
@@ -110,9 +112,8 @@ class TestsBeginnerClass(TestCase):
     def test_2nd_class_error(self):
         bc = BeginnerClass.objects.get(pk=1)
         # New class same day
-        response = self.client.post(reverse('programs:beginner_class'),
-                        {'class_date': '2023-06-05 09:00', 'class_type': 'combined', 'beginner_limit': 5,
-                         'returnee_limit': 5, 'instructor_limit': 5, 'state': 'scheduled', 'cost': 5}, secure=True)
+        self.class_dict['class_date'] = '2023-06-05 09:00'
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_list.html')
         bc = BeginnerClass.objects.all()
@@ -121,9 +122,8 @@ class TestsBeginnerClass(TestCase):
     def test_2nd_class_good(self):
         bc = BeginnerClass.objects.get(pk=1)
         # New class same day
-        response = self.client.post(reverse('programs:beginner_class'),
-                        {'class_date': '2022-06-05 07:00', 'class_type': 'combined', 'beginner_limit': 5,
-                         'returnee_limit': 5, 'instructor_limit': 5, 'state': 'scheduled', 'cost': 5}, secure=True)
+        self.class_dict['class_date'] = "2022-06-05 07:00"
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
         self.assertRedirects(response, reverse('programs:class_list'))
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 3)

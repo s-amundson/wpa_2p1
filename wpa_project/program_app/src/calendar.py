@@ -91,7 +91,7 @@ class Calendar(HTMLCalendar):
                 cd = timezone.localtime(event.class_date)
                 url = reverse('programs:class_registration', kwargs={'beginner_class': event.id})
                 data += f'<li><a href="{url}" role="button" type="button" bc_id="{event.id}" class="btn {btn_color} '
-                if not self.staff and event.state not in ['open']:
+                if not self.staff and event.state not in ['open', 'wait']:
                     data += f'bc-btn m-1 disabled" >{event.class_type.capitalize()} {cd.strftime("%I:%M %p")} FULL</a></li>'
                 else:
                     data += f'bc-btn m-1" >{event.class_type.capitalize()} {cd.strftime("%I:%M %p")}</a></li>'

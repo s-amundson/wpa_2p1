@@ -17,7 +17,6 @@ class TestsUnregisterStudent(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        settings.SQUARE_TESTING = True
 
     def create_payment(self, students, amount=500):
         ik = uuid.uuid4()
@@ -50,6 +49,7 @@ class TestsUnregisterStudent(TestCase):
         self.test_url = reverse('programs:unregister')
         self.url_registration = reverse('programs:class_registration')
         self.client.force_login(self.test_user)
+        settings.SQUARE_TESTING = True
 
     def test_refund_success_entire_purchase(self):
         student = Student.objects.get(pk=2)
@@ -58,6 +58,7 @@ class TestsUnregisterStudent(TestCase):
 
         self.create_payment([student, Student.objects.get(pk=3)], 1000)
         cr = ClassRegistration.objects.all()
+        logging.debug(cr)
 
         # make student a returnee and the class full
         student = Student.objects.get(pk=3)

@@ -21,7 +21,7 @@ class TestsClassAdminRegistration(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.post_dict = {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}
+        self.post_dict = {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on', 'student': 4}
 
     def test_class_get_no_auth(self):
         # Check that staff cannot access
@@ -44,6 +44,7 @@ class TestsClassAdminRegistration(TestCase):
         self.assertTemplateUsed(response, 'student_app/form_as_p.html')
 
     def test_class_post_good(self):
+        self.post_dict['student'] = 4
         response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
@@ -63,7 +64,6 @@ class TestsClassAdminRegistration(TestCase):
         s = Student.objects.get(pk=5)
         s.safety_class = None
         s.save()
-
         response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)

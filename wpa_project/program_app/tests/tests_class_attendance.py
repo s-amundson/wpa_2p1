@@ -54,7 +54,8 @@ class TestsClassAttendance(TestCase):
         # close the class
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
                                     {'class_date': "2023-06-05 09:00:00", 'class_type': 'combined', 'beginner_limit': 2,
-                                     'returnee_limit': 2, 'instructor_limit': 2, 'state': 'closed', 'cost': 5},
+                                     'beginner_wait_limit': 0, 'returnee_limit': 2, 'returnee_wait_limit': 0,
+                                     'instructor_limit': 2, 'state': 'closed', 'cost': 5},
                                     secure=True)
         self.assertEqual(response.status_code, 302)
         # check that the attending column is there with checkboxes

@@ -20,7 +20,6 @@ class TestsJoadRegistrationCancel(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        settings.SQUARE_TESTING = True
 
     def create_payment(self, amount=12500):
         ik = uuid.uuid4()
@@ -49,6 +48,7 @@ class TestsJoadRegistrationCancel(TestCase):
         self.test_url = reverse('joad:registration_cancel', kwargs={'session_id': 1})
         self.pay_dict = {'amount': 125, 'card': 0, 'donation': 0, 'category': 'joad', 'save_card': False,
                          'source_id': 'cnon:card-nonce-ok'}
+        settings.SQUARE_TESTING = True
 
     def test_no_user_get(self):
         response = self.client.get(self.test_url, secure=True)

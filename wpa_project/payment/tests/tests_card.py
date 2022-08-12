@@ -3,6 +3,7 @@ import uuid
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from ..models import Card, Customer, PaymentLog
 from ..src import CardHelper, PaymentHelper

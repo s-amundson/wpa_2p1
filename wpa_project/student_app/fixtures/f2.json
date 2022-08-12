@@ -9,7 +9,9 @@
       "pay_status": "start",
       "idempotency_key": "7b16fadf-4851-4206-8dc6-81a92b70e52f",
       "reg_time": "2021-06-09T16:00:00.000Z",
-      "attended": false
+      "attended": false,
+      "modified": "2021-06-09T16:00:00.000Z",
+      "user": 2
     }
   },
   {
@@ -22,7 +24,9 @@
       "pay_status": "start",
       "idempotency_key": "7b16fadf-4851-4206-8dc6-81a92b70e52f",
       "reg_time": "2021-06-09T16:00:00.000Z",
-      "attended": false
+      "attended": false,
+      "modified": "2021-06-09T16:00:00.000Z",
+      "user": 2
     }
   }
 ]

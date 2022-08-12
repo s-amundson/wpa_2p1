@@ -1,5 +1,6 @@
 import logging
 from django.conf import settings
+from django.utils import timezone
 
 from .square_helper import SquareHelper
 from ..models import Card, PaymentLog
@@ -30,12 +31,23 @@ class PaymentHelper(SquareHelper):
             body['customer_id'] = card.customer.customer_id
         else:
             body['source_id'] = source_id
-        result = self.client.payments.create_payment(
-            body=body
-        )
+        if not self.testing:
+            result = self.client.payments.create_payment(
+                body=body
+            )
+            response = result.body.get('payment', {'payment': None})
+        else:
+            response = {'created_at': timezone.now(),
+                        'location_id': 'test_location',
+                        'order_id': 'test_order',
+                        'id': 'test_id',
+                        'receipt_url': '',
+                        'source_type': 'test',
+                        'status': 'SUCCESS',
+                        'approved_money': {'amount': amount * 100}
+                        }
 
-        response = result.body.get('payment', {'payment': None})
-        if result.is_success():
+        if self.testing or result.is_success():
             self.payment = PaymentLog.objects.create(
                 category=category,
                 checkout_created_time=response['created_at'],

@@ -10,6 +10,7 @@ from django.utils import timezone
 from ..src import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
 from student_app.models import Student, StudentFamily, User
+from payment.models import Card, Customer
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,31 @@ class TestsClassRegistration(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def add_card(self, user):
+        customer = Customer.objects.create(user=user,
+                                           customer_id="9Z9Q0D09F0WMV0FHFA2QMZH8SC",
+                                           created_at="2022-05-30T19:50:46Z",
+                                           creation_source="THIRD_PARTY",
+                                           updated_at="2022-05-30T19:50:46Z")
+        card = Card.objects.create(
+            bin=411111,
+            card_brand="VISA",
+            card_id="ccof:8sLQqf1boPfmwDKI4GB",
+            card_type="CREDIT",
+            cardholder_name="",
+            customer=customer,
+            default=1,
+            enabled=1,
+            exp_month=11,
+            exp_year=2022,
+            fingerprint="sq-1-npXvWJT5AhTtISQwBYohbA8kkQ24CyPCN6G6kP_6Bm_K2KPYsT1y_1xKUhvAnMIzfA",
+            id=1,
+            last_4=1111,
+            merchant_id="TYXMY2T8CN2PK",
+            prepaid_type="NOT_PREPAID",
+            version=0)
+        return card
 
     def setUp(self):
         # Every test needs a client.
@@ -349,7 +375,7 @@ class TestsClassRegistration(TestCase):
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
 
-    def test_resume_registration(self):
+    def test_resume_registration_no_wait(self):
         cr = ClassRegistration(
             beginner_class=BeginnerClass.objects.get(pk=1),
             student=Student.objects.get(pk=4),
@@ -361,7 +387,7 @@ class TestsClassRegistration(TestCase):
         cr.save()
 
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
-        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('payment:make_payment'))
 
     def test_new_student_register_twice(self):
         d = timezone.now() + datetime.timedelta(days=2)
@@ -391,3 +417,119 @@ class TestsClassRegistration(TestCase):
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertContains(response, f'{s.first_name} is enrolled in another beginner class')
+
+    def test_class_register_wait_no_card(self):
+        # put a record in to the database
+        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
+                               student=Student.objects.get(pk=4),
+                               new_student=True,
+                               pay_status='paid',
+                               idempotency_key=str(uuid.uuid4()))
+        cr.save()
+        bc = cr.beginner_class
+        bc.beginner_wait_limit = 10
+        bc.save()
+
+        u = User.objects.get(pk=2)
+        u.is_staff = False
+        u.save()
+
+        # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
+        self.client.force_login(u)
+        response = self.client.post(reverse('programs:class_registration'),
+                     {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'open')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 3)
+        # self.assertContains(response, 'Not enough space available in this class')
+        self.assertRedirects(response, reverse('payment:card_manage'))
+
+    def test_class_register_wait_with_card(self):
+        # put a record in to the database
+        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
+                               student=Student.objects.get(pk=4),
+                               new_student=True,
+                               pay_status='paid',
+                               idempotency_key=str(uuid.uuid4()))
+        cr.save()
+        bc = cr.beginner_class
+        bc.beginner_wait_limit = 10
+        bc.save()
+
+        u = User.objects.get(pk=2)
+        u.is_staff = False
+        u.save()
+        customer = Customer.objects.create(user=u,
+                                           customer_id="9Z9Q0D09F0WMV0FHFA2QMZH8SC",
+                                           created_at="2022-05-30T19:50:46Z",
+                                           creation_source="THIRD_PARTY",
+                                           updated_at="2022-05-30T19:50:46Z")
+        card = Card.objects.create(
+            bin=411111,
+            card_brand="VISA",
+            card_id="ccof:8sLQqf1boPfmwDKI4GB",
+            card_type="CREDIT",
+            cardholder_name="",
+            customer=customer,
+            default=1,
+            enabled=1,
+            exp_month=11,
+            exp_year=2022,
+            fingerprint="sq-1-npXvWJT5AhTtISQwBYohbA8kkQ24CyPCN6G6kP_6Bm_K2KPYsT1y_1xKUhvAnMIzfA",
+            id=1,
+            last_4=1111,
+            merchant_id="TYXMY2T8CN2PK",
+            prepaid_type="NOT_PREPAID",
+            version=0)
+
+        # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
+        self.client.force_login(u)
+        response = self.client.post(reverse('programs:class_registration'),
+                     {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'wait')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 3)
+        # self.assertContains(response, 'Not enough space available in this class')
+        self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
+    def test_resume_registration_wait_with_card(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_type = 'beginner'
+        bc.beginner_limit = 0
+        bc.beginner_wait_limit = 10
+        bc.state = 'wait'
+        bc.save()
+        cr = ClassRegistration(
+            beginner_class=bc,
+            student=Student.objects.get(pk=4),
+            new_student=True,
+            pay_status="start",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        cr.save()
+        card = self.add_card(self.test_user)
+
+        response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
+        self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
+
+    def test_resume_registration_wait_no_card(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_type = 'beginner'
+        bc.beginner_limit = 0
+        bc.beginner_wait_limit = 10
+        bc.state = 'wait'
+        bc.save()
+        cr = ClassRegistration(
+            beginner_class=bc,
+            student=Student.objects.get(pk=4),
+            new_student=True,
+            pay_status="start",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        cr.save()
+
+        response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
+        self.assertRedirects(response, reverse('payment:card_manage'))

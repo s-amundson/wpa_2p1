@@ -6,6 +6,8 @@ from django.core import mail
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
+
+from ..src import EmailMessage
 from ..models import BeginnerClass, ClassRegistration
 from student_app.models import Student
 
@@ -45,3 +47,32 @@ class TestsClassSendEmail(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
         self.assertTrue(mail.outbox[0].body.find('Test message') >= 0)
+
+    def test_off_wait_list_email(self):
+        # set up beginner class to have wait list
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_type = 'beginner'
+        bc.beginner_limit = 0
+        bc.beginner_wait_limit = 0
+        bc.returnee_limit = 2
+        bc.returnee_wait_limit = 10
+        bc.save()
+
+        # add 2 more to the wait list at the same time so they go together.
+        user = User.objects.get(pk=3)
+        ik = str(uuid.uuid4())
+        for i in range(2):
+            s = Student.objects.get(pk=i + 5)
+            s.safety_class = "2023-06-05"
+            s.save()
+            cr = ClassRegistration(beginner_class=bc,
+                                   student=s,
+                                   new_student=False,
+                                   pay_status='waiting',
+                                   idempotency_key=ik,
+                                   user=user)
+            cr.save()
+        registrations = ClassRegistration.objects.all()
+        EmailMessage().wait_list_off(registrations)
+        self.assertEqual(len(mail.outbox), 1)
+        logging.debug(mail.outbox[0].body)
