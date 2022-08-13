@@ -5,6 +5,7 @@ from django.db.models import Count
 from ..src import ClassRegistrationHelper
 from payment.src import EmailMessage, RefundHelper
 from ..models import BeginnerClass, ClassRegistration
+from ..signals import update_wait_list_signal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -142,7 +143,7 @@ class UnregisterForm(forms.Form):
                         r.pay_status = 'canceled'
                     r.save()
                     crh.update_class_state(r.beginner_class)
-                crh.update_waiting(icr[0].beginner_class)
+                update_wait_list_signal.send(self.__class__, beginner_class=icr[0].beginner_class)
             else:
                 for r in icr:
                     self.add_error(f'unreg_{r.id}', square_response['error'])

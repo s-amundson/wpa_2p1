@@ -9,7 +9,7 @@ from django.views.generic.detail import DetailView
 
 from ..forms import PaymentForm
 from ..models import Card, PaymentLog
-from ..singals import payment_error_signal
+from ..signals import payment_error_signal
 
 import logging
 logger = logging.getLogger(__name__)

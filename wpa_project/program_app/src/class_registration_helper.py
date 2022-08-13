@@ -1,5 +1,7 @@
 import logging
 from django.db.models import Count
+
+from .email import EmailMessage
 from ..models import BeginnerClass, ClassRegistration
 from student_app.models import Student
 from payment.src import PaymentHelper
@@ -175,6 +177,7 @@ class ClassRegistrationHelper:
                 logging.debug(f'next group {len(next_group)}')
                 if beginner_class.beginner_limit - len(admitted) >= len(next_group):
                     self.charge_group(next_group)
+                    EmailMessage().wait_list_off(next_group)
                     # self.update_waiting(beginner_class)
         elif beginner_class.class_type == 'returnee':
             if len(admitted) < beginner_class.returnee_limit:
@@ -183,6 +186,5 @@ class ClassRegistrationHelper:
                 logging.debug(f'next group {len(next_group)}')
                 if beginner_class.returnee_limit - len(admitted) >= len(next_group):
                     self.charge_group(next_group)
-
-                    # self.update_waiting(beginner_class)
+                    EmailMessage().wait_list_off(next_group)
 

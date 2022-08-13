@@ -103,8 +103,9 @@ class TestsCalendar(TestCase):
 
         cal = Calendar(year=date.year, month=date.month)
         html_cal = cal.formatmonth(withyear=True)
-        self.assertEqual(html_cal.count('Beginner 09:00 AM FULL'), 1)
-        self.assertEqual(html_cal.count('Returnee 11:00 AM FULL'), 1)
-        self.assertEqual(html_cal.count('Combined 03:00 PM FULL'), 1)
+        logging.debug(html_cal)
+        self.assertEqual(html_cal.count('Beginner 09:00 AM Closed'), 1)
+        self.assertEqual(html_cal.count('Returnee 11:00 AM Closed'), 1)
+        self.assertEqual(html_cal.count('Combined 03:00 PM Closed'), 1)
         self.assertEqual(html_cal.count('JOAD Class 10:00 AM CLOSED'), 1)
         self.assertEqual(html_cal.count('JOAD Pin Shoot 01:00 PM CLOSED'), 1)
