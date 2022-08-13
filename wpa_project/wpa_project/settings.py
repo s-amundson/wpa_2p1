@@ -176,6 +176,7 @@ MIDDLEWARE = [
 
 PHONENUMBER_DB_FORMAT = 'NATIONAL'
 PHONENUMBER_DEFAULT_REGION = 'US'
+PRIVATE_LINKS = get_secret('PRIVATE_LINKS')
 
 ROOT_URLCONF = 'wpa_project.urls'
 
@@ -247,6 +248,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'student_app.context_processors.private_links',
             ],
         },
     },
