@@ -1,6 +1,7 @@
 import logging
 from django.conf import settings
 from square.client import Client
+from ..models import PaymentErrorLog
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,18 @@ class SquareHelper:
             'NOT_FOUND': 'Object not found',
             '': 'Payment Error'
         }
+        self.error_log = None
         self.testing = settings.SQUARE_TESTING
+        self.user = None
+
+    def log_error(self, category, error, idempotency_key, api):
+        self.error_log = PaymentErrorLog.objects.create(
+            user=self.user,
+            category=category,
+            error_code=error,
+            idempotency_key=idempotency_key,
+            api=api
+        )
 
     def handle_error(self, result, default_error):
         logging.error(result.errors)

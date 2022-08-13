@@ -54,6 +54,9 @@ class CardHelper(SquareHelper):
             return self.card
         elif result.is_error():  # pragma: no cover
             logging.error(result.errors)
+            self.user = customer.user
+            for error in result.errors:
+                self.log_error('N/A', error.get('code', 'unknown_error'), idempotency_key, 'cards.create_card')
             self.handle_error(result, 'Card Create Error')
         return None
 
@@ -74,6 +77,8 @@ class CardHelper(SquareHelper):
             self.card.save()
             return self.card
         elif result.is_error():  # pragma: no cover
+            for error in result.errors:
+                self.log_error('N/A', error.get('code', 'unknown_error'), None, 'cards.disable_card')
             self.handle_error(result, 'Card Disable Error')
         return None  # pragma: no cover
 
@@ -101,5 +106,7 @@ class CardHelper(SquareHelper):
             self.card.save()
             return self.card
         elif result.is_error():  # pragma: no cover
+            for error in result.errors:
+                self.log_error('N/A', error.get('code', 'unknown_error'), None, 'cards.retrieve_card')
             self.handle_error(result, 'Card Retrieve Error')
         return None

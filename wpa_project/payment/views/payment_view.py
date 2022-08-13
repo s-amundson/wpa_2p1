@@ -9,6 +9,7 @@ from django.views.generic.detail import DetailView
 
 from ..forms import PaymentForm
 from ..models import Card, PaymentLog
+from ..singals import payment_error_signal
 
 import logging
 logger = logging.getLogger(__name__)
@@ -27,7 +28,8 @@ class CreatePaymentView(FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        if form.process_payment(self.request.session.get('idempotency_key', str(uuid.uuid4()))):
+        idempotency_key = self.request.session.get('idempotency_key', str(uuid.uuid4()))
+        if form.process_payment(idempotency_key):
             if self.request.user.is_authenticated:
                 self.success_url = reverse_lazy('payment:view_payment', args=[form.log.id])
 
@@ -38,7 +40,10 @@ class CreatePaymentView(FormView):
         else:
             # logging.debug(form.errors)
             # replace idempotency_key
-            self.request.session['idempotency_key'] = str(uuid.uuid4())
+            new_ik = str(uuid.uuid4())
+            self.request.session['idempotency_key'] = new_ik
+            payment_error_signal.send(sender=self.__class__, old_idempotency_key=idempotency_key,
+                                      new_idempotency_key=new_ik)
         return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):

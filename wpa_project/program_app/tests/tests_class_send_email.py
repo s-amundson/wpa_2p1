@@ -75,4 +75,3 @@ class TestsClassSendEmail(TestCase):
         registrations = ClassRegistration.objects.all()
         EmailMessage().wait_list_off(registrations)
         self.assertEqual(len(mail.outbox), 1)
-        logging.debug(mail.outbox[0].body)

@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core import mail
 from django.conf import settings
 
-from ..models import Card, PaymentLog
+from ..models import Card, PaymentLog, PaymentErrorLog
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -117,6 +117,8 @@ class TestsPayment(TestCase):
         self.assertEqual(len(pl), 0)
         self.assertTemplateUsed(response, 'payment/make_payment.html')
         self.assertTrue('Payment Error: Card Declined' in response.context['form'].payment_errors)
+        pel = PaymentErrorLog.objects.all()
+        self.assertEqual(len(pel), 1)
 
     def test_payment_card_bad_cvv(self):
         self.pay_dict['source_id'] = 'cnon:card-nonce-rejected-cvv'
@@ -124,6 +126,8 @@ class TestsPayment(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 0)
         self.assertTrue('Payment Error: CVV' in response.context['form'].payment_errors)
+        pel = PaymentErrorLog.objects.all()
+        self.assertEqual(len(pel), 1)
 
     def test_payment_card_bad_expire_date(self):
         self.pay_dict['source_id'] = 'cnon:card-nonce-rejected-expiration'

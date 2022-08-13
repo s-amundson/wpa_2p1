@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
-from ..models import Card, Customer, PaymentLog
+from ..models import Card, Customer, PaymentLog, PaymentErrorLog
 from ..src import CardHelper, PaymentHelper
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -102,6 +102,8 @@ class TestsCard(TestCase):
         self.assertEqual(len(cl), 1)
         # self.assertRedirects(response, reverse('payment:card_manage'))
         self.assertContains(response, 'Card Create Error')
+        pel = PaymentErrorLog.objects.all()
+        self.assertEqual(len(pel), 1)
 
     def test_add_force_default(self):
         payment = PaymentHelper(user=self.test_user)

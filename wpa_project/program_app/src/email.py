@@ -1,4 +1,5 @@
 from django.template.loader import get_template
+from django.utils import timezone
 
 from student_app.src import EmailMessage
 import logging
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 class EmailMessage(EmailMessage):
     def beginner_reminder(self, beginner_class, students):
         self.bcc_from_students(students)
-        self.subject = f'WPA Class Reminder {beginner_class.class_date.date()}'
+        self.subject = f'WPA Class Reminder {timezone.localtime(beginner_class.class_date).date()}'
         if beginner_class.class_type == 'beginner':
             d = {'beginner_class': beginner_class, 'minutes': 30}
         elif  beginner_class.class_type == 'returnee':

@@ -34,6 +34,8 @@ class CustomerHelper(SquareHelper):
             )
             return self.customer
         elif result.is_error():  # pragma: no cover
+            for error in result.errors:
+                self.log_error('N/A', error.get('code', 'unknown_error'), idempotency_key, 'customers.create_customer')
             self.handle_error(result, 'Customer create error')
         return None  # pragma: no cover
 
@@ -46,6 +48,8 @@ class CustomerHelper(SquareHelper):
         if result.is_success():
             return True
         elif result.is_error():  # pragma: no cover
+            for error in result.errors:
+                self.log_error('N/A', error.get('code', 'unknown_error'), None, 'customers.delete_customer')
             self.handle_error(result, 'Customer delete error')
             return False
 
@@ -64,5 +68,7 @@ class CustomerHelper(SquareHelper):
             self.customer.version = customer['version']
             return self.customer
         elif result.is_error():  # pragma: no cover
+            for error in result.errors:
+                self.log_error('N/A', error.get('code', 'unknown_error'), None, 'customers.retrieve_customer')
             self.handle_error(result, 'Customer retrieve error')
         return None  # pragma: no cover

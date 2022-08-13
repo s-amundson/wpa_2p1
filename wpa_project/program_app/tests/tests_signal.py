@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from ..models import BeginnerClass, ClassRegistration
 from payment.models import PaymentLog
+from payment.singals import payment_error_signal
 from student_app.models import Student, StudentFamily
 logger = logging.getLogger(__name__)
 
@@ -82,3 +83,21 @@ class TestsSignal(TestCase):
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].pay_status, "started")
+
+    def test_payment_error_signal_good(self):
+        uid = uuid.uuid4()
+        student = Student.objects.get(pk=2)
+        cr = ClassRegistration.objects.create(
+            beginner_class=BeginnerClass.objects.get(pk=1),
+            student=student,
+            new_student=True,
+            pay_status='started',
+            idempotency_key=uid,
+            user=student.user
+        )
+        cr.save()
+        new_ik = uuid.uuid4()
+        payment_error_signal.send(self.__class__, old_idempotency_key=uid, new_idempotency_key=new_ik)
+
+        cr = ClassRegistration.objects.last()
+        self.assertEqual(cr.idempotency_key, new_ik)

@@ -24,6 +24,7 @@ class RefundHelper(SquareHelper):
 
     def refund_payment(self, log, amount):
         """ does either a full or partial refund. """
+        idempotency_key = None
         if log.status == 'comped':  # payment was comped therefore no refund
             log.status = 'refund'
             log.save()
@@ -36,8 +37,9 @@ class RefundHelper(SquareHelper):
             if log.total_money <= refunded_amount:  # check if only partial refund was applied
                 return {'status': 'error', 'error': 'Previously refunded'}
         if not self.testing:
+            idempotency_key = uuid.uuid4()
             result = self.client.refunds.refund_payment(
-                body={"idempotency_key": str(uuid.uuid4()),
+                body={"idempotency_key": str(idempotency_key),
                       "amount_money": {'amount': amount, 'currency': 'USD'},
                       "payment_id": log.payment_id
                       })
@@ -69,4 +71,6 @@ class RefundHelper(SquareHelper):
             square_response['status'] = 'error'
             logging.debug(result.errors)
             square_response['error'] = result.errors
+            for error in result.errors:
+                self.log_error('N/A', error.get('code', 'unknown_error'), idempotency_key, 'refunds.refund_payment')
         return square_response

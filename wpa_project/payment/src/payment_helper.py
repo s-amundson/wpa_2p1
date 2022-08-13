@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from .square_helper import SquareHelper
-from ..models import Card, PaymentLog
+from ..models import Card, PaymentLog, PaymentErrorLog
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +66,7 @@ class PaymentHelper(SquareHelper):
             return self.payment
 
         elif result.is_error():
+            for error in result.errors:
+                self.log_error(category, error.get('code', 'unknown_error'), idempotency_key, 'payments.create_payment')
             self.handle_error(result, 'Payment Error')
-
         return None

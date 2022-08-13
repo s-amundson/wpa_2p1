@@ -32,7 +32,7 @@ class CardManageView(LoginRequiredMixin, FormView):
             context['pay_url'] = "https://web.squarecdn.com/v1/square.js"
         else:  # pragma: no cover
             context['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"
-        logging.debug(Card.objects.filter(customer__user=self.request.user).enabled())
+        # logging.debug(Card.objects.filter(customer__user=self.request.user).enabled())
         # logging.debug(Card.objects.enabled())
         context['cards'] = Card.objects.filter(customer__user=self.request.user, enabled=True)
         context['app_id'] = settings.SQUARE_CONFIG['application_id']
