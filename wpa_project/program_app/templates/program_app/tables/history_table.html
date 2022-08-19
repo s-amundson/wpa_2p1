@@ -12,11 +12,11 @@
         </tr>
     </thead>
     <tbody>
-    {% for r in attend_history %}
+    {% for student in students %}
         <tr>
-            <td> {{ r.student.first_name }} {{ r.student.last_name }}</td>
-            <td> {{ r.registrations }} </td>
-            <td> {{ r.attended_count }} </td>
+            <td> {{ student.first_name }} {{ student.last_name }}</td>
+            <td> {{ student.classregistration_set.attendance.registrations }} </td>
+            <td> {{ student.classregistration_set.attendance.attended }} </td>
         </tr>
     {% endfor %}
     </tbody>

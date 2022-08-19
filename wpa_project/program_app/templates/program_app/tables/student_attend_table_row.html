@@ -11,6 +11,7 @@
     </td>
     <td>{{ cr.student.last_name }}</td>
     <td class="{% if cr.student.dob > form.adult_dob %} text-warning {% endif %}">{{ cr.student.dob }}</td>
+    <td>{{ cr.student.classregistration_set.attendance.attended }}/{{ cr.student.classregistration_set.attendance.registrations }}</td>
     <td>
         {% if form.is_closed %}
             {% if cr.pay_status == 'waiting' %}

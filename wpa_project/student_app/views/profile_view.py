@@ -1,9 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import TemplateView
-import logging
 
 from ..forms import ThemeForm
-from program_app.src import ClassRegistrationHelper
+
+import logging
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +20,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             context['student_family'] = context['this_student'].student_family
         if context['student_family'] is not None:
             context['students'] = context['student_family'].student_set.all()
-        context['attend_history'] = ClassRegistrationHelper().attendance_history_queryset(context['student_family'])
         return context
 
 

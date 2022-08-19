@@ -4,6 +4,23 @@
 
 
 {% block main %}
+    <h3> Class Calendar </h3>
+    <div class="p-2">
+        <p>
+            {% if beginner_class %}
+                The next available class for beginner students is {{ beginner_class.class_date }}
+            {% else %}
+                There are no classes available for beginner students at this time.
+            {% endif %}
+        </p>
+        <p>
+            {% if returnee_class %}
+                The next available class for returning students is {{ returnee_class.class_date }}
+            {% else %}
+                There are no classes available for returning students at this time.
+            {% endif %}
+        </p>
+    </div>
     <div class="row py-2">
         <div id="div-calendar">
             {{ html_cal }}

@@ -23,8 +23,9 @@ class ClassAttendanceForm(forms.Form):
         self.adult_dob = self.class_date.date().replace(year=self.class_date.year - 18)
         logging.debug(self.adult_dob)
 
-        self.new_students = registrations.exclude(student__in=staff).filter(
-            Q(student__safety_class__isnull=True) | Q(student__safety_class__gte=self.class_date.date()))
+        self.new_students = registrations.filter(
+            Q(student__safety_class__isnull=True) | Q(student__safety_class__gte=self.class_date.date())).exclude(
+            student__in=staff)
         self.new_students_waiting = self.new_students.filter(pay_status='waiting')
         self.new_students = self.new_students.exclude(pay_status='waiting')
         self.staff = registrations.filter(student__in=staff)
