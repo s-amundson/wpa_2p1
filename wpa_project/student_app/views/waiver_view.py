@@ -32,7 +32,8 @@ class WaiverView(UserPassesTestMixin, FormView):
         if form.make_pdf(self.class_date):
             self.update_attendance()
             form.send_pdf()
-        return HttpResponseRedirect(self.success_url)
+            return HttpResponseRedirect(self.success_url)
+        return self.form_invalid(form)
 
     def test_func(self):
         sid = self.kwargs.get('student_id', None)

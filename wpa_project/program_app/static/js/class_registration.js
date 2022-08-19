@@ -61,6 +61,9 @@ async function get_class_status() {
                     $("#class-description").html("This class is reserved for students that have been to at least one of our classes before.")
                 }
                 $("#class-description").append('</br> Please show up 15 minutes prior to class time.')
+                if(data["status"] == "wait") {
+                    alert_notice("Wait List", $("#wait-list-warning").html())
+                }
             }
 
         });

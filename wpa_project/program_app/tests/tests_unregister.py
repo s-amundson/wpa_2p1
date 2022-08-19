@@ -129,6 +129,24 @@ class TestsUnregisterStudent(TestCase):
         for r in cr:
             self.assertEqual(r.pay_status, 'refund donated')
 
+    def test_cancel_waiting(self):
+        ik = uuid.uuid4()
+        students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
+        for student in students:
+            reg = ClassRegistration.objects.create(
+                beginner_class=BeginnerClass.objects.get(pk=1),
+                student=student, new_student=True, pay_status="waiting",
+                idempotency_key=ik, reg_time="2021-06-09", attended=False
+            )
+        cr = ClassRegistration.objects.all()
+        d = {'donation': True}
+        for r in cr:
+            d[f'unreg_{r.id}'] = True
+        response = self.client.post(self.test_url, d, secure=True)
+        self.assertRedirects(response, self.url_registration)
+        cr = ClassRegistration.objects.all()
+        for r in cr:
+            self.assertEqual(r.pay_status, 'canceled')
 
 class TestsUnregisterStudent2(TestCase):
     fixtures = ['f1', 'f2']

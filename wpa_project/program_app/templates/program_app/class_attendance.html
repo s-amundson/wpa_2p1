@@ -50,7 +50,15 @@
                             </th>
                         </thead>
                         <tbody>
-                            {% for s in form.new_students %}
+                            {% for cr in form.new_students %}
+                                {% include "program_app/tables/student_attend_table_row.html" %}
+                            {% endfor %}
+                            <tr>
+                                <td colspan="6">
+                                    <a class="nav-link" href="{% url 'programs:admit_wait' form.beginner_class.id %}">Wait List</a>
+                                </td>
+                            </tr>
+                            {% for cr in form.new_students_waiting %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>
@@ -84,7 +92,13 @@
                             </th>
                         </thead>
                         <tbody>
-                            {% for s in form.return_students %}
+                            {% for cr in form.return_students %}
+                                {% include "program_app/tables/student_attend_table_row.html" %}
+                            {% endfor %}
+                            <tr>
+                                <td colspan="6">Wait List</td>
+                            </tr>
+                            {% for cr in form.return_students_waiting %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>
@@ -118,7 +132,7 @@
                             </th>
                         </thead>
                         <tbody>
-                            {% for s in form.staff %}
+                            {% for cr in form.staff %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>

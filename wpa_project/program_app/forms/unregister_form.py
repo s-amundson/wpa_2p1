@@ -77,13 +77,13 @@ class UnregisterForm(forms.Form):
             self.registrations = self.registrations.exclude(pay_status__in=['refund donated', 'refunded', 'canceled'])
             self.can_unregister = False
             for reg in self.registrations:
-                f = BooleanField(reg, widget=forms.CheckboxInput(attrs={'class': "m-2 unreg"}), required=False,
+                f = BooleanField(reg, widget=forms.CheckboxInput(attrs={'class': f"m-2 unreg {reg.pay_status}"}), required=False,
                                  initial=False)
                 f.beginner_class = str(reg.beginner_class.id)
                 f.class_date = reg.beginner_class.class_date
                 logging.debug(f.class_date)
                 f.pay_status = reg.pay_status
-                if reg.beginner_class.state in reg.beginner_class.class_states[3:]:  # class closed
+                if reg.beginner_class.state in reg.beginner_class.class_states[4:]:  # class closed
                     f.widget.attrs.update({'disabled': 'disabled'})
                     f.label = 'class closed'
                 else:
@@ -119,7 +119,10 @@ class UnregisterForm(forms.Form):
             logging.debug(ikey)
             icr = cr.filter(idempotency_key=ikey['idempotency_key'])
             cost = icr[0].beginner_class.cost
-            if ikey['pay_status'] == 'paid' and self.cleaned_data['donation']:
+            if ikey['pay_status'] == 'waiting':
+                icr.update(pay_status='canceled')
+                continue
+            elif ikey['pay_status'] == 'paid' and self.cleaned_data['donation']:
                 square_response = {'status': 'SUCCESS'}
 
             elif ikey['pay_status'] == 'paid':

@@ -460,28 +460,7 @@ class TestsClassRegistration(TestCase):
         u = User.objects.get(pk=2)
         u.is_staff = False
         u.save()
-        customer = Customer.objects.create(user=u,
-                                           customer_id="9Z9Q0D09F0WMV0FHFA2QMZH8SC",
-                                           created_at="2022-05-30T19:50:46Z",
-                                           creation_source="THIRD_PARTY",
-                                           updated_at="2022-05-30T19:50:46Z")
-        card = Card.objects.create(
-            bin=411111,
-            card_brand="VISA",
-            card_id="ccof:8sLQqf1boPfmwDKI4GB",
-            card_type="CREDIT",
-            cardholder_name="",
-            customer=customer,
-            default=1,
-            enabled=1,
-            exp_month=11,
-            exp_year=2022,
-            fingerprint="sq-1-npXvWJT5AhTtISQwBYohbA8kkQ24CyPCN6G6kP_6Bm_K2KPYsT1y_1xKUhvAnMIzfA",
-            id=1,
-            last_4=1111,
-            merchant_id="TYXMY2T8CN2PK",
-            prepaid_type="NOT_PREPAID",
-            version=0)
+        card = self.add_card(u)
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(u)
@@ -493,6 +472,89 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 3)
         # self.assertContains(response, 'Not enough space available in this class')
         self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
+
+    def test_class_register_wait_twice(self):
+        bc1 = BeginnerClass.objects.get(pk=1)
+        bc1.class_type = 'beginner'
+        bc1.beginner_limit = 0
+        bc1.beginner_wait_limit = 10
+        bc1.state = 'wait'
+        bc1.save()
+        students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
+        for s in students:
+            cr = ClassRegistration(
+                beginner_class=bc1,
+                student=s,
+                new_student=True,
+                pay_status="waiting",
+                idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+                reg_time='2021-06-09',
+                attended=False)
+            cr.save()
+
+        bc2 = BeginnerClass.objects.get(pk=2)
+        bc2.class_type = 'beginner'
+        bc2.beginner_limit = 0
+        bc2.beginner_wait_limit = 10
+        bc2.state = 'wait'
+        bc2.save()
+
+        u = User.objects.get(pk=2)
+        u.is_staff = False
+        u.save()
+        card = self.add_card(u)
+
+        # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
+        self.client.force_login(u)
+        response = self.client.post(reverse('programs:class_registration'),
+                     {'beginner_class': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=2)
+        self.assertEqual(bc.state, 'wait')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 2)
+        self.assertContains(response, f'{students[0].first_name} is on wait list for another beginner class')
+
+    def test_class_register_wait_and_no_wait(self):
+        bc1 = BeginnerClass.objects.get(pk=1)
+        bc1.class_type = 'beginner'
+        bc1.beginner_limit = 2
+        bc1.beginner_wait_limit = 10
+        bc1.state = 'wait'
+        bc1.save()
+        students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
+        for s in students:
+            cr = ClassRegistration(
+                beginner_class=bc1,
+                student=s,
+                new_student=True,
+                pay_status="paid",
+                idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+                reg_time='2021-06-09',
+                attended=False)
+            cr.save()
+
+        bc2 = BeginnerClass.objects.get(pk=2)
+        bc2.class_type = 'beginner'
+        bc2.beginner_limit = 0
+        bc2.beginner_wait_limit = 10
+        bc2.state = 'wait'
+        bc2.save()
+
+        u = User.objects.get(pk=2)
+        u.is_staff = False
+        u.save()
+        card = self.add_card(u)
+
+        # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
+        self.client.force_login(u)
+        response = self.client.post(reverse('programs:class_registration'),
+                     {'beginner_class': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=2)
+        self.assertEqual(bc.state, 'wait')
+        cr = ClassRegistration.objects.all()
+        self.assertEqual(len(cr), 4)
+        self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
+
     def test_resume_registration_wait_with_card(self):
         bc = BeginnerClass.objects.get(pk=1)
         bc.class_type = 'beginner'

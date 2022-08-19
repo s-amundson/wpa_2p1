@@ -1,9 +1,10 @@
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
 from student_app.views import WaiverView
-
 from ..models import ClassRegistration
-
+from payment.signals import refund_helper_signal
 import logging
 logger = logging.getLogger(__name__)
 
@@ -28,4 +29,15 @@ class ClassSignInView(WaiverView):
     def update_attendance(self):
         self.class_registration.attended = True
         self.class_registration.save()
+        cr = ClassRegistration.objects.filter(
+            beginner_class__class_date__gt=timezone.localdate(timezone.now()),
+            student=self.student)
+        waiting = cr.filter(pay_status='waiting')
+        waiting.update(pay_status='canceled')
+        for r in cr.filter(pay_status='paid'):
+            if not r == self.class_registration:
+                refund_helper_signal.send(self.__class__,
+                                          idempotency_key=r.idempotency_key,
+                                          amount=r.beginner_class.cost * 100,
+                                          class_registration=r)
         # logging.debug(self.class_registration.student.id)

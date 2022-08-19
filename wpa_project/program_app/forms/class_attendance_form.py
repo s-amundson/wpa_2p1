@@ -1,58 +1,40 @@
 from django import forms
 from django.db.models import Q
 from student_app.src import StudentHelper
-import logging
 
+from student_app.models import Student
+
+import logging
 logger = logging.getLogger(__name__)
 
 
 class ClassAttendanceForm(forms.Form):
 
     def __init__(self, beginner_class, *args, **kwargs):
+        self.beginner_class = beginner_class
         super().__init__(*args, **kwargs)
+        staff = Student.objects.filter(user__is_staff=True)
         self.student_helper = StudentHelper()
         self.is_closed = beginner_class.state == 'closed'
-        self.new_students = []
-        self.return_students = []
-        self.staff = []
-        self.class_registration = beginner_class.classregistration_set.filter(
-            Q(pay_status='paid') | Q(pay_status='admin'))
-        self.class_registration = self.class_registration.order_by('attended', 'student__last_name')
+        registrations = beginner_class.classregistration_set.filter(
+            pay_status__in=['admin', 'comped', 'paid', 'waiting']).order_by('attended', 'student__last_name')
         self.class_date = beginner_class.class_date
-        self.attend_count = {'beginner': 0, 'returnee': 0, 'staff': 0}
 
-        for cr in self.class_registration:
-            try:
-                is_staff = cr.student.user.is_staff
-            except (cr.student.DoesNotExist, AttributeError):
-                is_staff = False
-            # logging.debug(f'student: {cr.student.id}, class_date: {self.class_date.date()}, safety_class:{cr.student.safety_class}')
-            # if cr.student.safety_class is not None:
-            #     logging.debug(cr.student.safety_class >= self.class_date.date())
-            if is_staff:
-                self.staff.append(self.student_dict(cr, True))
-                if cr.attended:
-                    self.attend_count['staff'] += 1
-            elif cr.student.safety_class is None or cr.student.safety_class >= self.class_date.date():
-                self.new_students.append(self.student_dict(cr, bool(cr.student.signature)))
-                if cr.attended:
-                    self.attend_count['beginner'] += 1
-            else:
-                self.return_students.append(self.student_dict(cr, bool(cr.student.signature)))
-                if cr.attended:
-                    self.attend_count['returnee'] += 1
+        self.adult_dob = self.class_date.date().replace(year=self.class_date.year - 18)
+        logging.debug(self.adult_dob)
 
-    def student_dict(self, cr, is_signed):
-        # logging.debug(f'student: {cr.student.id} vax: {cr.student.covid_vax}, attended:{cr.attended}')
-        return {'id': cr.student.id,
-                'first_name': cr.student.first_name,
-                'last_name': cr.student.last_name,
-                'dob': cr.student.dob,
-                'check': f'check_{cr.student.id}',
-                'checked': cr.attended,
-                'cr_id': cr.id,
-                'covid_vax': cr.student.covid_vax,
-                'covid_vax_check': f'covid_vax_{cr.student.id}',
-                'fam_id': cr.student.student_family.id,
-                'signature': is_signed,
-                'is_minor': self.student_helper.calculate_age(cr.student.dob, self.class_date) < 18}
+        self.new_students = registrations.exclude(student__in=staff).filter(
+            Q(student__safety_class__isnull=True) | Q(student__safety_class__gte=self.class_date.date()))
+        self.new_students_waiting = self.new_students.filter(pay_status='waiting')
+        self.new_students = self.new_students.exclude(pay_status='waiting')
+        self.staff = registrations.filter(student__in=staff)
+        self.return_students = registrations.exclude(student__in=staff).filter(
+            student__safety_class__lt=self.class_date.date())
+        self.return_students_waiting = self.return_students.filter(pay_status='waiting')
+        self.return_students = self.return_students.exclude(pay_status='waiting')
+
+        logging.debug(self.new_students)
+        self.attend_count = {'beginner': len(self.new_students.filter(attended=True)),
+                             'returnee': len(self.return_students.filter(attended=True)),
+                             'staff': len(self.staff.filter(attended=True))}
+

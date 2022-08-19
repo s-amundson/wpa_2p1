@@ -112,8 +112,10 @@ class ClassRegistrationView(AccessMixin, FormView):
                         pay_status__in=['canceled', "refunded", 'refund donated'])
                     if len(reg.filter(beginner_class=beginner_class)) == 0:
                         if s.safety_class is None:
-                            # logging.debug(len(reg))
-                            if len(reg.filter(beginner_class__class_date__gt=timezone.localdate(timezone.now()))) > 0:
+                            future_reg = reg.filter(beginner_class__class_date__gt=timezone.localdate(timezone.now()))
+                            if beginner_class.state == 'wait' and len(future_reg.filter(pay_status='waiting')) > 0:
+                                return self.has_error(f'{s.first_name} is on wait list for another beginner class')
+                            elif beginner_class.state != 'wait' and len(future_reg.exclude(pay_status='waiting')) > 0:
                                 return self.has_error(f'{s.first_name} is enrolled in another beginner class')
                             else:
                                 beginner += 1

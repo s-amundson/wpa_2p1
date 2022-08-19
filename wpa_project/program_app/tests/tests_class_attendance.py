@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestsClassAttendance(TestCase):
-    fixtures = ['f1', 'f3']
+    fixtures = ['f1']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,8 +62,6 @@ class TestsClassAttendance(TestCase):
         response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Attending', 6)
-        # self.assertContains(response, 'covid_vax_2')
-        self.assertContains(response, 'covid_vax_3')
 
     def test_class_beginner_attendance(self):
         # register instructor and close class.
@@ -80,7 +78,6 @@ class TestsClassAttendance(TestCase):
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'check_1')
 
         # mark instructor as attending.
         self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
@@ -93,7 +90,6 @@ class TestsClassAttendance(TestCase):
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'check_1')
 
     def test_class_beginner_unattend(self):
         # register instructor and close class.
@@ -135,7 +131,6 @@ class TestsClassAttendance(TestCase):
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'check_1')
 
         # mark instructor as attending.
         self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
@@ -147,7 +142,6 @@ class TestsClassAttendance(TestCase):
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'check_1')
 
     def test_class_attend_error(self):
 

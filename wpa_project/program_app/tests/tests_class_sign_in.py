@@ -1,17 +1,20 @@
-import logging
-
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
-from ..models import ClassRegistration
+from django.conf import settings
 
+from ..models import BeginnerClass, ClassRegistration
+from student_app.models import Student
+from payment.models import PaymentLog
+
+import logging
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
 class TestsClassSignIn(TestCase):
-    fixtures = ['f1', 'f2', 'f3']
+    fixtures = ['f1', 'f2']
 
     def setUp(self):
         # Every test needs a client.
@@ -44,3 +47,58 @@ class TestsClassSignIn(TestCase):
         self.assertEqual(response.status_code, 200)
         cr = ClassRegistration.objects.get(pk=1)
         self.assertFalse(cr.student.signature)
+
+    def test_sign_in_unregister(self):
+        settings.SQUARE_TESTING = True
+        bc2 = BeginnerClass.objects.get(pk=2)
+        reg2 = ClassRegistration.objects.create(
+            beginner_class=bc2,
+            student=Student.objects.get(pk=2),
+            new_student=True,
+            pay_status="paid",
+            idempotency_key='3239ed71-6740-4540-86f3-86fff79898a0',
+            reg_time="2021-06-09",
+            attended=False
+        )
+        payment = PaymentLog.objects.create(
+            category='intro',
+            checkout_created_time=timezone.now(),
+            description='programs_test',  # database set to 255 characters
+            donation=0,  # storing pennies in the database
+            idempotency_key='3239ed71-6740-4540-86f3-86fff79898a0',
+            location_id='',
+            order_id='',
+            payment_id='test_payment',
+            receipt='',
+            source_type='',
+            status='SUCCESS',
+            total_money=bc2.cost*100,
+            user=self.test_user
+        )
+        bc3 = BeginnerClass.objects.create(
+            class_date="2023-06-05T16:00:00.000Z",
+            class_type="beginner",
+            beginner_limit=0,
+            beginner_wait_limit=10,
+            returnee_limit=0,
+            returnee_wait_limit=0,
+            state="wait"
+        )
+        reg3 = ClassRegistration.objects.create(
+            beginner_class=bc3,
+            student=Student.objects.get(pk=2),
+            new_student=True,
+            pay_status="waiting",
+            idempotency_key='3239ed71-6740-4540-86f3-86fff79898a1',
+            reg_time="2021-06-09",
+            attended=False
+        )
+        response = self.client.post(reverse('programs:class_sign_in', kwargs={'reg_id': 1}), self.img, secure=True)
+        self.assertEqual(response.status_code, 302)
+        cr = ClassRegistration.objects.get(pk=1)
+        self.assertTrue(cr.student.signature)
+        self.assertEqual(cr.student.safety_class, timezone.datetime(year=2023, month=6, day=5).date())
+        cr2 = ClassRegistration.objects.get(pk=reg2.id)
+        self.assertEqual(cr2.pay_status, 'refunded')
+        cr3 = ClassRegistration.objects.get(pk=reg3.id)
+        self.assertEqual(cr3.pay_status, 'canceled')
