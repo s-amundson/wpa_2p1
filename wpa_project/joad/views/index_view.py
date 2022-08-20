@@ -69,10 +69,11 @@ class IndexView(UserPassesTestMixin, ListView):
         return event_list
 
     def get_queryset(self):
-        sessions = Session.objects.all()
+        session_date = timezone.now() - timezone.timedelta(days=8*7)
+        sessions = Session.objects.filter(start_date__gte=session_date)
         if not self.request.user.is_staff:
-            sessions = sessions.exclude(state='scheduled').exclude(state='canceled')
-        sessions = sessions.exclude(state='recorded').order_by('start_date')
+            sessions = sessions.filter(state__in=['scheduled', 'open', 'full', 'closed'])
+        sessions = sessions.order_by('start_date')
         self.has_joad = self.request.user.is_staff
         for session in sessions:
             s = model_to_dict(session)

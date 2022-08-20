@@ -21,7 +21,6 @@ class ClassAttendanceForm(forms.Form):
         self.class_date = beginner_class.class_date
 
         self.adult_dob = self.class_date.date().replace(year=self.class_date.year - 18)
-        logging.debug(self.adult_dob)
 
         self.new_students = registrations.filter(
             Q(student__safety_class__isnull=True) | Q(student__safety_class__gte=self.class_date.date())).exclude(
@@ -34,7 +33,6 @@ class ClassAttendanceForm(forms.Form):
         self.return_students_waiting = self.return_students.filter(pay_status='waiting')
         self.return_students = self.return_students.exclude(pay_status='waiting')
 
-        logging.debug(self.new_students)
         self.attend_count = {'beginner': len(self.new_students.filter(attended=True)),
                              'returnee': len(self.return_students.filter(attended=True)),
                              'staff': len(self.staff.filter(attended=True))}

@@ -1,10 +1,11 @@
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.forms import model_to_dict
+from django.utils import timezone
 
 from ..forms import JoadEventForm, PinAttendanceStaffForm, PinAttendanceStudentForm
 from ..models import JoadEvent, PinAttendance
@@ -125,6 +126,18 @@ class EventAttendListView(UserPassesTestMixin, ListView):
                 self.event = get_object_or_404(JoadEvent, pk=sid)
             return self.request.user.is_board
         return False
+
+
+class JoadEventListView(LoginRequiredMixin, ListView):
+    model = JoadEvent
+    template_name = 'joad/event_list.html'
+
+    def get_queryset(self):
+        queryset = self.model.objects.filter(event_date__lt=timezone.now())
+        # if not self.request.user.is_staff:
+        #     queryset = queryset.filter()
+        return queryset
+
 
 class JoadEventView(UserPassesTestMixin, FormView):
     template_name = 'joad/event.html'

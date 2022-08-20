@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %} JOAD Events {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <div>
+        <table class="table table-bordered
+            {% if user.dark_theme %}
+                text-white
+            {% else %}
+                text-dark
+            {% endif %}">
+            <thead>
+                <tr>
+                    <th> Date </th>
+                    <th> Type </th>
+                    <th> State </th>
+                    <th> Cost </th>
+                </tr>
+            </thead>
+            <tbody id="class-list-body">
+                {% for row in object_list %}
+                    <tr>
+                        <td>
+                            {% if user.is_board %}
+                                <a class="nav-link" href="{% url 'joad:event' row.id %}">{{ row.event_date }}</a>
+                            {% else %}
+                                {{ row.event_date }}
+                            {% endif %}
+                        </td>
+                        <td>{{ row.event_type }}</td>
+                        <td>{{ row.state }}</td>
+                        <td>{{ row.cost }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

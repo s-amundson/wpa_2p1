@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from student_app.models import Student
-from ..models import JoadEvent, EventRegistration, PinAttendance
+from ..models import JoadEvent, EventRegistration, Session, PinAttendance
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -63,6 +63,10 @@ class TestsJoadIndex(TestCase):
         student = Student.objects.get(pk=10)
         student.is_joad = False
         student.save()
+        session = Session.objects.get(pk=1)
+        session.start_date = timezone.now().date()
+        session.save()
+
         self.test_user = User.objects.get(pk=7)
         self.client.force_login(self.test_user)
         self.set_event_date()

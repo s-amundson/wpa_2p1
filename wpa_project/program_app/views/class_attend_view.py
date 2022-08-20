@@ -32,7 +32,6 @@ class ClassAttendListView(UserPassesTestMixin, FormView):
             if bid is None:
                 return False
             self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
-            # ClassRegistrationHelper().update_waiting(self.beginner_class)  # TODO remove this line
             return self.request.user.is_staff
         else:
             return False
