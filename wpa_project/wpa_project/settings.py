@@ -71,6 +71,12 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+CELERY_BROKER_URL = get_secret('CELERY_BROKER')
+CELERY_RESULT_BACKEND = 'rpc://'
+CELERY_RESULT_PERSISTENT = False
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TASK_IGNORE_RESULT = True
+
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = get_secret("CSRF_TRUSTED_ORIGINS")
 # Database
@@ -153,6 +159,11 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose2'
+        },
+        'celery': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose2',
+            'level': 'INFO',
         },
     },
     'root': {

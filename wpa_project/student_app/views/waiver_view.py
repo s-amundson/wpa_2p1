@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from student_app.forms import WaiverForm
 from student_app.models import Student
+from ..tasks import waiver_pdf
 
 import logging
 logger = logging.getLogger(__name__)
@@ -28,10 +29,11 @@ class WaiverView(UserPassesTestMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        self.form = form
-        if form.make_pdf(self.class_date):
+        # self.form = form
+        if form.check_signature(self.class_date):
             self.update_attendance()
-            form.send_pdf()
+            waiver_pdf.delay(self.student.id, form.cleaned_data['sig_first_name'], form.cleaned_data['sig_last_name'])
+            # form.send_pdf()
             return HttpResponseRedirect(self.success_url)
         return self.form_invalid(form)
 

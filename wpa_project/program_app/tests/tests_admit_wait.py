@@ -1,6 +1,7 @@
 import logging
 import uuid
 import json
+from unittest.mock import patch
 
 from django.apps import apps
 from django.test import TestCase, Client
@@ -10,6 +11,7 @@ from django.utils import timezone
 
 from payment.models import Card, Customer
 from ..models import BeginnerClass, ClassRegistration
+from ..tasks import charge_group
 Student = apps.get_model('student_app', 'Student')
 User = apps.get_model('student_app', 'User')
 logger = logging.getLogger(__name__)
@@ -104,11 +106,10 @@ class TestsAdmitWait(TestCase):
         self.assertTemplateUsed('student_app/admit_wait.html')
         self.assertEqual(len(response.context['form'].fields), 2)
 
-    def test_post_wait_list(self):
+    @patch('program_app.forms.admit_wait_form.charge_group.delay')
+    def test_post_wait_list(self, chg_group):
         d = {'admit_1': True, 'admit_2': True, 'admit_3': False, 'admit_4': False}
         response = self.client.post(reverse('programs:admit_wait', kwargs={'beginner_class': 1}), d, secure=True)
         self.assertRedirects(response, reverse('programs:class_attend_list', kwargs={'beginner_class': 1}))
-        cr = ClassRegistration.objects.all()
-        self.assertEqual(len(cr.filter(pay_status='paid')), 2)
-        self.assertEqual(len(cr.filter(pay_status='waiting')), 2)
+        chg_group.assert_called_with([2, 1])
 

@@ -1,11 +1,12 @@
 import logging
 import uuid
-
+from django.core import mail
 from django.test import TestCase, Client
 from django.conf import settings
 
 from ..src import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
+from ..tasks import update_waiting
 from student_app.models import Student, User
 from payment.models import Card, Customer
 
@@ -43,6 +44,7 @@ class TestsClassRegistrationHelper(TestCase):
             prepaid_type="NOT_PREPAID",
             version=0)
         return card
+
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
@@ -233,7 +235,7 @@ class TestsClassRegistrationHelper(TestCase):
                                    user=user)
             cr.save()
 
-        # add 2 more to the wait list at the same time so they go together.
+        # add 2 more to the wait list at the same time so that they go together.
         user = User.objects.get(pk=3)
         self.add_card(user)
         ik = str(uuid.uuid4())
@@ -257,18 +259,20 @@ class TestsClassRegistrationHelper(TestCase):
         # chang the beginnner limit so that one waiting can change to paid.
         bc.beginner_limit = 3
         bc.save()
-        self.crh.update_waiting(bc)
+        update_waiting(bc.id)
         registrations = ClassRegistration.objects.filter(beginner_class=bc)
         self.assertEqual(len(registrations), 5)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 2)
+        self.assertEqual(len(mail.outbox), 1)
 
         # add the last 2
         bc.beginner_limit = 6
         bc.save()
-        self.crh.update_waiting(bc)
+        update_waiting(bc.id)
         registrations = ClassRegistration.objects.filter(beginner_class=bc)
         self.assertEqual(len(registrations), 5)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
+        self.assertEqual(len(mail.outbox), 2)
 
     def test_update_status_beginner_waiting_error(self):
         # set up beginner class to have wait list
@@ -305,11 +309,12 @@ class TestsClassRegistrationHelper(TestCase):
         # chang the beginnner limit so that one waiting can change to paid.
         bc.beginner_limit = 3
         bc.save()
-        self.crh.update_waiting(bc)
+        update_waiting(bc.id)
         registrations = ClassRegistration.objects.filter(beginner_class=bc)
         self.assertEqual(len(registrations), 3)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
         self.assertEqual(len(registrations.filter(pay_status='start')), 1)
+
 
     def test_update_status_return_waiting(self):
         # set up beginner class to have wait list
@@ -361,7 +366,7 @@ class TestsClassRegistrationHelper(TestCase):
         # chang the beginnner limit so that one waiting can change to paid.
         bc.returnee_limit = 3
         bc.save()
-        self.crh.update_waiting(bc)
+        update_waiting(bc.id)
         registrations = ClassRegistration.objects.filter(beginner_class=bc)
         self.assertEqual(len(registrations), 5)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 2)
@@ -369,7 +374,7 @@ class TestsClassRegistrationHelper(TestCase):
         # add the last 2
         bc.returnee_limit = 6
         bc.save()
-        self.crh.update_waiting(bc)
+        update_waiting(bc.id)
         registrations = ClassRegistration.objects.filter(beginner_class=bc)
         self.assertEqual(len(registrations), 5)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)

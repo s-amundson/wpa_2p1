@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class ClassRegistrationHelper:
     def charge_group(self, queryset):
         for ikey in queryset.values('idempotency_key').annotate(ik_count=Count('idempotency_key')).order_by():
-            logging.debug(ikey)
+            logging.warning(ikey)
             icr = queryset.filter(idempotency_key=str(ikey['idempotency_key']))
             cost = icr[0].beginner_class.cost
             note = f'Class on {str(icr[0].beginner_class.class_date)[:10]}, Students: '
@@ -44,7 +44,7 @@ class ClassRegistrationHelper:
                 # if record.student.safety_class is not None:
                 #     bcd = beginner_class.class_date.date()
                 #     scd = record.student.safety_class
-                #     logging.debug(f'safety_class={scd}, beginner_class={bcd}, beginner={scd>=bcd}')
+                #     logging.warning(f'safety_class={scd}, beginner_class={bcd}, beginner={scd>=bcd}')
                 if is_staff:
                     staff_count += 1
                 elif record.student.safety_class is None \
@@ -56,8 +56,8 @@ class ClassRegistrationHelper:
 
     def has_space(self, user, beginner_class, beginner, instructor, returnee):
         enrolled_count = self.enrolled_count(beginner_class)
-        logging.debug(enrolled_count)
-        logging.debug(beginner)
+        logging.warning(enrolled_count)
+        logging.warning(beginner)
         wait = False
         if beginner_class.state in ['open', 'wait']:  # in case it changed since user got the self.form.
             if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
@@ -93,8 +93,8 @@ class ClassRegistrationHelper:
 
     def update_class_state(self, beginner_class):
         records = self.student_registrations(beginner_class)
-        logging.debug(len(records))
-        logging.debug(beginner_class.beginner_limit)
+        logging.warning(len(records))
+        logging.warning(beginner_class.beginner_limit)
         if beginner_class.class_type == 'beginner' and beginner_class.state in ['open', 'wait', 'full']:
             if len(records) >= beginner_class.beginner_limit and beginner_class.state == 'open':
                 if len(records) >= beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
@@ -142,30 +142,34 @@ class ClassRegistrationHelper:
                 else:
                     beginner_class.state = 'wait'
                 beginner_class.save()
-        # logging.debug(beginner_class.state)
+        # logging.warning(beginner_class.state)
 
     def update_waiting(self, beginner_class):
+        logging.warning(beginner_class)
+        logging.warning(type(beginner_class))
+        if type(beginner_class) == int:
+            beginner_class = BeginnerClass.objects.get(pk=beginner_class)
         records = self.student_registrations(beginner_class)
-        logging.debug(records)
+        logging.warning(records)
         waiting = records.filter(pay_status='waiting').order_by('modified')
         admitted = records.filter(pay_status__in=['paid', 'admin']).order_by('modified')
-
+        logging.warning(waiting)
         if not len(waiting):
             return
         if beginner_class.class_type == 'beginner':
             if len(admitted) < beginner_class.beginner_limit:
-                logging.debug(f'space available {beginner_class.beginner_limit - len(admitted)}')
+                logging.warning(f'space available {beginner_class.beginner_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
-                logging.debug(f'next group {len(next_group)}')
+                logging.warning(f'next group {len(next_group)}')
                 if beginner_class.beginner_limit - len(admitted) >= len(next_group):
                     self.charge_group(next_group)
                     EmailMessage().wait_list_off(next_group)
                     # self.update_waiting(beginner_class)
         elif beginner_class.class_type == 'returnee':
             if len(admitted) < beginner_class.returnee_limit:
-                logging.debug(f'space available {beginner_class.returnee_limit - len(admitted)}')
+                logging.warning(f'space available {beginner_class.returnee_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
-                logging.debug(f'next group {len(next_group)}')
+                logging.warning(f'next group {len(next_group)}')
                 if beginner_class.returnee_limit - len(admitted) >= len(next_group):
                     self.charge_group(next_group)
                     EmailMessage().wait_list_off(next_group)

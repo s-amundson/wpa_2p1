@@ -5,7 +5,6 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
 from ..models import Student
-from ..forms import WaiverForm
 from ..src import EmailMessage
 
 logger = logging.getLogger(__name__)
@@ -40,6 +39,7 @@ class TestsWaiver(TestCase):
         self.assertEqual(response.status_code, 302)
         student = Student.objects.get(pk=1)
         self.assertTrue(student.signature)
+        self.assertIsNotNone(student.signature_pdf)
 
     def test_post_waiver_invalid(self):
         self.img['signature'] = self.invalid_sig

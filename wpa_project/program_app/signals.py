@@ -10,8 +10,6 @@ from payment.src import RefundHelper
 
 logger = logging.getLogger(__name__)
 
-update_wait_list_signal = Signal()
-
 
 @receiver(payment_error_signal)
 def registration_payment_error(old_idempotency_key, new_idempotency_key, **kwargs):
@@ -31,8 +29,3 @@ def registration_update(sender, instance, created, **kwargs):
             c.pay_status = 'paid'
             c.save()
             crh.update_class_state(c.beginner_class)
-
-
-@receiver(update_wait_list_signal)
-def update_wait_list(beginner_class, **kwargs):
-    ClassRegistrationHelper().update_waiting(beginner_class)

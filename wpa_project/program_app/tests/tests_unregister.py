@@ -1,5 +1,6 @@
 import logging
 import uuid
+from unittest.mock import patch
 from datetime import datetime, timedelta
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -51,7 +52,8 @@ class TestsUnregisterStudent(TestCase):
         self.client.force_login(self.test_user)
         settings.SQUARE_TESTING = True
 
-    def test_refund_success_entire_purchase(self):
+    @patch('program_app.forms.unregister_form.update_waiting.delay')
+    def test_refund_success_entire_purchase(self, task_update_waiting):
         student = Student.objects.get(pk=2)
         student.user.is_staff = False
         student.user.save()
@@ -84,8 +86,10 @@ class TestsUnregisterStudent(TestCase):
         cr = bc.classregistration_set.all()
         self.assertEqual(cr[0].pay_status, 'refunded')
         self.assertEqual(cr[1].pay_status, 'refunded')
+        task_update_waiting.assert_called_with(1)
 
-    def test_refund_success_partial_purchase(self):
+    @patch('program_app.forms.unregister_form.update_waiting.delay')
+    def test_refund_success_partial_purchase(self, task_update_waiting):
         self.create_payment([Student.objects.get(pk=2), Student.objects.get(pk=3)], 1000)
         cr = ClassRegistration.objects.all()
 
@@ -112,8 +116,10 @@ class TestsUnregisterStudent(TestCase):
         pl = PaymentLog.objects.filter(payment_id=rl[1].payment_id)
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].status, 'refund')
+        task_update_waiting.assert_called_with(1)
 
-    def test_donate_refund(self):
+    @patch('program_app.forms.unregister_form.update_waiting.delay')
+    def test_donate_refund(self, task_update_waiting):
         student = Student.objects.get(pk=2)
         student.user.is_staff = False
         student.user.save()
@@ -128,6 +134,7 @@ class TestsUnregisterStudent(TestCase):
         cr = ClassRegistration.objects.all()
         for r in cr:
             self.assertEqual(r.pay_status, 'refund donated')
+        task_update_waiting.assert_called_with(1)
 
     def test_cancel_waiting(self):
         ik = uuid.uuid4()
@@ -147,6 +154,7 @@ class TestsUnregisterStudent(TestCase):
         cr = ClassRegistration.objects.all()
         for r in cr:
             self.assertEqual(r.pay_status, 'canceled')
+
 
 class TestsUnregisterStudent2(TestCase):
     fixtures = ['f1', 'f2']

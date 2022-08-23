@@ -2,6 +2,7 @@ from django import forms
 
 from ..src import ClassRegistrationHelper
 from ..models import ClassRegistration
+from ..tasks import charge_group
 import logging
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,8 @@ class AdmitWaitForm(forms.Form):
         for k, v in self.cleaned_data.items():
             if k[:6] == 'admit_' and v:
                 reg_list.append(int(k.split('_')[1]))
-        logging.debug(self.registrations.filter(id__in=reg_list))
-        ClassRegistrationHelper().charge_group(self.registrations.filter(id__in=reg_list))
+        # logging.debug(self.registrations.filter(id__in=reg_list))
+        logging.debug(reg_list)
+        charge_group.delay(reg_list)
+        # ClassRegistrationHelper().charge_group(self.registrations.filter(id__in=reg_list))
         return True
