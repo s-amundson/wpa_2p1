@@ -1,56 +1,31 @@
 import logging
 import uuid
+from unittest.mock import patch
+
 from django.core import mail
 from django.test import TestCase, Client
-from django.conf import settings
 
 from ..src import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
 from ..tasks import update_waiting
 from student_app.models import Student, User
-from payment.models import Card, Customer
+from payment.tests import MockSideEffects
 
 logger = logging.getLogger(__name__)
 
 
-class TestsClassRegistrationHelper(TestCase):
+class TestsClassRegistrationHelper(MockSideEffects, TestCase):
     fixtures = ['f1']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.crh = ClassRegistrationHelper()
 
-    def add_card(self, user):
-        customer = Customer.objects.create(user=user,
-                                           customer_id="9Z9Q0D09F0WMV0FHFA2QMZH8SC",
-                                           created_at="2022-05-30T19:50:46Z",
-                                           creation_source="THIRD_PARTY",
-                                           updated_at="2022-05-30T19:50:46Z")
-        card = Card.objects.create(
-            bin=411111,
-            card_brand="VISA",
-            card_id="ccof:8sLQqf1boPfmwDKI4GB",
-            card_type="CREDIT",
-            cardholder_name="",
-            customer=customer,
-            default=1,
-            enabled=1,
-            exp_month=11,
-            exp_year=2022,
-            fingerprint="sq-1-npXvWJT5AhTtISQwBYohbA8kkQ24CyPCN6G6kP_6Bm_K2KPYsT1y_1xKUhvAnMIzfA",
-            # id=1,
-            last_4=1111,
-            merchant_id="TYXMY2T8CN2PK",
-            prepaid_type="NOT_PREPAID",
-            version=0)
-        return card
-
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
-        settings.SQUARE_TESTING = True
 
     def test_update_status_beginner_full(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -190,27 +165,9 @@ class TestsClassRegistrationHelper(TestCase):
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.state, 'open')
 
-    def test_update_status_returnee_full(self):
-        bc = BeginnerClass.objects.get(pk=1)
-        bc.class_type = 'returnee'
-        bc.beginner_limit = 0
-        bc.returnee_limit = 3
-        bc.save()
-        for i in range(3):
-            s = Student.objects.get(pk=i + 3)
-            s.safety_class = "2021-05-31"
-            s.save()
-            cr = ClassRegistration(beginner_class=bc,
-                                   student=s,
-                                   new_student=True,
-                                   pay_status='paid',
-                                   idempotency_key=str(uuid.uuid4()))
-            cr.save()
-        self.crh.update_class_state(bc)
-        bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
-
-    def test_update_status_beginner_waiting(self):
+    @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
+    def test_update_status_beginner_waiting(self, mock_payment):
+        mock_payment.side_effect = self.payment_side_effect
         # set up beginner class to have wait list
         bc = BeginnerClass.objects.get(pk=1)
         bc.class_type = 'beginner'
@@ -274,7 +231,9 @@ class TestsClassRegistrationHelper(TestCase):
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
         self.assertEqual(len(mail.outbox), 2)
 
-    def test_update_status_beginner_waiting_error(self):
+    @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
+    def test_update_status_beginner_waiting_error(self, mock_payment):
+        mock_payment.side_effect = self.payment_side_effect
         # set up beginner class to have wait list
         bc = BeginnerClass.objects.get(pk=1)
         bc.class_type = 'beginner'
@@ -315,8 +274,9 @@ class TestsClassRegistrationHelper(TestCase):
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
         self.assertEqual(len(registrations.filter(pay_status='start')), 1)
 
-
-    def test_update_status_return_waiting(self):
+    @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
+    def test_update_status_return_waiting(self, mock_payment):
+        mock_payment.side_effect = self.payment_side_effect
         # set up beginner class to have wait list
         bc = BeginnerClass.objects.get(pk=1)
         bc.class_type = 'returnee'

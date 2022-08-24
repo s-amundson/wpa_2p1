@@ -29,7 +29,6 @@ class SquareHelper:
             '': 'Payment Error'
         }
         self.error_log = None
-        self.testing = settings.SQUARE_TESTING
         self.user = None
 
     def log_error(self, category, error, idempotency_key, api):

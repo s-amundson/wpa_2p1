@@ -3,7 +3,6 @@ import uuid
 
 from django.test import TestCase, Client
 from django.apps import apps
-from django.conf import settings
 
 from ..models import Card, Customer, PaymentLog
 from ..src import CardHelper, CustomerHelper, PaymentHelper

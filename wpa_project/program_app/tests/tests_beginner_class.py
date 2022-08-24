@@ -6,17 +6,18 @@ from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
-from django.conf import settings
+from unittest.mock import patch
 
 from ..models import BeginnerClass, ClassRegistration
 from payment.models import PaymentLog
+from payment.tests import MockSideEffects
 from student_app.models import Student
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
-class TestsBeginnerClass(TestCase):
+class TestsBeginnerClass(MockSideEffects, TestCase):
     fixtures = ['f1', 'f3']
 
     def __init__(self, *args, **kwargs):
@@ -61,7 +62,6 @@ class TestsBeginnerClass(TestCase):
                            'instructor_limit': 2,
                            'state': 'scheduled',
                            'cost': 5}
-        settings.SQUARE_TESTING = True
 
     def test_user_normal_user_not_authorized(self):
         self.test_user = User.objects.get(pk=3)
@@ -138,7 +138,10 @@ class TestsBeginnerClass(TestCase):
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 2)
 
-    def test_refund_success_class(self):
+    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    def test_refund_success_class(self, refund):
+        refund.side_effect = self.refund_side_effect
+
         self.test_user = User.objects.get(pk=2)
         self.test_user.is_staff = False
         self.test_user.save()

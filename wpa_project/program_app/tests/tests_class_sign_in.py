@@ -2,18 +2,19 @@ from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
-from django.conf import settings
+from unittest.mock import patch
 
 from ..models import BeginnerClass, ClassRegistration
 from student_app.models import Student
 from payment.models import PaymentLog
+from payment.tests import MockSideEffects
 
 import logging
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
-class TestsClassSignIn(TestCase):
+class TestsClassSignIn(MockSideEffects, TestCase):
     fixtures = ['f1', 'f2']
 
     def setUp(self):
@@ -48,8 +49,10 @@ class TestsClassSignIn(TestCase):
         cr = ClassRegistration.objects.get(pk=1)
         self.assertFalse(cr.student.signature)
 
-    def test_sign_in_unregister(self):
-        settings.SQUARE_TESTING = True
+    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    def test_sign_in_unregister(self, refund):
+        refund.side_effect = self.refund_side_effect
+
         bc2 = BeginnerClass.objects.get(pk=2)
         reg2 = ClassRegistration.objects.create(
             beginner_class=bc2,

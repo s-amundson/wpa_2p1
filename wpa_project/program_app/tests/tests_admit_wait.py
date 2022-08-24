@@ -1,52 +1,22 @@
 import logging
-import uuid
-import json
 from unittest.mock import patch
 
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.conf import settings
-from django.utils import timezone
 
-from payment.models import Card, Customer
+from payment.tests import MockSideEffects
 from ..models import BeginnerClass, ClassRegistration
-from ..tasks import charge_group
 Student = apps.get_model('student_app', 'Student')
 User = apps.get_model('student_app', 'User')
 logger = logging.getLogger(__name__)
 
 
-class TestsAdmitWait(TestCase):
+class TestsAdmitWait(MockSideEffects, TestCase):
     fixtures = ['f1']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def add_card(self, user):
-        customer = Customer.objects.create(user=user,
-                                           customer_id="9Z9Q0D09F0WMV0FHFA2QMZH8SC",
-                                           created_at="2022-05-30T19:50:46Z",
-                                           creation_source="THIRD_PARTY",
-                                           updated_at="2022-05-30T19:50:46Z")
-        card = Card.objects.create(
-            bin=411111,
-            card_brand="VISA",
-            card_id="ccof:8sLQqf1boPfmwDKI4GB",
-            card_type="CREDIT",
-            cardholder_name="",
-            customer=customer,
-            default=1,
-            enabled=1,
-            exp_month=11,
-            exp_year=2022,
-            fingerprint="sq-1-npXvWJT5AhTtISQwBYohbA8kkQ24CyPCN6G6kP_6Bm_K2KPYsT1y_1xKUhvAnMIzfA",
-            id=1,
-            last_4=1111,
-            merchant_id="TYXMY2T8CN2PK",
-            prepaid_type="NOT_PREPAID",
-            version=0)
-        return card
 
     def beginner_class_setup(self, id):
         bc = BeginnerClass.objects.get(pk=id)
@@ -63,7 +33,7 @@ class TestsAdmitWait(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        settings.SQUARE_TESTING = True
+
         # update beginner_class
         self.beginner_class = self.beginner_class_setup(1)
         students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
@@ -106,8 +76,10 @@ class TestsAdmitWait(TestCase):
         self.assertTemplateUsed('student_app/admit_wait.html')
         self.assertEqual(len(response.context['form'].fields), 2)
 
+    @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
     @patch('program_app.forms.admit_wait_form.charge_group.delay')
-    def test_post_wait_list(self, chg_group):
+    def test_post_wait_list(self, chg_group, mock_payment):
+        mock_payment.side_effect = self.payment_side_effect
         d = {'admit_1': True, 'admit_2': True, 'admit_3': False, 'admit_4': False}
         response = self.client.post(reverse('programs:admit_wait', kwargs={'beginner_class': 1}), d, secure=True)
         self.assertRedirects(response, reverse('programs:class_attend_list', kwargs={'beginner_class': 1}))

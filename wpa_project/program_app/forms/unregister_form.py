@@ -69,7 +69,6 @@ class UnregisterForm(forms.Form):
             self.family = None
         super().__init__(*args, **kwargs)
         self.template_name = 'program_app/forms/unregister.html'
-        logging.debug(self.family)
         self.refund_errors = []
         if self.family:
             self.registrations = ClassRegistration.objects.filter(beginner_class__class_date__gte=timezone.now(),
@@ -81,7 +80,6 @@ class UnregisterForm(forms.Form):
                                  initial=False)
                 f.beginner_class = str(reg.beginner_class.id)
                 f.class_date = reg.beginner_class.class_date
-                logging.debug(f.class_date)
                 f.pay_status = reg.pay_status
                 if reg.beginner_class.state in reg.beginner_class.class_states[4:]:  # class closed
                     f.widget.attrs.update({'disabled': 'disabled'})
@@ -99,6 +97,7 @@ class UnregisterForm(forms.Form):
                 yield self[field_name]
 
     def process_refund(self, user, student_family):
+        logging.warning(self.cleaned_data)
         class_list = []
         for k, v in self.cleaned_data.items():
             if k[:5] == 'unreg' and v:
@@ -119,7 +118,7 @@ class UnregisterForm(forms.Form):
             logging.debug(ikey)
             icr = cr.filter(idempotency_key=ikey['idempotency_key'])
             cost = icr[0].beginner_class.cost
-            if ikey['pay_status'] == 'waiting':
+            if ikey['pay_status'] in ['start', 'waiting']:
                 icr.update(pay_status='canceled')
                 continue
             elif ikey['pay_status'] == 'paid' and self.cleaned_data['donation']:
@@ -128,6 +127,7 @@ class UnregisterForm(forms.Form):
             elif ikey['pay_status'] == 'paid':
                 square_response = refund.refund_with_idempotency_key(ikey['idempotency_key'],
                                                                      cost * 100 * ikey['ik_count'])
+            logging.debug(square_response)
 
             if square_response['status'] in ['PENDING', 'SUCCESS']:
                 if user.student_set.first().student_family == self.family:

@@ -13,7 +13,6 @@ class TestsReport(TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
@@ -21,7 +20,6 @@ class TestsReport(TestCase):
         self.client.force_login(self.test_user)
         self.post_dict = {'beginning_date': '2022-02-02', 'end_date': '2022-06-06'}
         self.url = reverse('payment:report')
-
 
     def test_get_report(self):
         response = self.client.get(self.url, secure=True)

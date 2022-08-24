@@ -4,7 +4,6 @@ import uuid
 
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from django.conf import settings
 
 from ..forms import PaymentForm
 from ..models import RefundLog

@@ -36,25 +36,17 @@ class RefundHelper(SquareHelper):
                 refunded_amount += r.amount
             if log.total_money <= refunded_amount:  # check if only partial refund was applied
                 return {'status': 'error', 'error': 'Previously refunded'}
-        if not self.testing:
-            idempotency_key = uuid.uuid4()
-            result = self.client.refunds.refund_payment(
-                body={"idempotency_key": str(idempotency_key),
-                      "amount_money": {'amount': amount, 'currency': 'USD'},
-                      "payment_id": log.payment_id
-                      })
-            square_response = result.body.get('refund', {'refund': None})
-        else:
-            square_response = {'status': "SUCCESS",
-                               'created_at': timezone.now(),
-                               'error': '',
-                               'location_id': log.location_id,
-                               'order_id': log.order_id,
-                               'payment_id': log.payment_id,
-                               'id': 'test_refund',
-                               'amount_money': {'amount': amount}}
+
+        idempotency_key = uuid.uuid4()
+        result = self.client.refunds.refund_payment(
+            body={"idempotency_key": str(idempotency_key),
+                  "amount_money": {'amount': amount, 'currency': 'USD'},
+                  "payment_id": log.payment_id
+                  })
+        square_response = result.body.get('refund', {'refund': None})
+
         logging.debug(square_response)
-        if self.testing or result.is_success():
+        if result.is_success():
             square_response['error'] = ""
             log.status = 'refund'
             log.save()

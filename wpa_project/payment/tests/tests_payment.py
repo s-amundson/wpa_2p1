@@ -3,7 +3,6 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core import mail
-from django.conf import settings
 
 from ..models import Card, PaymentLog, PaymentErrorLog
 
