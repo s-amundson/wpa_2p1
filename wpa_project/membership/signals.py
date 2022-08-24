@@ -5,6 +5,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from .models import Member, Membership
 from payment.models import PaymentLog
+from payment.signals import payment_error_signal
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,11 @@ def member_update(sender, instance, created, **kwargs):
                     student.user.is_member = True
                     student.user.save()
             membership.save()
-    #
-    # if created:
-    #     pass
-    # #     MembershipModel.objects.create(user=instance)
+
+
+@receiver(payment_error_signal)
+def payment_error(old_idempotency_key, new_idempotency_key, **kwargs):
+    """ in case of a payment error update the registration with the new idempotency key so that we register them once
+    a successful payment is processed"""
+    m = Membership.objects.filter(idempotency_key=old_idempotency_key)
+    m.update(idempotency_key=new_idempotency_key)
