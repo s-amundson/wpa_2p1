@@ -23,7 +23,7 @@ services:
     container_name: celery_dev
     image: *django
     restart: 'no'
-    command: celery -A wpa_project worker -l INFO --uid 1000
+    entrypoint: celery -A wpa_project worker -l INFO
     volumes:
       - ../wpa_project:/code
     env_file:
@@ -45,7 +45,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
   rabbitmq3:
-    container_name: "rabbitmq"
+    container_name: "rabbitmq_dev"
     image: rabbitmq:3-management-alpine
     env_file:
       - ../wpa_project/wpa_project.env

@@ -1,6 +1,5 @@
 import logging
 from django.conf import settings
-from django.utils import timezone
 
 from .square_helper import SquareHelper
 from ..models import Card, PaymentLog, PaymentErrorLog

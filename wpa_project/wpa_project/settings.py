@@ -168,7 +168,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': get_secret("DEBUG"),
+        'level': get_secret("DEBUG_LEVEL"),
     },
 }
 
