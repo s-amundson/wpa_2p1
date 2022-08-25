@@ -13,5 +13,5 @@ class InstructorForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['instructor_expire_date'].widget = SelectDateWidget(
-            years=range(date.today().year, date.today().year + 3, 1))
+            years=range(date.today().year, date.today().year + 4, 1))
         self.fields['instructor_level'].widget.attrs.update({'placeholder': 'Level'})
