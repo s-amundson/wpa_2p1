@@ -47,7 +47,8 @@ services:
     restart: 'unless-stopped'
     entrypoint: celery -A wpa_project worker -l INFO
     volumes:
-      - ../wpa_project:/code
+      - staticfiles:/home/app/web/staticfiles
+      - media:/home/app/web/student_app/media
     env_file:
       - ../wpa_project/wpa_project.env
     depends_on:
@@ -72,7 +73,7 @@ services:
     env_file:
       - ./wordpress.env
     volumes:
-      - ../wordpress/wp-content:/var/www/html/wp-contentd
+      - ../wordpress/wp-content:/var/www/html/wp-content
 
   nginx:
     container_name: nginx
