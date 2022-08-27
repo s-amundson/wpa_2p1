@@ -49,3 +49,17 @@ class WaiverView(UserPassesTestMixin, FormView):
     def update_attendance(self):
         pass
 
+
+class WaiverRecreateView(WaiverView):
+    def get(self, request, *args, **kwargs):
+        waiver_pdf.delay(self.student.id, self.student.first_name, self.student.last_name)
+        return HttpResponseRedirect(self.success_url)
+
+    def test_func(self):
+        sid = self.kwargs.get('student_id', None)
+        if sid is not None:
+            self.student = get_object_or_404(Student, pk=sid)
+        if self.request.user.is_authenticated:
+            return self.request.user.is_superuser
+        else:
+            return False

@@ -15,7 +15,7 @@ class RegistrationManager(models.Manager):
 class RegistrationQuerySet(models.QuerySet):
     def attendance(self):
         return self.filter(
-            beginner_class__class_date__lt=timezone.now().today(),
+            beginner_class__class_date__lt=timezone.now(),
             pay_status__in=['paid', 'admin']
         ).aggregate(
             attended=models.Count('id', filter=models.Q(attended=True)),

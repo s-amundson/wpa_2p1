@@ -34,8 +34,10 @@ services:
       - django
 
   db:
+#    command: postgres -c max_wal_senders=10 -c max_replication_slots=10 -c wal_keep_size=5 -c max_slot_wal_keep_size=-1 -c wal_sender_timeout=60s -c track_commit_timestamp=off
+#    command: postgres -c config_file=
     container_name: devdb
-    image: postgres:latest
+    image: postgres:14
     restart: 'no' #always
     env_file:
       - ../wpa_project/wpa_project.env
@@ -43,6 +45,16 @@ services:
       - 5432:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
+#    command: pg_upgrade
+  bkupdb:
+    image: postgres:14
+    restart: 'no' #always
+    env_file:
+      - ../wpa_project/wpa_project.env
+    ports:
+      - 15432:5432
+    volumes:
+      - ./db_backup/wpa:/var/lib/postgresql/data
 
   rabbitmq3:
     container_name: "rabbitmq_dev"
