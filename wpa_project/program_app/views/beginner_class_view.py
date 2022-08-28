@@ -51,7 +51,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
         return kwargs
 
     def form_invalid(self, form):
-        logging.debug(form.errors)
+        logging.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
@@ -118,6 +118,8 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
             bid = self.kwargs.get('beginner_class', None)
             if bid is not None:
                 self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
+                logging.warning(self.beginner_class.class_date)
+                logging.warning(timezone.localtime(self.beginner_class.class_date))
                 self.success_url = reverse_lazy('programs:class_attend_list', kwargs={'beginner_class': bid})
             return self.request.user.is_board
         else:

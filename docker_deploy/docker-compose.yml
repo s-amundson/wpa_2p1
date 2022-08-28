@@ -2,6 +2,7 @@ version: "3.7"
 
 services:
   db:
+    command: postgres -c config_file=conf/postgres.conf
     container_name: postgresdb
     image: postgres:latest
     restart: unless-stopped #always

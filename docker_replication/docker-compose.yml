@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  bkupdb:
+    command: postgres -c config_file=conf/postgres.conf
+    image: postgres:14
+    restart: 'no' #always
+    entrypoint: ["/conf/replicate.sh"]
+    env_file:
+      - ./replicate.env
+    ports:
+      - 15432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./ps_rep_conf:/conf
+
+networks:
+  default:
+    name: my-app-net
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.58.0/24
+
+volumes:
+  postgres-data:
+#  mysql_data:

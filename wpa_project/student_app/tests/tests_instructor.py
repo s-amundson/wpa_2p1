@@ -27,7 +27,7 @@ class TestsInstructor(TestCase):
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('registration:instructor_update'), secure=True)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_form(self):
         response = self.client.post(reverse('registration:instructor_update'),

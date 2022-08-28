@@ -16,7 +16,7 @@ from student_app.src import EmailMessage
 from .models import Student
 
 import os
-
+import logging
 logger = get_task_logger(__name__)
 
 
@@ -25,7 +25,10 @@ def waiver_pdf(student_id, sig_first_name, sig_last_name):
     student = Student.objects.get(pk=student_id)
     if student is None:
         return
-
+    logging.warning(student.signature)
+    if not student.signature:
+        logging.warning('No Signature')
+        return
     sf = student.student_family
 
     styles = getSampleStyleSheet()

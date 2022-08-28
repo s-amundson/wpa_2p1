@@ -9,7 +9,6 @@ services:
     build:
       context: ..
       dockerfile: docker_development/Dockerfile
-    #    command: python manage.py runserver 0.0.0.0:8000
     command: python manage.py runsslserver 0.0.0.0:8000
 
     volumes:
@@ -34,8 +33,7 @@ services:
       - django
 
   db:
-#    command: postgres -c max_wal_senders=10 -c max_replication_slots=10 -c wal_keep_size=5 -c max_slot_wal_keep_size=-1 -c wal_sender_timeout=60s -c track_commit_timestamp=off
-#    command: postgres -c config_file=
+    command: postgres -c config_file=conf/postgres.conf
     container_name: devdb
     image: postgres:14
     restart: 'no' #always
@@ -45,16 +43,22 @@ services:
       - 5432:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
-#    command: pg_upgrade
+      - ./ps_master_conf:/conf
+
   bkupdb:
+    command: postgres -c config_file=conf/postgres.conf
     image: postgres:14
     restart: 'no' #always
+    entrypoint: ["/conf/replicate.sh"]
     env_file:
-      - ../wpa_project/wpa_project.env
+      - ./replicate.env
     ports:
       - 15432:5432
     volumes:
-      - ./db_backup/wpa:/var/lib/postgresql/data
+      - ./db_backup/rep/bkup:/var/lib/postgresql/data
+      - ./ps_rep_conf:/conf
+    depends_on:
+      - db
 
   rabbitmq3:
     container_name: "rabbitmq_dev"

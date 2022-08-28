@@ -31,7 +31,7 @@ class ClassSignInView(WaiverView):
         self.class_registration.save()
         # Cancel future beginner classes by this student
         cr = ClassRegistration.objects.filter(
-            beginner_class__class_date__gt=timezone.localdate(timezone.now()),
+            beginner_class__class_date__gt=timezone.now().replace(hour=23, minute=59, second=59),
             student=self.student)
         waiting = cr.filter(pay_status='waiting')
         waiting.update(pay_status='canceled')

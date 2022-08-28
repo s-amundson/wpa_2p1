@@ -7,3 +7,4 @@ temp_*
 *.env
 /wpa_project/student_app/media/signatures/
 wordpress/
+/docker_development/db_backup/
