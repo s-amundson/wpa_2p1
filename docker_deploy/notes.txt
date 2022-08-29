@@ -48,5 +48,6 @@ To update wordpress:
         sudo cp -r ~/bkup/wordpress/wp-content ~/wpa_2p1/wordpress/wp-content
     restart docker
         cd ~/wpa_2p1/docker_deploy
+        chmod +x wp_entry.sh
         docker-compose down
         docker-compose up
