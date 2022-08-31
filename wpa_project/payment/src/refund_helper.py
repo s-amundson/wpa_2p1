@@ -1,6 +1,5 @@
 import uuid
 import logging
-from django.utils import timezone
 
 from .square_helper import SquareHelper
 from ..models import PaymentLog, RefundLog
@@ -12,10 +11,8 @@ class RefundHelper(SquareHelper):
     def refund_with_idempotency_key(self, idempotency_key, amount):
         """ does either a full or partial refund. Takes and idempotency_key and amount as arguments, Looks up the log
         then calls refund_payment"""
-        try:
-            log = PaymentLog.objects.get(idempotency_key=idempotency_key)
-            logging.debug(log)
-        except PaymentLog.DoesNotExist:
+        log = PaymentLog.objects.filter(idempotency_key=idempotency_key).last()
+        if log is None:
             return {'status': "FAIL", 'error': 'Record does not exist'}
         return self.refund_payment(log, amount)
 
@@ -24,7 +21,6 @@ class RefundHelper(SquareHelper):
 
     def refund_payment(self, log, amount):
         """ does either a full or partial refund. """
-        idempotency_key = None
         if log.status == 'comped':  # payment was comped therefore no refund
             log.status = 'refund'
             log.save()

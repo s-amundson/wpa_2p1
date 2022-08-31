@@ -14,7 +14,7 @@ services:
     volumes:
       - ../wpa_project:/code
     ports:
-      - "8000":"8000"
+      - "8000:8000"
     depends_on:
       - db
 
@@ -40,25 +40,25 @@ services:
     env_file:
       - ../wpa_project/wpa_project.env
     ports:
-      - "5432":"5432"
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./ps_master_conf:/conf
 
-  bkupdb:
-    command: postgres -c config_file=conf/postgres.conf
-    image: postgres:14
-    restart: 'no' #always
-    entrypoint: ["/conf/replicate.sh"]
-    env_file:
-      - ./replicate.env
-    ports:
-      - "15432":"5432"
-    volumes:
-      - ./db_backup/rep/bkup:/var/lib/postgresql/data
-      - ./ps_rep_conf:/conf
-    depends_on:
-      - db
+#  bkupdb:
+#    command: postgres -c config_file=conf/postgres.conf
+#    image: postgres:14
+#    restart: 'no' #always
+#    entrypoint: ["/conf/replicate.sh"]
+#    env_file:
+#      - ./replicate.env
+#    ports:
+#      - "15432:5432"
+#    volumes:
+#      - ./db_backup/rep/bkup:/var/lib/postgresql/data
+#      - ./ps_rep_conf:/conf
+#    depends_on:
+#      - db
 
   rabbitmq3:
     container_name: "rabbitmq_dev"
@@ -66,8 +66,8 @@ services:
     env_file:
       - ../wpa_project/wpa_project.env
     ports:
-      - "5672":"5672"
-      - '15672':"15672"
+      - "5672:5672"
+      - "15672:15672"
 
 networks:
   default:

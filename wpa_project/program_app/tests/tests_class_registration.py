@@ -319,7 +319,7 @@ class TestsClassRegistration(TestCase):
         self.client.force_login(self.test_user)
         self.test_user.is_instructor = True
         d = timezone.now()
-        self.test_user.instructor_expire_date = d.replace(month=d.month + 1)
+        self.test_user.instructor_expire_date = d + timezone.timedelta(days=30)
         self.test_user.save()
 
         bc = BeginnerClass.objects.get(pk=1)
@@ -341,7 +341,7 @@ class TestsClassRegistration(TestCase):
         self.client.force_login(self.test_user)
         self.test_user.is_instructor = True
         d = timezone.now()
-        self.test_user.instructor_expire_date = d.replace(month=d.month + 1)
+        self.test_user.instructor_expire_date = d + timezone.timedelta(days=30)
         self.test_user.save()
 
         bc = BeginnerClass.objects.get(pk=1)

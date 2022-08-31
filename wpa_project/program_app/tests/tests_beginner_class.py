@@ -9,6 +9,7 @@ from django.utils import timezone
 from unittest.mock import patch
 
 from ..models import BeginnerClass, ClassRegistration
+from ..tasks import refund_class
 from payment.models import PaymentLog
 from payment.tests import MockSideEffects
 from student_app.models import Student
@@ -139,7 +140,9 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.assertEquals(len(bc), 2)
 
     @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    # @patch('program_app.views.beginner_class_view.BeginnerClassView.form_valid.refund_class.delay')
     def test_refund_success_class(self, refund):
+        # task_refund.side_effect = refund_class()
         refund.side_effect = self.refund_side_effect
 
         self.test_user = User.objects.get(pk=2)
@@ -160,11 +163,13 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.class_dict['state'] = 'canceled'
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
                                     self.class_dict, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        refund_class(bc) # this is typically called by celery
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)
         for c in cr:
             self.assertEqual(c.pay_status, 'refund')
-        bc = BeginnerClass.objects.get(pk=1)
+
         self.assertEqual(bc.state, 'canceled')
         pl = PaymentLog.objects.filter(Q(idempotency_key=cr[0].idempotency_key) | Q(idempotency_key=cr[2].idempotency_key))
         self.assertEqual(len(pl), 2)
