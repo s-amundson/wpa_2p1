@@ -3,6 +3,7 @@ import uuid
 from django.db.models import Q
 from datetime import date
 from django.apps import apps
+from django.core import mail
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
@@ -54,7 +55,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.class_dict = {'class_date': "2021-05-30T09:00:00.000Z",
+        self.class_dict = {'class_date': "2021-05-30T16:00:00.000Z",
                            'class_type': 'combined',
                            'beginner_limit': 2,
                            'beginner_wait_limit': 0,
@@ -140,9 +141,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.assertEquals(len(bc), 2)
 
     @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
-    # @patch('program_app.views.beginner_class_view.BeginnerClassView.form_valid.refund_class.delay')
     def test_refund_success_class(self, refund):
-        # task_refund.side_effect = refund_class()
         refund.side_effect = self.refund_side_effect
 
         self.test_user = User.objects.get(pk=2)
@@ -175,6 +174,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.assertEqual(len(pl), 2)
         for l in pl:
             self.assertEqual(l.status, 'refund')
+        logging.warning(mail.outbox[0].body)
 
     def test_beginner_class_with_returnee(self):
         self.class_dict['class_type'] = 'beginner'

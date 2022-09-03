@@ -17,7 +17,7 @@ class EmailMessage(EmailMessage):
             receipt: url,} """
 
         self.get_email_address(user)
-        pay_dict['name'] = user.first_name
+        pay_dict['name'] = user.student_set.last().first_name
         pay_dict['line_items'] = self.line_items(pay_dict['line_items'])
         self.subject = 'Woodley Park Archers Payment Confirmation'
         self.body = get_template('payment/email/payment_email.txt').render(pay_dict)
@@ -26,7 +26,7 @@ class EmailMessage(EmailMessage):
 
     def refund_email(self, user, donation=False):
         self.get_email_address(user)
-        d = {'name': user.first_name, 'donation': donation}
+        d = {'name': user.student_set.last().first_name, 'donation': donation}
         self.subject = 'Woodley Park Archers Refund Confirmation'
         self.body = get_template('payment/email/refund_email.txt').render(d)
         self.attach_alternative(get_template('payment/email/refund_email.html').render(d), 'text/html')
@@ -34,7 +34,7 @@ class EmailMessage(EmailMessage):
 
     def refund_canceled_email(self, user, event):
         self.get_email_address(user)
-        d = {'name': user.first_name, 'event': event}
+        d = {'name': user.student_set.last().first_name, 'event': event}
         self.subject = 'Woodley Park Archers Cancellation'
         self.body = get_template('payment/email/refund_canceled_email.txt').render(d)
         self.attach_alternative(get_template('payment/email/refund_canceled_email.html').render(d), 'text/html')

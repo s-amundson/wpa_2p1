@@ -1,8 +1,8 @@
 from .covid_vax_view import CovidVaxView
 from .index_view import IndexView
+from .info_view import InfoView
 from .instructor_update_view import InstructorUpdateView
 from .pdf_view import PdfGetView
-from .policy_view import PolicyView
 from .profile_view import ProfileView
 from .search_view import SearchEmailView, SearchNameView, SearchPhoneView, SearchResultListView, SearchResultView
 from .send_email_view import SendEmailView

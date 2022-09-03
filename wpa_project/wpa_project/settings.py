@@ -105,6 +105,8 @@ EMAIL_PORT = '587'
 EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 
+FACEBOOK_USER = get_secret('FACEBOOK_USER')
+FACEBOOK_PASSWORD = get_secret('FACEBOOK_PASSWORD')
 
 # Application definition
 INSTALLED_APPS = [
@@ -115,6 +117,8 @@ INSTALLED_APPS = [
     'minutes',
     'joad',
     'contact_us',
+    'faq',
+    'facebook',
 
     "django_apscheduler",
     'django.contrib.admin',

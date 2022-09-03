@@ -1,28 +1,52 @@
 {% extends 'base.html' %}
 
-{% block title %} Index {% endblock %}
+{% block title %} Welcome {% endblock %}
 
+{% load static %}
 {% block main %}
-  <div class="row justify-content-center">
-    <div class="col-4 text-center"><h2> Class Registration </h2></div>
-  </div>
-  {% if not user.is_authenticated %}
-    <div class="row">
-
-      <div class="col">
-        <p>In order to sign up for a class you will need to create an account and provide some information.</p>
-        <p>
-          The first step is to
-          <a href="{% url 'account_signup' %}">join.</a>
-           If you already have an account, please
-          <a href="{% url 'account_login' %}">log in.</a>
-        </p>
-      </div>
+<div class="row justify-content-center">
+    <div class="col-4 text-center">
+        <h2> Welcome </h2>
     </div>
+</div>
+{% if not user.is_authenticated %}
+<div class="d-flex flex-row">
+    <div class="m-2">
+        <img class="rounded float-start m-2 " alt="Welcome Sign"
+         src="{% static 'images/WelcomeSign_400.jpg' %}" title="Woodley Park Archery Range Welcomes You" width="400" height="228">
+        <p>
+            Register online for our Introductory and Returning Student classes! All students must be at least nine years old
+            and must register and pay the $5 administration fee here as well as comply with our Covid-19 policy. For more
+            information, see our Classes and Activities page.
+        </p>
+        <p>
+            The Woodley Park Archery Range is located in the San Fernando Valley, near the junction of the 405 and 101
+            freeways. The range is open from sunrise to sundown, seven days a week, except during WPA classes, activities
+            and events (check the WPA Range Schedule for closures.) The range was founded in 1984 by the Easton Sports
+            Development Foundation as a training facility for the Olympic Games, and is maintained by the Woodley Park
+            Archers, the U.S. Army Corp. of Engineers and Los Angeles Department of Recreation and Parks.
+        </p>
+    </div>
+</div>
+<div class="row">
 
-  {% endif %}
+    <p>
+        For more complete information about the range, please follow this link. For directions and a map, please click here.
+    </p>
+
+    <p>In order to sign up for a class you will need to create an account and provide some information.</p>
+    <p>
+        The first step is to
+        <a href="{% url 'account_signup' %}">join.</a>
+        If you already have an account, please
+        <a href="{% url 'account_login' %}">log in.</a>
+    </p>
+
+</div>
+
+{% endif %}
 {% endblock %}
 
 {% block right %}
-  <div id="login-div"></div>
+<div id="login-div"></div>
 {% endblock %}

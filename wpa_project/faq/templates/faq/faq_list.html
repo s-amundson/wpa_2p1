@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %} Faq {% endblock %}
+
+{% load static %}
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="text-center">
+            <h2> Frequently Asked Questions </h2>
+        </div>
+    </div>
+    {% for faq in object_list %}
+        <div class="row">
+            {% if user.is_board %}
+                <a href="{% url 'faq:edit' faq.id %}"><h4>{{ faq.question }}</h4></a>
+            {% else %}
+                <h4>{{ faq.question }}</h4>
+            {% endif %}
+            <p>
+                Categories:
+                {% for category in faq.category.all %}
+                {{ category }}
+                {% if not forloop.last %},&nbsp; {% endif %}
+                {% endfor %}
+            </p>
+            <div class="mx-3">
+                <p> {{ faq.rendered_answer|safe }}</p>
+            </div>
+        </div>
+        <hr>
+    {% endfor %}
+
+    {% if user.is_board %}
+        <a href="{% url 'faq:edit' %}" role="button" class="btn btn-warning m-1"> Add FAQ</a>
+    {% endif %}
+{% endblock %}

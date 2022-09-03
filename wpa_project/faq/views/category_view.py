@@ -16,7 +16,7 @@ class CategoryDeleteView(UserPassesTestMixin, View):
     def post(self, request, category_id):
         category = get_object_or_404(Category, pk=category_id)
         category.delete()
-        return HttpResponseRedirect(reverse_lazy('contact_us:category_list'))
+        return HttpResponseRedirect(reverse_lazy('faq:category_list'))
 
     def test_func(self):
         if self.request.user.is_authenticated:
@@ -27,18 +27,18 @@ class CategoryDeleteView(UserPassesTestMixin, View):
 class CategoryListView(UserPassesTestMixin, ListView):
     model = Category
     paginate_by = 100  # if pagination is desired
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        categories = []
-        for c in self.object_list:
-            r = []
-            for u in c.recipients.all():
-                s = u.student_set.first()
-                r.append(f'{s.first_name} {s.last_name}')
-            categories.append({'id': c.id, 'title': c.title, 'recipients': r})
-        context['categories'] = categories
-        return context
+    queryset = Category.objects.all().order_by('title')
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     categories = []
+    #     for c in self.object_list:
+    #         r = []
+    #         for u in c.recipients.all():
+    #             s = u.student_set.first()
+    #             r.append(f'{s.first_name} {s.last_name}')
+    #         categories.append({'id': c.id, 'title': c.title, 'recipients': r})
+    #     context['categories'] = categories
+    #     return context
 
     def test_func(self):
         if self.request.user.is_authenticated:
@@ -49,7 +49,7 @@ class CategoryListView(UserPassesTestMixin, ListView):
 class CategoryView(UserPassesTestMixin, FormView):
     template_name = 'contact_us/category.html'
     form_class = CategoryForm
-    success_url = reverse_lazy('contact_us:category_list')
+    success_url = reverse_lazy('faq:category_list')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

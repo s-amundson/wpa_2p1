@@ -100,3 +100,16 @@ ul {
 a {
   color: #17a2b8;
 }
+
+.card {
+  box-shadow: 0 16px 48px #E3E7EB;
+}
+
+.img-max-300 {
+  max-width: 300px;
+  width:100%;
+}
+.hangingindent {
+    padding-left: 50px ;
+    text-indent: -50px ;
+}
