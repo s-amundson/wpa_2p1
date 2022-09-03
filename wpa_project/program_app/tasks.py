@@ -1,5 +1,6 @@
 # Create your tasks here
 from celery import shared_task
+from django.utils import timezone
 
 from .src import ClassRegistrationHelper
 from .models import BeginnerClass, ClassRegistration
@@ -40,13 +41,15 @@ def refund_class(beginner_class):
                         c.pay_status = 'refund'
                         c.save()
                         if c.student.user is not None:
-                            email_message.refund_canceled_email(c.student.user, f'Class on {beginner_class.class_date}')
+                            email_message.refund_canceled_email(
+                                c.student.user, f'Class on {str(timezone.localtime(beginner_class.class_date))[:10]}')
                             email_sent = True
                     if not email_sent:  # if none of the students is a user find a user in the family.
                         c = cr.filter(idempotency_key=reg.idempotency_key)[0]
                         for s in c.student.student_family.student_set.all():
                             if s.user is not None:
-                                email_message.refund_canceled_email(s.user, f'Class on {beginner_class.class_date}')
+                                email_message.refund_canceled_email(
+                                    s.user, f'Class on {str(timezone.localtime(beginner_class.class_date))[:10]}')
 
 
 @shared_task
