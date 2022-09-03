@@ -27,6 +27,10 @@
                         <a href="{% url 'programs:resume_registration' field.reg %}">
                             Unsuccessful
                         </a>
+                    {% elif field.pay_status == 'waiting' %}
+                        <a href="{% url 'programs:wait_list' field.bcid %}">
+                            {{ field.pay_status|capfirst }}
+                        </a>
                     {% else %}
                         {{ field.pay_status|capfirst }}
                     {% endif %}

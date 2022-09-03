@@ -25,5 +25,6 @@ urlpatterns = [
         path('terms/', TermsView.as_view(), name='terms'),
         path('theme/', ThemeView.as_view(), name='theme'),
         path('update_user/<int:user_id>/', UserView.as_view(), name='update_user'),
-        path('waiver/<int:student_id>/', WaiverView.as_view(), name='waiver')
+        path('waiver/<int:student_id>/', WaiverView.as_view(), name='waiver'),
+        path('waiver_recreate/<int:student_id>/', WaiverRecreateView.as_view(), name='waiver_recreate')
 ]

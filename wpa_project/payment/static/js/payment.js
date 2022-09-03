@@ -83,10 +83,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         $("#id_amount").prop("disabled", false);
         $("#payment-form").submit();
     });
-//    $("#payment-form").submit(function(e){
-//        e.preventDefault();
-//        createPayment('no-payment')
-//    });
 });
 
 function eval_saved_card() {
@@ -94,12 +90,16 @@ function eval_saved_card() {
     if ($("#id_card").val() == "0") {
         console.log("new card");
         $("#id_save_card").prop("disabled", false);
-//        $("#card-button").prop("disabled", true);
+        // if there isn't any cards the new card must be default
+        if ($("#id_card option").length > 1){
+            $("#id_default_card").prop("disabled", false);
+        }
         $("#card-container").show();
         $("#card-remove-button").hide();
     }
     else {
         $("#id_save_card").prop("disabled", true);
+        $("#id_default_card").prop("disabled", true);
         $("#card-button").prop("disabled", false);
         $("#card-container").hide();
         $("#card-remove-button").show();

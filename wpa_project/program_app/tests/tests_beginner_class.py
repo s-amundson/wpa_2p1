@@ -6,23 +6,24 @@ from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
-from django.conf import settings
+from unittest.mock import patch
 
 from ..models import BeginnerClass, ClassRegistration
+from ..tasks import refund_class
 from payment.models import PaymentLog
+from payment.tests import MockSideEffects
 from student_app.models import Student
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
-class TestsBeginnerClass(TestCase):
+class TestsBeginnerClass(MockSideEffects, TestCase):
     fixtures = ['f1', 'f3']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_UID = 3
-        settings.SQUARE_TESTING = True
 
     def create_payment(self, students, amount=500):
         ik = uuid.uuid4()
@@ -53,10 +54,12 @@ class TestsBeginnerClass(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.class_dict = {'class_date': '2021-05-30 09:00',
+        self.class_dict = {'class_date': "2021-05-30T09:00:00.000Z",
                            'class_type': 'combined',
                            'beginner_limit': 2,
+                           'beginner_wait_limit': 0,
                            'returnee_limit': 2,
+                           'returnee_wait_limit': 0,
                            'instructor_limit': 2,
                            'state': 'scheduled',
                            'cost': 5}
@@ -110,9 +113,8 @@ class TestsBeginnerClass(TestCase):
     def test_2nd_class_error(self):
         bc = BeginnerClass.objects.get(pk=1)
         # New class same day
-        response = self.client.post(reverse('programs:beginner_class'),
-                        {'class_date': '2023-06-05 09:00', 'class_type': 'combined', 'beginner_limit': 5,
-                         'returnee_limit': 5, 'instructor_limit': 5, 'state': 'scheduled', 'cost': 5}, secure=True)
+        self.class_dict['class_date'] = '2023-06-05 09:00'
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_list.html')
         bc = BeginnerClass.objects.all()
@@ -121,9 +123,8 @@ class TestsBeginnerClass(TestCase):
     def test_2nd_class_good(self):
         bc = BeginnerClass.objects.get(pk=1)
         # New class same day
-        response = self.client.post(reverse('programs:beginner_class'),
-                        {'class_date': '2022-06-05 07:00', 'class_type': 'combined', 'beginner_limit': 5,
-                         'returnee_limit': 5, 'instructor_limit': 5, 'state': 'scheduled', 'cost': 5}, secure=True)
+        self.class_dict['class_date'] = "2022-06-05 07:00"
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
         self.assertRedirects(response, reverse('programs:class_list'))
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 3)
@@ -138,7 +139,12 @@ class TestsBeginnerClass(TestCase):
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 2)
 
-    def test_refund_success_class(self):
+    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    # @patch('program_app.views.beginner_class_view.BeginnerClassView.form_valid.refund_class.delay')
+    def test_refund_success_class(self, refund):
+        # task_refund.side_effect = refund_class()
+        refund.side_effect = self.refund_side_effect
+
         self.test_user = User.objects.get(pk=2)
         self.test_user.is_staff = False
         self.test_user.save()
@@ -157,11 +163,13 @@ class TestsBeginnerClass(TestCase):
         self.class_dict['state'] = 'canceled'
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
                                     self.class_dict, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        refund_class(bc) # this is typically called by celery
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)
         for c in cr:
             self.assertEqual(c.pay_status, 'refund')
-        bc = BeginnerClass.objects.get(pk=1)
+
         self.assertEqual(bc.state, 'canceled')
         pl = PaymentLog.objects.filter(Q(idempotency_key=cr[0].idempotency_key) | Q(idempotency_key=cr[2].idempotency_key))
         self.assertEqual(len(pl), 2)

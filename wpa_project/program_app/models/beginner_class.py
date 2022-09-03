@@ -13,11 +13,13 @@ def choices(choice_list):
 
 class BeginnerCommonClass(models.Model):
     class_types = ['beginner', 'returnee', 'combined', 'special']
-    class_states = ['scheduled', 'open', 'full', 'closed', 'canceled', 'recorded']
+    class_states = ['scheduled', 'open', 'wait', 'full', 'closed', 'canceled', 'recorded']
 
     class_type = models.CharField(max_length=20, null=True, choices=choices(class_types))
     beginner_limit = models.IntegerField()
+    beginner_wait_limit = models.IntegerField(default=0)
     returnee_limit = models.IntegerField()
+    returnee_wait_limit = models.IntegerField(default=0)
     instructor_limit = models.IntegerField(default=10)
     state = models.CharField(max_length=20, null=True, choices=choices(class_states))
     cost = models.IntegerField(default=5)

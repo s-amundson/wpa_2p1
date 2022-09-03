@@ -24,6 +24,7 @@ async function post_unregister() {
     // to unregister student(s) from a class.
     let refund = 0;
     let incomplete = 0;
+    let waiting = 0
     let unreg_list = [];
     let getConfirm = false;
     let class_id = "";
@@ -31,11 +32,16 @@ async function post_unregister() {
         class_id = $(this).attr("class_id");
         console.log($(this).parents("tr").find(".pay_status").find("a").length)
         if($(this).prop('checked') == true) {
-            if($(this).parents("tr").find(".pay_status").find("a").length) {
+            if($(this).prop("class").search("start")) {
                 incomplete = incomplete + 1;
                 console.log(incomplete)
             }
-            refund += parseInt($(this).parent().find(".unreg_cost").val());
+            else if($(this).prop("class").search("waiting")) {
+                waiting = waiting + 1;
+            }
+            else {
+                refund += parseInt($(this).parent().find(".unreg_cost").val());
+            }
             unreg_list.push(class_id);
         }
     });
@@ -44,7 +50,7 @@ async function post_unregister() {
     }
     if ('confirm' in window) {
         if(unreg_list.length == 1){
-            if (unreg_list.length == incomplete) {
+            if (unreg_list.length == incomplete | unreg_list.length == waiting) {
                 getConfirm = confirm("Please confirm that you wish to unregister for this class.");
                 }
             else if ($("#id_donation").prop('checked') == true) {
@@ -57,7 +63,7 @@ async function post_unregister() {
                 }
             }
         else if (unreg_list.length > 1) {
-            if (unreg_list.length == incomplete) {
+            if (unreg_list.length == incomplete | unreg_list.length == waiting) {
                     getConfirm = confirm("Please confirm that you wish to unregister for this class.");
                 }
             else if ($("#id_donation").prop('checked') == true) {

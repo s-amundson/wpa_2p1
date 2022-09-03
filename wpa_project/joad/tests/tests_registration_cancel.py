@@ -1,26 +1,26 @@
 import logging
 import uuid
+from unittest.mock import patch
 
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
-from django.conf import settings
 
 from student_app.models import Student
 from ..models import Session, Registration
 from payment.models import PaymentLog, RefundLog
+from payment.tests import MockSideEffects
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
-class TestsJoadRegistrationCancel(TestCase):
+class TestsJoadRegistrationCancel(MockSideEffects, TestCase):
     fixtures = ['f1', 'joad1']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        settings.SQUARE_TESTING = True
 
     def create_payment(self, amount=12500):
         ik = uuid.uuid4()
@@ -90,7 +90,10 @@ class TestsJoadRegistrationCancel(TestCase):
         self.assertTemplateUsed(response, 'joad/registration.html')
         self.assertEqual(response.status_code, 200)
 
-    def test_staff_post(self):
+    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    def test_staff_post(self, refund):
+        refund.side_effect = self.refund_side_effect
+
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.create_payment()
@@ -111,7 +114,10 @@ class TestsJoadRegistrationCancel(TestCase):
         self.assertEqual(len(reg), 1)
         self.assertEqual(reg[0].pay_status, 'refunded')
 
-    def test_user_post_good(self):
+    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    def test_user_post_good(self, refund):
+        refund.side_effect = self.refund_side_effect
+
         self.test_user = User.objects.get(pk=6)
         self.client.force_login(self.test_user)
         self.create_payment()
@@ -130,7 +136,10 @@ class TestsJoadRegistrationCancel(TestCase):
         self.assertEqual(len(reg), 1)
         self.assertEqual(reg[0].pay_status, 'refunded')
 
-    def test_user_post_bad(self):
+    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    def test_user_post_bad(self, refund):
+        refund.side_effect = self.refund_side_effect
+
         self.test_user = User.objects.get(pk=6)
         self.client.force_login(self.test_user)
         self.create_payment()

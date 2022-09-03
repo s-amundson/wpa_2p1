@@ -1,5 +1,6 @@
 import uuid
 from django.apps import apps
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, AccessMixin
 from django.contrib import messages
 from django.db import transaction
@@ -12,9 +13,10 @@ from django.views.generic.edit import FormView
 import logging
 
 
-from ..forms import ClassRegistrationForm
+from ..forms import ClassRegistrationForm, ClassRegistrationAdminForm
 from ..models import BeginnerClass, ClassRegistration, ClassRegistrationAdmin
 from ..src import ClassRegistrationHelper
+from payment.models.card import Card
 from student_app.src import StudentHelper
 
 logger = logging.getLogger(__name__)
@@ -29,12 +31,18 @@ class ClassRegistrationView(AccessMixin, FormView):
     form = None
     students = None
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.wait = False
+        self.has_card = False
+
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         if request.user.student_set.last() is None or request.user.student_set.last().student_family is None:
             request.session['message'] = 'Address form is required'
             return HttpResponseRedirect(reverse('registration:profile'))
+        self.has_card = bool(Card.objects.filter(customer__user=self.request.user, enabled=True))
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -60,6 +68,7 @@ class ClassRegistrationView(AccessMixin, FormView):
         return self.form_class(self.students, self.request.user, **self.get_form_kwargs())
 
     def form_invalid(self, form):
+        logging.debug(self.request.POST)
         logging.debug(form.errors)
         return super().form_invalid(form)
 
@@ -92,8 +101,7 @@ class ClassRegistrationView(AccessMixin, FormView):
 
                     if len(ClassRegistration.objects.filter(
                             beginner_class=beginner_class, student=s).exclude(
-                            pay_status="refunded").exclude(pay_status='canceled').exclude(
-                            pay_status='refund donated')) == 0:
+                            pay_status__in=['canceled', "refunded", 'refund donated'])) == 0:
                         instructor += 1
                         instructors.append(s)
                     else:
@@ -101,11 +109,13 @@ class ClassRegistrationView(AccessMixin, FormView):
 
                 else:
                     reg = ClassRegistration.objects.filter(student=s).exclude(
-                            pay_status="refunded").exclude(pay_status='canceled').exclude(pay_status='refund donated')
+                        pay_status__in=['canceled', "refunded", 'refund donated'])
                     if len(reg.filter(beginner_class=beginner_class)) == 0:
                         if s.safety_class is None:
-                            # logging.debug(len(reg))
-                            if len(reg.filter(beginner_class__class_date__gt=timezone.localdate(timezone.now()))) > 0:
+                            future_reg = reg.filter(beginner_class__class_date__gt=timezone.now())
+                            if beginner_class.state == 'wait' and len(future_reg.filter(pay_status='waiting')) > 0:
+                                return self.has_error(f'{s.first_name} is on wait list for another beginner class')
+                            elif beginner_class.state != 'wait' and len(future_reg.exclude(pay_status='waiting')) > 0:
                                 return self.has_error(f'{s.first_name} is enrolled in another beginner class')
                             else:
                                 beginner += 1
@@ -121,25 +131,12 @@ class ClassRegistrationView(AccessMixin, FormView):
 
         self.request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                       'returnee': returnee}
-
-        enrolled_count = ClassRegistrationHelper().enrolled_count(beginner_class)
-        if beginner_class.state == 'open':  # in case it changed since user got the self.form.
-            if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
-                return self.has_error('Not enough space available in this class')
-
-            if returnee and enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
-                return self.has_error('Not enough space available in this class')
-
-            if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
-                return self.has_error('Not enough space available in this class')
-
+        space = ClassRegistrationHelper().has_space(self.request.user, beginner_class, beginner, instructor, returnee)
+        if space == 'full':
+            return self.has_error('Not enough space available in this class')
+        else:
+            self.wait = space == 'wait'
             return self.transact(beginner_class, students, instructors)
-
-        elif beginner_class.state in ['full', 'closed'] and self.request.user.is_staff:
-            if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
-                return self.has_error('Not enough space available in this class')
-            else:
-                return self.transact(beginner_class, students, instructors)
 
     def has_error(self, message):
         logging.debug(message)
@@ -148,11 +145,25 @@ class ClassRegistrationView(AccessMixin, FormView):
 
     def transact(self, beginner_class, students, instructors):
         with transaction.atomic():
+            pay_status = 'start'
+            logging.debug(self.wait)
+            if self.wait:
+                logging.debug(self.has_card)
+                if self.has_card:
+                    beginner_class.state = 'wait'
+                    beginner_class.save()
+                    pay_status = 'waiting'
+                    self.success_url = reverse_lazy('programs:wait_list', kwargs={'beginner_class': beginner_class.id})
+                else:
+                    self.success_url = reverse_lazy('payment:card_manage')
+                    messages.add_message(self.request, messages.INFO,
+                                         "To be placed on the wait list you need to have a card on file")
             uid = str(uuid.uuid4())
+            class_date = timezone.localtime(beginner_class.class_date)
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
-            self.request.session['payment_description'] = f'Class on {str(beginner_class.class_date)[:10]}'
+            self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
             # logging.debug(students)
             for s in students:
                 if s.safety_class is None:
@@ -160,30 +171,31 @@ class ClassRegistrationView(AccessMixin, FormView):
                 else:
                     n = False
                 cr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
-                                       pay_status='start', idempotency_key=uid)
+                                       pay_status=pay_status, idempotency_key=uid, user=self.request.user)
                 self.request.session['line_items'].append({
-                    'name': f'Class on {str(beginner_class.class_date)[:10]} student: {s.first_name}',
+                    'name': f'Class on {str(class_date)[:10]} student: {s.first_name}',
                     'quantity': 1,
                     'amount_each': beginner_class.cost,
                      }
                 )
                 # logging.debug(cr)
             for i in instructors:
-                cr = ClassRegistration(beginner_class=beginner_class, student=i, new_student=False, pay_status='paid',
-                                       idempotency_key=uid).save()
+                cr = ClassRegistration.objects.create(beginner_class=beginner_class, student=i, new_student=False,
+                                       pay_status='paid', idempotency_key=uid, user=self.request.user)
                 self.request.session['line_items'].append({
-                    'name': f"Class on {str(beginner_class.class_date)[:10]} instructor: {i.first_name}",
+                    'name': f"Class on {str(class_date)[:10]} instructor: {i.first_name}",
                     'quantity': 1,
                     'amount_each': 0,
                      }
                 )
 
-        return HttpResponseRedirect(reverse('payment:make_payment'))
+        return HttpResponseRedirect(self.success_url)
 
 
 class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
     template_name = 'student_app/form_as_p.html'
     form = None
+    form_class = ClassRegistrationAdminForm
     students = None
 
     def get_form(self):
@@ -197,12 +209,13 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
         # logging.debug(beginner_class.cost)
 
         uid = str(uuid.uuid4())
+        class_date = timezone.localtime(beginner_class.class_date)
         if form.cleaned_data['payment']:
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment'] = True
-            self.request.session['payment_description'] = f'Class on {str(beginner_class.class_date)[:10]}'
+            self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
         else:
             self.success_url = reverse_lazy('programs:class_attend_list',
                                             kwargs={'beginner_class': form.cleaned_data['beginner_class']})
@@ -228,14 +241,14 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                     if form.cleaned_data['payment']:
                         pay_status = 'start'
                         self.request.session['line_items'].append({
-                            'name': f'Class on {str(beginner_class.class_date)[:10]} student: {s.first_name}',
+                            'name': f'Class on {str(class_date)[:10]} student: {s.first_name}',
                             'quantity': 1,
                             'amount_each': beginner_class.cost,
                              }
                         )
                     ncr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
                                                            pay_status=pay_status, idempotency_key=uid,
-                                                           reg_time=timezone.now())
+                                                           user=form.cleaned_data['student'].user, reg_time=timezone.now())
                     note = form.cleaned_data['notes']
                     ClassRegistrationAdmin.objects.create(class_registration=ncr, staff=self.request.user, note=note)
 
@@ -266,6 +279,24 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             if cr.student.student_family != students[0].student_family:  # pragma: no cover
                 return Http404("registration mismatch")
             registrations = ClassRegistration.objects.filter(idempotency_key=cr.idempotency_key)
+            space = ClassRegistrationHelper().has_space(self.request.user,
+                                                        cr.beginner_class,
+                                                        len(registrations.filter(student__safety_class__isnull=True)),
+                                                        0,
+                                                        len(registrations.filter(student__safety_class__isnull=False))
+                                                        )
+            logging.debug(space)
+            if space == 'full':
+                messages.add_message(self.request, messages.ERROR, 'Not enough space available in this class')
+                return HttpResponseRedirect(reverse('programs:calendar'))
+            elif space == 'wait':
+                if Card.objects.filter(customer__user=self.request.user, enabled=True):
+                    registrations.update(pay_status='waiting')
+                    return HttpResponseRedirect(reverse('programs:wait_list',
+                                                        kwargs={'beginner_class': cr.beginner_class.id}))
+                else:
+                    return HttpResponseRedirect(reverse('payment:card_manage'))
+
             request.session['idempotency_key'] = str(cr.idempotency_key)
             request.session['line_items'] = []
             request.session['payment_category'] = 'intro'
@@ -274,11 +305,13 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             returnee = 0
 
             for r in registrations:
+                class_date = timezone.localtime(r.beginner_class.class_date)
                 request.session['line_items'].append({
-                        'name': f'Class on {str(r.beginner_class.class_date)[:10]} student: {r.student.first_name}',
+                        'name': f'Class on {str(class_date)[:10]} student: {r.student.first_name}',
                         'quantity': 1,
                         'amount_each': r.beginner_class.cost,
                     }
+
                 )
                 if r.student.safety_class is None:
                     beginner += 1

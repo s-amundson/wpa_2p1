@@ -4,7 +4,6 @@ $(document).ready(function() {
     $("#can-register").hide()
     if ($("#btn-address-edit").attr("family_id") == "") {
         $(".can-register-top").hide();
-        console.log('new family');
         new_family = true;
         $("#btn-add-student").prop('disabled', true);
         $("#btn-add-student").hide();
@@ -28,7 +27,6 @@ $(document).ready(function() {
     });
 
     $("#btn-address-edit").click(function(){
-        console.log($(this).attr("family_id"))
         load_student_family_form($(this).attr("family_id"));
     });
 
@@ -43,10 +41,8 @@ $(document).ready(function() {
 
 
 function load_instructor_form() {
-    console.log("load instructor form");
     $("#instructor-form-div").show();
     $.get(url_instructor_update, function(data, status){
-        console.log(data);
         $("#instructor-form-div").html(data);
         $("#instructor-info-div").hide();
         $("#instructor_form").submit(function(e) {
@@ -77,34 +73,9 @@ function load_student_table() {
     });
 }
 
-//async function theme_function(e) {
-//    e.preventDefault();
-//    console.log('theme update')
-//    console.log($("#id_theme_1").prop('checked'))
-//    let data = await $.post(url_theme, {
-//                csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
-//                theme: $("#id_theme_1").prop('checked')});
-//    if ($("#id_theme_1").prop('checked')) {
-//        $("#block-main").attr("class", "col-md bg-dark text-white")
-//    }
-//    else{
-//        $("#block-main").attr("class", "col-md bg-light text-dark")
-//    }
-
-//}
-
 async function update_instructor() {
     console.log('update instructor');
-    console.log({
-        csrfmiddlewaretoken: $("#instructor-form-div").find('[name="csrfmiddlewaretoken"]').val(),
-        instructor_expire_date: $("#id_instructor_expire_date").val()
-    });
-    let data = await $.post(url_instructor_update, {
-        csrfmiddlewaretoken: $("#instructor-form-div").find('[name="csrfmiddlewaretoken"]').val(),
-        instructor_expire_date: $("#id_instructor_expire_date").val(),
-        instructor_level: $("#id_instructor_level").val()
-    });
-    console.log(data);
+    let data = await $.post(url_instructor_update, $("#instructor_form").serializeArray());
     if (data.status == "SUCCESS") {
         $("#instructor-form-div").hide();
         $("#instructor-info-div").show();

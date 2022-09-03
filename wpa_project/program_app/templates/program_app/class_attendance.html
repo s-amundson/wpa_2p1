@@ -16,7 +16,21 @@
         </a>
         <hr/>
     {% endif %}
-
+    <h4>Instructions:</h4>
+    <div class="row m-2 pl-4"><div>
+        <ol>
+            <li>Verify student and accompanying members have masks.</li>
+            <li>Check ID</li>
+            <li>
+                Check vaccination status. If student is vaccinated: check the checkbox in the "Covid-19 Vaccination"
+                column. If student is not vaccinated they must show proof of negative PCR Covid-19 test within the
+                previous 48 hours in order to attend. Do not check the box in the "Covid-19 Vaccination" column.
+            </li>
+            <li>
+                Get signatures for every student attending.
+            </li>
+        </ol>
+    </div></div>
     <div class="row p-2">
         {% if form %}
             <form id="attendance_form" class="col" method="post">
@@ -38,6 +52,7 @@
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
+                            <th> Attended/Registered</th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -50,7 +65,15 @@
                             </th>
                         </thead>
                         <tbody>
-                            {% for s in form.new_students %}
+                            {% for cr in form.new_students %}
+                                {% include "program_app/tables/student_attend_table_row.html" %}
+                            {% endfor %}
+                            <tr>
+                                <td colspan="6">
+                                    <a class="nav-link" href="{% url 'programs:admit_wait' form.beginner_class.id %}">Wait List</a>
+                                </td>
+                            </tr>
+                            {% for cr in form.new_students_waiting %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>
@@ -72,6 +95,7 @@
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
+                            <th> Attended/Registered</th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -84,7 +108,13 @@
                             </th>
                         </thead>
                         <tbody>
-                            {% for s in form.return_students %}
+                            {% for cr in form.return_students %}
+                                {% include "program_app/tables/student_attend_table_row.html" %}
+                            {% endfor %}
+                            <tr>
+                                <td colspan="6">Wait List</td>
+                            </tr>
+                            {% for cr in form.return_students_waiting %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>
@@ -106,6 +136,7 @@
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
+                            <th> Attended/Registered</th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -118,7 +149,7 @@
                             </th>
                         </thead>
                         <tbody>
-                            {% for s in form.staff %}
+                            {% for cr in form.staff %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>

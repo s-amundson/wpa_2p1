@@ -30,7 +30,7 @@ class MessageListView(UserPassesTestMixin, ListView):
 class MessageView(FormView):
     template_name = 'contact_us/message.html'
     form_class = MessageForm
-    success_url = reverse_lazy('registration:index')
+    success_url = reverse_lazy('registration:profile')
     message = None
 
     def get_context_data(self, **kwargs):

@@ -1,7 +1,8 @@
 from django.apps import apps
 from django.db import models
 from .beginner_class import BeginnerClass
-
+from ..manager import RegistrationManager
+from student_app.models import User
 import logging
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,10 @@ class ClassRegistration(models.Model):
     idempotency_key = models.UUIDField()
     reg_time = models.DateTimeField(auto_now_add=True, blank=True)
     attended = models.BooleanField(default=False)
+    modified = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    objects = RegistrationManager()
 
 
 class ClassRegistrationAdmin(models.Model):

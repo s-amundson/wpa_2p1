@@ -2,6 +2,8 @@ from django.urls import path
 from .views import *
 app_name = 'programs'
 urlpatterns = [
+    path('admit_wait/<int:beginner_class>/', AdmitWaitView.as_view(), name='admit_wait'),
+    path('admit_wait/<int:beginner_class>/<int:family_id>/', AdmitWaitView.as_view(), name='admit_wait'),
     path('beginner_class/<int:beginner_class>/', BeginnerClassView.as_view(), name='beginner_class'),
     path('beginner_class/', BeginnerClassView.as_view(), name='beginner_class'),
     path('calendar/', CalendarView.as_view(), name='calendar'),
@@ -26,4 +28,5 @@ urlpatterns = [
     path('unregister/', UnregisterView.as_view(), name='unregister'),
     path('unregister/<int:family_id>/', UnregisterView.as_view(), name='unregister'),
     path('unregister_table/', UnregisterTableView.as_view(), name='unregister_table'),
+    path('wait_list/<int:beginner_class>/', WaitListView.as_view(), name='wait_list'),
 ]

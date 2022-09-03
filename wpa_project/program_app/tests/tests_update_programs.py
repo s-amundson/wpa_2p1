@@ -94,7 +94,7 @@ class TestsUpdatePrograms(TestCase):
 
     def test_email_beginner_reminder(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
-        d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
+        d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=18)
         d = timezone.make_aware(d, timezone.get_current_timezone())
         bc1 = BeginnerClass(class_date=d, class_type='beginner', beginner_limit=10, returnee_limit=0, state='open')
         bc1.save()

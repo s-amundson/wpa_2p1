@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block main %}
+<form class="form" id="admit_form" method="post" autocomplete="off"
+    {% if form.family %}
+        action="{% url 'programs:admit_wait' form.beginner_class.id form.family.id %}">
+    {% else %}
+        action="{% url 'programs:admit_wait' form.beginner_class.id %}">
+    {% endif %}
+    {% csrf_token %}
+    <p mt-2 mb-2>
+        Admitting student(s) will cause their card to be charged the admission fee.
+    </p>
+
+    {% for field in form.get_boxes %}
+        <p>
+            {{ field }} {{field.label}} {{ field.errors }}
+        </p>
+    {% empty %}
+        <p>
+            No Students
+        </p>
+    {% endfor %}
+
+    <div class="flex-row m-2">
+        <button class="btn btn-primary" type="submit">Admit Students</button>
+    </div>
+
+</form>
+
+{% endblock %}

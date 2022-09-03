@@ -1,3 +1,4 @@
+from .admit_wait_view import AdmitWaitView
 from .beginner_class_view import BeginnerClassView, BeginnerClassListView
 from .class_attend_view import ClassAttendListView, ClassAttendView
 from .class_calendar_view import CalendarView
@@ -9,3 +10,4 @@ from .send_email_view import SendEmailView
 from .staff_report_views import StaffReportView
 from .log_views import AdminRegistrationListView
 from .unregister_view import UnregisterView, UnregisterTableView
+from .wait_list_view import WaitListView

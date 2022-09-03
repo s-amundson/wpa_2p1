@@ -1,0 +1,79 @@
+{% extends "student_app/email/email_layout.html" %}
+{% block main %}
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Hi,
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Either you or a member of your family is has been moved off the wait list and is now signed up for a class on
+        {{ beginner_class.class_date }} We look
+        forward to seeing you there. Please plan to be at the range {{ minutes }} minutes prior to the class to allow us to
+        sign you in. {% if beginner_class.class_type == 'beginner' %} Students that arrive past
+        {{ beginner_class.class_date|time }} will not be allowed to participate. {% endif %}
+    </p>
+    <table style="font-family: arial, sans-serif; border-collapse: collapse; color: black; margin: 10px;">
+        <tr>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                Item
+            </th>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                Quantity
+            </th>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                Amount Each
+            </th>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                Amount
+            </th>
+        </tr>
+
+        {% for row in line_items %}
+            <tr>
+                <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                    {{ row.name }}
+                </td>
+                <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                    {{ row.quantity }}
+                </td>
+                <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                    {{ row.amount_each }}
+                </td>
+                <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                    {{ row.cost }}
+                </td>
+            </tr>
+        {% endfor %}
+
+        <tr>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+            Total
+            </td>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+
+            </td>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+
+            </td>
+            <th style="border: 1px solid #e9e9e9; text-align: left; padding: 8px;">
+                {{ total }}
+            </td>
+        </tr>
+    </table>
+    <p style="margin-bottom: 0in; line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        {{ receipt }}
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <img src="https://registration.woodleyparkarchers.org/static/images/park_entrance_closure.jpg" alt="Closure Map, North entrance closed use South entrance">
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        If for any
+        reason you can't make it, please unregister yourself from the class prior to the 24-hour cutoff by going
+        <a href="http://registration/woodleyparkarchers.org/">here.</a>. The system will not let you unregister within
+        24 hours.
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+    </p>
+{% endblock %}

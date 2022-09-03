@@ -9,7 +9,6 @@ import logging
 
 from ..forms import SearchEmailForm, SearchNameForm, SearchPhoneForm
 from ..models import StudentFamily, Student
-from program_app.src import ClassRegistrationHelper
 from program_app.forms import UnregisterForm
 logger = logging.getLogger(__name__)
 
@@ -42,15 +41,10 @@ class SearchResultView(UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['attend_history'] = ClassRegistrationHelper().attendance_history_queryset(self.student_family)
         context['student_family'] = self.student_family
+        context['students'] = self.student_family.student_set.all()
         context['form'] = UnregisterForm(family=self.student_family)
         return context
-
-    # def get(self, request, student_family):
-    #     s = StudentFamily.objects.filter(pk=student_family)
-    #     logging.debug(s)
-    #     return render(request, 'student_app/search_result.html', {'student_family': s})
 
     def test_func(self):
         if self.request.user.is_authenticated and self.request.user.is_staff:

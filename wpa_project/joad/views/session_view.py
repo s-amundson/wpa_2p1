@@ -1,9 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404
-from django.views.generic.edit import FormView
 from django.views.generic.base import View
+from django.views.generic.edit import FormView
+from django.views.generic.list import ListView
 from django.http import JsonResponse
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 
 from ..models import Session
 from ..forms import SessionForm
@@ -50,6 +52,16 @@ class SessionFormView(UserPassesTestMixin, FormView):
         if self.request.user.is_authenticated:
             return self.request.user.is_board
         return False
+
+
+class SessionListView(LoginRequiredMixin, ListView):
+    model = Session
+    template_name = 'joad/session_list.html'
+
+    def get_queryset(self):
+        # filter_date = timezone.now().date() - timezone.timedelta.days(60)
+        queryset = self.model.objects.filter(start_date__lt=timezone.now()).order_by('-start_date')
+        return queryset
 
 
 class SessionStatusView(LoginRequiredMixin, View):

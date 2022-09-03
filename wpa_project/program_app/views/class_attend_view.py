@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 
 from ..models import BeginnerClass, ClassRegistration
 from ..forms import ClassAttendanceForm
+from ..src import ClassRegistrationHelper
 import logging
 logger = logging.getLogger(__name__)
 

@@ -2,6 +2,7 @@ version: "3.7"
 
 services:
   db:
+    command: postgres -c config_file=conf/postgres.conf
     container_name: postgresdb
     image: postgres:latest
     restart: unless-stopped #always
@@ -11,6 +12,7 @@ services:
       - 5432:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./ps_master_conf:/conf
 
   mysql:
     container_name: mysql
@@ -30,7 +32,9 @@ services:
       context: ..
       dockerfile: docker_deploy/Dockerfile
     command: gunicorn wpa_project.wsgi:application --bind 0.0.0.0:8000 --workers=4
-
+    env_file:
+      - ../wpa_project/wpa_project.env
+    image: &django django
     ports:
       - 8000:8000
     depends_on:
@@ -38,6 +42,21 @@ services:
     volumes:
       - staticfiles:/home/app/web/staticfiles
       - media:/home/app/web/student_app/media
+
+  celery:
+    container_name: celery
+    image: *django
+    restart: 'unless-stopped'
+    entrypoint: celery -A wpa_project worker -l INFO
+    volumes:
+      - staticfiles:/home/app/web/staticfiles
+      - media:/home/app/web/student_app/media
+    env_file:
+      - ../wpa_project/wpa_project.env
+    depends_on:
+      - db
+      - rabbitmq3
+      - django
 
   wordpress:
     container_name: wordpress
@@ -56,7 +75,7 @@ services:
     env_file:
       - ./wordpress.env
     volumes:
-      - ../wordpress/wp-content:/var/www/html/wp-content
+      - ../wordpress:/var/www/html
 
   nginx:
     container_name: nginx
@@ -87,6 +106,15 @@ services:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  rabbitmq3:
+    container_name: "rabbitmq"
+    image: rabbitmq:3-management-alpine
+    env_file:
+      - ../wpa_project/wpa_project.env
+    ports:
+      - 5672:5672
+      - 15672:15672
 
 networks:
   default:

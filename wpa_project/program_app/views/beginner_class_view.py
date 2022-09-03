@@ -11,7 +11,7 @@ from django.forms import model_to_dict
 from ..forms import BeginnerClassForm, SendClassEmailForm
 from ..models import BeginnerClass, ClassRegistration
 from ..src import ClassRegistrationHelper
-from payment.src import EmailMessage, RefundHelper
+from ..tasks import refund_class
 from payment.models import CostsModel
 
 logger = logging.getLogger(__name__)
@@ -51,11 +51,11 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
         return kwargs
 
     def form_invalid(self, form):
-        logging.debug(form.errors)
+        logging.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        # dont' add a class on a date that already has a class.
+        # don't add a class on a date that already has a class.
         # logging.debug(form.cleaned_data['class_date'])
         if len(BeginnerClass.objects.filter(class_date=form.cleaned_data['class_date'])) > 0 \
                 and self.beginner_class is None:
@@ -76,41 +76,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
             bc.beginner_limit = 0
             bc.save()
         if bc.state == 'canceled':
-            ec = ClassRegistrationHelper().enrolled_count(bc)
-            refund = RefundHelper()
-            email_message = EmailMessage()
-            # need to refund students if any
-            # logging.debug(f'beginners: {ec["beginner"]}, returnees: {ec["returnee"]}')
-            cancel_error = False
-            if ec["beginner"] > 0 or ec["returnee"] > 0:
-                cr = ClassRegistration.objects.filter(beginner_class__id=bc.id)
-                ik_list = []
-                for reg in cr:
-                    if reg.idempotency_key not in ik_list:
-                        ik_list.append(reg.idempotency_key)
-                        qty = len(cr.filter(idempotency_key=reg.idempotency_key).filter(pay_status='paid'))
-                        square_response = refund.refund_with_idempotency_key(reg.idempotency_key, qty * bc.cost * 100)
-                        if square_response['status'] == 'error':
-                            if square_response['error'] != 'Previously refunded':  # pragma: no cover
-                                cancel_error = True
-                                logging.error(square_response)
-                                messages.add_message(self.request, messages.ERROR, square_response)
-                        else:
-                            email_sent = False
-                            for c in cr.filter(idempotency_key=reg.idempotency_key):
-                                c.pay_status = 'refund'
-                                c.save()
-                                if c.student.user is not None:
-                                    email_message.refund_canceled_email(c.student.user, f'Class on {bc.class_date}')
-                                    email_sent = True
-                            if not email_sent:  # if none of the students is a user find a user in the family.
-                                c = cr.filter(idempotency_key=reg.idempotency_key)[0]
-                                for s in c.student.student_family.student_set.all():
-                                    if s.user is not None:
-                                        email_message.refund_canceled_email(s.user, f'Class on {bc.class_date}')
-                # logging.debug(cr)
-            if not cancel_error:
-                messages.add_message(self.request, messages.SUCCESS, 'Class was canceled')
+            refund_class.delay(bc.id)
         return super().form_valid(form)
 
     def test_func(self):
@@ -118,6 +84,8 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
             bid = self.kwargs.get('beginner_class', None)
             if bid is not None:
                 self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
+                logging.warning(self.beginner_class.class_date)
+                logging.warning(timezone.localtime(self.beginner_class.class_date))
                 self.success_url = reverse_lazy('programs:class_attend_list', kwargs={'beginner_class': bid})
             return self.request.user.is_board
         else:

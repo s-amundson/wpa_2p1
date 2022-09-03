@@ -97,8 +97,13 @@
           </div>
 
           <div id="card-container"></div>
-          <div class="form-check">
-              {{ form.save_card }} <span class="form-check-label">{{ form.save_card.label }}</span>
+          <div class="d-flex flex-row p-3">
+              <div class="form-check">
+                  {{ form.save_card }} <span class="form-check-label">{{ form.save_card.label }}</span>
+              </div>
+              <div class="form-check">
+                  {{ form.default_card }} <span class="form-check-label">{{ form.default_card.label }}</span>
+              </div>
           </div>
           <button class="btn btn-primary m-2" id="card-button" type="button"> Pay Now </button>
       </form>

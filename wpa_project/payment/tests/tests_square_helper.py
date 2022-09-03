@@ -1,15 +1,11 @@
 import logging
-import time
 import uuid
-from datetime import datetime
 
 from django.test import TestCase, Client
-from django.urls import reverse
 from django.apps import apps
 
-from student_app.models import Student
-from ..models import Card, Customer, PaymentLog, RefundLog
-from ..src import SquareHelper, CardHelper, CustomerHelper, PaymentHelper, RefundHelper
+from ..models import Card, Customer, PaymentLog
+from ..src import CardHelper, CustomerHelper, PaymentHelper
 
 logger = logging.getLogger(__name__)
 
@@ -20,18 +16,13 @@ class TestsSquareHelper(TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.User = apps.get_model(app_label='student_app', model_name='User')
-#
+
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
         self.test_user = self.User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         self.customer = Customer.objects.get(pk=1)
-        # session = self.client.session
-        # session['idempotency_key'] = str(uuid.uuid4())
-        # session['line_items'] = [{'name': 'Class on None student id: 1',
-        #                           'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]
-        # session.save()
 
     def test_payment_create_good(self):
         payment = PaymentHelper(user=self.test_user)
@@ -73,14 +64,16 @@ class TestsSquareHelper(TestCase):
             source_id='cnon:card-nonce-ok'
         )
         card_helper = CardHelper()
-        card = card_helper.create_card_from_payment(self.customer, payment_log)
+        card = card_helper.create_card_from_payment(self.customer, payment_log, True)
         cl = Card.objects.all()
         self.assertEqual(len(cl), 2)
+        self.assertTrue(card.default)
 
         # Disable card
         card = card_helper.disable_card()
         self.assertIsNotNone(card)
         self.assertFalse(card.enabled)
+        self.assertFalse(card.default)
         cl = Card.objects.all()
         self.assertEqual(len(cl), 2)
 

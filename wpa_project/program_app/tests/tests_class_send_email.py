@@ -6,6 +6,8 @@ from django.core import mail
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
+
+from ..src import EmailMessage
 from ..models import BeginnerClass, ClassRegistration
 from student_app.models import Student
 

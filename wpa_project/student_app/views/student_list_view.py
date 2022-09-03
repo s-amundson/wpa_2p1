@@ -29,7 +29,7 @@ class StudentList(UserPassesTestMixin, ListView):
                 object_list = object_list.filter(first_name__icontains=self.form.cleaned_data['first_name'])
             if self.form.cleaned_data['staff']:
                 object_list = object_list.filter(user__is_staff=True)
-        return object_list
+        return object_list.order_by('last_name')
 
     def test_func(self):
         if self.request.user.is_authenticated:

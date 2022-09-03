@@ -2,7 +2,7 @@ import logging
 from django.conf import settings
 
 from .square_helper import SquareHelper
-from ..models import Card, PaymentLog
+from ..models import Card, PaymentLog, PaymentErrorLog
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class PaymentHelper(SquareHelper):
                        autocomplete=True, saved_card_id=0):
         # logging.debug(note)
         body = {
-                "idempotency_key": idempotency_key,
+                "idempotency_key": str(idempotency_key),
                 "amount_money": {"amount": amount * 100, "currency": "USD"},
                 "autocomplete": autocomplete,
                 "location_id": settings.SQUARE_CONFIG['location_id'],
@@ -30,11 +30,12 @@ class PaymentHelper(SquareHelper):
             body['customer_id'] = card.customer.customer_id
         else:
             body['source_id'] = source_id
+
         result = self.client.payments.create_payment(
             body=body
         )
-
         response = result.body.get('payment', {'payment': None})
+
         if result.is_success():
             self.payment = PaymentLog.objects.create(
                 category=category,
@@ -54,6 +55,7 @@ class PaymentHelper(SquareHelper):
             return self.payment
 
         elif result.is_error():
+            for error in result.errors:
+                self.log_error(category, error.get('code', 'unknown_error'), idempotency_key, 'payments.create_payment')
             self.handle_error(result, 'Payment Error')
-
         return None

@@ -1,13 +1,8 @@
 import logging
-import csv
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic.base import TemplateView
-from django.db.models import Count
-from django.utils import timezone
-from django.http import HttpResponse
-from ..src import ClassRegistrationHelper
 from ..models import ClassRegistration
-from student_app.models import Student
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +14,7 @@ class HistoryView(UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['attend_history'] = ClassRegistrationHelper().attendance_history_queryset(self.student_family)
+        context['students'] = self.student_family.student_set.all()
         return context
 
     def test_func(self):

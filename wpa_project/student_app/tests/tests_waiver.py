@@ -39,11 +39,12 @@ class TestsWaiver(TestCase):
         self.assertEqual(response.status_code, 302)
         student = Student.objects.get(pk=1)
         self.assertTrue(student.signature)
+        self.assertIsNotNone(student.signature_pdf)
 
     def test_post_waiver_invalid(self):
         self.img['signature'] = self.invalid_sig
         response = self.client.post(reverse(self.url, kwargs={'student_id': 1}), self.img, secure=True)
-        self.assertEqual(response.status_code, 302)
+        self.assertFormError(response, 'form', None, 'invalid signature')
         student = Student.objects.get(pk=1)
         self.assertFalse(student.signature)
 

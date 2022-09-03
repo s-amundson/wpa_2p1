@@ -8,6 +8,7 @@
         "card_type": "CREDIT",
         "cardholder_name": "",
         "customer": 1,
+        "default": 0,
         "enabled": 0,
         "exp_month": 11,
         "exp_year": 2022,

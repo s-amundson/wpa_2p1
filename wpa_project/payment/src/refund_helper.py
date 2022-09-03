@@ -1,6 +1,5 @@
 import uuid
 import logging
-from django.utils import timezone
 
 from .square_helper import SquareHelper
 from ..models import PaymentLog, RefundLog
@@ -12,9 +11,8 @@ class RefundHelper(SquareHelper):
     def refund_with_idempotency_key(self, idempotency_key, amount):
         """ does either a full or partial refund. Takes and idempotency_key and amount as arguments, Looks up the log
         then calls refund_payment"""
-        try:
-            log = PaymentLog.objects.get(idempotency_key=idempotency_key)
-        except PaymentLog.DoesNotExist:
+        log = PaymentLog.objects.filter(idempotency_key=idempotency_key).last()
+        if log is None:
             return {'status': "FAIL", 'error': 'Record does not exist'}
         return self.refund_payment(log, amount)
 
@@ -34,24 +32,17 @@ class RefundHelper(SquareHelper):
                 refunded_amount += r.amount
             if log.total_money <= refunded_amount:  # check if only partial refund was applied
                 return {'status': 'error', 'error': 'Previously refunded'}
-        if not self.testing:
-            result = self.client.refunds.refund_payment(
-                body={"idempotency_key": str(uuid.uuid4()),
-                      "amount_money": {'amount': amount, 'currency': 'USD'},
-                      "payment_id": log.payment_id
-                      })
-            square_response = result.body.get('refund', {'refund': None})
-        else:
-            square_response = {'status': "SUCCESS",
-                               'created_at': timezone.now(),
-                               'error': '',
-                               'location_id': log.location_id,
-                               'order_id': log.order_id,
-                               'payment_id': log.payment_id,
-                               'id': 'test_refund',
-                               'amount_money': {'amount': amount}}
-        # logging.debug(square_response)
-        if self.testing or result.is_success():
+
+        idempotency_key = uuid.uuid4()
+        result = self.client.refunds.refund_payment(
+            body={"idempotency_key": str(idempotency_key),
+                  "amount_money": {'amount': amount, 'currency': 'USD'},
+                  "payment_id": log.payment_id
+                  })
+        square_response = result.body.get('refund', {'refund': None})
+
+        logging.debug(square_response)
+        if result.is_success():
             square_response['error'] = ""
             log.status = 'refund'
             log.save()
@@ -66,6 +57,8 @@ class RefundHelper(SquareHelper):
                                      )
         elif result.is_error():  # pragma: no cover
             square_response['status'] = 'error'
-            # logging.debug(result.errors)
+            logging.debug(result.errors)
             square_response['error'] = result.errors
+            for error in result.errors:
+                self.log_error('N/A', error.get('code', 'unknown_error'), idempotency_key, 'refunds.refund_payment')
         return square_response

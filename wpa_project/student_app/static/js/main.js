@@ -3,7 +3,10 @@ $(document).ready(function(){
     if ($("#alert-message").val() != "") {
         alert($("#alert-message").val());
     }
-
+    $(".submit-btn").click(function(){
+        $(this).prop('disabled', true);
+        $(this).parents("form").submit()
+    });
 });
 
 async function add_student_function(student_id) {

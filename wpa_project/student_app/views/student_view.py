@@ -36,7 +36,10 @@ class AddStudentView(LoginRequiredMixin, FormView):
             if self.student:
                 # logging.debug('is student')
                 s = self.request.user.student_set.last()
-                if s is not None:
+                if s is None:
+                    form.add_error(None, 'Address required')
+                    return self.form_invalid(form)
+                else:
                     # logging.debug(s.student_family.id)
                     f.student_family = s.student_family
                     self.request.session['student_family'] = s.student_family.id

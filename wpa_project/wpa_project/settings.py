@@ -71,6 +71,12 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+CELERY_BROKER_URL = get_secret('CELERY_BROKER')
+CELERY_RESULT_BACKEND = 'rpc://'
+CELERY_RESULT_PERSISTENT = False
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TASK_IGNORE_RESULT = True
+
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = get_secret("CSRF_TRUSTED_ORIGINS")
 # Database
@@ -154,10 +160,15 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose2'
         },
+        'celery': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose2',
+            'level': 'INFO',
+        },
     },
     'root': {
         'handlers': ['console'],
-        'level': get_secret("DEBUG"),
+        'level': get_secret("DEBUG_LEVEL"),
     },
 }
 
@@ -176,6 +187,7 @@ MIDDLEWARE = [
 
 PHONENUMBER_DB_FORMAT = 'NATIONAL'
 PHONENUMBER_DEFAULT_REGION = 'US'
+PRIVATE_LINKS = get_secret('PRIVATE_LINKS')
 
 ROOT_URLCONF = 'wpa_project.urls'
 
@@ -247,6 +259,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'student_app.context_processors.private_links',
             ],
         },
     },

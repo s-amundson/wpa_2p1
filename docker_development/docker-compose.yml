@@ -1,70 +1,73 @@
 version: "3.7"
 
 services:
-  db:
-    container_name: devdb
-    image: postgres:latest
-    restart: 'no' #always
-    env_file:
-      - ../wpa_project/wpa_project.env
-    ports:
-      - 5432:5432
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
-#  mysql:
-#    image: mysql:8.0
-#    restart: unless-stopped
-#    env_file:
-#      - ../wpa_project/wpa_project.env
-##    environment:
-##      MYSQL_ROOT_PASSWORD: my_password
-##      MYSQL_DATABASE: wordpress
-##      MYSQL_USER: wordpress_user
-##      MYSQL_PASSWORD: wordpress_password
-#    command: '--default-authentication-plugin=mysql_native_password'
-#    ports:
-#      - 3306:3306
-#    volumes:
-#      - mysql_data:/var/lib/mysql
-
-  web:
+  django:
     container_name: django_dev
     env_file:
-          - ../wpa_project/wpa_project.env
+      - ../wpa_project/wpa_project.env
+    image: &django django
     build:
       context: ..
       dockerfile: docker_development/Dockerfile
-#    command: python manage.py runserver 0.0.0.0:8000
     command: python manage.py runsslserver 0.0.0.0:8000
 
     volumes:
       - ../wpa_project:/code
     ports:
-      - 8000:8000
+      - "8000:8000"
     depends_on:
       - db
-#    env_file:
-#      - ../wpa_project/wpa_project.env
 
-#  wordpress:
-#    container_name: wordpress
-#
-#    build:
-#      context: ..
-#      dockerfile: docker_deploy/Dockerfile_wordpress
-#
-##    image: wordpress:5.8.2-fpm-alpine
-##    depends_on:
-##      - mysql
-#    ports:
-#      - 8080:80
-#      - 8081:443
-#    restart: always
+  celery:
+    container_name: celery_dev
+    image: *django
+    restart: 'no'
+    entrypoint: celery -A wpa_project worker -l INFO
+    volumes:
+      - ../wpa_project:/code
+    env_file:
+      - ../wpa_project/wpa_project.env
+    depends_on:
+      - db
+      - rabbitmq3
+      - django
+
+  db:
+    command: postgres -c config_file=conf/postgres.conf
+    container_name: devdb
+    image: postgres:14
+    restart: 'no' #always
+    env_file:
+      - ../wpa_project/wpa_project.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./ps_master_conf:/conf
+
+#  bkupdb:
+#    command: postgres -c config_file=conf/postgres.conf
+#    image: postgres:14
+#    restart: 'no' #always
+#    entrypoint: ["/conf/replicate.sh"]
 #    env_file:
-#      - ../docker_deploy/wordpress.env
+#      - ./replicate.env
+#    ports:
+#      - "15432:5432"
 #    volumes:
-#      - ../wordpress:/var/www/html
+#      - ./db_backup/rep/bkup:/var/lib/postgresql/data
+#      - ./ps_rep_conf:/conf
+#    depends_on:
+#      - db
+
+  rabbitmq3:
+    container_name: "rabbitmq_dev"
+    image: rabbitmq:3-management-alpine
+    env_file:
+      - ../wpa_project/wpa_project.env
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
 networks:
   default:

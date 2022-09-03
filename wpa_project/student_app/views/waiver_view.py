@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from student_app.forms import WaiverForm
 from student_app.models import Student
+from ..tasks import waiver_pdf
 
 import logging
 logger = logging.getLogger(__name__)
@@ -28,11 +29,13 @@ class WaiverView(UserPassesTestMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        self.form = form
-        if form.make_pdf(self.class_date):
+        # self.form = form
+        if form.check_signature(self.class_date):
             self.update_attendance()
-            form.send_pdf()
-        return HttpResponseRedirect(self.success_url)
+            waiver_pdf.delay(self.student.id, form.cleaned_data['sig_first_name'], form.cleaned_data['sig_last_name'])
+            # form.send_pdf()
+            return HttpResponseRedirect(self.success_url)
+        return self.form_invalid(form)
 
     def test_func(self):
         sid = self.kwargs.get('student_id', None)
@@ -46,3 +49,17 @@ class WaiverView(UserPassesTestMixin, FormView):
     def update_attendance(self):
         pass
 
+
+class WaiverRecreateView(WaiverView):
+    def get(self, request, *args, **kwargs):
+        waiver_pdf.delay(self.student.id, self.student.first_name, self.student.last_name)
+        return HttpResponseRedirect(self.success_url)
+
+    def test_func(self):
+        sid = self.kwargs.get('student_id', None)
+        if sid is not None:
+            self.student = get_object_or_404(Student, pk=sid)
+        if self.request.user.is_authenticated:
+            return self.request.user.is_superuser
+        else:
+            return False

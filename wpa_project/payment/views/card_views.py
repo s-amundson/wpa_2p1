@@ -12,6 +12,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class CardDefaultView(LoginRequiredMixin, View):
+    def get(self, request, card_id):
+        cards = Card.objects.filter(customer__user=self.request.user, enabled=True)
+        if cards.filter(id=card_id):
+            cards.update(default=False)
+            cards.filter(id=card_id).update(default=True)
+            return HttpResponseRedirect(reverse_lazy('payment:card_manage'))
+
+
 class CardManageView(LoginRequiredMixin, FormView):
     template_name = 'payment/cards.html'
     form_class = CardNewForm
@@ -23,6 +32,8 @@ class CardManageView(LoginRequiredMixin, FormView):
             context['pay_url'] = "https://web.squarecdn.com/v1/square.js"
         else:  # pragma: no cover
             context['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"
+        # logging.debug(Card.objects.filter(customer__user=self.request.user).enabled())
+        # logging.debug(Card.objects.enabled())
         context['cards'] = Card.objects.filter(customer__user=self.request.user, enabled=True)
         context['app_id'] = settings.SQUARE_CONFIG['application_id']
         context['location_id'] = settings.SQUARE_CONFIG['location_id']
@@ -37,7 +48,8 @@ class CardManageView(LoginRequiredMixin, FormView):
             ch = CustomerHelper(self.request.user)
             customer = ch.create_customer()
         if customer is not None:
-            card = card_helper.create_card_from_source(customer, form.cleaned_data['source_id'])
+            card = card_helper.create_card_from_source(customer, form.cleaned_data['source_id'],
+                                                       form.cleaned_data['default_card'])
             if card is not None:
                 return super().form_valid(form)
         # logging.debug(card_helper.errors)

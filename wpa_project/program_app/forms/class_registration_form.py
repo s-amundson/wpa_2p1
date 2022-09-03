@@ -1,7 +1,6 @@
 # from datetime import timedelta
 from django import forms
 from django.utils import timezone
-from django.db.models import Q
 from ..models import BeginnerClass, ClassRegistration
 import logging
 
@@ -21,14 +20,7 @@ class ClassRegistrationForm(forms.Form):
                 attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
                        'dob': f"{student.dob}"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
-        if user.is_board:
-            self.fields['notes'] = forms.CharField(required=False)
-            self.fields['notes'].widget.attrs.update({'cols': 80, 'rows': 3, 'class': 'form-control m-2 report'})
-            self.fields['payment'] = forms.BooleanField(
-                widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=False,
-                label=f'Payment',
-                initial=False)
-        else:
+        if not user.is_board:
             self.fields['terms'] = forms.BooleanField(
                 widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=True,
                 label=f'I agree to the terms of the AWRL, COVID-19 Policy and the Cancellation Policy',
@@ -43,11 +35,11 @@ class ClassRegistrationForm(forms.Form):
         date = timezone.now() - timezone.timedelta(hours=6)
         classes = BeginnerClass.objects.filter(class_date__gt=date).order_by('class_date')
         if user.is_board:
-            classes = classes.filter(Q(state='open') | Q(state='full') | Q(state='closed'))
+            classes = classes.filter(state__in=['open', 'wait', 'full', 'closed'])
         elif user.is_staff:
-            classes = classes.filter(Q(state='open') | Q(state='full'))
+            classes = classes.filter(state__in=['open', 'wait', 'full'])
         else:
-            classes = classes.filter(state='open')
+            classes = classes.filter(state__in=['open', 'wait'])
         d = [("", "None")]
         for c in classes:
             cd = timezone.localtime(c.class_date)
@@ -58,3 +50,16 @@ class ClassRegistrationForm(forms.Form):
     class Meta:
         model = ClassRegistration
         exclude = ['pay_status', 'order_id', 'reg_time']
+
+
+class ClassRegistrationAdminForm(ClassRegistrationForm):
+    def __init__(self, students, user, *args, **kwargs):
+        super().__init__(students, user, *args, **kwargs)
+        self.fields['notes'] = forms.CharField(required=False)
+        self.fields['notes'].widget.attrs.update({'cols': 80, 'rows': 3, 'class': 'form-control m-2 report'})
+        self.fields['payment'] = forms.BooleanField(
+            widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=False,
+            label=f'Payment',
+            initial=False)
+        self.fields['student'] = forms.ModelChoiceField(queryset=students.filter(user__isnull=False),
+                                                        label='Requesting Student')
