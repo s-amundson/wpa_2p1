@@ -11,6 +11,7 @@ class IndexView(PostList):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = LoginForm()
+        context['signup_url'] = reverse('account_signup')
         return context
     # """Shows a message page"""
     # def get(self, request):

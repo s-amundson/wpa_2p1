@@ -97,11 +97,7 @@ class AddStudentView(UserPassesTestMixin, FormView):
         return kwargs
 
     def test_func(self):
-        if self.request.user.is_authenticated:
-            s = self.request.user.student_set.last()
-            return s and s.student_family
-        else:
-            return False
+        return self.request.user.is_authenticated
 
 
 class StudentIsJoadView(UserPassesTestMixin, View):
