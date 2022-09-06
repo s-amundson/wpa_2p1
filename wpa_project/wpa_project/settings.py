@@ -88,17 +88,18 @@ CSP_FONT_SRC = ("'self'",
                 "https://*.cloudfront.net", "https://*.squarecdn.com")
 CSP_FRAME_ANCESTORS = ("'self'", "https://www.facebook.com")
 CSP_FRAME_SRC = ("'self'",
-                 "https://sandbox.web.squarecdn.com",
+                 "https://*.squarecdn.com",
                  "https://*.squareupsandbox.com",
                  "https://*.squareup.com",
-                 "https://www.facebook.com")
+                 "https://www.facebook.com",
+                 )
 CSP_IMG_SRC = ("'self' ",
                "https://www.facebook.com")
 CSP_INCLUDE_NONCE_IN = ['script-src']
 CSP_STYLE_SRC = ("'self' 'unsafe-inline'",
                  "https://cdnjs.cloudflare.com",
                  "https://cdn.jsdelivr.net",
-                 "https://*.web.squarecdn.com",
+                 "https://*.squarecdn.com",
                  "https://*.squareupsandbox.com",
                  "https://*.squareup.com",
                  )
