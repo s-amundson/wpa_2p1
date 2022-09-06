@@ -163,10 +163,11 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.class_dict['state'] = 'canceled'
+        self.class_dict['cancel_message'] = 'due to extreme bytes'
         response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
                                     self.class_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        refund_class(bc) # this is typically called by celery
+        refund_class(bc, 'due to extreme bytes') # this is typically called by celery
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)
         for c in cr:

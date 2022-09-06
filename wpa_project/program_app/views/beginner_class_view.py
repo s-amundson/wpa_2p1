@@ -56,7 +56,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
 
     def form_valid(self, form):
         # don't add a class on a date that already has a class.
-        # logging.debug(form.cleaned_data['class_date'])
+        # logging.warning(form.cleaned_data)
         if len(BeginnerClass.objects.filter(class_date=form.cleaned_data['class_date'])) > 0 \
                 and self.beginner_class is None:
             # logging.debug('Class Exists')
@@ -76,7 +76,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
             bc.beginner_limit = 0
             bc.save()
         if bc.state == 'canceled':
-            refund_class.delay(bc.id)
+            refund_class.delay(bc.id, form.cleaned_data['cancel_message'])
         return super().form_valid(form)
 
     def test_func(self):

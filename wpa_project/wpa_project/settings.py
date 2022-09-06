@@ -94,7 +94,8 @@ CSP_FRAME_SRC = ("'self'",
                  "https://www.facebook.com",
                  )
 CSP_IMG_SRC = ("'self' ",
-               "https://www.facebook.com")
+               "https://www.facebook.com",
+               "http://www.w3.org")
 CSP_INCLUDE_NONCE_IN = ['script-src']
 CSP_STYLE_SRC = ("'self' 'unsafe-inline'",
                  "https://cdnjs.cloudflare.com",
