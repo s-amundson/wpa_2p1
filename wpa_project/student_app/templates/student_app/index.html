@@ -9,7 +9,7 @@
         <h2> Welcome </h2>
     </div>
 </div>
-{% if not user.is_authenticated %}
+
 <div class="d-flex flex-row">
     <div class="m-2">
         <img class="rounded float-start m-2 " alt="Welcome Sign"
@@ -35,16 +35,14 @@
     </p>
 
     <p>In order to sign up for a class you will need to create an account and provide some information.</p>
-    <p>
-        The first step is to
-        <a href="{% url 'account_signup' %}">join.</a>
-        If you already have an account, please
-        <a href="{% url 'account_login' %}">log in.</a>
-    </p>
-
 </div>
 
+{% if not user.is_authenticated %}
+    {% include "account/login_insert.html" %}
 {% endif %}
+
+{% include "facebook/post_list_insert.html" %}
+
 {% endblock %}
 
 {% block right %}

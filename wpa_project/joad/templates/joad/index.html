@@ -5,7 +5,7 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/joad_registration.js' %}"></script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         let class_list_url = null;
         let session_status_url = null;
         let has_joad = {{ has_joad|lower }};

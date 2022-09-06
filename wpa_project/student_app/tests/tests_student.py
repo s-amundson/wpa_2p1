@@ -29,6 +29,13 @@ class TestsStudent(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/forms/student.html')
 
+    def test_get_student_id_not_staff(self):
+        self.test_user = User.objects.get(pk=4)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('registration:add_student', kwargs={'student_id': 5}), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('student_app/forms/student.html')
+
     def test_get_student_id_not_authorized(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
@@ -45,6 +52,36 @@ class TestsStudent(TestCase):
         self.assertEqual(student.last_name, d['last_name'])
         self.assertEqual(student.student_family, self.test_user.student_set.last().student_family)
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_post_add_student_no_address(self):
+        self.test_user = User.objects.get(pk=4)
+        s = self.test_user.student_set.last()
+        s.student_family = None
+        s.save()
+        logging.warning(self.test_user.student_set.last().student_family)
+        self.client.force_login(self.test_user)
+
+        d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
+        response = self.client.post(reverse('registration:add_student'), d, secure=True)
+        self.assertEqual(response.status_code, 403)
+        student = Student.objects.last()
+        self.assertNotEqual(student.first_name, d['first_name'])
+        self.assertNotEqual(student.last_name, d['last_name'])
+        # self.assertEqual(student.student_family, self.test_user.student_set.last().student_family)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_post_add_student_json(self):
+        self.test_user = User.objects.get(pk=4)
+        self.client.force_login(self.test_user)
+        d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
+        response = self.client.post(reverse('registration:add_student'), d, secure=True, HTTP_ACCEPT='application/json')
+        student = Student.objects.last()
+        self.assertEqual(student.first_name, d['first_name'])
+        self.assertEqual(student.last_name, d['last_name'])
+        self.assertEqual(student.student_family, self.test_user.student_set.last().student_family)
+        self.assertEqual(len(mail.outbox), 0)
+        content = json.loads(response.content)
+        self.assertEqual(content['first_name'], "Kiley")
 
     def test_post_student_id(self):
         self.test_user = User.objects.get(pk=5)
@@ -76,6 +113,22 @@ class TestsStudent(TestCase):
         self.assertNotEqual(student.first_name, d['first_name'])
         self.assertNotEqual(student.last_name, d['last_name'])
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_post_student_form_invalid_json(self):
+        self.test_user = User.objects.get(pk=4)
+        self.client.force_login(self.test_user)
+        d = {"first_name": "Kiley", "last_name": "Wells", "dob": "1995-22-03"}
+        response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 5}), d, secure=True,
+                                    HTTP_ACCEPT='application/json')
+        self.assertEqual(response.status_code, 200)
+        student = Student.objects.get(pk=1)
+        self.assertNotEqual(student.first_name, d['first_name'])
+        self.assertNotEqual(student.last_name, d['last_name'])
+        self.assertEqual(len(mail.outbox), 0)
+        content = json.loads(response.content)
+        logging.warning(content)
+        self.assertNotEqual(content['error'], {})
+
 
     def test_post_student_errors(self):
         self.test_user = User.objects.get(pk=4)

@@ -22,7 +22,7 @@ class Faq(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return self.title
 
     def rendered_answer(self):

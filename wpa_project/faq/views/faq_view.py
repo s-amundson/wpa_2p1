@@ -25,10 +25,6 @@ class FaqFormView(UserPassesTestMixin, FormView):
             kwargs['instance'] = self.faq
         return kwargs
 
-    def form_invalid(self, form):
-        logging.warning(form.errors)
-        return super().form_invalid(form)
-
     def form_valid(self, form):
         logging.warning(form.cleaned_data)
         form.save()

@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def fetch_posts():  # pragma: no cover
+def fetch_posts(pages=1):  # pragma: no cover
     fp = Posts.objects.all()
 
-    for post in get_posts(100024925153290, pages=1, credentials=(settings.FACEBOOK_USER, settings.FACEBOOK_PASSWORD)):
+    for post in get_posts(100024925153290, pages=pages, credentials=(settings.FACEBOOK_USER, settings.FACEBOOK_PASSWORD)):
         if not fp.filter(post_id=post['post_id']):
             Posts.objects.create(
                 available=post['available'],

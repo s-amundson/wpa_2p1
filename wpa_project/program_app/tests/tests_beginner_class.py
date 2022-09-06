@@ -154,7 +154,10 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         #  Change user and make another payment
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
-        self.create_payment([Student.objects.get(pk=5)], 500)
+        s = Student.objects.get(pk=5)
+        s.user = None
+        s.save()
+        self.create_payment([s], 500)
 
         #  Change user and then cancel the class
         self.test_user = User.objects.get(pk=1)

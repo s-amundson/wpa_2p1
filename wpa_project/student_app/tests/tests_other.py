@@ -18,18 +18,12 @@ class TestsOther(TestCase):
         # self.test_user = self.User.objects.get(pk=2)
         # self.client.force_login(self.test_user)
 
-    def test_terms(self):
-        self.client.get(reverse('registration:terms'), secure=True)
-        self.assertTemplateUsed('registration/terms.html')
+    def test_info(self):
+        items = ['about', 'by-laws', 'class_description', 'constitution', 'covid', 'directions', 'privacy', 'terms']
+        for item in items:
+            self.client.get(reverse('registration:info', kwargs={'info': item}), secure=True)
+            self.assertTemplateUsed(f'registration/{item}.html')
 
-    def test_policy_privacy(self):
-        self.client.get(reverse('registration:policy', kwargs={'policy': 'privacy'}), secure=True)
-        self.assertTemplateUsed('registration/privacy.html')
-
-    def test_policy_covid(self):
-        self.client.get(reverse('registration:policy', kwargs={'policy': 'covid'}), secure=True)
-        self.assertTemplateUsed('registration/covid_policy.html')
-
-    def test_policy_invalid(self):
-        response = self.client.get(reverse('registration:policy', kwargs={'policy': 'invalid'}), secure=True)
+    def test_info_no_exist(self):
+        response = self.client.get(reverse('registration:info', kwargs={'info': 'no exist'}), secure=True)
         self.assertEqual(response.status_code, 404)

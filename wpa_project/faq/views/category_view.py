@@ -28,17 +28,6 @@ class CategoryListView(UserPassesTestMixin, ListView):
     model = Category
     paginate_by = 100  # if pagination is desired
     queryset = Category.objects.all().order_by('title')
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     categories = []
-    #     for c in self.object_list:
-    #         r = []
-    #         for u in c.recipients.all():
-    #             s = u.student_set.first()
-    #             r.append(f'{s.first_name} {s.last_name}')
-    #         categories.append({'id': c.id, 'title': c.title, 'recipients': r})
-    #     context['categories'] = categories
-    #     return context
 
     def test_func(self):
         if self.request.user.is_authenticated:
@@ -57,12 +46,7 @@ class CategoryView(UserPassesTestMixin, FormView):
             kwargs['instance'] = get_object_or_404(Category, pk=self.kwargs['category_id'])
         return kwargs
 
-    def form_invalid(self, form):
-        logging.debug(form.errors)
-        return super().form_invalid(form)
-
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
         form.save()
         return super().form_valid(form)
 

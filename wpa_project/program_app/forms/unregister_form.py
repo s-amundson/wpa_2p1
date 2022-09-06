@@ -65,7 +65,7 @@ class UnregisterForm(forms.Form):
 
         if 'family' in kwargs:
             self.family = kwargs.pop('family')
-        else:
+        else:  # pragma: no cover
             self.family = None
         super().__init__(*args, **kwargs)
         self.template_name = 'program_app/forms/unregister.html'
@@ -93,7 +93,7 @@ class UnregisterForm(forms.Form):
 
     def get_boxes(self):
         for field_name in self.fields:
-            if field_name.startswith('unreg_'):
+            if field_name.startswith('unreg_'):  # pragma: no cover
                 yield self[field_name]
 
     def process_refund(self, user, student_family):

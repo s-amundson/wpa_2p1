@@ -5,7 +5,7 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/session.js' %}"></script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         {% if session_id %}
             let session_url = "{% url 'joad:session' session_id %}";
         {% else %}

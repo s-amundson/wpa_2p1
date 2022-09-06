@@ -2,21 +2,7 @@
 
 {% block title %} Posts {% endblock %}
 
-{% block script %}
-    <script async defer src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>
-{% endblock %}
-
 {% load static %}
 {% block main %}
-
-    <div class="row justify-content-center">
-        <div class="text-center">
-            <h2> Posts </h2>
-        </div>
-    </div>
-    <div id="fb-root"></div>
-  <script async defer src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>
-  <div class="fb-post"
-      data-href="https://www.facebook.com/20531316728/posts/10154009990506729/"
-      data-width="500"></div>
+    {% include "facebook/post_list_insert.html" %}
 {% endblock %}

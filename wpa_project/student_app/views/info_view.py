@@ -12,15 +12,17 @@ class InfoView(View):
         if info == 'about':
             return render(request, 'student_app/about.html')
         if info == 'by-laws':
-            return render(request, 'student_app/bylaws.html')
+            return render(request, 'student_app/by-laws.html')
         if info == 'class_description':
-            return render(request, 'program_app/class_descriptions.html')
+            return render(request, 'student_app/class_descriptions.html')
         if info == 'constitution':
             return render(request, 'student_app/constitution.html')
         if info == 'covid':
-            return render(request, 'student_app/covid_policy.html')
+            return render(request, 'student_app/covid.html')
         if info == 'directions':
             return render(request, 'student_app/directions.html')
         if info == 'privacy':
             return render(request, 'student_app/privacy.html', {'current_site': current_site})
+        if info == 'terms':
+            return render(request, 'student_app/terms.html', {'current_site': current_site})
         raise Http404("Policy not found")

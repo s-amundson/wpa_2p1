@@ -5,7 +5,7 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/minutes.js' %}"></script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         {% if minutes_id %}
             let minutes_id = "{{ minutes_id }}";
             let url_minutes = "{% url 'minutes:minutes_form' minutes_id %}";

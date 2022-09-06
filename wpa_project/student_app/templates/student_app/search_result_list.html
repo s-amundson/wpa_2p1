@@ -7,7 +7,7 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/search.js' %}"></script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         let student_table_url = "{% url 'registration:student_table' %}"
         let add_student_url = "{% url 'registration:add_student' %}"
         let url_student_family_api = "{% url 'registration:student_family' %}"

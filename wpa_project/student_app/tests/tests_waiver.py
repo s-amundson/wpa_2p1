@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.core import mail
 from ..models import Student
 from ..src import EmailMessage
+from ..tasks import waiver_pdf
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -35,11 +36,20 @@ class TestsWaiver(TestCase):
         self.assertTemplateUsed(response, 'program_app/class_sign_in.html')
 
     def test_post_waiver_good(self):
+        # test task no signature
+        student = Student.objects.get(pk=1)
+        waiver_pdf(student.id, student.first_name, student.last_name)
+        self.assertEqual(len(mail.outbox), 0)
+
         response = self.client.post(reverse(self.url, kwargs={'student_id': 1}), self.img, secure=True)
         self.assertEqual(response.status_code, 302)
         student = Student.objects.get(pk=1)
         self.assertTrue(student.signature)
         self.assertIsNotNone(student.signature_pdf)
+
+        # test task
+        waiver_pdf(student.id, student.first_name, student.last_name)
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_post_waiver_invalid(self):
         self.img['signature'] = self.invalid_sig

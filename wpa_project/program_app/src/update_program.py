@@ -73,6 +73,19 @@ class UpdatePrograms:
                         state=c.state)
                     bc.save()
 
+    def create_class(self, beginner_schedule):
+        class_date = timezone.datetime.combine(
+            self.today + timedelta(days=beginner_schedule.frequency * beginner_schedule.future_classes),
+            beginner_schedule.class_time)
+        bc, created = BeginnerClass.objects.get_or_create(
+            class_date=class_date,
+            class_type=beginner_schedule.class_type,
+            beginner_limit=beginner_schedule.beginner_limit,
+            beginner_wait_limit=beginner_schedule.beginner_wait_limit,
+            returnee_limit=beginner_schedule.returnee_limit,
+            returnee_wait_limit=beginner_schedule.returnee_wait_limit,
+            state=beginner_schedule.state)
+
     def close_class(self, class_time):
         class_date = timezone.datetime.combine(self.today + timedelta(days=1), class_time)
         classes = BeginnerClass.objects.filter(class_date=class_date, state__in=self.states[:3])
@@ -84,13 +97,7 @@ class UpdatePrograms:
     def daily_update(self):
         self.add_weekly()
         self.status_email()
-
-        # set past classes to recorded
-        yesterday = self.today - timedelta(days=1)
-        classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=self.states[:4])
-        for c in classes:
-            c.state = self.states[6]  # 'recorded'
-            c.save()
+        self.record_classes()
 
     def next_class_day(self, target_day):
         """Returns the next eligible class day (not today or tomorrow)
@@ -100,6 +107,14 @@ class UpdatePrograms:
         while target_delta <= 1:
             target_delta += 7
         return self.today + timedelta(target_delta)
+
+    def record_classes(self):
+        # set past classes to recorded
+        yesterday = self.today - timedelta(days=1)
+        classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=self.states[:4])
+        for c in classes:
+            c.state = self.states[6]  # 'recorded'
+            c.save()
 
     def reminder_email(self, class_time):
         # send reminder email to students for classes 2 days from now.

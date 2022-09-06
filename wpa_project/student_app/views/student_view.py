@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 import logging
 from django.http import JsonResponse
@@ -12,7 +12,7 @@ from ..src import EmailMessage, StudentHelper
 logger = logging.getLogger(__name__)
 
 
-class AddStudentView(LoginRequiredMixin, FormView):
+class AddStudentView(UserPassesTestMixin, FormView):
     template_name = 'student_app/forms/student.html'
     form_class = StudentForm
     success_url = reverse_lazy('registration:profile')
@@ -29,14 +29,15 @@ class AddStudentView(LoginRequiredMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
+        logging.warning(form.cleaned_data)
         if self.request.user.is_board:
             f = form.save()
         else:
             f = form.save(commit=False)
             if self.student:
-                # logging.debug('is student')
                 s = self.request.user.student_set.last()
-                if s is None:
+                if s is None:  # pragma: no cover
+                    logging.warning('Address required')
                     form.add_error(None, 'Address required')
                     return self.form_invalid(form)
                 else:
@@ -44,22 +45,17 @@ class AddStudentView(LoginRequiredMixin, FormView):
                     f.student_family = s.student_family
                     self.request.session['student_family'] = s.student_family.id
             else:
-                # logging.debug('here')
                 if self.request.user.student_set.first() is None:
-                    # logging.debug('user is student')
                     f.user = self.request.user
                 s = self.request.user.student_set.last()
                 if s is not None:
-                    # logging.debug(s.student_family.id)
                     f.student_family = s.student_family
             f.save()
 
             if f.user is None:
                 if f.email is not None and f.email != self.request.user.email:
-                    # logging.debug('invite')
                     EmailMessage().invite_user_email(self.request.user.student_set.first(), f)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
-            # logging.debug('json response')
             return JsonResponse({'id': f.id, 'first_name': form.cleaned_data['first_name'],
                                  'last_name': form.cleaned_data['last_name']})
         return super().form_valid(form)
@@ -72,14 +68,11 @@ class AddStudentView(LoginRequiredMixin, FormView):
         student_id = self.kwargs.get('student_id', None)
         if student_id is not None:
             context['student']['id'] = student_id
+            context['student']['is_joad'] = self.student.is_joad
+            context['student']['is_user'] = self.student.user_id
             if self.request.user.is_staff:
-                context['student']['is_joad'] = self.student.is_joad
-                context['student']['is_user'] = self.student.user_id
                 context['student']['this_user'] = False
             else:
-                # logging.debug(self.student.user)
-                context['student']['is_user'] = self.student.user_id
-                context['student']['is_joad'] = self.student.is_joad
                 context['student']['this_user'] = (self.student.user == self.request.user)
             age = StudentHelper().calculate_age(self.student.dob)
             context['student']['joad_age'] = 8 < age < 21
@@ -92,7 +85,7 @@ class AddStudentView(LoginRequiredMixin, FormView):
             if self.request.user.is_staff:
                 self.student = get_object_or_404(Student, pk=student_id)
             else:
-                sf = Student.objects.get(user=self.request.user).student_family
+                sf = self.request.user.student_set.last().student_family
                 self.student = get_object_or_404(Student, id=student_id, student_family=sf)
         if self.student:
             kwargs['instance'] = self.student
@@ -102,6 +95,13 @@ class AddStudentView(LoginRequiredMixin, FormView):
             if s.count() == 0:
                 kwargs['initial'] = {'email': self.request.user.email}
         return kwargs
+
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            s = self.request.user.student_set.last()
+            return s and s.student_family
+        else:
+            return False
 
 
 class StudentIsJoadView(UserPassesTestMixin, View):

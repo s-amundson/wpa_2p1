@@ -22,7 +22,7 @@ services:
     container_name: celery_dev
     image: *django
     restart: 'no'
-    entrypoint: celery -A wpa_project worker -l INFO
+    entrypoint: celery -A wpa_project worker --beat --scheduler django --loglevel=info
     volumes:
       - ../wpa_project:/code
     env_file:

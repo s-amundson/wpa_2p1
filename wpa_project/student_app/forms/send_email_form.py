@@ -42,7 +42,7 @@ class SendEmailForm(forms.Form):
         #     em.bcc_from_users(users.filter(is_staff=True))
         elif self.cleaned_data['recipients'] == 'students':
             em.bcc_from_users(users)
-        else:
+        else:  # pragma no cover
             logging.debug('return')
             return
         em.send_message(self.cleaned_data['subject'], self.cleaned_data['message'])

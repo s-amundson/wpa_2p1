@@ -4,7 +4,7 @@
 <!-- link to the SqPaymentForm library -->
 <script type="text/javascript" src="{{ pay_url }}"></script>
 
-<script type="application/javascript">
+<script type="application/javascript" nonce="{{request.csp_nonce}}">
         window.applicationId = '{{ app_id }}';
         window.locationId = '{{ location_id }}';
         window.action_url = '{{ action_url }}';

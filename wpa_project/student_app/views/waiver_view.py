@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from csp.decorators import csp_update
 
 from student_app.forms import WaiverForm
 from student_app.models import Student
@@ -20,6 +22,10 @@ class WaiverView(UserPassesTestMixin, FormView):
     form = None
     student = None
     class_date = timezone.localtime(timezone.now()).date()
+
+    @method_decorator(csp_update(STYLE_SRC="https://ajax.googleapis.com", SCRIPT_SRC="https://ajax.googleapis.com"))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def get_form(self):
         return self.form_class(self.student, **self.get_form_kwargs())
@@ -43,14 +49,14 @@ class WaiverView(UserPassesTestMixin, FormView):
             self.student = get_object_or_404(Student, pk=sid)
         if self.request.user.is_authenticated:
             return self.request.user.is_staff
-        else:
+        else:  # pragma: no cover
             return False
 
     def update_attendance(self):
         pass
 
 
-class WaiverRecreateView(WaiverView):
+class WaiverRecreateView(WaiverView):  # pragma: no cover
     def get(self, request, *args, **kwargs):
         waiver_pdf.delay(self.student.id, self.student.first_name, self.student.last_name)
         return HttpResponseRedirect(self.success_url)
