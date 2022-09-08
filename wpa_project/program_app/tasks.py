@@ -2,6 +2,7 @@
 from celery import shared_task
 from django.utils import timezone
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from django.conf import settings
 
 from .src import ClassRegistrationHelper, UpdatePrograms
 from .models import BeginnerClass, BeginnerSchedule, ClassRegistration
@@ -52,6 +53,7 @@ def init_class():
             day_of_week=f'{day_of_week}',
             day_of_month='*',
             month_of_year='*',
+            timezone=settings.TIME_ZONE
         )
         PeriodicTask.objects.update_or_create(
             crontab=reminder_schedule,
@@ -68,15 +70,16 @@ def init_class():
             day_of_week = c.day_of_week - 1
         else:
             day_of_week = c.day_of_week + 7 - 1
-        email_schedule, _ = CrontabSchedule.objects.get_or_create(
+        close_schedule, _ = CrontabSchedule.objects.get_or_create(
             minute=f'{c.class_time.minute}',
             hour=f'{c.class_time.hour}',
             day_of_week=f'{day_of_week}',
             day_of_month='*',
             month_of_year='*',
+            timezone=settings.TIME_ZONE
         )
         PeriodicTask.objects.update_or_create(
-            crontab=reminder_schedule,
+            crontab=close_schedule,
             name=f'Beginner Schedule {c.id} close create class',
             task='program_app.tasks.close_create_class',
             description='close the class and create an new one',

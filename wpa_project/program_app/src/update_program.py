@@ -25,28 +25,28 @@ class SchedulePrograms:
     def __init__(self, scheduler):
         self.scheduler = scheduler
 
-        scheduled_classes = BeginnerSchedule.objects.all()
-        for c in scheduled_classes:
-            self.scheduler.add_job(
-                reminder_email_job,
-                trigger=CronTrigger(day_of_week=c.day_of_week - 2,
-                                    hour=c.class_time.hour,
-                                    minute=c.class_time.minute),
-                id=f'reminder_email_{c.id}',  # The `id` assigned to each job MUST be unique
-                max_instances=1,
-                replace_existing=True,
-                kwargs={'class_time': c.class_time}
-            )
-            self.scheduler.add_job(
-                close_class_job,
-                trigger=CronTrigger(day_of_week=c.day_of_week - 1,
-                                    hour=c.class_time.hour,
-                                    minute=c.class_time.minute),
-                id=f'close_{c.id}',  # The `id` assigned to each job MUST be unique
-                max_instances=1,
-                replace_existing=True,
-                kwargs={'class_time': c.class_time}
-            )
+        # scheduled_classes = BeginnerSchedule.objects.all()
+        # for c in scheduled_classes:
+        #     self.scheduler.add_job(
+        #         reminder_email_job,
+        #         trigger=CronTrigger(day_of_week=c.day_of_week - 2,
+        #                             hour=c.class_time.hour,
+        #                             minute=c.class_time.minute),
+        #         id=f'reminder_email_{c.id}',  # The `id` assigned to each job MUST be unique
+        #         max_instances=1,
+        #         replace_existing=True,
+        #         kwargs={'class_time': c.class_time}
+        #     )
+        #     self.scheduler.add_job(
+        #         close_class_job,
+        #         trigger=CronTrigger(day_of_week=c.day_of_week - 1,
+        #                             hour=c.class_time.hour,
+        #                             minute=c.class_time.minute),
+        #         id=f'close_{c.id}',  # The `id` assigned to each job MUST be unique
+        #         max_instances=1,
+        #         replace_existing=True,
+        #         kwargs={'class_time': c.class_time}
+        #     )
 
 
 class UpdatePrograms:
@@ -75,7 +75,7 @@ class UpdatePrograms:
 
     def create_class(self, beginner_schedule):
         class_date = timezone.datetime.combine(
-            self.today + timedelta(days=beginner_schedule.frequency * beginner_schedule.future_classes),
+            self.today + timedelta(days=(7 * beginner_schedule.frequency * beginner_schedule.future_classes) + 1),
             beginner_schedule.class_time)
         bc, created = BeginnerClass.objects.get_or_create(
             class_date=class_date,
@@ -122,7 +122,7 @@ class UpdatePrograms:
         class_date = timezone.datetime.combine(self.today + timedelta(days=2), class_time)
         classes = BeginnerClass.objects.filter(class_date=class_date, state__in=self.states[:3])
         for c in classes:
-            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin'])  #.exclude(student__in=staff_students)
+            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin']).exclude(student__in=staff_query)
             student_list = []
             for r in cr:
                 student_list.append(r.student.id)
