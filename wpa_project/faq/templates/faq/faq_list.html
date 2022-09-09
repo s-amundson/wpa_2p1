@@ -9,6 +9,9 @@
             <h2> Frequently Asked Questions </h2>
         </div>
     </div>
+    {% if user.is_board %}
+        <a href="{% url 'faq:edit' %}" role="button" class="btn btn-warning m-1"> Add FAQ</a>
+    {% endif %}
     {% for faq in object_list %}
         <div class="row">
             {% if user.is_board %}
@@ -18,10 +21,7 @@
             {% endif %}
             <p>
                 Categories:
-                {% for category in faq.category.all %}
-                {{ category }}
-                {% if not forloop.last %},&nbsp; {% endif %}
-                {% endfor %}
+                {% for category in faq.category.all %}{{ category }}{% if not forloop.last %},&nbsp{% endif %}{% endfor %}
             </p>
             <div class="mx-3">
                 <p> {{ faq.rendered_answer|safe }}</p>
@@ -30,7 +30,5 @@
         <hr>
     {% endfor %}
 
-    {% if user.is_board %}
-        <a href="{% url 'faq:edit' %}" role="button" class="btn btn-warning m-1"> Add FAQ</a>
-    {% endif %}
+    {% include 'student_app/paginate.html' %}
 {% endblock %}

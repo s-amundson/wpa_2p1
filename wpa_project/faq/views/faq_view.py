@@ -44,3 +44,4 @@ class FaqList(ListView):
     """
     queryset = Faq.objects.filter(status=1).order_by('-created_at')
     template_name = 'faq/faq_list.html'
+    paginate_by = 10

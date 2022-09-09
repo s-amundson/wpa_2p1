@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import TemplateView
 from django.utils import timezone
 from django.utils.safestring import mark_safe
@@ -10,7 +9,7 @@ from ..src import Calendar
 logger = logging.getLogger(__name__)
 
 
-class CalendarView(LoginRequiredMixin, TemplateView):
+class CalendarView(TemplateView):
     template_name = "program_app/calendar.html"
 
     def coerce_month(self, year, month):
@@ -48,8 +47,12 @@ class CalendarView(LoginRequiredMixin, TemplateView):
             context['returnee_class'] = returnee_class.first()
         else:
             context['returnee_class'] = None
+
         # Instantiate our calendar class with selected year and month
-        cal = Calendar(year, month, self.request.user.dark_theme, self.request.user.is_staff)
+        dark = False
+        if self.request.user.is_authenticated:
+            dark = self.request.user.dark_theme
+        cal = Calendar(year, month, dark, self.request.user.is_staff)
 
         # Call the formatmonth method, which returns our calendar as a table
         context['html_cal'] = mark_safe(cal.formatmonth(withyear=True))

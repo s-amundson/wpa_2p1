@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 class StudentListView(StudentList):
     template_name = 'joad/student_list.html'
     form_class = SearchColumnsForm
+    paginate_by = 20
     last_event = False
 
     def get_context_data(self, **kwargs):

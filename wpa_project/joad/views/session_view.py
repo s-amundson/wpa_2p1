@@ -57,6 +57,7 @@ class SessionFormView(UserPassesTestMixin, FormView):
 class SessionListView(LoginRequiredMixin, ListView):
     model = Session
     template_name = 'joad/session_list.html'
+    paginate_by = 20
 
     def get_queryset(self):
         # filter_date = timezone.now().date() - timezone.timedelta.days(60)

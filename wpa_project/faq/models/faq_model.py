@@ -23,7 +23,7 @@ class Faq(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):  # pragma: no cover
-        return self.title
+        return self.question
 
     def rendered_answer(self):
         logging.warning(self.category.all())

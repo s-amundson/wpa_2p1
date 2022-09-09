@@ -68,9 +68,6 @@
             {% endfor %}
         </tbody>
     </table>
-    <div class="m-2">
-        <a href="{% url 'joad:pin_score' %}" class="btn btn-primary" role="button">
-            Add Score
-        </a>
-    </div>
+
+    {% include 'student_app/paginate.html' %}
 {% endblock %}
