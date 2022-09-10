@@ -26,5 +26,4 @@ class Faq(models.Model):
         return self.question
 
     def rendered_answer(self):
-        logging.warning(self.category.all())
         return Template(self.answer).render(Context({}))

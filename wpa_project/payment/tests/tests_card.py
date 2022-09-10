@@ -35,7 +35,7 @@ class TestsCard(TestCase):
         old_card.save()
 
         payment = PaymentHelper(user=self.test_user)
-        payment_log = payment.create_payment(
+        payment_log, created = payment.create_payment(
             amount=5,
             category='donation',
             donation=0,
@@ -106,7 +106,7 @@ class TestsCard(TestCase):
 
     def test_add_force_default(self):
         payment = PaymentHelper(user=self.test_user)
-        payment_log = payment.create_payment(
+        payment_log, created = payment.create_payment(
             amount=5,
             category='donation',
             donation=0,

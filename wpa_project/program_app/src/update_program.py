@@ -88,14 +88,15 @@ class UpdatePrograms:
 
     def close_class(self, class_time):
         class_date = timezone.datetime.combine(self.today + timedelta(days=1), class_time)
-        classes = BeginnerClass.objects.filter(class_date=class_date, state__in=self.states[:4])
+        classes = BeginnerClass.objects.filter(
+            class_date=class_date, state__in=self.states[:self.states.index('closed')])
         for c in classes:
-            c.state = self.states[4]  # 'closed'
+            c.state = self.states[self.states.index('closed')]  # 'closed'
             c.save()
             # logging.debug(c.state)
 
     def daily_update(self):
-        self.add_weekly()
+        # self.add_weekly()
         self.status_email()
         self.record_classes()
 
@@ -111,16 +112,18 @@ class UpdatePrograms:
     def record_classes(self):
         # set past classes to recorded
         yesterday = self.today - timedelta(days=1)
-        classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=self.states[:5])
+        classes = BeginnerClass.objects.filter(
+            class_date__lte=yesterday, state__in=self.states[:self.states.index('recorded')])
         for c in classes:
-            c.state = self.states[6]  # 'recorded'
+            c.state = 'recorded'
             c.save()
 
     def reminder_email(self, class_time):
         # send reminder email to students for classes 2 days from now.
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         class_date = timezone.datetime.combine(self.today + timedelta(days=2), class_time)
-        classes = BeginnerClass.objects.filter(class_date=class_date, state__in=self.states[:4])
+        classes = BeginnerClass.objects.filter(
+            class_date=class_date, state__in=self.states[:self.states.index('closed')])
         for c in classes:
             cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin']).exclude(student__in=staff_query)
             student_list = []
@@ -137,8 +140,8 @@ class UpdatePrograms:
         # logging.debug(email_date)
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         staff_students = Student.objects.filter(user__in=staff_query)
-        classes = BeginnerClass.objects.filter(class_date__date=email_date, state__in=self.states[:4])
-        # logging.debug(len(classes))
+        classes = BeginnerClass.objects.filter(
+            class_date__date=email_date, state__in=self.states[:self.states.index('closed')])
         if len(classes):
             class_list = []
             for c in classes:

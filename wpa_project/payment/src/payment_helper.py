@@ -31,6 +31,8 @@ class PaymentHelper(SquareHelper):
         else:
             body['source_id'] = source_id
 
+        if PaymentLog.objects.filter(idempotency_key=idempotency_key):  # pragma: no cover
+            return PaymentLog.objects.filter(idempotency_key=idempotency_key).last(), True
         result = self.client.payments.create_payment(
             body=body
         )
@@ -52,10 +54,10 @@ class PaymentHelper(SquareHelper):
                 total_money=response['approved_money']['amount'],
                 user=self.user
             )
-            return self.payment
+            return self.payment, False
 
         elif result.is_error():
             for error in result.errors:
                 self.log_error(category, error.get('code', 'unknown_error'), idempotency_key, 'payments.create_payment')
             self.handle_error(result, 'Payment Error')
-        return None
+        return None, False

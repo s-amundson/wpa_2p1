@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.template import Template
 
 from ..models import Faq
-from ..forms import FaqForm
+from ..forms import FaqForm, FaqFilterForm
 
 import logging
 logger = logging.getLogger(__name__)
@@ -42,6 +42,22 @@ class FaqList(ListView):
     """
     Return all posts that are with status 1 (published) and order from the latest one.
     """
-    queryset = Faq.objects.filter(status=1).order_by('-created_at')
+    model = Faq
     template_name = 'faq/faq_list.html'
     paginate_by = 10
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['form'] = FaqFilterForm(initial=self.request.GET)
+        return context
+
+    def get_queryset(self):
+        form = FaqFilterForm(self.request.GET)
+        object_list = self.model.objects.filter(status=1)
+        if form.is_valid():
+            logging.warning(form.cleaned_data)
+            if form.cleaned_data['category'] is not None:
+                object_list = object_list.filter(category=form.cleaned_data['category'])
+        else:
+            logging.warning(form.errors)
+        return object_list.order_by('-created_at')

@@ -80,7 +80,7 @@ class PaymentForm(forms.ModelForm):
             self.log.save()
             return True
         payment_helper = PaymentHelper(self.user)
-        self.log = payment_helper.create_payment(
+        self.log, duplicate = payment_helper.create_payment(
             amount=self.cleaned_data['amount'],
             category=self.cleaned_data['category'],
             donation=self.cleaned_data['donation'],
@@ -93,7 +93,7 @@ class PaymentForm(forms.ModelForm):
         if self.log is not None:
             pay_dict = {'line_items': self.line_items, 'total': self.cleaned_data['amount'],
                         'receipt': self.log.receipt}
-            if self.user is not None:
+            if self.user is not None and not duplicate:
                 EmailMessage().payment_email_user(self.user, pay_dict)
             if self.cleaned_data['save_card']:
                 customer = Customer.objects.filter(user=self.user).last()
