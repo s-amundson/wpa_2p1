@@ -63,10 +63,10 @@ class TestsStudent(TestCase):
 
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
         response = self.client.post(reverse('registration:add_student'), d, secure=True)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 302)
         student = Student.objects.last()
-        self.assertNotEqual(student.first_name, d['first_name'])
-        self.assertNotEqual(student.last_name, d['last_name'])
+        self.assertEqual(student.first_name, d['first_name'])
+        self.assertEqual(student.last_name, d['last_name'])
         # self.assertEqual(student.student_family, self.test_user.student_set.last().student_family)
         self.assertEqual(len(mail.outbox), 0)
 

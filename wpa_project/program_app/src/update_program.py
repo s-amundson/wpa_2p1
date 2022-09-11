@@ -1,11 +1,6 @@
 import logging
 from django.utils import timezone
 from datetime import timedelta
-from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
-from django.conf import settings
-from django_apscheduler.jobstores import DjangoJobStore
 from ..models import BeginnerClass, BeginnerSchedule, ClassRegistration
 from ..src import ClassRegistrationHelper, EmailMessage
 from student_app.models import Student, User
@@ -19,34 +14,6 @@ def close_class_job(class_time):
 
 def reminder_email_job(class_time):
     UpdatePrograms().reminder_email(class_time)
-
-
-class SchedulePrograms:
-    def __init__(self, scheduler):
-        self.scheduler = scheduler
-
-        # scheduled_classes = BeginnerSchedule.objects.all()
-        # for c in scheduled_classes:
-        #     self.scheduler.add_job(
-        #         reminder_email_job,
-        #         trigger=CronTrigger(day_of_week=c.day_of_week - 2,
-        #                             hour=c.class_time.hour,
-        #                             minute=c.class_time.minute),
-        #         id=f'reminder_email_{c.id}',  # The `id` assigned to each job MUST be unique
-        #         max_instances=1,
-        #         replace_existing=True,
-        #         kwargs={'class_time': c.class_time}
-        #     )
-        #     self.scheduler.add_job(
-        #         close_class_job,
-        #         trigger=CronTrigger(day_of_week=c.day_of_week - 1,
-        #                             hour=c.class_time.hour,
-        #                             minute=c.class_time.minute),
-        #         id=f'close_{c.id}',  # The `id` assigned to each job MUST be unique
-        #         max_instances=1,
-        #         replace_existing=True,
-        #         kwargs={'class_time': c.class_time}
-        #     )
 
 
 class UpdatePrograms:
@@ -125,7 +92,7 @@ class UpdatePrograms:
         classes = BeginnerClass.objects.filter(
             class_date=class_date, state__in=self.states[:self.states.index('closed')])
         for c in classes:
-            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin']).exclude(student__in=staff_query)
+            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin']) #.exclude(student__user__in=staff_query)
             student_list = []
             for r in cr:
                 student_list.append(r.student.id)
