@@ -1,5 +1,4 @@
 <tr>
-    <td>{{ cr.student.id }}</td>
     <td>
         {% if user.is_board %}
             <a href="{% url 'registration:search_result' cr.student.student_family.id %}">

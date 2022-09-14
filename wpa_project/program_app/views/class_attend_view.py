@@ -54,7 +54,8 @@ class ClassAttendView(UserPassesTestMixin, View):
                     cr.student.safety_class = None
                     cr.student.save()
             cr.save()
-            return JsonResponse({'error': False})
+            return JsonResponse({'attending': cr.attended, 'error': False,
+                                 'name': f'{cr.student.first_name} {cr.student.last_name}'})
         return JsonResponse({'error': True})
 
     def test_func(self):

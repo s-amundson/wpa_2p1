@@ -12,6 +12,16 @@ $(document).ready(function(){
 
 async function post_attend(url, send_data) {
     await $.post(url, send_data, function(data, status){
+        console.log(data)
+        if(data['attending'] == true) {
+            $(".toast-body").html(data['name'] + " attending");
+        }
+        else {
+            $(".toast-body").html(data['name'] + " not attending");
+        }
+
+        var myToast = bootstrap.Toast.getOrCreateInstance($('.toast'))
+        myToast.show()
         return data;
     }, "json");
 }

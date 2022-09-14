@@ -16,6 +16,20 @@
         </a>
         <hr/>
     {% endif %}
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+  <!-- Position it: -->
+  <!-- - `.toast-container` for spacing between toasts -->
+  <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
+  <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+  <div class="toast-container position-absolute top-0 end-0 p-3">
+
+    <!-- Then put toasts within -->
+    <div class="toast text-white bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-body"></div>
+    </div>
+
+  </div>
+</div>
     <h4>Instructions:</h4>
     <div class="row m-2 pl-4"><div>
         <ol>
@@ -48,7 +62,7 @@
                             table-light
                         {% endif %}">
                         <thead>
-                            <th> ID </th>
+
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
@@ -69,7 +83,7 @@
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                             <tr>
-                                <td colspan="7">
+                                <td colspan="6">
                                     <a class="nav-link" href="{% url 'programs:admit_wait' form.beginner_class.id %}">Wait List</a>
                                 </td>
                             </tr>
@@ -91,7 +105,6 @@
                             table-light
                         {% endif %}">
                         <thead>
-                            <th> ID </th>
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
@@ -112,7 +125,7 @@
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                             <tr>
-                                <td colspan="7">Wait List</td>
+                                <td colspan="6">Wait List</td>
                             </tr>
                             {% for cr in form.return_students_waiting %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
@@ -132,7 +145,6 @@
                                 table-light
                             {% endif %}">
                         <thead>
-                            <th> ID </th>
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
