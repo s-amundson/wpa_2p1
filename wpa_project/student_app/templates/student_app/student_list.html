@@ -30,11 +30,11 @@
 
   <div id="student_table">
     <table class="table table-bordered
-        {% if user.dark_theme %}
-            text-white
-        {% else %}
-            text-dark
-        {% endif %}">
+            {% if user.dark_theme %}
+                table-dark
+            {% else %}
+                table-light
+            {% endif %}">
         <thead>
             <th> Last Name </th>
             <th> First Name </th>

@@ -2,7 +2,7 @@
     <td>{{ cr.student.id }}</td>
     <td>
         {% if user.is_board %}
-            <a class="nav-link" href="{% url 'registration:search_result' cr.student.student_family.id %}">
+            <a href="{% url 'registration:search_result' cr.student.student_family.id %}">
                 {{ cr.student.first_name }}
             </a>
         {% else %}
@@ -11,18 +11,17 @@
     </td>
     <td>{{ cr.student.last_name }}</td>
     <td class="{% if cr.student.dob > form.adult_dob %} text-warning {% endif %}">{{ cr.student.dob }}</td>
-    <td>{{ cr.student.classregistration_set.attendance.attended }}/{{ cr.student.classregistration_set.attendance.registrations }}</td>
     <td>
         {% if form.is_closed %}
             {% if cr.pay_status == 'waiting' %}
-                <a class="nav-link" href="{% url 'programs:admit_wait' cr.beginner_class.id cr.student.student_family.id %}">Admit</a>
+                <a href="{% url 'programs:admit_wait' cr.beginner_class.id cr.student.student_family.id %}">Admit</a>
             {% else %}
                 {% if cr.student.signature or cr.student.user.is_staff %}
                     <input type="checkbox" class="m-2 attend-check" id="check_{{ cr.student.id }}"
                        attend_url="{% url 'programs:class_attend' cr.id %}"
                        {% if cr.attended %} checked="checked" {% endif %}>
                 {% endif %}
-                <a class="nav-link" href="{% url 'programs:class_sign_in' cr.id %}">
+                <a href="{% url 'programs:class_sign_in' cr.id %}">
                     {% if cr.student.signature %}
                         Update Signature
                     {% else %}
@@ -39,4 +38,5 @@
             {% if cr.student.covid_vax %} checked="checked" {% endif %}>
         {% endif %}
     </td>
+    <td>{{ cr.student.classregistration_set.attendance.attended }}/{{ cr.student.classregistration_set.attendance.registrations }}</td>
 </tr>

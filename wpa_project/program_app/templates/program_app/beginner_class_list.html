@@ -6,9 +6,11 @@
     <div class="row p-2" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
     <div class="row p-2">
         <table class="table table-bordered table-striped
-                {% if user.dark_theme %}
-                    table-dark
-                {% endif %}">
+                        {% if user.dark_theme %}
+                            table-dark
+                        {% else %}
+                            table-light
+                        {% endif %}">
             <thead>
                 <tr>
                     <th>Date</th>

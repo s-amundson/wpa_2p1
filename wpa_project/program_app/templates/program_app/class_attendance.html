@@ -41,18 +41,17 @@
                     <div class="col"> Attending: {{ form.attend_count.beginner }} </div>
                 </div>
                 <div class="row">
-                    <table class="table table-bordered col
+                    <table class="table table-bordered table-responsive-sm col
                         {% if user.dark_theme %}
-                            text-white
+                            table-dark
                         {% else %}
-                            text-dark
+                            table-light
                         {% endif %}">
                         <thead>
                             <th> ID </th>
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
-                            <th> Attended/Registered</th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -63,13 +62,14 @@
                                     Covid-19 Vaccination
                                 {% endif %}
                             </th>
+                            <th> Attended/</br>Registered</th>
                         </thead>
                         <tbody>
                             {% for cr in form.new_students %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                             <tr>
-                                <td colspan="6">
+                                <td colspan="7">
                                     <a class="nav-link" href="{% url 'programs:admit_wait' form.beginner_class.id %}">Wait List</a>
                                 </td>
                             </tr>
@@ -86,16 +86,15 @@
                 <div class="row">
                     <table class="table table-bordered
                         {% if user.dark_theme %}
-                            text-white
+                            table-dark
                         {% else %}
-                            text-dark
+                            table-light
                         {% endif %}">
                         <thead>
                             <th> ID </th>
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
-                            <th> Attended/Registered</th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -106,13 +105,14 @@
                                     Covid-19 Vaccination
                                 {% endif %}
                             </th>
+                            <th> Attended/</br>Registered</th>
                         </thead>
                         <tbody>
                             {% for cr in form.return_students %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
                             {% endfor %}
                             <tr>
-                                <td colspan="6">Wait List</td>
+                                <td colspan="7">Wait List</td>
                             </tr>
                             {% for cr in form.return_students_waiting %}
                                 {% include "program_app/tables/student_attend_table_row.html" %}
@@ -126,17 +126,16 @@
                 </div>
                 <div class="row">
                     <table class="table table-bordered
-                        {% if user.dark_theme %}
-                            text-white
-                        {% else %}
-                            text-dark
-                        {% endif %}">
+                            {% if user.dark_theme %}
+                                table-dark
+                            {% else %}
+                                table-light
+                            {% endif %}">
                         <thead>
                             <th> ID </th>
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
-                            <th> Attended/Registered</th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -147,6 +146,7 @@
                                     Covid-19 Vaccination
                                 {% endif %}
                             </th>
+                            <th> Attended/</br>Registered</th>
                         </thead>
                         <tbody>
                             {% for cr in form.staff %}

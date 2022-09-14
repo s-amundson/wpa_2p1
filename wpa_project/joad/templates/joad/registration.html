@@ -57,11 +57,11 @@
     <hr>
     <div id="class-table-div" class="row p-3">
         <table class="table table-bordered
-            {% if user.dark_theme %}
-                text-white
-            {% else %}
-                text-dark
-            {% endif %}">
+                {% if user.dark_theme %}
+                    table-dark
+                {% else %}
+                    table-light
+                {% endif %}">
             <thead>
                 <tr>
                     <th> ID </th>
