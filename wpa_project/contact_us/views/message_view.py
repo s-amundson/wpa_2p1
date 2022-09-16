@@ -46,7 +46,7 @@ class MessageView(FormView):
 
     def get_initial(self):
         self.initial = super().get_initial()
-        if self.request.user.is_authenticated:
+        if 'message_id' not in self.kwargs and self.request.user.is_authenticated:
             student = Student.objects.filter(user=self.request.user).last()
             if student is not None:
                 self.initial['contact_name'] = f'{student.first_name} {student.last_name}'
