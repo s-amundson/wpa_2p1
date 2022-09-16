@@ -162,6 +162,34 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         cr = ClassRegistration.objects.all()
         for r in cr:
             self.assertEqual(r.pay_status, 'canceled')
+
+    def test_cancel_within_24hrs(self):
+        student = Student.objects.get(pk=2)
+        student.user.is_staff = False
+        student.user.save()
+
+        self.create_payment([student, Student.objects.get(pk=3)], 1000)
+        cr = ClassRegistration.objects.all()
+        logging.debug(cr)
+        bc = BeginnerClass.objects.get(pk=1)
+        class_date = timezone.now() + timedelta(days=1)
+        bc.class_date = bc.class_date.replace(year=class_date.year, month=class_date.month, day=class_date.day)
+        bc.state = 'closed'
+        bc.save()
+        logging.warning(bc.class_date)
+
+        d = {'donation': False}
+        for r in cr:
+            d[f'unreg_{r.id}'] = True
+        response = self.client.post(self.test_url, d, secure=True)
+        self.assertRedirects(response, self.url_registration)
+
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'closed')
+
+        cr = bc.classregistration_set.all()
+        self.assertEqual(cr[0].pay_status, 'canceled')
+        self.assertEqual(cr[1].pay_status, 'canceled')
 #
 #
 # class TestsUnregisterStudent2(TestCase):

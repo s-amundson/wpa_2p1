@@ -1,3 +1,4 @@
 You are registered or registering for these upcoming classes. Payment must be completed
 before registration is complete. If the payment status is "Unsuccessful" then you need to click on the link
-to complete the registration. Registrations cannot be completed within 24 hours of a class.
+to complete the registration. Registrations cannot be completed within 24 hours of a class. Refunds are not given within
+24 hours of a class.

@@ -74,7 +74,7 @@ class UnregisterForm(forms.Form):
             self.registrations = ClassRegistration.objects.filter(beginner_class__class_date__gte=timezone.now(),
                                                                   student__in=self.family.student_set.all())
             self.registrations = self.registrations.exclude(pay_status__in=['refund donated', 'refunded', 'canceled'])
-            self.can_unregister = False
+            self.can_refund = False
             for reg in self.registrations:
                 f = BooleanField(reg, widget=forms.CheckboxInput(attrs={'class': f"m-2 unreg {reg.pay_status}"}), required=False,
                                  initial=False)
@@ -82,10 +82,10 @@ class UnregisterForm(forms.Form):
                 f.class_date = reg.beginner_class.class_date
                 f.pay_status = reg.pay_status
                 if reg.beginner_class.state in reg.beginner_class.class_states[4:]:  # class closed
-                    f.widget.attrs.update({'disabled': 'disabled'})
-                    f.label = 'class closed'
+                    # f.widget.attrs.update({'disabled': 'disabled'})
+                    f.label = '(no refund)'
                 else:
-                    self.can_unregister = True
+                    self.can_refund = True
                     f.label = ''
                 reg.check = self.fields[f'unreg_{reg.id}'] = f
         self.fields['donation'] = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class': "m-2"}), required=False,
@@ -103,13 +103,22 @@ class UnregisterForm(forms.Form):
             if k[:5] == 'unreg' and v:
                 # logging.debug(k.split('_'))
                 class_list.append(int(k.split('_')[1]))
-        logging.debug(class_list)
+        logging.warning(class_list)
         cr = ClassRegistration.objects.filter(
             id__in=class_list,
-            beginner_class__class_date__gte=timezone.now() + timezone.timedelta(hours=24),
-            beginner_class__state__in=BeginnerClass.class_states[:4],  # not class closed
+            # beginner_class__class_date__gte=timezone.now() + timezone.timedelta(hours=24),
+            # beginner_class__state__in=BeginnerClass.class_states[:4],  # not class closed
             student__in=student_family.student_set.all())
-        logging.debug(cr)
+        logging.warning(cr)
+        if not len(cr):  # no registrations found
+            return True
+        not_refundable = cr.filter(
+            beginner_class__class_date__lt=timezone.now() + timezone.timedelta(hours=24),
+            beginner_class__state__in=BeginnerClass.class_states[:5])
+        not_refundable.update(pay_status='canceled')
+        cr = cr.filter(beginner_class__class_date__gte=timezone.now() + timezone.timedelta(hours=24),
+                       beginner_class__state__in=BeginnerClass.class_states[:4])
+        logging.warning(cr)
         # if not user.is_board:
         #     cr = cr.filter(
         refund = RefundHelper()

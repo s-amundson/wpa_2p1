@@ -11,7 +11,7 @@
                 <th> Class Date </th>
                 <th> Name </th>
                 <th> Payment Status </th>
-                <th> Unregister/Cancel </th>
+                <th> Cancel </th>
             </tr>
         </thead>
         <tbody>
@@ -49,16 +49,18 @@
 
         </tbody>
     </table>
-    {% if form.can_unregister %}
+    {% if form.can_refund %}
         <div class="row p-2 form-check">
             <label class="form-check-label">
                 {{ form.donation }}
                 I wish to donate my refund to Woodley Park Archers
             </label>
         </div>
-
-        <div class="flex-row m-2">
-            <button class="btn btn-primary" type="submit">Unregister/Cancel</button>
+    {% endif %}
+    {% if form.registrations %}
+        <div class="d-flex flex-row justify-content-end m-2">
+            <button class="btn btn-primary" type="submit">Cancel Registrations</button>
         </div>
     {% endif %}
+
 </form>
