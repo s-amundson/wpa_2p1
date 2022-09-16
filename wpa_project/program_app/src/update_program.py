@@ -1,11 +1,6 @@
 import logging
 from django.utils import timezone
 from datetime import timedelta
-from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
-from django.conf import settings
-from django_apscheduler.jobstores import DjangoJobStore
 from ..models import BeginnerClass, BeginnerSchedule, ClassRegistration
 from ..src import ClassRegistrationHelper, EmailMessage
 from student_app.models import Student, User
@@ -19,34 +14,6 @@ def close_class_job(class_time):
 
 def reminder_email_job(class_time):
     UpdatePrograms().reminder_email(class_time)
-
-
-class SchedulePrograms:
-    def __init__(self, scheduler):
-        self.scheduler = scheduler
-
-        scheduled_classes = BeginnerSchedule.objects.all()
-        for c in scheduled_classes:
-            self.scheduler.add_job(
-                reminder_email_job,
-                trigger=CronTrigger(day_of_week=c.day_of_week - 2,
-                                    hour=c.class_time.hour,
-                                    minute=c.class_time.minute),
-                id=f'reminder_email_{c.id}',  # The `id` assigned to each job MUST be unique
-                max_instances=1,
-                replace_existing=True,
-                kwargs={'class_time': c.class_time}
-            )
-            self.scheduler.add_job(
-                close_class_job,
-                trigger=CronTrigger(day_of_week=c.day_of_week - 1,
-                                    hour=c.class_time.hour,
-                                    minute=c.class_time.minute),
-                id=f'close_{c.id}',  # The `id` assigned to each job MUST be unique
-                max_instances=1,
-                replace_existing=True,
-                kwargs={'class_time': c.class_time}
-            )
 
 
 class UpdatePrograms:
@@ -73,24 +40,32 @@ class UpdatePrograms:
                         state=c.state)
                     bc.save()
 
+    def create_class(self, beginner_schedule):
+        class_date = timezone.datetime.combine(
+            self.today + timedelta(days=(7 * beginner_schedule.frequency * beginner_schedule.future_classes) + 1),
+            beginner_schedule.class_time)
+        bc, created = BeginnerClass.objects.get_or_create(
+            class_date=class_date,
+            class_type=beginner_schedule.class_type,
+            beginner_limit=beginner_schedule.beginner_limit,
+            beginner_wait_limit=beginner_schedule.beginner_wait_limit,
+            returnee_limit=beginner_schedule.returnee_limit,
+            returnee_wait_limit=beginner_schedule.returnee_wait_limit,
+            state=beginner_schedule.state)
+
     def close_class(self, class_time):
         class_date = timezone.datetime.combine(self.today + timedelta(days=1), class_time)
-        classes = BeginnerClass.objects.filter(class_date=class_date, state__in=self.states[:3])
+        classes = BeginnerClass.objects.filter(
+            class_date=class_date, state__in=self.states[:self.states.index('closed')])
         for c in classes:
-            c.state = self.states[4]  # 'closed'
+            c.state = self.states[self.states.index('closed')]  # 'closed'
             c.save()
             # logging.debug(c.state)
 
     def daily_update(self):
-        self.add_weekly()
+        # self.add_weekly()
         self.status_email()
-
-        # set past classes to recorded
-        yesterday = self.today - timedelta(days=1)
-        classes = BeginnerClass.objects.filter(class_date__lte=yesterday, state__in=self.states[:4])
-        for c in classes:
-            c.state = self.states[6]  # 'recorded'
-            c.save()
+        self.record_classes()
 
     def next_class_day(self, target_day):
         """Returns the next eligible class day (not today or tomorrow)
@@ -101,13 +76,23 @@ class UpdatePrograms:
             target_delta += 7
         return self.today + timedelta(target_delta)
 
+    def record_classes(self):
+        # set past classes to recorded
+        yesterday = self.today - timedelta(days=1)
+        classes = BeginnerClass.objects.filter(
+            class_date__lte=yesterday, state__in=self.states[:self.states.index('recorded')])
+        for c in classes:
+            c.state = 'recorded'
+            c.save()
+
     def reminder_email(self, class_time):
         # send reminder email to students for classes 2 days from now.
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         class_date = timezone.datetime.combine(self.today + timedelta(days=2), class_time)
-        classes = BeginnerClass.objects.filter(class_date=class_date, state__in=self.states[:3])
+        classes = BeginnerClass.objects.filter(
+            class_date=class_date, state__in=self.states[:self.states.index('closed')])
         for c in classes:
-            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin'])  #.exclude(student__in=staff_students)
+            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin']) #.exclude(student__user__in=staff_query)
             student_list = []
             for r in cr:
                 student_list.append(r.student.id)
@@ -122,8 +107,8 @@ class UpdatePrograms:
         # logging.debug(email_date)
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         staff_students = Student.objects.filter(user__in=staff_query)
-        classes = BeginnerClass.objects.filter(class_date__date=email_date, state__in=self.states[:3])
-        # logging.debug(len(classes))
+        classes = BeginnerClass.objects.filter(
+            class_date__date=email_date, state__in=self.states[:self.states.index('closed')])
         if len(classes):
             class_list = []
             for c in classes:

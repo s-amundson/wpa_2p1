@@ -71,11 +71,48 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BROKER_URL = get_secret('CELERY_BROKER')
 CELERY_RESULT_BACKEND = 'rpc://'
 CELERY_RESULT_PERSISTENT = False
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TASK_IGNORE_RESULT = True
+
+# Content Security Policy
+CSP_DEFAULT_SRC = ("'self'",
+                   "https://cdnjs.cloudflare.com",
+                   "https://*.squareupsandbox.com",
+                   "https://*.squareup.com")
+CSP_FONT_SRC = ("'self'",
+                "https://cdnjs.cloudflare.com",
+                "https://*.cloudfront.net", "https://*.squarecdn.com")
+CSP_FRAME_ANCESTORS = ("'self'", "https://www.facebook.com")
+CSP_FRAME_SRC = ("'self'",
+                 "https://*.squarecdn.com",
+                 "https://*.squareupsandbox.com",
+                 "https://*.squareup.com",
+                 "https://www.facebook.com",
+                 )
+CSP_IMG_SRC = ("'self' ",
+               "https://www.facebook.com",
+               "http://www.w3.org")
+CSP_INCLUDE_NONCE_IN = ['script-src']
+CSP_STYLE_SRC = ("'self' 'unsafe-inline'",
+                 "https://cdnjs.cloudflare.com",
+                 "https://cdn.jsdelivr.net",
+                 "https://*.squarecdn.com",
+                 "https://*.squareupsandbox.com",
+                 "https://*.squareup.com",
+                 )
+CSP_SCRIPT_SRC = ("'self' 'sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB' "
+                  "'sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13'",
+                  "https://code.jquery.com",
+                  "https://cdn.jsdelivr.net",
+                  "https://*.squarecdn.com",
+                  "https://*.squareupsandbox.com",
+                  "https://*.squareup.com",
+                  "https://*.facebook.net",
+                  )
 
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = get_secret("CSRF_TRUSTED_ORIGINS")
@@ -105,6 +142,9 @@ EMAIL_PORT = '587'
 EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
 
+FACEBOOK_ID = get_secret('FACEBOOK_ID')
+FACEBOOK_PASSWORD = get_secret('FACEBOOK_PASSWORD')
+FACEBOOK_USER = get_secret('FACEBOOK_USER')
 
 # Application definition
 INSTALLED_APPS = [
@@ -115,8 +155,9 @@ INSTALLED_APPS = [
     'minutes',
     'joad',
     'contact_us',
+    'faq',
+    'facebook',
 
-    "django_apscheduler",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -134,6 +175,7 @@ INSTALLED_APPS = [
     'rest_framework',
     "sslserver",
     'django_sendfile',
+    'django_celery_beat',
 ]
 
 LOGIN_REDIRECT_URL = 'registration:profile'
@@ -176,6 +218,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'student_app', 'media')
 MEDIA_URL = '/media/'
 
 MIDDLEWARE = [
+    'csp.middleware.CSPMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

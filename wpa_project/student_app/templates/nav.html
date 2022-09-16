@@ -1,13 +1,20 @@
+{% load static %}
 <nav class="navbar navbar-dark bg-dark border">
     <a class="navbar-brand" href="/">
         <div class="container px-4">
-            <img src="https://woodleyparkarchers.org/wp-content/uploads/2018/06/cropped-WPA-Logo-4.png" alt="Icon" width="40">
+            <img src="{% static 'images/cropped-WPA-Logo-4.png' %}" alt="Header" width="40">
             <span class="green">Registration</span>
         </div>
     </a>
 
     <div class="navbar-expand-md" id="navbar">
         <ul class="navbar-nav md-auto mt-2">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'registration:info' 'about' %}">About</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'registration:info' 'class_description' %}">Class Description</a>
+            </li>
             {% if user.is_board %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
@@ -27,14 +34,32 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'payment:make_payment' %}">Donate</a>
             </li>
+            {% if user.is_board %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        FAQ
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'faq:faq' %}">Faq</a>
+                        <a class="dropdown-item" href="{% url 'faq:category_list' %}">Categories</a>
+                    </div>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'faq:faq' %}">Faq</a>
+                </li>
+            {% endif %}
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                     Policies
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{% url 'registration:terms' %}">Terms</a>
-                    <a class="dropdown-item" href="{% url 'registration:policy' 'privacy' %}">Privacy</a>
-                    <a class="dropdown-item" href="{% url 'registration:policy' 'covid' %}">Covid 19</a>
+                    <a class="dropdown-item" href="{% url 'registration:info' 'terms' %}">Terms</a>
+                    <a class="dropdown-item" href="{% url 'registration:info' 'privacy' %}">Privacy</a>
+                    <a class="dropdown-item" href="{% url 'registration:info' 'covid' %}">Covid 19</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'registration:info' 'constitution' %}">Constitution</a>
+                    <a class="dropdown-item" href="{% url 'registration:info' 'by-laws' %}">By-Laws</a>
                 </div>
             </li>
 
@@ -108,6 +133,9 @@
                     <a class="nav-link" href="{% url 'registration:profile' %}">Profile</a>
 
             {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'programs:calendar' %}">Classes</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'account_login' %}">Login</a>
                 </li>

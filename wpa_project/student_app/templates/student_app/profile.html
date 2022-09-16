@@ -5,7 +5,7 @@
     {% load static %}
     <script src="{% static 'js/profile.js' %}"></script>
     <script src="{% static 'js/class_cancel.js' %}"></script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         let student_table_url = "{% url 'registration:student_table' %}"
         let add_student_url = "{% url 'registration:add_student' %}"
         let url_student_family_api = "{% url 'registration:student_family' %}"
@@ -132,11 +132,11 @@
             <div class="col-1"></div>
             <div class="col">
                 <table class="table table-bordered
-                    {% if user.dark_theme %}
-                        text-white
-                    {% else %}
-                        text-dark
-                    {% endif %}">
+                        {% if user.dark_theme %}
+                            table-dark
+                        {% else %}
+                            table-light
+                        {% endif %}">
                     <tbody>
                         <tr>
                             <td>USAA Archery Instructor Certificate Expiration Date:</td>

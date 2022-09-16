@@ -4,7 +4,6 @@
 
 {% block script %}
     {% load static %}
-    <script src="{% static 'js/minutes.js' %}"></script>
 {% endblock %}
 
 {% block main %}
@@ -25,4 +24,5 @@
             </div>
         {% endfor %}
     </div>
+    {% include 'student_app/paginate.html' %}
 {% endblock %}

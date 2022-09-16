@@ -10,6 +10,8 @@ from django.views.generic.detail import DetailView
 from ..forms import PaymentForm
 from ..models import Card, PaymentLog
 from ..signals import payment_error_signal
+from django.utils.decorators import method_decorator
+from csp.decorators import csp
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,6 +24,13 @@ class CreatePaymentView(FormView):
     template_name = 'payment/make_payment.html'
     form_class = PaymentForm
     success_url = reverse_lazy('registration:index')
+    if settings.SQUARE_CONFIG['environment'] == "production":  # pragma: no cover
+        pay_url = "https://web.squarecdn.com/v1/square.js"
+    else:  # pragma: no cover
+        pay_url = "https://sandbox.web.squarecdn.com/v1/square.js"
+
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def form_invalid(self, form):
         logging.warning(form.errors)
@@ -49,10 +58,11 @@ class CreatePaymentView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        if settings.SQUARE_CONFIG['environment'] == "production":   # pragma: no cover
-            context['pay_url'] = "https://web.squarecdn.com/v1/square.js"
-        else:  # pragma: no cover
-            context['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"
+        # if settings.SQUARE_CONFIG['environment'] == "production":   # pragma: no cover
+        #     context['pay_url'] = "https://web.squarecdn.com/v1/square.js"
+        # else:  # pragma: no cover
+        #     context['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"
+        context['pay_url'] = self.pay_url
         context['app_id'] = settings.SQUARE_CONFIG['application_id']
         context['location_id'] = settings.SQUARE_CONFIG['location_id']
         context['action_url'] = self.request.session.get('action_url', reverse_lazy('payment:make_payment'))

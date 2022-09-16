@@ -22,11 +22,11 @@
   </form>
     </div>
     <table class="table table-bordered m-2
-        {% if user.dark_theme %}
-            text-white
-        {% else %}
-            text-dark
-        {% endif %}">
+            {% if user.dark_theme %}
+                table-dark
+            {% else %}
+                table-light
+            {% endif %}">
         <thead>
             <tr>
                 <th> Student </th>
@@ -43,7 +43,9 @@
             {% for student in object_list %}
                 <tr>
                     <td>
-                        {{ student.first_name|capfirst }} {{ student.last_name|capfirst }}
+                        <a href="{% url 'registration:search_result' student.student_family.id %}">
+                            {{ student.first_name|capfirst }} {{ student.last_name|capfirst }}
+                        </a>
                     </td>
                     {% if last_event %}
                         <td>{{ student.pinattendance_set.last_event.bow }}</td>
@@ -66,9 +68,6 @@
             {% endfor %}
         </tbody>
     </table>
-    <div class="m-2">
-        <a href="{% url 'joad:pin_score' %}" class="btn btn-primary" role="button">
-            Add Score
-        </a>
-    </div>
+
+    {% include 'student_app/paginate.html' %}
 {% endblock %}

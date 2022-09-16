@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %} Directions {% endblock %}
+
+{% load static %}
+{% block main %}
+<div>
+    <h1 class="text-center"> Directions </h1>
+</div>
+
+<div class="d-flex flex-row">
+    <div class="m-2">
+        <img class="rounded my-2 float-end img-max-300 imgshadow" alt="Target" src="{% static 'images/park_entrance_closure.jpg' %}"
+                 title="Map" width="300">
+
+        <h3>From the Southwest:</h3>
+        <p class="ms-3">
+            Take the 101 east and exit at the Balboa off ramp. Turn left at the bottom of the ramp and go north to
+            Burbank. Turn right and go east to Woodley. Turn left and go north until you see the signs for the water
+            treatment plant, the Wildlife Refuge and the Japanese Gardens on the right. Turn right into the park and
+            stay to the right at the fork. Follow the road all the way, past the park and the cricket fields, until
+            you reach the traffic circle. Go left and up into the range parking lot.
+        </p>
+
+        <h3>From the Southeast:</h3>
+        <p class="ms-3">
+            Take the 101 west and exit at the Balboa off ramp. Turn right at the bottom of the ramp and go north to
+            Burbank. Turn right and go east to Woodley. Turn left and go north until you see the signs for the water
+            treatment plant, the Wildlife Refuge and the Japanese Gardens on the right. Turn right into the park and
+            stay to the right at the fork. Follow the road all the way, past the park and the cricket fields, until
+            you reach the traffic circle. Go left and up into the range parking lot.
+        </p>
+
+        <h3>From the Northeast: </h3>
+        <p class="ms-3">
+            Take the 405 south and exit at the Burbank off ramp. Turn right on Burbank and go west to Woodley. Turn
+            right on Woodley Ave and go North, take the first entrance to the right. Follow the road though the
+            parking lot then take a right. Take a left at the traffic circle to the range parking lot.
+        </p>
+
+        <h3>From the Northeast: </h3>
+        <p class="ms-3">
+            Take the 101 west and exit at the Balboa off ramp. Turn right at the bottom of the ramp and go north to
+            Burbank. Turn right and go east to Woodley. Turn left and go north until you see the signs for the water
+            treatment plant, the Wildlife Refuge and the Japanese Gardens on the right. Turn right into the park and
+            stay to the right at the fork. Follow the road all the way, past the park and the cricket fields, until
+            you reach the traffic circle. Go left and up into the range parking lot.
+        </p>
+
+        <h3>From the Northwest: </h3>
+        <p class="ms-3">
+            Take the 118 east to the 405 south. Take the 405 south and exit at the Burbank off ramp. Turn right on
+            Burbank and go west to Woodley. Turn right on Woodley Ave and go North, take the first entrance to the
+            right. Follow the road though the parking lot then take a right. Take a left at the traffic circle to
+            the range parking lot.
+        </p>
+
+        <h3>From the North: </h3>
+        <p class="ms-3">
+            Take the 5 south to the 405 south. Take the 405 south and exit at the Burbank off ramp. Turn right on
+            Burbank and go west to Woodley. Turn right on Woodley Ave and go North, take the first entrance to the
+            right. Follow the road though the parking lot then take a right. Take a left at the traffic circle to
+            the range parking lot.
+        </p>
+
+        <h3>From the South: </h3>
+        <div class="ms-3">
+            <p>
+                Take the 405 north and exit at the Burbank off ramp. Turn left on Burbank and go west to Woodley. Turn
+                right on Burbank and go west to Woodley. Turn right on Woodley Ave and go North, take the first entrance
+                to the right. Follow the road though the parking lot then take a right. Take a left at the traffic circle
+                to the range parking lot.
+            </p>
+            <h4> - or - </h4>
+            <p>
+                Take the 5 north to the 134 west. Follow the 134 and connect to the 101 west. Take the 101 west and exit
+                at the Balboa off ramp. Turn right at the bottom of the ramp and go north to Burbank. Turn right and go
+                east to Woodley. Turn left and go north take the first entrance to the right. Follow the road though the
+                parking lot then take a right. Take a left at the traffic circle to the range parking lot.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block right %}
+<div id="login-div"></div>
+{% endblock %}

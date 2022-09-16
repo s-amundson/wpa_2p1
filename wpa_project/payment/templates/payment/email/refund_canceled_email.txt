@@ -1,6 +1,6 @@
 Hi {{ name }},
 
-{{ event }} has been canceled.
+{{ event }} has been canceled {{ message }}.
 
 Your refund with Woodley Park Archers has successfully been sent to square for processing. Please allow 5 to 10
 business days for the refund to process.

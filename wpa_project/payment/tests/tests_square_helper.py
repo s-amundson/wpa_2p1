@@ -26,7 +26,7 @@ class TestsSquareHelper(TestCase):
 
     def test_payment_create_good(self):
         payment = PaymentHelper(user=self.test_user)
-        payment_log = payment.create_payment(
+        payment_log, created = payment.create_payment(
             amount=5,
             category='donation',
             donation=0,
@@ -40,7 +40,7 @@ class TestsSquareHelper(TestCase):
 
     def test_payment_create_bad(self):
         payment = PaymentHelper(user=self.test_user)
-        payment_log = payment.create_payment(
+        payment_log, created = payment.create_payment(
             amount=5,
             category='donation',
             donation=0,
@@ -55,7 +55,7 @@ class TestsSquareHelper(TestCase):
 
     def test_card_good(self):
         payment = PaymentHelper(user=self.test_user)
-        payment_log = payment.create_payment(
+        payment_log, created = payment.create_payment(
             amount=5,
             category='donation',
             donation=0,

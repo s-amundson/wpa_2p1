@@ -7,11 +7,11 @@
         <h3>Class Registration Admin List</h3>
     </div>
     <table class="table table-bordered
-        {% if user.dark_theme %}
-            text-white
-        {% else %}
-            text-dark
-        {% endif %}">
+            {% if user.dark_theme %}
+                table-dark
+            {% else %}
+                table-light
+            {% endif %}">
         <thead>
             <tr>
                 <th> ID </th>
@@ -40,4 +40,5 @@
 
         </div>
     </div>
+    {% include 'student_app/paginate.html' %}
 {% endblock %}

@@ -5,7 +5,7 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/joad_registration.js' %}"></script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         let class_list_url = null;
         let session_status_url = null;
         let has_joad = {{ has_joad|lower }};
@@ -60,11 +60,11 @@
 
     <div class="row"><h5>Upcoming Sessions:</h5></div>
     <table class="table table-bordered
-        {% if user.dark_theme %}
-            text-white
-        {% else %}
-            text-dark
-        {% endif %}">
+                {% if user.dark_theme %}
+                    table-dark
+                {% else %}
+                    table-light
+                {% endif %}">
         <thead>
             <tr>
                 <th> Start Date </th>

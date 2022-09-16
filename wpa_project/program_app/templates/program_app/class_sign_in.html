@@ -11,7 +11,7 @@
     <link type="text/css" href="{% static 'css/jquery.signature.css' %}" rel="stylesheet">
     <script type="text/javascript" src="{% static 'js/jquery.signature.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/sign_in.js' %}"></script>
-    <style>
+    <style nonce="{{request.csp_nonce}}">
         .kbw-signature { width: 400px; height: 200px; }
     </style>
 {% endblock %}
@@ -57,13 +57,13 @@
                     <div class="form-floating input-group-md m-2">
                         {{ form.sig_first_name }}
                         <label for="id_sig_first_name">
-                            <span style="color:Black;">First Name</span>
+                            First Name
                         </label>
                     </div>
                     <div class="form-floating input-group-md m-2">
                         {{ form.sig_last_name }}
                         <label for="id_sig_last_name">
-                            <span style="color:Black;">Last Name</span>
+                            Last Name
                         </label>
                     </div>
                 </div>

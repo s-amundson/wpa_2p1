@@ -47,7 +47,7 @@ services:
     container_name: celery
     image: *django
     restart: 'unless-stopped'
-    entrypoint: celery -A wpa_project worker -l INFO
+    entrypoint: celery -A wpa_project worker --beat --scheduler django --loglevel=info
     volumes:
       - staticfiles:/home/app/web/staticfiles
       - media:/home/app/web/student_app/media

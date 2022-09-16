@@ -30,11 +30,11 @@
 
   <div id="student_table">
     <table class="table table-bordered
-        {% if user.dark_theme %}
-            text-white
-        {% else %}
-            text-dark
-        {% endif %}">
+            {% if user.dark_theme %}
+                table-dark
+            {% else %}
+                table-light
+            {% endif %}">
         <thead>
             <th> Last Name </th>
             <th> First Name </th>
@@ -55,23 +55,7 @@
         </tbody>
     </table>
   </div>
-    <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_previous %}
-                <a href="?page=1">&laquo; first</a>
-                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-            {% endif %}
-
-            <span class="current">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-            </span>
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">next</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-            {% endif %}
-        </span>
-    </div>
+    {% include 'student_app/paginate.html' %}
 {% endblock %}
 
 {% block right %}

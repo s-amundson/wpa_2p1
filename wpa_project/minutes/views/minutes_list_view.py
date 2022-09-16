@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 class MinutesListView(LoginRequiredMixin, ListView):
     model = Minutes
     template_name = 'minutes/minutes_list.html'
+    paginate_by = 20
 
     def get_queryset(self):
         return Minutes.objects.all().order_by('-meeting_date')

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %} FAQ Category List {% endblock %}
+
+
+{% block main %}
+    <div class="m-2"><h5>FAQ Categories:</h5></div>
+    {% for category in object_list %}
+        <div class="d-flex flex-row m-2">
+            <div class="col">
+                <a href="{% url 'faq:category' category.id %}">
+                    {{ category.title }}
+                </a>
+            </div>
+
+        </div>
+    {% empty %}
+        <h6>No categories yet.</h6>
+    {% endfor %}
+
+    <div class="d-flex flex-row m-2">
+        <div class="m-3">
+            <a href="{% url 'faq:category'%}" class="btn btn-primary" role="button">
+                Add Category
+            </a>
+        </div>
+    </div>
+
+{% endblock %}

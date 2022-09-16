@@ -19,8 +19,7 @@ class MessageListView(UserPassesTestMixin, ListView):
     template_name = 'contact_us/message_list.html'
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset.order_by('-id')
+        queryset = super().get_queryset().order_by('-created_time')
         return queryset
 
     def test_func(self):

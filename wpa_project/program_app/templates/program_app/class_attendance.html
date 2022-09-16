@@ -16,6 +16,20 @@
         </a>
         <hr/>
     {% endif %}
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+  <!-- Position it: -->
+  <!-- - `.toast-container` for spacing between toasts -->
+  <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
+  <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+  <div class="toast-container position-absolute top-0 end-0 p-3">
+
+    <!-- Then put toasts within -->
+    <div class="toast text-white bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-body"></div>
+    </div>
+
+  </div>
+</div>
     <h4>Instructions:</h4>
     <div class="row m-2 pl-4"><div>
         <ol>
@@ -41,18 +55,17 @@
                     <div class="col"> Attending: {{ form.attend_count.beginner }} </div>
                 </div>
                 <div class="row">
-                    <table class="table table-bordered col
+                    <table class="table table-bordered table-responsive-sm col
                         {% if user.dark_theme %}
-                            text-white
+                            table-dark
                         {% else %}
-                            text-dark
+                            table-light
                         {% endif %}">
                         <thead>
-                            <th> ID </th>
+
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
-                            <th> Attended/Registered</th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -63,6 +76,7 @@
                                     Covid-19 Vaccination
                                 {% endif %}
                             </th>
+                            <th> Attended/</br>Registered</th>
                         </thead>
                         <tbody>
                             {% for cr in form.new_students %}
@@ -86,16 +100,14 @@
                 <div class="row">
                     <table class="table table-bordered
                         {% if user.dark_theme %}
-                            text-white
+                            table-dark
                         {% else %}
-                            text-dark
+                            table-light
                         {% endif %}">
                         <thead>
-                            <th> ID </th>
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
-                            <th> Attended/Registered</th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -106,6 +118,7 @@
                                     Covid-19 Vaccination
                                 {% endif %}
                             </th>
+                            <th> Attended/</br>Registered</th>
                         </thead>
                         <tbody>
                             {% for cr in form.return_students %}
@@ -126,17 +139,15 @@
                 </div>
                 <div class="row">
                     <table class="table table-bordered
-                        {% if user.dark_theme %}
-                            text-white
-                        {% else %}
-                            text-dark
-                        {% endif %}">
+                            {% if user.dark_theme %}
+                                table-dark
+                            {% else %}
+                                table-light
+                            {% endif %}">
                         <thead>
-                            <th> ID </th>
                             <th> First Name </th>
                             <th> Last Name </th>
                             <th> Date of Birth </th>
-                            <th> Attended/Registered</th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -147,6 +158,7 @@
                                     Covid-19 Vaccination
                                 {% endif %}
                             </th>
+                            <th> Attended/</br>Registered</th>
                         </thead>
                         <tbody>
                             {% for cr in form.staff %}

@@ -1,20 +1,12 @@
 from django import forms
 from django.utils import timezone
-from django.conf import settings
-from django.core.files.base import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image as PIL_Image
 
-from reportlab.pdfgen.canvas import Canvas
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import inch
-from reportlab.platypus import Paragraph, Frame, Image, Spacer
-from reportlab.lib.pagesizes import letter
 
 from student_app.src import EmailMessage, StudentHelper
 
 import io
-import os
 import base64
 import logging
 
@@ -59,7 +51,7 @@ class WaiverForm(forms.Form):
             return False
 
         img = self.decodeImage()
-        if img is None:
+        if img is None:  # pragma: no cover
             logging.debug('img is None')
             return False
         img_io = io.BytesIO()
@@ -84,44 +76,10 @@ class WaiverForm(forms.Form):
             buf = io.BytesIO(data)
             img = PIL_Image.open(buf)
             return img
-        except:
+        except:  # pragma: no cover
             return None
 
-    # def make_pdf(self, class_date=timezone.localtime(timezone.now()).date()):
-    #     sf = self.student.student_family
-    #
-    #     styles = getSampleStyleSheet()
-    #     path = os.path.join(settings.BASE_DIR, 'student_app', 'static', 'images', 'WPAHeader4.jpg')
-    #     story = [Image(path, width=5 * inch, height=5 * inch / 8), Spacer(1, 0.2 * inch)]
-    #
-    #     with open(os.path.join(settings.BASE_DIR, 'program_app', 'templates', 'program_app', 'awrl.txt'), 'r') as f:
-    #         story.append(Paragraph(f.readline(), styles['Normal']))
-    #         story.append(Spacer(1, 0.2 * inch))
-    #         story.append(Paragraph(f.readline(), styles['Normal']))
-    #         story.append(Spacer(1, 0.1 * inch))
-    #         for line in f.readlines():
-    #             story.append(Paragraph(line, styles['Bullet']))
-    #             story.append(Spacer(1, 0.1 * inch))
-    #     story.append(Paragraph("Student:", styles['Normal']))
-    #     story.append(
-    #         Paragraph(f'&nbsp;&nbsp;&nbsp;&nbsp;{self.student.first_name} {self.student.last_name}', styles['Normal']))
-    #     story.append(Paragraph(f'&nbsp;&nbsp;&nbsp;&nbsp;{sf.street}', styles['Normal']))
-    #     story.append(Paragraph(f'&nbsp;&nbsp;&nbsp;&nbsp;{sf.city} {sf.state} {sf.post_code}', styles['Normal']))
-    #
-    #     new_sig = Image('img.jpg', width=3 * inch, height=1 * inch, hAlign='LEFT')
-    #     story.append(new_sig)
-    #     name = f"{self.cleaned_data['sig_first_name']} {self.cleaned_data['sig_last_name']}"
-    #     story.append(Paragraph(f"Signed By {name} on Date: {timezone.localtime(timezone.now()).date()}"))
-    #     c = Canvas('mydoc.pdf', pagesize=letter)
-    #     f = Frame(inch / 2, inch / 2, 7 * inch, 10 * inch, showBoundary=1)
-    #     f.addFromList(story, c)
-    #     c.save()
-    #     fn = f'{self.student.last_name}_{self.student.first_name}'
-    #     self.student.signature = File(open('img.jpg', 'rb'), name=f'{fn}.jpg')
-    #     self.student.signature_pdf = File(open('mydoc.pdf', 'rb'), name=f'{fn}.pdf')
-    #     self.student.safety_class = class_date
-    #     self.student.save()
-    #     return True
+
 
     def send_pdf(self):
         # send email to user with the waiver attached

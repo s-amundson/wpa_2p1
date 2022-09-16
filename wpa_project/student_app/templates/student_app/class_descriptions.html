@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %} Class Descriptions {% endblock %}
+
+{% load static %}
+{% block main %}
+<div>
+    <h1 class="text-center"> Classes & Activities </h1>
+    <div class="d-flex flex-row">
+
+        <div class="m-2">
+            <img class="rounded float-start imgshadow m-2" alt="Target" src="{% static 'images/targetStands_287.jpg' %}"
+                 title="Targets" width="287">
+            <p>
+                Below are descriptions of WPA’s regularly scheduled classes and activities. For special events and
+                competitions, please check the Calendar.
+            </p>
+            <p>
+                Register online for our Introductory and Returning Student classes! All students must be at least nine
+                years old and must register and pay the $5 administration fee here as well as comply with our Covid-19 policy.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row container">
+    <h2> Introductory and Returning Student Classes </h2>
+    <div class="ms-5">
+        <h3>Introductory class:</h3>
+        <div class="ms-3">
+            <p>Saturday 9:00 – 10:30 AM</p>
+            <p>
+                Our ninety minute introductory course will teach students nine and older how to safely shoot a bow and arrow
+                and the rules of the range. We provide everything you need to shoot including one-on-one coaching from our
+                certified instructors. Once you have completed the introductory course, you will be able to register for the
+                returning student classes.
+            </p>
+        </div>
+        <h3>Returning class:</h3>
+        <div class="ms-3">
+            <p>Saturday 11:00 AM – 12:00 PM</p>
+            <p>Wednesday 6:00 – 8:00 PM</p>
+            <p>
+                Our returning students class provides a full hour on Saturday and two hours on Wednesday to practice shooting
+                under the continued guidance of our certified instructors. Bows and arrows are only provided to registered
+                students during class time, but you can take as many returning classes as you like.
+            </p>
+            <div class="d-flex justify-content-center">
+                <img class="rounded img-fluid my-2" alt="Target" src="{% static 'images/SatClass_700.jpg' %}"
+                         title="Sat Class" width="700">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div>
+        <h2> JOAD (Junior Olympic Archery Development) </h2>
+    </div>
+    <div class="m-2">
+        <ul>
+            <li>Tuesday 5:00 PM to 7:00 PM</li>
+            <li>Pre-approval required. Instruction and equipment provided. Ages 8 to 20.</li>
+            <li>See our JOAD page for more information!</li>
+        </ul>
+    </div>
+</div>
+<div class="row">
+    <div>
+        <h2> League Night </h2>
+    </div>
+    <div class="m-2">
+        <ul>
+            <li>Pending</li>
+        </ul>
+    </div>
+</div>
+<div class="row">
+    <div>
+        <h2> Summer Youth Archery Program </h2>
+    </div>
+    <div class="m-2">
+        <ul>
+            <li>Pending</li>
+        </ul>
+    </div>
+</div>
+<div class="row">
+    <div>
+        <h2> Traditional Night </h2>
+    </div>
+    <div class="m-2">
+        <ul>
+            <li>Pending</li>
+        </ul>
+    </div>
+</div>
+<div class="d-flex justify-content-center">
+    <img class="rounded img-fluid my-2" alt="Target" src="{% static 'images/NightShoot_700.jpg' %}"
+             title="Night Class" width="700">
+</div>
+{% endblock %}
+
+{% block right %}
+<div id="login-div"></div>
+{% endblock %}

@@ -32,5 +32,5 @@ class UserView(UserPassesTestMixin, FormView):
             self.user = get_object_or_404(User, pk=uid)
         if self.request.user.is_authenticated:
             return self.request.user.is_staff
-        else:
+        else:  # pragma: no cover
             return False

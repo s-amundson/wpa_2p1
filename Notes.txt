@@ -6,15 +6,6 @@ Useful Commands:
     python manage.py startapp
     python manage.py dumpdata student_app[.ModelName]
 
-TODO
-    social accounts
-    test beginner class canceled (square refunds) - refund needs to check for prior refund amount
-    cookie law
-    member events
-
-Wish:
-    Wish: add classes that a student has attended.
-    Wish: add students to class by admin.
 
     For deployment need to add SSL Certs started ssl per: https://stackify.com/how-to-configure-https-for-an-nginx-docker-container/
     https://docs.djangoproject.com/en/3.2/howto/outputting-pdf/

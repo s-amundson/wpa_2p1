@@ -19,7 +19,9 @@ class CategoryDeleteView(UserPassesTestMixin, View):
         return HttpResponseRedirect(reverse_lazy('contact_us:category_list'))
 
     def test_func(self):
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        return False
 
 
 class CategoryListView(UserPassesTestMixin, ListView):
@@ -39,7 +41,9 @@ class CategoryListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        return False
 
 
 class CategoryView(UserPassesTestMixin, FormView):
@@ -63,4 +67,6 @@ class CategoryView(UserPassesTestMixin, FormView):
         return super().form_valid(form)
 
     def test_func(self):
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        return False

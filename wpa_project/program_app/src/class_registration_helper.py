@@ -25,7 +25,6 @@ class ClassRegistrationHelper:
                 payment = PaymentHelper(cr.user).create_payment(cost * 100 * ikey['ik_count'], 'intro', 0,
                                                                 str(ikey['idempotency_key']), note, '',
                                                                 saved_card_id=card.id)
-                # send email to user
             if payment is None:  # a payment error happened
                 icr.update(pay_status='start')
 
@@ -41,10 +40,7 @@ class ClassRegistrationHelper:
                     is_staff = record.student.user.is_staff
                 except (record.student.DoesNotExist, AttributeError):
                     is_staff = False
-                # if record.student.safety_class is not None:
-                #     bcd = beginner_class.class_date.date()
-                #     scd = record.student.safety_class
-                #     logging.warning(f'safety_class={scd}, beginner_class={bcd}, beginner={scd>=bcd}')
+
                 if is_staff:
                     staff_count += 1
                 elif record.student.safety_class is None \
