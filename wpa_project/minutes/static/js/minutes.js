@@ -181,6 +181,7 @@ async function load_decision_form() {
     await $.get(url_decision, { report_index: report_count }, function(data, status){
         $("#div-decisions").append(data);
         index_decision_div($("#decision-div-" + report_count))
+        $("#decision-div-" + report_count).find("[name='minutes']").val(minutes_id)
         report_count = report_count + 1;
     });
 }
@@ -224,11 +225,8 @@ async function save_decision(container) {
     if (container.find("[name='decision_id']").val() != "") {
         url_string = url_string + "/" + container.find("[name='decision_id']").val();
     }
-    await $.post(url_string, {
-        csrfmiddlewaretoken: container.find('[name="csrfmiddlewaretoken"]').val(),
-        decision_date: container.find("[name='decision_date']").val(),
-        text: container.find("[name='text']").val()
-    }, function(data, status){
+//    $("#instructor_form").serializeArray()
+    await $.post(url_string, container.find('[name="decision-form"]').serializeArray(), function(data, status){
         container.find("[name='decision_id']").val(data.decision_id);
         indicate_saved(data.success);
     }, "json");
