@@ -1,4 +1,6 @@
 import logging
+from captcha.fields import CaptchaField
+
 from src.model_form import MyModelForm
 from ..models import Message
 from ..src import EmailMessage
@@ -6,10 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 class MessageForm(MyModelForm):
+    captcha = CaptchaField()
 
     class Meta(MyModelForm.Meta):
         model = Message
-        required_fields = ['contact_name', 'email', 'category', 'message']
+        required_fields = ['contact_name', 'email', 'category', 'message', 'captcha']
         optional_fields = []
         fields = optional_fields + required_fields
 

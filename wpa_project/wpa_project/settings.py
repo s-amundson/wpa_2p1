@@ -176,6 +176,7 @@ INSTALLED_APPS = [
     "sslserver",
     'django_sendfile',
     'django_celery_beat',
+    'captcha',
 ]
 
 LOGIN_REDIRECT_URL = 'registration:profile'

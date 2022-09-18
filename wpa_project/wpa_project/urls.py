@@ -22,6 +22,7 @@ urlpatterns = [
     path('', include('student_app.urls', namespace='registration')),
     path('accounts/', include('allauth.urls')),
     path('admin/', admin.site.urls),
+    path('captcha/', include('captcha.urls')),
     path('contact_us/', include('contact_us.urls', namespace='contact_us')),
     path('facebook/', include('facebook.urls', namespace='facebook')),
     path('faq/', include('faq.urls', namespace='faq')),
