@@ -14,14 +14,14 @@ $(document).ready(function(){
 	    let getConfirm = false;
 	    if ('confirm' in window) {
 	        getConfirm = confirm($("#confirm-covid").html());
-
+	        console.log(getConfirm)
 	    }
         else {
             getConfirm = true;
         }
         if (getConfirm) {
-            e.unbind();
-            e.submit();
+            $("#beginner-class-form").unbind();
+            $("#beginner-class-form").submit();
         }
     });
 });
