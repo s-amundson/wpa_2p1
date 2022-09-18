@@ -10,6 +10,7 @@
         let url_class_registered_table = "{% url 'programs:unregister_table' %}"
         let url_class_status = "{% url 'programs:class_status' %}"
         {% if family %} let family = true {% else %} let family = false {% endif %}
+        {% if form.needs_covid %} let needs_covid = true; {% else %} let needs_covid = false; {% endif %}
 
     </script>
 {% endblock %}

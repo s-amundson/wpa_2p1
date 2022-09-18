@@ -12,7 +12,7 @@ $(document).ready(function(){
 	    e.preventDefault();
 	    console.log('submit')
 	    let getConfirm = false;
-	    if ('confirm' in window) {
+	    if (needs_covid && 'confirm' in window) {
 	        getConfirm = confirm($("#confirm-covid").html());
 	        console.log(getConfirm)
 	    }
