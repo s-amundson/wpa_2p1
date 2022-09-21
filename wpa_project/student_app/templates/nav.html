@@ -121,9 +121,14 @@
                         <a class="nav-link" href="{% url 'joad:index'%}">JOAD</a>
                     </li>
                 {% endif %}
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'programs:calendar' %}">Classes</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        Calendar
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'programs:calendar' %}">Classes</a>
+                        <a class="dropdown-item" href="{% url 'programs:google_calendar' %}">Events</a>
+                    </div>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
@@ -132,8 +137,14 @@
                     <a class="nav-link" href="{% url 'registration:profile' %}">Profile</a>
 
             {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'programs:calendar' %}">Classes</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        Calendar
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'programs:calendar' %}">Classes</a>
+                        <a class="dropdown-item" href="{% url 'programs:google_calendar' %}">Events</a>
+                    </div>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'account_login' %}">Login</a>

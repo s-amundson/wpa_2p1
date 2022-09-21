@@ -1,8 +1,9 @@
 import logging
 from django.apps import apps
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.core import mail
+from captcha.conf import settings as captcha_settings
 
 from ..models import Category, Message
 logger = logging.getLogger(__name__)
@@ -17,8 +18,20 @@ class TestsMessage(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
-        self.post_dict = {'contact_name': ['Emily Conlan'], 'email': ['EmilyNConlan@einrot.com'], 'category': ['2'],
-                          'message': ['test message']}
+        self.settings(CAPTCHA_TEST_MODE=True)
+        captcha_settings.CAPTCHA_TEST_MODE = True
+        self.post_dict = {'contact_name': ['Emily Conlan'],
+                          'email': ['EmilyNConlan@einrot.com'],
+                          'category': ['2'],
+                          'message': ['test message'],
+                          'captcha_0': 'PASSED',
+                          'captcha_1': 'PASSED',
+                          }
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        captcha_settings.CAPTCHA_TEST_MODE = False
 
     def _category_post(self):
         c = Category.objects.create(title='test category')

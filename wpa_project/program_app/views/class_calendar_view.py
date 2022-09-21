@@ -57,3 +57,7 @@ class CalendarView(TemplateView):
         # Call the formatmonth method, which returns our calendar as a table
         context['html_cal'] = mark_safe(cal.formatmonth(withyear=True))
         return context
+
+
+class EventCalendarView(TemplateView):
+    template_name = "program_app/google_calendar.html"

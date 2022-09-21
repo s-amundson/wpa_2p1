@@ -86,12 +86,13 @@ CSP_DEFAULT_SRC = ("'self'",
 CSP_FONT_SRC = ("'self'",
                 "https://cdnjs.cloudflare.com",
                 "https://*.cloudfront.net", "https://*.squarecdn.com")
-CSP_FRAME_ANCESTORS = ("'self'", "https://www.facebook.com")
+CSP_FRAME_ANCESTORS = ("'self'", "https://www.facebook.com", "https://www.google.com")
 CSP_FRAME_SRC = ("'self'",
                  "https://*.squarecdn.com",
                  "https://*.squareupsandbox.com",
                  "https://*.squareup.com",
                  "https://www.facebook.com",
+                 "https://*.google.com",
                  )
 CSP_IMG_SRC = ("'self' ",
                "https://www.facebook.com",
