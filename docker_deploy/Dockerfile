@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 # install netcat for entry script
-RUN apt-get update && apt-get install -y netcat enchant
+RUN apt-get update && apt-get install -y netcat enchant-2
 
 # Create an app user in the app group.
 RUN useradd --user-group --create-home --no-log-init --shell /bin/bash app
