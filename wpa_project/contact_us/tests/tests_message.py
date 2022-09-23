@@ -1,11 +1,13 @@
 import logging
+from unittest.mock import patch
 from django.apps import apps
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.core import mail
 from captcha.conf import settings as captcha_settings
 
-from ..models import Category, Message
+from ..models import Category, Message, SpamWords
+from ..tasks import send_contact_email
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
@@ -42,6 +44,9 @@ class TestsMessage(TestCase):
         self.assertEqual(mail.outbox[0].subject, 'WPA Contact Us test category')
         self.assertTrue(mail.outbox[0].body.find('test message') > 0)
 
+    def send_email(self, message_id):
+        send_contact_email(message_id)
+
     def test_get_message_user(self):
         response = self.client.get(reverse('contact_us:contact'), secure=True)
         self.assertEqual(response.status_code, 200)
@@ -68,11 +73,12 @@ class TestsMessage(TestCase):
         response = self.client.get(reverse('contact_us:contact', kwargs={'message_id': message.id}), secure=True)
         self.assertFalse(response.context['form'].has_instance)
 
-    def test_post_message_user(self):
+    @patch('contact_us.views.message_view.send_contact_email.delay')
+    def test_post_message_user(self, sce):
+        sce.side_effect = self.send_email
         self._category_post()
         response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
         message = Message.objects.all()
-
         self.assertEqual(len(message), 1)
         self.check_email()
 
@@ -84,13 +90,56 @@ class TestsMessage(TestCase):
 
         self.assertEqual(len(message), 0)
 
-    def test_post_message_nonuser(self):
+    @patch('contact_us.views.message_view.send_contact_email.delay')
+    def test_post_message_nonuser(self, sce):
+        sce.side_effect = self.send_email
         self.client.logout()
         self._category_post()
         response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
         message = Message.objects.all()
         self.assertEqual(len(message), 1)
         self.check_email()
+
+    @patch('contact_us.views.message_view.send_contact_email.delay')
+    def test_spam_message_spam_word(self, sce):
+        sce.side_effect = self.send_email
+        SpamWords.objects.create(word='porn')
+        self.client.logout()
+        self._category_post()
+        self.post_dict['message'][0] = "This message has the evil word of Porn"
+        logging.warning(self.post_dict)
+        response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
+        message = Message.objects.all()
+        self.assertEqual(len(message), 1)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @patch('contact_us.views.message_view.send_contact_email.delay')
+    def test_spam_message_ru(self, sce):
+        sce.side_effect = self.send_email
+        self.client.logout()
+        self._category_post()
+        self.post_dict['message'][0] = "This message has to many russian websites http://loan.tb.ru/bez-proverok http://loan.tb.ru/bez-procentov http://loan.tb.ru/mikrozajm"
+        logging.warning(self.post_dict)
+        response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
+        message = Message.objects.all()
+        self.assertEqual(len(message), 1)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @patch('contact_us.views.message_view.send_contact_email.delay')
+    def test_spam_message_english(self, sce):
+        sce.side_effect = self.send_email
+        self.client.logout()
+        self._category_post()
+        # this was taken from an actual message.
+        self.post_dict['message'][0] = """Народ подскажите как лучше сделать крышу на пристройке.
+Верней даже из чего её надежней сделать. Нюанс есть один - кровля должна быть плоская. Такая у меня уж пристройка сделана.
+Сейчас смотрел про кровди из мембраны ПВХ https://theballettheatre.com - тут, вроде как смотрится достойно и по надежности нормально, и по стоимости доступно.
+Сталкивался ли кто-то из вас с такими кровлями? Какие там подводныекамни, прошу прояснить для нуба."""
+        logging.warning(self.post_dict)
+        response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
+        message = Message.objects.all()
+        self.assertEqual(len(message), 1)
+        self.assertEqual(len(mail.outbox), 0)
 
 
 class TestsMessageList(TestCase):

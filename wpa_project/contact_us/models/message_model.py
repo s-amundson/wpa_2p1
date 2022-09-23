@@ -11,3 +11,4 @@ class Message(models.Model):
     created_time = models.DateTimeField(default=timezone.now)
     email = models.EmailField()
     message = models.TextField()
+    sent = models.BooleanField(default=False)

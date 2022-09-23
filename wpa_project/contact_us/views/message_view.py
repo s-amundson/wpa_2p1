@@ -8,6 +8,7 @@ from django.conf import settings
 
 from ..forms import MessageForm
 from ..models import Message
+from ..tasks import send_contact_email
 from student_app.models import Student
 from allauth.account.models import EmailAddress
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ class MessageView(FormView):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         message = form.save()
-        form.send_email(message)
+        send_contact_email.delay(message.id)
         return super().form_valid(form)
 
     def post(self, request, *args, **kwargs):

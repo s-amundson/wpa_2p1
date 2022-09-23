@@ -1,6 +1,7 @@
 FROM python:3
 
 ENV PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y enchant
 WORKDIR /code
 COPY requirements.txt /code/
 COPY wpa_project/wpa_project.env /code/.env
