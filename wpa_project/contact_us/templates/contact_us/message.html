@@ -8,7 +8,7 @@
     <form method="post">{% csrf_token %}
         {{ form.as_p }}
 
-        {% if form.has_instance %}
+        {% if form.has_instance or not form.instance.sent %}
             <button class="m-2 btn btn-primary submit-btn" type="submit">
                 Submit
             </button>

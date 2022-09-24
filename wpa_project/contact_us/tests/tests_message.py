@@ -141,6 +141,24 @@ class TestsMessage(TestCase):
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 0)
 
+    @patch('contact_us.views.message_view.send_contact_email.delay')
+    def test_message_english(self, sce):
+        sce.side_effect = self.send_email
+        self.client.logout()
+        self._category_post()
+        # this was taken from an actual message.
+        self.post_dict['message'][0] = """Hello,
+
+I would like to know if a group of 5 people can attend and could we get some instructions if some of us have little to no experience?  How would the cost work?
+
+Thanks 
+Julieta"""
+        logging.warning(self.post_dict)
+        response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
+        message = Message.objects.all()
+        self.assertEqual(len(message), 1)
+        self.assertEqual(len(mail.outbox), 1)
+
 
 class TestsMessageList(TestCase):
     fixtures = ['f1']

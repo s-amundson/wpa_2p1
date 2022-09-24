@@ -26,7 +26,9 @@ class MessageForm(MyModelForm):
             logging.debug(self.fields)
             for f in self.fields:
                 self.fields[f].required = False
-                self.fields[f].widget.attrs.update({'class': 'form-control m-2', 'disabled': 'disabled'})
+                self.fields[f].widget.attrs.update({'class': 'form-control m-2'})
 
     def send_email(self, message):
         EmailMessage().contact_email(message)
+        message.sent = True
+        message.save()

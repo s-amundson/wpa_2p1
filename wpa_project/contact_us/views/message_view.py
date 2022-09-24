@@ -59,10 +59,12 @@ class MessageView(FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        # This method is called when valid form data has been POSTed.
-        # It should return an HttpResponse.
+        logging.warning(self.request.POST)
         message = form.save()
-        send_contact_email.delay(message.id)
+        if self.request.user.is_authenticated and self.request.user.is_board:
+            form.send_email(message)
+        else:
+            send_contact_email.delay(message.id)
         return super().form_valid(form)
 
     def post(self, request, *args, **kwargs):

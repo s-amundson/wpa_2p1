@@ -26,10 +26,13 @@ def send_contact_email(message_id):
     d = enchant.Dict("en_US")
     for i in range(len(message_array)):
         message_array[i] = message_array[i].lower()
-        if d.check(message_array[i]):
-            english_words += 1
-        else:
-            other_words += 1
+        try:
+            if d.check(message_array[i]):
+                english_words += 1
+            else:
+                other_words += 1
+        except ValueError:
+            pass
     if other_words > english_words * 1.5:
         logging.warning('return not english enough')
         return False
