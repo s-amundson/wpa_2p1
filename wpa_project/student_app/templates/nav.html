@@ -39,13 +39,13 @@
                         FAQ
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{% url 'faq:faq' %}">Faq</a>
-                        <a class="dropdown-item" href="{% url 'faq:category_list' %}">Categories</a>
+                        <a class="dropdown-item" href="{% url 'information:faq' %}">Faq</a>
+                        <a class="dropdown-item" href="{% url 'information:category_list' %}">Categories</a>
                     </div>
                 </li>
             {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'faq:faq' %}">Faq</a>
+                    <a class="nav-link" href="{% url 'information:faq' %}">Faq</a>
                 </li>
             {% endif %}
             <li class="nav-item dropdown">

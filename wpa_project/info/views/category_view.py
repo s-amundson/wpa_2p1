@@ -16,7 +16,7 @@ class CategoryDeleteView(UserPassesTestMixin, View):
     def post(self, request, category_id):
         category = get_object_or_404(Category, pk=category_id)
         category.delete()
-        return HttpResponseRedirect(reverse_lazy('faq:category_list'))
+        return HttpResponseRedirect(reverse_lazy('info:category_list'))
 
     def test_func(self):
         if self.request.user.is_authenticated:
@@ -38,7 +38,7 @@ class CategoryListView(UserPassesTestMixin, ListView):
 class CategoryView(UserPassesTestMixin, FormView):
     template_name = 'contact_us/category.html'
     form_class = CategoryForm
-    success_url = reverse_lazy('faq:category_list')
+    success_url = reverse_lazy('info:category_list')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

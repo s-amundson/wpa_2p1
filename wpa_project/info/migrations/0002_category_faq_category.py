@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('faq', '0001_initial'),
+        ('info', '0001_initial'),
     ]
 
     operations = [
@@ -20,6 +20,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='faq',
             name='category',
-            field=models.ManyToManyField(to='faq.category'),
+            field=models.ManyToManyField(to='info.category'),
         ),
     ]

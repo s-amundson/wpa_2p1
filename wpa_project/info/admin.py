@@ -13,5 +13,3 @@ class FaqAdmin(admin.ModelAdmin):
     list_filter = ('status',)
     search_fields = ('title', 'content',)
 
-
-# admin.site.register(Faq, CategoryAdmin, FaqAdmin)

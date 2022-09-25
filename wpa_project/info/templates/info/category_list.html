@@ -8,7 +8,7 @@
     {% for category in object_list %}
         <div class="d-flex flex-row m-2">
             <div class="col">
-                <a href="{% url 'faq:category' category.id %}">
+                <a href="{% url 'information:category' category.id %}">
                     {{ category.title }}
                 </a>
             </div>
@@ -20,7 +20,7 @@
 
     <div class="d-flex flex-row m-2">
         <div class="m-3">
-            <a href="{% url 'faq:category'%}" class="btn btn-primary" role="button">
+            <a href="{% url 'information:category'%}" class="btn btn-primary" role="button">
                 Add Category
             </a>
         </div>

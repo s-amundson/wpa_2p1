@@ -25,7 +25,7 @@ urlpatterns = [
     path('captcha/', include('captcha.urls')),
     path('contact_us/', include('contact_us.urls', namespace='contact_us')),
     path('facebook/', include('facebook.urls', namespace='facebook')),
-    path('faq/', include('faq.urls', namespace='faq')),
+    path('information/', include('info.urls', namespace='information')),
     path('joad/', include('joad.urls', namespace='joad')),
     path('membership/', include('membership.urls', namespace='membership')),
     path('minutes/', include('minutes.urls', namespace='minutes')),

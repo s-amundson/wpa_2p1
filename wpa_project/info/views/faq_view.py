@@ -3,7 +3,6 @@ from django.views.generic.edit import FormView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.template import Template
 
 from ..models import Faq
 from ..forms import FaqForm, FaqFilterForm
@@ -17,7 +16,7 @@ class FaqFormView(UserPassesTestMixin, FormView):
     form_class = FaqForm
     template_name = 'student_app/form_as_p.html'
     faq = None
-    success_url = reverse_lazy('faq:faq')
+    success_url = reverse_lazy('info:faq')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -43,7 +42,7 @@ class FaqList(ListView):
     Return all posts that are with status 1 (published) and order from the latest one.
     """
     model = Faq
-    template_name = 'faq/faq_list.html'
+    template_name = 'info/faq_list.html'
     paginate_by = 10
 
     def get_context_data(self, *args, **kwargs):

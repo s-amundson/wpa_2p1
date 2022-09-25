@@ -5,7 +5,7 @@
 {% load static %}
 {% block left %}
     {% if user.is_board %}
-        <a href="{% url 'faq:edit' %}" role="button" class="btn btn-primary m-1"> Add FAQ</a>
+        <a href="{% url 'info:edit' %}" role="button" class="btn btn-primary m-1"> Add FAQ</a>
     {% endif %}
 {% endblock %}
 
@@ -32,7 +32,7 @@
     {% for faq in object_list %}
         <div class="row">
             {% if user.is_board %}
-                <a href="{% url 'faq:edit' faq.id %}"><h4>{{ faq.question }}</h4></a>
+                <a href="{% url 'info:edit' faq.id %}"><h4>{{ faq.question }}</h4></a>
             {% else %}
                 <h4>{{ faq.question }}</h4>
             {% endif %}

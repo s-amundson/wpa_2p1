@@ -156,7 +156,7 @@ INSTALLED_APPS = [
     'minutes',
     'joad',
     'contact_us',
-    'faq',
+    'info',
     'facebook',
 
     'django.contrib.admin',
