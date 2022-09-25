@@ -57,5 +57,6 @@ def send_contact_email(message_id, spam_check=True):
         # send the message
         EmailMessage().contact_email(message)
         message.sent = True
+        message.spam = False
         message.save()
         logging.warning(message.sent)

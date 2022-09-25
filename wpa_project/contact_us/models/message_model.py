@@ -12,3 +12,4 @@ class Message(models.Model):
     email = models.EmailField()
     message = models.TextField()
     sent = models.BooleanField(default=False)
+    is_spam = models.BooleanField(default=True)
