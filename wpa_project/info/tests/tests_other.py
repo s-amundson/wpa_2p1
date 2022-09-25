@@ -21,9 +21,9 @@ class TestsOther(TestCase):
     def test_info(self):
         items = ['about', 'by-laws', 'class_description', 'constitution', 'covid', 'directions', 'privacy', 'terms']
         for item in items:
-            self.client.get(reverse('registration:info', kwargs={'info': item}), secure=True)
-            self.assertTemplateUsed(f'registration/{item}.html')
+            self.client.get(reverse('information:info', kwargs={'info': item}), secure=True)
+            self.assertTemplateUsed(f'info/{item}.html')
 
     def test_info_no_exist(self):
-        response = self.client.get(reverse('registration:info', kwargs={'info': 'no exist'}), secure=True)
+        response = self.client.get(reverse('information:info', kwargs={'info': 'no exist'}), secure=True)
         self.assertEqual(response.status_code, 404)

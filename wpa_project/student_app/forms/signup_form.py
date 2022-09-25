@@ -8,7 +8,7 @@ from django.utils.translation import gettext as _
 class SignUpForm(SignupForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        terms = reverse_lazy("registration:info", kwargs={'info': 'terms'})
+        terms = reverse_lazy("information:info", kwargs={'info': 'terms'})
         self.fields['terms'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2"}), required=True,
                 label=mark_safe(_(f"I have read and agree with the <a href='{terms}'>Terms and Conditions</a>")),

@@ -9,10 +9,10 @@
     <div class="navbar-expand-md" id="navbar">
         <ul class="navbar-nav md-auto mt-2">
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'registration:info' 'about' %}">About</a>
+                <a class="nav-link" href="{% url 'information:info' 'about' %}">About</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'registration:info' 'class_description' %}">Class Description</a>
+                <a class="nav-link" href="{% url 'information:info' 'class_description' %}">Class Description</a>
             </li>
             {% if user.is_board %}
                 <li class="nav-item dropdown">
@@ -53,12 +53,12 @@
                     Policies
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{% url 'registration:info' 'terms' %}">Terms</a>
-                    <a class="dropdown-item" href="{% url 'registration:info' 'privacy' %}">Privacy</a>
-                    <a class="dropdown-item" href="{% url 'registration:info' 'covid' %}">Covid 19</a>
+                    <a class="dropdown-item" href="{% url 'information:info' 'terms' %}">Terms</a>
+                    <a class="dropdown-item" href="{% url 'information:info' 'privacy' %}">Privacy</a>
+                    <a class="dropdown-item" href="{% url 'information:info' 'covid' %}">Covid 19</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{% url 'registration:info' 'constitution' %}">Constitution</a>
-                    <a class="dropdown-item" href="{% url 'registration:info' 'by-laws' %}">By-Laws</a>
+                    <a class="dropdown-item" href="{% url 'information:info' 'constitution' %}">Constitution</a>
+                    <a class="dropdown-item" href="{% url 'information:info' 'by-laws' %}">By-Laws</a>
                 </div>
             </li>
 
