@@ -1,8 +1,4 @@
-# Create your tasks here
 from celery import shared_task
-from django.utils import timezone
-from django_celery_beat.models import CrontabSchedule, PeriodicTask
-from django.conf import settings
 import enchant
 
 from .models import Message, SpamWords
@@ -13,39 +9,53 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def send_contact_email(message_id):
-    message = Message.objects.get(pk=message_id)
-    logging.warning(message.message)
-    if message.message.count('.ru') >= 3:
+def check_spam(message):
+    # check for spam, since most of the spam seems to be russian we are checking for russian sites and words.
+    if message.count('.ru') >= 3:
         logging.warning('return .ru')
         return False
 
-    message_array = message.message.split(' ')
-    english_words = 0
-    other_words = 0
-    d = enchant.Dict("en_US")
+    message_array = message.split(' ')
+    words = {'english': 0, 'spanish': 0, 'russian': 0, 'other': 0}
+    en = enchant.Dict("en_US")
+    es = enchant.Dict("es")
+    ru = enchant.Dict("ru")
     for i in range(len(message_array)):
         message_array[i] = message_array[i].lower()
+        is_word = False
         try:
-            if d.check(message_array[i]):
-                english_words += 1
-            else:
-                other_words += 1
+            if en.check(message_array[i]):
+                words['english'] += 1
+                is_word = True
+            if es.check(message_array[i]):
+                words['spanish'] += 1
+                is_word = True
+            if ru.check(message_array[i]):
+                words['russian'] += 1
+                is_word = True
+            if not is_word:
+                words['other'] += 1
         except ValueError:
             pass
-    if other_words > english_words * 1.5:
-        logging.warning('return not english enough')
+
+        logging.warning(f'{message_array[i]} english: {words["english"]}, spanish: {words["spanish"]}, russian: {words["russian"]}, other: {words["other"]}')
+    if words["russian"] / len(message_array) >= 0.03:
+        logging.warning('to many russian words')
         return False
 
     for w in SpamWords.objects.all():
         if message_array.count(w.word):
             logging.warning('return spam words')
             return False
-    # send the message
-    EmailMessage().contact_email(message)
-    message.sent = True
-    message.save()
-    logging.warning(message.sent)
+
     return True
 
-
+@shared_task
+def send_contact_email(message_id, spam_check=True):
+    message = Message.objects.get(pk=message_id)
+    if not spam_check or check_spam(message.message):
+        # send the message
+        EmailMessage().contact_email(message)
+        message.sent = True
+        message.save()
+        logging.warning(message.sent)

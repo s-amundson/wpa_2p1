@@ -151,13 +151,28 @@ class TestsMessage(TestCase):
 
 I would like to know if a group of 5 people can attend and could we get some instructions if some of us have little to no experience?  How would the cost work?
 
-Thanks 
+Thanks
 Julieta"""
         logging.warning(self.post_dict)
         response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
         message = Message.objects.all()
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 1)
+
+
+    @patch('contact_us.views.message_view.send_contact_email.delay')
+    def test_message_english2(self, sce):
+        sce.side_effect = self.send_email
+        self.client.logout()
+        self._category_post()
+        # this was taken from an actual message.
+        self.post_dict['message'][0] = """
+    World of Tank Premium account: buy WoT tank premium account in the Wargaming.one store in Russia Ворлд оф Танк премиум магазин: купить WoT танковый премиум аккаунт в магазине Wargaming.one в России <a href=https://wargaming.one/nashi-garantii>ru wargaming net </a>"""
+        logging.warning(self.post_dict)
+        response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
+        message = Message.objects.all()
+        self.assertEqual(len(message), 1)
+        self.assertEqual(len(mail.outbox), 0)
 
 
 class TestsMessageList(TestCase):
