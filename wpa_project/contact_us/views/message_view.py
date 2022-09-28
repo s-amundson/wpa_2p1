@@ -16,12 +16,21 @@ logger = logging.getLogger(__name__)
 
 class MessageListView(UserPassesTestMixin, ListView):
     model = Message
-    paginate_by = 100  # if pagination is desired
+    paginate_by = 20  # if pagination is desired
     template_name = 'contact_us/message_list.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['spam_list'] = self.kwargs.get('spam', False)
+        return context
+
     def get_queryset(self):
-        queryset = super().get_queryset().exclude(spam_category='spam').order_by('-created_time')
-        return queryset
+        queryset = super().get_queryset()
+        if self.kwargs.get('spam', False):
+            queryset = queryset.filter(spam_category='spam')
+        else:
+            queryset = queryset.exclude(spam_category='spam')
+        return queryset.order_by('-created_time')
 
     def test_func(self):
         if self.request.user.is_authenticated:

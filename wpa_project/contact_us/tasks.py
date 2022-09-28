@@ -11,11 +11,15 @@ logger = logging.getLogger(__name__)
 @shared_task
 def check_spam(message):
     # check for spam, since most of the spam seems to be russian we are checking for russian sites and words.
-    if message.count('.ru') >= 3:
+    if message.message.count('.ru') >= 3:
         logging.warning('return .ru')
         return False
 
-    message_array = message.split(' ')
+    if message.email.strip()[-3:] == '.ru':
+        logging.warning('.ru email address')
+        return False
+
+    message_array = message.message.split(' ')
     words = {'english': 0, 'spanish': 0, 'russian': 0, 'other': 0}
     en = enchant.Dict("en_US")
     es = enchant.Dict("es")
@@ -56,7 +60,7 @@ def send_contact_email(message_id):
     message = Message.objects.get(pk=message_id)
     if message.sent or message.spam_category == 'spam':
         return
-    if message.spam_category == 'legit' or check_spam(message.message):
+    if message.spam_category == 'legit' or check_spam(message):
         # send the message
         EmailMessage().contact_email(message)
         message.sent = True

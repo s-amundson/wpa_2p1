@@ -36,6 +36,15 @@
             {% endfor %}
         </tbody>
     </table>
-
     {% include 'student_app/paginate.html' %}
+    {% if spam_list %}
+        <a class="nav-link" href="{% url 'contact_us:message_list' %}">
+            View non spam
+        </a>
+    {% else %}
+        <a class="nav-link" href="{% url 'contact_us:message_list' 1 %}">
+            View spam messages
+        </a>
+    {% endif %}
+
 {% endblock %}
