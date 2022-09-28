@@ -77,6 +77,8 @@ class TestsMessage(TestCase):
     def test_post_message_user(self, sce):
         sce.side_effect = self.send_email
         self._category_post()
+        self.post_dict.pop('captcha_0')
+        self.post_dict.pop('captcha_1')
         response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
         message = Message.objects.all()
         self.assertEqual(len(message), 1)
@@ -158,7 +160,6 @@ Julieta"""
         message = Message.objects.all()
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 1)
-
 
     @patch('contact_us.views.message_view.send_contact_email.delay')
     def test_message_english2(self, sce):

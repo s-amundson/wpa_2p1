@@ -50,13 +50,15 @@ def check_spam(message):
 
     return True
 
+
 @shared_task
-def send_contact_email(message_id, spam_check=True):
+def send_contact_email(message_id):
     message = Message.objects.get(pk=message_id)
-    if not spam_check or check_spam(message.message):
+    if message.sent or message.spam_category == 'spam':
+        return
+    if message.spam_category == 'legit' or check_spam(message.message):
         # send the message
         EmailMessage().contact_email(message)
         message.sent = True
-        message.spam = False
         message.save()
         logging.warning(message.sent)

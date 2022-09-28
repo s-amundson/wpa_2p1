@@ -8,11 +8,9 @@
     <form method="post">{% csrf_token %}
         {{ form.as_p }}
 
-        {% if form.has_instance or not form.instance.sent %}
-            <button class="m-2 btn btn-primary submit-btn" type="submit">
-                Submit
-            </button>
-        {% endif %}
+        <button class="m-2 btn btn-primary submit-btn" type="submit">
+            Submit
+        </button>
 
     </form>
     <p>If you are having technical difficulties you can also <a href="mailto:{{ email }}">email</a> us at {{ email }}</p>

@@ -20,17 +20,19 @@ class MessageListView(UserPassesTestMixin, ListView):
     template_name = 'contact_us/message_list.html'
 
     def get_queryset(self):
-        queryset = super().get_queryset().order_by('-created_time')
+        queryset = super().get_queryset().exclude(spam_category='spam').order_by('-created_time')
         return queryset
 
     def test_func(self):
-        return self.request.user.is_board
+        if self.request.user.is_authenticated:
+            return self.request.user.is_board
+        return False
 
 
 class MessageView(FormView):
     template_name = 'contact_us/message.html'
     form_class = MessageForm
-    success_url = reverse_lazy('registration:profile')
+    success_url = reverse_lazy('registration:index')
     message = None
 
     def get_context_data(self, **kwargs):
@@ -38,12 +40,14 @@ class MessageView(FormView):
         context['email'] = settings.DEFAULT_FROM_EMAIL
         return context
 
-    def get_form(self):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
         message = self.kwargs.get("message_id", None)
         if self.request.user.is_authenticated and self.request.user.is_board and message is not None:
             self.message = get_object_or_404(Message, pk=message)
-            return self.form_class(instance=self.message, **self.get_form_kwargs())
-        return self.form_class(**self.get_form_kwargs())
+            kwargs['instance'] = self.message
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_initial(self):
         self.initial = super().get_initial()
@@ -55,16 +59,13 @@ class MessageView(FormView):
         return self.initial
 
     def form_invalid(self, form):
-        logging.debug(form.errors)
+        logging.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
         logging.warning(self.request.POST)
         message = form.save()
-        if self.request.user.is_authenticated and self.request.user.is_board:
-            form.send_email(message)
-        else:
-            send_contact_email.delay(message.id)
+        send_contact_email.delay(message.id)
         return super().form_valid(form)
 
     def post(self, request, *args, **kwargs):

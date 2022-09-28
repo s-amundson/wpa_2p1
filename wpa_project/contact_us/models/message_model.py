@@ -13,3 +13,5 @@ class Message(models.Model):
     message = models.TextField()
     sent = models.BooleanField(default=False)
     is_spam = models.BooleanField(default=True)
+    spam_choices = [('legit', 'legit'), ('undetermined', 'undetermined'), ('spam', 'spam')]
+    spam_category = models.CharField(max_length=20, choices=spam_choices, default='undetermined')
