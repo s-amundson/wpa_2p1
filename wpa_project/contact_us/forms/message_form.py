@@ -16,6 +16,7 @@ class MessageForm(MyModelForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
+        self.can_submit = True
         super().__init__(*args, **kwargs)
         logging.debug(self.instance)
         if not self.user.is_authenticated:

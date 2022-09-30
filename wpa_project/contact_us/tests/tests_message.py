@@ -3,6 +3,7 @@ from unittest.mock import patch
 from django.apps import apps
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from django.core import mail
 from captcha.conf import settings as captcha_settings
 
@@ -181,6 +182,34 @@ Julieta"""
         self.client.logout()
         self._category_post()
         self.post_dict['email'][0] = 'elfridakovaleva1982@inbox.ru'
+        response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
+        message = Message.objects.all()
+        self.assertEqual(len(message), 1)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @patch('contact_us.views.message_view.send_contact_email.delay')
+    def test_message_timeout(self, sce):
+        sce.side_effect = self.send_email
+        self.client.logout()
+        self._category_post()
+        session = self.client.session
+        session['contact_us'] = (timezone.now() - timezone.timedelta(hours=1)).isoformat()
+        session.save()
+
+        response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
+        message = Message.objects.all()
+        self.assertEqual(len(message), 0)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_message_email_timeout(self):
+        c = Category.objects.create(title='test category')
+        c.recipients.set([self.test_user])
+        message = Message.objects.create(category=c,
+                                         contact_name=self.post_dict['contact_name'][0],
+                                         created_time=timezone.now() - timezone.timedelta(hours=1),
+                                         email=self.post_dict['email'][0],
+                                         message=self.post_dict['message'][0])
+        self.post_dict['category'] = [c.id]
         response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
         message = Message.objects.all()
         self.assertEqual(len(message), 1)

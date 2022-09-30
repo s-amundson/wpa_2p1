@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django.utils import timezone
 
 from ..forms import MessageForm
 from ..models import Message
@@ -72,8 +73,27 @@ class MessageView(FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
+        def make_error():
+            form.add_error(None, 'In order to prevent spam we are unable to process request at this time.')
+            form.can_submit = False
+            self.request.session['contact_us'] = timezone.now().isoformat()
+            return self.form_invalid(form)
+
         logging.warning(self.request.POST)
+
+        # check users history
+        recent_time = timezone.now() - timezone.timedelta(hours=2)
+        if 'contact_us' in self.request.session:
+            if timezone.datetime.fromisoformat(self.request.session['contact_us']) > recent_time:
+                return make_error()
+        recent = Message.objects.filter(created_time__gt=recent_time, email=form.cleaned_data['email'])
+        if recent:
+            return make_error()
+
+        # save record
+        self.request.session['contact_us'] = timezone.now().isoformat()
         message = form.save()
+
         send_contact_email.delay(message.id)
         return super().form_valid(form)
 

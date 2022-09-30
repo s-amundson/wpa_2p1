@@ -43,7 +43,7 @@ def check_spam(message):
             pass
 
         logging.warning(f'{message_array[i]} english: {words["english"]}, spanish: {words["spanish"]}, russian: {words["russian"]}, other: {words["other"]}')
-    if words["russian"] / len(message_array) >= 0.03:
+    if words["russian"] / len(message_array) >= 0.07:
         logging.warning('to many russian words')
         return False
 
