@@ -1,7 +1,7 @@
 from django.views.generic import ListView
 from django.conf import settings
-
-from ..models import Posts
+from django.utils import timezone
+from ..models import EmbeddedPosts
 
 import logging
 logger = logging.getLogger(__name__)
@@ -12,7 +12,8 @@ class PostList(ListView):
     """
     Return all posts that are with available true and order from the latest one.
     """
-    queryset = Posts.objects.filter(available=True).order_by('-time')
+    queryset = EmbeddedPosts.objects.filter(
+        begin_date__lte=timezone.now(), end_date__gte=timezone.now()).order_by('-begin_date')
     template_name = 'facebook/post_list.html'
 
     def get_context_data(self, **kwargs):

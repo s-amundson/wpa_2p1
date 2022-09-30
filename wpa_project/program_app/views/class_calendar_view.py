@@ -4,6 +4,7 @@ from django.views.generic.base import TemplateView
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 
+from facebook.views import PostList
 from ..models import BeginnerClass
 from ..src import Calendar
 logger = logging.getLogger(__name__)
@@ -59,5 +60,10 @@ class CalendarView(TemplateView):
         return context
 
 
-class EventCalendarView(TemplateView):
-    template_name = "program_app/google_calendar.html"
+class EventCalendarView(PostList):
+    template_name = 'program_app/google_calendar.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset.filter(is_event=True)
+        return queryset

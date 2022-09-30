@@ -4,23 +4,14 @@
     </div>
 </div>
 <div id="fb-root"></div>
-<script nonce="{{request.csp_nonce}}">
-  window.fbAsyncInit = function() {
-    FB.init({
-      appId            : {{fb_id}},
-      autoLogAppEvents : true,
-      xfbml            : true,
-      version          : 'v14.0'
-    });
-  };
-</script>
-<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+
 
 {% for post in object_list %}
     <div class="d-flex flex-row align-items-center p-3">
-        <div class="fb-post mx-auto" data-href="{{ post.post_url }}" target="_top" data-width="500"></div>
+        <div class="mx-auto">{{ post.content|safe }}</div>
     </div>
 {% endfor %}
+
 <div class="pagination">
     <span class="step-links">
         {% if page_obj.has_previous %}
