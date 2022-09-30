@@ -65,5 +65,5 @@ class EventCalendarView(PostList):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset.filter(is_event=True)
+        queryset = queryset.filter(is_event=True)
         return queryset
