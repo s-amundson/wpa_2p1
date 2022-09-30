@@ -3,8 +3,6 @@ from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
 
-from facebook.tasks import fetch_posts
-
 
 class InfoView(View):
     def get(self, request, info):

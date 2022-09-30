@@ -4,21 +4,12 @@ from django.shortcuts import render, reverse
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views.generic.base import View
 from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
-from rest_framework.response import Response
 
 from ..forms import LevelForm
 from ..models import Level
-# from ..serializers import LevelSerializer
+
 
 logger = logging.getLogger(__name__)
-
-
-# class LevelApiView(APIView):
-#     def get(self, request):
-#         levels = Level.objects.filter(enabled=True)
-#         ls = LevelSerializer(levels, many=True)
-#         return Response(ls.data)
 
 
 class LevelView(LoginRequiredMixin, View):
