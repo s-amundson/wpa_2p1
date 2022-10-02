@@ -22,8 +22,6 @@ class PostList(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['fb_id'] = settings.FACEBOOK_ID
-        for ep in EmbeddedPosts.objects.all():
-            logging.warning(ep.begin_date)
         return context
 
 
