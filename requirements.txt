@@ -6,6 +6,7 @@ django-csp==3.7
 django-richtextfield==1.6.1
 django-sendfile2==0.7.0
 django-sslserver==0.22
+gunicorn==20.1.0
 phonenumbers==8.12.51
 psycopg2-binary==2.9.3
 pyenchant==3.2.2
