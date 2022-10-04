@@ -1,5 +1,8 @@
 from celery import shared_task
 import enchant
+from django_pandas.io import read_frame
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
 
 from .models import Message, SpamWords
 from .src import EmailMessage
@@ -10,6 +13,13 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def check_spam(message):
+    message.is_spam = naive_bayes(message)
+    logging.warning(message.is_spam)
+    if message.is_spam:
+        message.save()
+        logging.warning('return naive bayes')
+        return False
+
     # check for spam, since most of the spam seems to be russian we are checking for russian sites and words.
     if message.message.count('.ru') >= 3:
         logging.warning('return .ru')
@@ -55,9 +65,27 @@ def check_spam(message):
     return True
 
 
+def naive_bayes(message):
+    qs = Message.objects.exclude(spam_category='undetermined')
+    if qs:
+        df = read_frame(qs, fieldnames=['id', 'message', 'spam_category'], index_col='id')
+        df['label'] = df['spam_category'].map({'legit': 0, 'spam': 1})
+        cv = CountVectorizer()
+        X = cv.fit_transform(df['message'])
+
+        model = MultinomialNB()
+        model.fit(X, df['label'])
+        data = cv.transform([message.message]).toarray()
+
+        return model.predict(data)[0]
+    else:
+        return False
+
 @shared_task
 def send_contact_email(message_id):
     message = Message.objects.get(pk=message_id)
+    logging.warning('here')
+    naive_bayes(message)
     if message.sent or message.spam_category == 'spam':
         return
     if message.spam_category == 'legit' or check_spam(message):

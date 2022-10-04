@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from ..forms import MessageForm
 from ..models import Message
-from ..tasks import send_contact_email
+from ..tasks import send_contact_email, naive_bayes
 from student_app.models import Student
 from allauth.account.models import EmailAddress
 logger = logging.getLogger(__name__)
@@ -48,6 +48,7 @@ class MessageView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['email'] = settings.DEFAULT_FROM_EMAIL
+        logging.warning(context)
         return context
 
     def get_form_kwargs(self):
@@ -93,7 +94,6 @@ class MessageView(FormView):
         # save record
         self.request.session['contact_us'] = timezone.now().isoformat()
         message = form.save()
-
         send_contact_email.delay(message.id)
         return super().form_valid(form)
 
