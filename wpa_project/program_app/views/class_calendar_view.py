@@ -18,8 +18,8 @@ class CalendarView(TemplateView):
             while month > 12:
                 year += 1
                 month = month - 12
-        if month < 0:
-            while month < 0:
+        if month <= 0:
+            while month <= 0:
                 year -= 1
                 month = month + 12
         return year, month
@@ -27,6 +27,7 @@ class CalendarView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # use today's date for the calendar
+        logging.warning(self.kwargs)
         d = timezone.localtime(timezone.now()).date()
         year = self.kwargs.get('year', d.year)
         month = self.kwargs.get('month', d.month)
