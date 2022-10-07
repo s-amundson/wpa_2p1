@@ -22,7 +22,7 @@ class ClassRegistrationHelper:
             payment = None
             if cr.user.customer_set.last():
                 card = cr.user.customer_set.last().card_set.filter(enabled=True, default=True).last()
-                payment = PaymentHelper(cr.user).create_payment(cost * 100 * ikey['ik_count'], 'intro', 0,
+                payment = PaymentHelper(cr.user).create_payment(cost * ikey['ik_count'], 'intro', 0,
                                                                 str(ikey['idempotency_key']), note, '',
                                                                 saved_card_id=card.id)
             if payment is None:  # a payment error happened
