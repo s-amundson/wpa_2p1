@@ -31,8 +31,6 @@ of your existing third party accounts. {% endblocktrans %}</p>
 <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
 {% endif %}
 
-<h5> Sorry, account signup is currently disabled.</h5>
-{% comment %}
 <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
   {% csrf_token %}
   {{ form.as_p }}
@@ -41,5 +39,4 @@ of your existing third party accounts. {% endblocktrans %}</p>
   {% endif %}
   <button class="btn btn-primary" type="submit">{% trans "Sign Up" %} &raquo;</button>
 </form>
-{% endcomment %}
 {% endblock %}

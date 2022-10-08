@@ -4,6 +4,10 @@ from django import forms
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
+from validate_email import validate_email
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class SignUpForm(SignupForm):
@@ -15,3 +19,10 @@ class SignUpForm(SignupForm):
                 attrs={'class': "m-2"}), required=True,
                 label=mark_safe(_(f"I have read and agree with the <a href='{terms}'>Terms and Conditions</a>")),
                 initial=False)
+
+    def clean_email(self):
+        value = super().clean_email()
+        is_valid = validate_email(value)
+        if is_valid:
+            return value
+        raise forms.ValidationError("Email validation error")
