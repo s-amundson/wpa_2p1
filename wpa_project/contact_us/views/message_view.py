@@ -4,12 +4,11 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
-from django.conf import settings
 from django.utils import timezone
 
 from ..forms import MessageForm
 from ..models import Message
-from ..tasks import send_contact_email, naive_bayes
+from ..tasks import send_contact_email
 from student_app.models import Student
 from allauth.account.models import EmailAddress
 logger = logging.getLogger(__name__)
@@ -45,12 +44,6 @@ class MessageView(FormView):
     success_url = reverse_lazy('registration:index')
     message = None
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['email'] = settings.DEFAULT_FROM_EMAIL
-        logging.warning(context)
-        return context
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         message = self.kwargs.get("message_id", None)
@@ -79,8 +72,6 @@ class MessageView(FormView):
             form.can_submit = False
             self.request.session['contact_us'] = timezone.now().isoformat()
             return self.form_invalid(form)
-
-        logging.warning(self.request.POST)
 
         # check users history
         recent_time = timezone.now() - timezone.timedelta(hours=2)

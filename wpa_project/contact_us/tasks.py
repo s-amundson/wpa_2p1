@@ -3,6 +3,7 @@ import enchant
 from django_pandas.io import read_frame
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
+from validate_email import validate_email
 
 from .models import Message, SpamWords
 from .src import EmailMessage
@@ -89,8 +90,9 @@ def send_contact_email(message_id):
     if message.sent or message.spam_category == 'spam':
         return
     if message.spam_category == 'legit' or check_spam(message):
-        # send the message
-        EmailMessage().contact_email(message)
-        message.sent = True
-        message.save()
-        logging.warning(message.sent)
+        if validate_email(message.email):
+            # send the message
+            EmailMessage().contact_email(message)
+            message.sent = True
+            message.save()
+            logging.warning(message.sent)

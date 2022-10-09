@@ -27,7 +27,6 @@ class CalendarView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # use today's date for the calendar
-        logging.warning(self.kwargs)
         d = timezone.localtime(timezone.now()).date()
         year = self.kwargs.get('year', d.year)
         month = self.kwargs.get('month', d.month)

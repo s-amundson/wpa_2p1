@@ -52,7 +52,7 @@ ACCOUNT_RATE_LIMITS = {
     # Password reset (the view the password reset email links to).
     "reset_password_from_key": "20/m",
     # Signups.
-    "signup": "5/h",
+    "signup": "10/h",
     # NOTE: Login is already protected via `ACCOUNT_LOGIN_ATTEMPTS_LIMIT`
 }
 ACCOUNT_USERNAME_REQUIRED = False
