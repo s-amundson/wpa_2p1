@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 class SignUpForm(SignupForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['captcha'] = CaptchaField(required=True)
+        logging.warning("signup")
+        # self.fields['captcha'] = CaptchaField(required=True)
         terms = reverse_lazy("information:info", kwargs={'info': 'terms'})
         self.fields['terms'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2"}), required=True,
@@ -25,4 +26,5 @@ class SignUpForm(SignupForm):
         is_valid = validate_email(value)
         if is_valid:
             return value
+        logging.warning(f'Invalid email {value}')
         raise forms.ValidationError("Email validation error")
