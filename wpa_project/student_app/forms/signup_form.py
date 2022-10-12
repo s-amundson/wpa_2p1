@@ -23,7 +23,8 @@ class SignUpForm(SignupForm):
 
     def clean_email(self):
         value = super().clean_email()
-        is_valid = validate_email(value)
+        is_valid = validate_email(value, dns_timeout=5, smtp_timeout=5)
+        logging.warning(is_valid)
         if is_valid:
             return value
         logging.warning(f'Invalid email {value}')
