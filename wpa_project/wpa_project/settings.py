@@ -195,6 +195,7 @@ INSTALLED_APPS = [
     'captcha',
 ]
 
+ISITAREALEMAIL_API = get_secret('ISITAREALEMAIL_API')
 LOGIN_REDIRECT_URL = 'registration:profile'
 
 LOGGING = {

@@ -4,7 +4,7 @@
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-
+    {% include "contact_us/is_it_real_email.html" %}
     <form method="post">{% csrf_token %}
         {{ form.as_p }}
 

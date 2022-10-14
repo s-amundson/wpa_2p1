@@ -4,7 +4,10 @@ from django import forms
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
-from wpa_project.celery import check_email
+from django.utils import timezone
+
+from contact_us.models import Email
+from contact_us.tasks import validate_email
 
 import logging
 logger = logging.getLogger(__name__)
@@ -23,15 +26,20 @@ class SignUpForm(SignupForm):
 
     def clean_email(self):
         value = super().clean_email()
-        # is_valid = validate_email(value, dns_timeout=5, smtp_timeout=5)
-        # logging.warning(is_valid)
-        result = check_email.delay(value)
-        logging.warning(result)
-        while not result.ready():
-            time.sleep(1)
-
-        is_valid = result.get()
-        logging.warning(is_valid)
+        # u, d = value.split('@')
+        # logging.warning(f'{u} {d}')
+        # with open('block_domains.txt', 'r') as f:
+        #     blocked = f.readlines()
+        # logging.warning(blocked)
+        # if d in blocked:
+        #     logging.warning(d)
+        #     raise forms.ValidationError("Email domain blocked")
+        #
+        # # check if we can validate email address.
+        # count = Email.objects.filter(created_time__gt=timezone.now() + timezone.timedelta(hours=24)).count()
+        # if count > 95:
+        #     raise forms.ValidationError("Email cannot be checked at this time.")
+        is_valid = validate_email(value)
         if is_valid:
             return value
         logging.warning(f'Invalid email {value}')

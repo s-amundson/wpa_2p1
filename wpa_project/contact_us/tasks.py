@@ -1,11 +1,14 @@
 from celery import shared_task
 import enchant
+import requests
+from django import forms
+from django.conf import settings
+from django.utils import timezone
 from django_pandas.io import read_frame
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from validate_email import validate_email
 
-from .models import Message, SpamWords
+from .models import Email, Message, SpamWords
 from .src import EmailMessage
 
 import logging
@@ -53,7 +56,7 @@ def check_spam(message):
         except ValueError:
             pass
 
-        logging.warning(f'{message_array[i]} english: {words["english"]}, spanish: {words["spanish"]}, russian: {words["russian"]}, other: {words["other"]}')
+        # logging.warning(f'{message_array[i]} english: {words["english"]}, spanish: {words["spanish"]}, russian: {words["russian"]}, other: {words["other"]}')
     if words["russian"] / len(message_array) >= 0.07:
         logging.warning('to many russian words')
         return False
@@ -96,3 +99,40 @@ def send_contact_email(message_id):
             message.sent = True
             message.save()
             logging.warning(message.sent)
+
+
+def validate_email(address, default_state=True):
+    u, d = address.split('@')
+    logging.warning(f'{u} {d}')
+    with open('block_domains.txt', 'r') as f:
+        blocked = f.readlines()
+    if d in blocked:
+        logging.warning(d)
+        raise forms.ValidationError("Email domain blocked")
+
+    # check if we can validate email address.
+    count = Email.objects.filter(created_time__gt=timezone.now() + timezone.timedelta(hours=24)).count()
+    if count > 95:
+        raise forms.ValidationError("Email cannot be checked at this time.")
+
+    record, created = Email.objects.get_or_create(email=address)
+    if created:
+        response = requests.get(
+            "https://isitarealemail.com/api/email/validate",
+            params={'email': address},
+            headers={'Authorization': "Bearer " + settings.ISITAREALEMAIL_API})
+        status = response.json()['status']
+        if status == "valid":
+            logging.warning(f'{address} is valid')
+            record.is_valid = True
+        elif status == "invalid":
+            logging.warning(f'{address} is invalid')
+            record.is_valid = False
+            raise forms.ValidationError("Email validation error")
+        else:
+            logging.warning(f'{address} is unknown')
+            record.is_valid = default_state
+            if not default_state:
+                raise forms.ValidationError("Email validation error")
+        record.save()
+    return record.is_valid

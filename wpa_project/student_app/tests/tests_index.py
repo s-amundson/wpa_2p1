@@ -2,6 +2,7 @@ import logging
 from django.test import TestCase, Client
 from django.urls import reverse
 from ..models import User
+from contact_us.models import Email
 logger = logging.getLogger(__name__)
 
 
@@ -28,3 +29,10 @@ class TestsIndex(TestCase):
         response = self.client.get(reverse('account_signup'), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('account/signup.html')
+
+    def test_post_signup(self):
+        d = {"email": 'sam@example.com', "password1": "johndoe",  "password2": "johndoe"}
+        response = self.client.post(reverse('account_signup'), d, secure=True)
+        self.assertEqual(response.status_code, 200)
+        e = Email.objects.all()
+        self.assertEqual(e.count(), 0)
