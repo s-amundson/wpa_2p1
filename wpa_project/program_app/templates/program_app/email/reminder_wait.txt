@@ -1,0 +1,9 @@
+Hi,
+
+Either you or a member of your family is on the wait-list for a class on {{ beginner_class.class_date }} You may show up at the range and if there is space we can let you in. Space is not guaranteed, but you will most likely get in.
+
+Please plan to be at the range {{ minutes }} minutes prior to the class to allow us to sign you in. {% if beginner_class.class_type == 'beginner' %} Students that arrive past {{ beginner_class.class_date|time }} will not be allowed to participate. Be sure to bring proof of vaccination or proof of a negative PCR Covid-19 test within the previous 48 hours for yourself and all the members of your party. {% endif %}
+
+If for any reason you can't make it, please cancel your registration by going http://registration/woodleyparkarchers.org/
+http://woodleyparkarchers.org/">WoodleyParkArchers.org
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

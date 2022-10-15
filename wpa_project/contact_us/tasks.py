@@ -8,7 +8,7 @@ from django_pandas.io import read_frame
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 
-from .models import Email, Message, SpamWords
+from .models import BlockedDomain, Email, Message, SpamWords
 from .src import EmailMessage
 
 import logging
@@ -93,7 +93,11 @@ def send_contact_email(message_id):
     if message.sent or message.spam_category == 'spam':
         return
     if message.spam_category == 'legit' or check_spam(message):
-        if validate_email(message.email):
+        try:
+            is_valid = validate_email(message.email)
+        except forms.ValidationError as e:
+            is_valid = False
+        if is_valid:
             # send the message
             EmailMessage().contact_email(message)
             message.sent = True
@@ -104,10 +108,9 @@ def send_contact_email(message_id):
 def validate_email(address, default_state=True):
     u, d = address.split('@')
     logging.warning(f'{u} {d}')
-    with open('block_domains.txt', 'r') as f:
-        blocked = f.readlines()
-    if d in blocked:
-        logging.warning(d)
+    blocked = BlockedDomain.objects.filter(domain=d).count()
+    logging.warning(blocked)
+    if blocked:
         raise forms.ValidationError("Email domain blocked")
 
     # check if we can validate email address.
@@ -117,11 +120,13 @@ def validate_email(address, default_state=True):
 
     record, created = Email.objects.get_or_create(email=address)
     if created:
-        response = requests.get(
-            "https://isitarealemail.com/api/email/validate",
-            params={'email': address},
-            headers={'Authorization': "Bearer " + settings.ISITAREALEMAIL_API})
+        # response = None
+        response = requests.get()
+        #     "https://isitarealemail.com/api/email/validate",
+        #     params={'email': address},
+        #     headers={'Authorization': "Bearer " + settings.ISITAREALEMAIL_API})
         status = response.json()['status']
+        logging.warning(str(status))
         if status == "valid":
             logging.warning(f'{address} is valid')
             record.is_valid = True

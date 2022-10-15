@@ -92,7 +92,8 @@ class UpdatePrograms:
         classes = BeginnerClass.objects.filter(
             class_date=class_date, state__in=self.states[:self.states.index('closed')])
         for c in classes:
-            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin']) #.exclude(student__user__in=staff_query)
+            # send email to students that are registered
+            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin'])
             student_list = []
             for r in cr:
                 student_list.append(r.student.id)
@@ -100,6 +101,15 @@ class UpdatePrograms:
             students = students.exclude(user__in=staff_query)
             # logging.debug(students)
             self.email.beginner_reminder(c, students)
+
+            # send email to students that are on the wait list
+            cr = c.classregistration_set.filter(pay_status__in=['waiting'])
+            student_list = []
+            for r in cr:
+                student_list.append(r.student.id)
+            students = Student.objects.filter(id__in=student_list)
+            students = students.exclude(user__in=staff_query)
+            self.email.wait_list_reminder(c, students)
 
     def status_email(self):
         crh = ClassRegistrationHelper()

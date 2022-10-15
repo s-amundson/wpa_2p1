@@ -2,7 +2,7 @@ import logging
 from django.test import TestCase, Client
 from django.urls import reverse
 from ..models import User
-from contact_us.models import Email
+from contact_us.models import BlockedDomain, Email
 logger = logging.getLogger(__name__)
 
 
@@ -31,6 +31,7 @@ class TestsIndex(TestCase):
         self.assertTemplateUsed('account/signup.html')
 
     def test_post_signup(self):
+        BlockedDomain.objects.create(domain='example.com')
         d = {"email": 'sam@example.com', "password1": "johndoe",  "password2": "johndoe"}
         response = self.client.post(reverse('account_signup'), d, secure=True)
         self.assertEqual(response.status_code, 200)

@@ -73,14 +73,17 @@ class MessageView(FormView):
             self.request.session['contact_us'] = timezone.now().isoformat()
             return self.form_invalid(form)
 
-        # check users history
-        recent_time = timezone.now() - timezone.timedelta(hours=2)
-        if 'contact_us' in self.request.session:
-            if timezone.datetime.fromisoformat(self.request.session['contact_us']) > recent_time:
+        if self.request.user.is_authenticated and self.request.user.is_board:
+            pass
+        else:
+            # check users history
+            recent_time = timezone.now() - timezone.timedelta(hours=2)
+            if 'contact_us' in self.request.session:
+                if timezone.datetime.fromisoformat(self.request.session['contact_us']) > recent_time:
+                    return make_error()
+            recent = Message.objects.filter(created_time__gt=recent_time, email=form.cleaned_data['email'])
+            if recent:
                 return make_error()
-        recent = Message.objects.filter(created_time__gt=recent_time, email=form.cleaned_data['email'])
-        if recent:
-            return make_error()
 
         # save record
         self.request.session['contact_us'] = timezone.now().isoformat()

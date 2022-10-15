@@ -31,6 +31,17 @@ class EmailMessage(EmailMessage):
                                 'text/html')
         self.send()
 
+    def wait_list_reminder(self, beginner_class, students):
+        self.bcc_from_students(students)
+        self.subject = f'WPA Class Wait List Reminder {timezone.localtime(beginner_class.class_date).date()}'
+        if beginner_class.class_type == 'beginner':
+            d = {'beginner_class': beginner_class, 'minutes': 30}
+        elif beginner_class.class_type == 'returnee':
+            d = {'beginner_class': beginner_class, 'minutes': 15}
+        self.body = get_template('program_app/email/reminder_wait.txt').render(d)
+        self.attach_alternative(get_template('program_app/email/reminder_wait.html').render(d), 'text/html')
+        self.send()
+
     def wait_list_off(self, registrations):
         """Send mail students that they have been removed from wait list and their card charged."""
         beginner_class = registrations[0].beginner_class
