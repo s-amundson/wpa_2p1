@@ -120,11 +120,10 @@ def validate_email(address, default_state=True):
 
     record, created = Email.objects.get_or_create(email=address)
     if created:
-        # response = None
-        response = requests.get()
-        #     "https://isitarealemail.com/api/email/validate",
-        #     params={'email': address},
-        #     headers={'Authorization': "Bearer " + settings.ISITAREALEMAIL_API})
+        response = requests.get(
+            "https://isitarealemail.com/api/email/validate",
+            params={'email': address},
+            headers={'Authorization': "Bearer " + settings.ISITAREALEMAIL_API})
         status = response.json()['status']
         logging.warning(str(status))
         if status == "valid":
