@@ -10,6 +10,7 @@
         let url_class_registered_table = "{% url 'programs:unregister_table' %}"
         let url_class_status = "{% url 'programs:class_status' %}"
         {% if family %} let family = true {% else %} let family = false {% endif %}
+        {% if form.needs_covid %} let needs_covid = true; {% else %} let needs_covid = false; {% endif %}
 
     </script>
 {% endblock %}
@@ -110,8 +111,14 @@
             </div>
         </form>
     </div>
-    <div id="wait-list-warning" hidden >This class has a wait list if you register your credit card may be charged in the future when a
-        space becomes available.
+    <div id="wait-list-warning" hidden >
+This class has a wait list if you register your credit card may be charged in the future when a space becomes available.
+
+Wait list is under evaluation and may be discontinued.
+    </div>
+    <div id="confirm-covid" hidden >
+Covid-19 Policy:
+Please confirm that you agree to bring proof of vaccination proof of a negative PCR Covid-19 test within the previous 48 hours for yourself and all the members of your party.
     </div>
 
     {% include "program_app/registration_dialogs.html" %}

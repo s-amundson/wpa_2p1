@@ -11,7 +11,7 @@ class DecisionForm(MyModelForm):
     class Meta(MyModelForm.Meta):
         model = Decision
         hidden_fields = ['decision_id']
-        optional_fields = ['decision_date']  # , 'minutes']
+        optional_fields = ['decision_date', 'minutes']
         required_fields = ['text']
         fields = hidden_fields + optional_fields + required_fields
 

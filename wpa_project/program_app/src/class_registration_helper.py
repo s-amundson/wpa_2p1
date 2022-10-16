@@ -22,7 +22,7 @@ class ClassRegistrationHelper:
             payment = None
             if cr.user.customer_set.last():
                 card = cr.user.customer_set.last().card_set.filter(enabled=True, default=True).last()
-                payment = PaymentHelper(cr.user).create_payment(cost * 100 * ikey['ik_count'], 'intro', 0,
+                payment = PaymentHelper(cr.user).create_payment(cost * ikey['ik_count'], 'intro', 0,
                                                                 str(ikey['idempotency_key']), note, '',
                                                                 saved_card_id=card.id)
             if payment is None:  # a payment error happened
@@ -52,8 +52,6 @@ class ClassRegistrationHelper:
 
     def has_space(self, user, beginner_class, beginner, instructor, returnee):
         enrolled_count = self.enrolled_count(beginner_class)
-        logging.warning(enrolled_count)
-        logging.warning(beginner)
         wait = False
         if beginner_class.state in ['open', 'wait']:  # in case it changed since user got the self.form.
             if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:

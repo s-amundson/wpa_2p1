@@ -1,6 +1,7 @@
-FROM python:3
+FROM python:3-bullseye
 
 ENV PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y enchant-2 myspell-es myspell-ru
 WORKDIR /code
 COPY requirements.txt /code/
 COPY wpa_project/wpa_project.env /code/.env

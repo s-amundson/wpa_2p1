@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %} About {% endblock %}
+
+{% load static %}
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="text-center">
+            <h2> About the Woodley Park Archers </h2>
+        </div>
+    </div>
+
+    <div class="d-flex flex-row">
+        <div class="m-2">
+            <img class="rounded-2 float-end imgshadow m-2" alt="Logo"
+             src="{% static 'images/wpaLogo_350.jpg' %}" title="Woodley Park Archery Range Welcomes You" width="280" height="322">
+
+            <p> Welcome to the Home of the Woodley Park Archers. </p>
+            <p>
+                Woodley Park Archers promotes fellowship through social and field activities offered by the organization.
+                WPA is a non-sectarian, non-political, educational organization.
+            </p>
+            <p>
+                Membership in Woodley Park Archers includes Compound, Olympic-Style Recurve and Traditional style archers,
+                archery enthusiasts, family members and others who support the club’s objectives and, as members, may
+                participate in activities, meetings and classes.
+            </p>
+            <p>
+                Woodley Park Archers is a Member Club of
+                <a title="USA Archery" href="http://usarchery.org" target="_blank" rel="noopener">USA Archery</a>
+                and the
+                <a title="State Archers of California" href="http://calarchery.net/" target="_blank" rel="noopener">State Archers of California</a>.
+            </p>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="text-center">
+            <h2> Mission Statement </h2>
+        </div>
+        <div class="m-2">
+            <img class="rounded float-start imgshadow m-2" alt="Heron with archer"
+                 src="{% static 'images/heronArcher_200.jpg' %}" title="Woodley Park Archery Range Welcomes You" width="280" height="322">
+            <p>
+                The objective of the Woodley Park Archers is the elevation of the sport of archery through education and the
+                promotion of youth, family and individual archery participation.
+            </p>
+            <p>
+                The Woodley Park Archers promotes the safe use of archery equipment, the practice of proper archery techniques,
+                etiquette and sportsmanship.
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="text-center">
+            <h2> Coaching </h2>
+        </div>
+        <div class="m-2">
+            <p>The Woodley Park Archers boasts an excellent coaching staff of volunteer instructors who can offer assistance
+                in all forms of archery – Traditional, Olympic-style and Compound. All the club’s instructors are certified
+                by
+                <a title="USA Archery" href="http://usarchery.org" target="_blank" rel="noopener">USA Archery</a>
+                 (USAA), the governing body for target archery in the United States. Shortly, a list of our coaches
+                will be available on our website.
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block right %}
+    <div id="login-div"></div>
+{% endblock %}

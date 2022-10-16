@@ -7,6 +7,23 @@ $(document).ready(function(){
     get_class_status();
 
     $("#myModal").modal("show");
+
+    $("#beginner-class-form").submit(function(e) {
+	    e.preventDefault();
+	    console.log('submit')
+	    let getConfirm = false;
+	    if (needs_covid && 'confirm' in window) {
+	        getConfirm = confirm($("#confirm-covid").html());
+	        console.log(getConfirm)
+	    }
+        else {
+            getConfirm = true;
+        }
+        if (getConfirm) {
+            $("#beginner-class-form").unbind();
+            $("#beginner-class-form").submit();
+        }
+    });
 });
 
 async function get_calendar() {

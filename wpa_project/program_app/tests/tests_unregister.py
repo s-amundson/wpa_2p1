@@ -162,41 +162,69 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         cr = ClassRegistration.objects.all()
         for r in cr:
             self.assertEqual(r.pay_status, 'canceled')
-#
-#
-# class TestsUnregisterStudent2(TestCase):
-#     fixtures = ['f1', 'f2']
-#
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#
-#     def setUp(self):
-#         # Every test needs a client.
-#         self.client = Client()
-#         self.test_user = User.objects.get(pk=2)
-#         self.test_url = reverse('programs:unregister')
-#         self.url_registration = reverse('programs:class_registration')
-#         self.client.force_login(self.test_user)
-#
-#     def test_refund_invalid_student(self):
-#         self.test_user = User.objects.get(pk=3)
-#         self.client.force_login(self.test_user)
-#         response = self.client.post(self.test_url, {'unreg_1': True, 'unreg_2': True, 'donation': True}, secure=True)
-#         self.assertRedirects(response, self.url_registration)
-#
-#     def test_refund_class_wrong(self):  # requires fixture f2
-#         bc = BeginnerClass.objects.get(pk=1)
-#         for state in ['closed', 'canceled', 'recorded']:
-#             bc.state = state
-#             bc.save()
-#             response = self.client.post(self.test_url, {'unreg_1': True, 'unreg_2': True, 'donation': False}, secure=True)
-#             self.assertRedirects(response, self.url_registration)
-#
-#     def test_unregister_expired(self):
-#         # set the time of the class within 24 hours.
-#         bc = BeginnerClass.objects.get(pk=1)
-#         bc.class_date = datetime.now() + timedelta(hours=20)
-#         bc.save()
-#
-#         response = self.client.post(self.test_url, {'unreg_1': True, 'unreg_2': True, 'donation': False}, secure=True)
-#         self.assertRedirects(response, self.url_registration)
+
+    def test_cancel_within_24hrs(self):
+        student = Student.objects.get(pk=2)
+        student.user.is_staff = False
+        student.user.save()
+
+        self.create_payment([student, Student.objects.get(pk=3)], 1000)
+        cr = ClassRegistration.objects.all()
+        logging.debug(cr)
+        bc = BeginnerClass.objects.get(pk=1)
+        class_date = timezone.now() + timedelta(hours=18)
+        bc.class_date = bc.class_date.replace(year=class_date.year, month=class_date.month, day=class_date.day)
+        bc.state = 'closed'
+        bc.save()
+        logging.warning(bc.class_date)
+
+        d = {'donation': False}
+        for r in cr:
+            d[f'unreg_{r.id}'] = True
+        response = self.client.post(self.test_url, d, secure=True)
+        self.assertRedirects(response, self.url_registration)
+
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'closed')
+
+        cr = bc.classregistration_set.all()
+        self.assertEqual(cr[0].pay_status, 'canceled')
+        self.assertEqual(cr[1].pay_status, 'canceled')
+
+
+class TestsUnregisterStudent2(TestCase):
+    fixtures = ['f1', 'f2']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def setUp(self):
+        # Every test needs a client.
+        self.client = Client()
+        self.test_user = User.objects.get(pk=2)
+        self.test_url = reverse('programs:unregister')
+        self.url_registration = reverse('programs:class_registration')
+        self.client.force_login(self.test_user)
+
+    def test_refund_invalid_student(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        response = self.client.post(self.test_url, {'unreg_1': True, 'unreg_2': True, 'donation': True}, secure=True)
+        self.assertRedirects(response, self.url_registration)
+
+    def test_refund_class_wrong(self):  # requires fixture f2
+        bc = BeginnerClass.objects.get(pk=1)
+        for state in ['closed', 'canceled', 'recorded']:
+            bc.state = state
+            bc.save()
+            response = self.client.post(self.test_url, {'unreg_1': True, 'unreg_2': True, 'donation': False}, secure=True)
+            self.assertRedirects(response, self.url_registration)
+
+    def test_unregister_expired(self):
+        # set the time of the class within 24 hours.
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_date = datetime.now() + timedelta(hours=20)
+        bc.save()
+
+        response = self.client.post(self.test_url, {'unreg_1': True, 'unreg_2': True, 'donation': False}, secure=True)
+        self.assertRedirects(response, self.url_registration)

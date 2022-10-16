@@ -4,6 +4,7 @@ from django.views.generic.base import TemplateView
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 
+from facebook.views import PostList
 from ..models import BeginnerClass
 from ..src import Calendar
 logger = logging.getLogger(__name__)
@@ -17,8 +18,8 @@ class CalendarView(TemplateView):
             while month > 12:
                 year += 1
                 month = month - 12
-        if month < 0:
-            while month < 0:
+        if month <= 0:
+            while month <= 0:
                 year -= 1
                 month = month + 12
         return year, month
@@ -57,3 +58,12 @@ class CalendarView(TemplateView):
         # Call the formatmonth method, which returns our calendar as a table
         context['html_cal'] = mark_safe(cal.formatmonth(withyear=True))
         return context
+
+
+class EventCalendarView(PostList):
+    template_name = 'program_app/google_calendar.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(is_event=True)
+        return queryset

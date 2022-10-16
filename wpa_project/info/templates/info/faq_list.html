@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %} Faq {% endblock %}
+
+{% load static %}
+{% block left %}
+    {% if user.is_board %}
+        <a href="{% url 'info:edit' %}" role="button" class="btn btn-primary m-1"> Add FAQ</a>
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="text-center">
+            <h2> Frequently Asked Questions </h2>
+        </div>
+    </div>
+
+    <form class="form m-2" method="get">
+        <div class="m-2"><h5>Filter by category:</h5></div>
+
+        <div class="d-flex flex-row m-2">
+            <div class="m-2 fieldWrapper">
+                {{ form.category }}
+            </div>
+        </div>
+        <div class="d-flex flex-row m-2">
+            <input class="btn btn-primary" type="submit" value="Submit">
+        </div>
+    </form>
+    <hr>
+    {% for faq in object_list %}
+        <div class="row">
+            {% if user.is_board %}
+                <a href="{% url 'info:edit' faq.id %}"><h4>{{ faq.question }}</h4></a>
+            {% else %}
+                <h4>{{ faq.question }}</h4>
+            {% endif %}
+            <p>
+                Categories:
+                {% for category in faq.category.all %}{{ category }}{% if not forloop.last %},&nbsp{% endif %}{% endfor %}
+            </p>
+            <div class="mx-3">
+                <p> {{ faq.rendered_answer|safe }}</p>
+            </div>
+        </div>
+        <hr>
+    {% endfor %}
+
+    {% include 'student_app/paginate.html' %}
+{% endblock %}

@@ -14,7 +14,8 @@ class ClassRegistrationForm(forms.Form):
         bc = self.get_open_classes(user)
         self.fields['beginner_class'] = forms.ChoiceField(choices=bc)
         self.students = list(students.values())
-
+        self.needs_covid = len(students.filter(covid_vax=False))
+        logging.warning(self.needs_covid)
         for student in students:
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',

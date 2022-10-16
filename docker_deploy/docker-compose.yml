@@ -14,18 +14,6 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./ps_master_conf:/conf
 
-  mysql:
-    container_name: mysql
-    image: mysql:8.0
-    restart: unless-stopped
-    env_file:
-      - ./wordpress.env
-    command: '--default-authentication-plugin=mysql_native_password'
-    ports:
-      - 3306:3306
-    volumes:
-      - mysql_data:/var/lib/mysql
-
   django:
     container_name: django
     build:
@@ -58,24 +46,6 @@ services:
       - rabbitmq3
       - django
 
-  wordpress:
-    container_name: wordpress
-
-    build:
-      context: ..
-      dockerfile: docker_deploy/Dockerfile_wordpress
-
-#    image: wordpress:5.8.2-fpm-alpine
-    depends_on:
-      - mysql
-    ports:
-      - 8080:80
-      - 8081:443
-    restart: always
-    env_file:
-      - ./wordpress.env
-    volumes:
-      - ../wordpress:/var/www/html
 
   nginx:
     container_name: nginx
@@ -90,12 +60,10 @@ services:
       - staticfiles:/app/static/
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-      - ../wordpress:/var/www/html
       - media:/app/media
 
     depends_on:
       - django
-      - wordpress
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:

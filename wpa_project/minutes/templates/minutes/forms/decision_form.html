@@ -1,7 +1,10 @@
 <div class="row decision-div" id="decision-div-{{ decision.form.report_index }}">
-    {% csrf_token %}
-    {{ decision.form.decision_id }}
+    <form name="decision-form">
+        {% csrf_token %}
+        {{ decision.form.decision_id }}
 
-    {{ decision.form.decision_date }}
-    {{ decision.form.text }}
+        {{ decision.form.decision_date }}
+        {{ decision.form.text }}
+        <div hidden> {{ decision.form.minutes }} </div>
+    </form>
 </div>

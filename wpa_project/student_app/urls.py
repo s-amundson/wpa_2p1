@@ -7,7 +7,6 @@ urlpatterns = [
         path('add_student/', AddStudentView.as_view(), name='add_student'),
         path('covid_vax/<int:student_id>/', CovidVaxView.as_view(), name='covid_vax'),
         path('instructor_update/', InstructorUpdateView.as_view(), name='instructor_update'),
-        path('info/<str:info>/', InfoView.as_view(), name='info'),
         path('is_joad/<int:student_id>/', StudentIsJoadView.as_view(), name='is_joad'),
         path('login/', LoginView.as_view(), name='login'),
         path('pdf/<int:student_id>/', PdfGetView.as_view(), name='pdf'),

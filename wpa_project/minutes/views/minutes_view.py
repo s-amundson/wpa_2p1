@@ -50,7 +50,7 @@ class MinutesFormView(LoginRequiredMixin, View):
             nb = Business.objects.filter(Q(resolved=None, added_date__date=minutes.meeting_date) |
                                          Q(resolved__date__gte=minutes.meeting_date, added_date__date=minutes.meeting_date))
             nb = nb.order_by('id')
-            decisions_query = Decision.objects.filter(decision_date__date=minutes.meeting_date.date()).order_by('id')
+            decisions_query = minutes.decision_set.all()
             logging.debug(decisions_query)
 
         else:
@@ -60,7 +60,7 @@ class MinutesFormView(LoginRequiredMixin, View):
 
             ob = Business.objects.filter(resolved__lt=timezone.now()).order_by('added_date', 'id')
             nb = []
-            decisions_query = Decision.objects.filter(decision_date=timezone.now()).order_by('id')
+            decisions_query = Decision.objects.filter(decision_date__date=timezone.now().date()).order_by('id')
 
         old_business = self.business_list(ob, True)
         new_business = self.business_list(nb, False)

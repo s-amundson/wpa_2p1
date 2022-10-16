@@ -19,6 +19,7 @@ urlpatterns = [
     path('class_sign_in/<int:reg_id>/', ClassSignInView.as_view(), name='class_sign_in'),
     path('class_status/<str:class_id>/', ClassStatusView.as_view(), name='class_status'),
     path('class_status/', ClassStatusView.as_view(), name='class_status'),
+    path('google_calendar/', EventCalendarView.as_view(), name='google_calendar'),
     path('history/', HistoryView.as_view(), name='history'),
     path('history/<int:family_id>/', HistoryView.as_view(), name='history'),
     path('resume_registration/<int:reg_id>/', ResumeRegistrationView.as_view(), name='resume_registration'),

@@ -40,6 +40,21 @@ ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_FORMS = {'signup': 'student_app.forms.SignUpForm'}
 ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS')
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_RATE_LIMITS = {
+    # Change password view (for users already logged in)
+    "change_password": "5/m",
+    # Email management (e.g. add, remove, change primary)
+    "manage_email": "10/m",
+    # Request a password reset, global rate limit per IP
+    "reset_password": "20/m",
+    # Rate limit measured per individual email address
+    "reset_password_email": "5/m",
+    # Password reset (the view the password reset email links to).
+    "reset_password_from_key": "20/m",
+    # Signups.
+    "signup": "10/h",
+    # NOTE: Login is already protected via `ACCOUNT_LOGIN_ATTEMPTS_LIMIT`
+}
 ACCOUNT_USERNAME_REQUIRED = False
 
 
@@ -86,12 +101,13 @@ CSP_DEFAULT_SRC = ("'self'",
 CSP_FONT_SRC = ("'self'",
                 "https://cdnjs.cloudflare.com",
                 "https://*.cloudfront.net", "https://*.squarecdn.com")
-CSP_FRAME_ANCESTORS = ("'self'", "https://www.facebook.com")
+CSP_FRAME_ANCESTORS = ("'self'", "https://www.facebook.com", "https://www.google.com")
 CSP_FRAME_SRC = ("'self'",
                  "https://*.squarecdn.com",
                  "https://*.squareupsandbox.com",
                  "https://*.squareup.com",
                  "https://www.facebook.com",
+                 "https://*.google.com",
                  )
 CSP_IMG_SRC = ("'self' ",
                "https://www.facebook.com",
@@ -155,7 +171,7 @@ INSTALLED_APPS = [
     'minutes',
     'joad',
     'contact_us',
-    'faq',
+    'info',
     'facebook',
 
     'django.contrib.admin',
@@ -172,12 +188,14 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     # 'allauth.socialaccount.providers.facebook',
     # 'allauth.socialaccount.providers.instagram',
-    'rest_framework',
+
     "sslserver",
     'django_sendfile',
     'django_celery_beat',
+    'captcha',
 ]
 
+ISITAREALEMAIL_API = get_secret('ISITAREALEMAIL_API')
 LOGIN_REDIRECT_URL = 'registration:profile'
 
 LOGGING = {

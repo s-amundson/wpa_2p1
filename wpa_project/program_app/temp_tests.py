@@ -14,7 +14,8 @@
 # from .tests.tests_logs import TestsAdminRegistration
 # from .tests.tests_signal import TestsSignal
 # from .tests.tests_staff_report import TestsStaffReport
+# from .tests.tests_tasks import TestsTasks
 # from .tests.tests_unregister import TestsUnregisterStudent
 # from .tests.tests_unregister import TestsUnregisterStudent2
-from .tests.tests_update_programs import TestsUpdatePrograms
+# from .tests.tests_update_programs import TestsUpdatePrograms
 # from .tests.tests_update_programs import TestsUpdatePrograms2

@@ -5,21 +5,46 @@
 
 {% block main %}
     <div class="m-2"><h5>Messages:</h5></div>
-    {% for message in object_list %}
-        <div class="d-flex flex-row m-2">
-            <div class="col">
-                <a href="{% url 'contact_us:contact' message.id %}"> {{ message.id }} </a>
-            </div>
-            <div class="col">
-                {{ message.category.title }}
-            </div>
-            <div class="col">
-                {{ message.created_time }}
-            </div>
-        </div>
-    {% empty %}
-        <h6>No messages yet.</h6>
-    {% endfor %}
-
+    <table class="table table-bordered
+            {% if user.dark_theme %}
+                table-dark
+            {% else %}
+                table-light
+            {% endif %}">
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th> Category </th>
+                <th> Spam Category </th>
+                <th> Sent </th>
+                <th> Submission Time </th>
+            </tr>
+        </thead>
+        <tbody id="class-list-body">
+            {% for message in object_list %}
+                <tr>
+                    <td><a href="{% url 'contact_us:contact' message.id %}"> {{ message.id }} </a></td>
+                    <td>{{ message.category.title }}</td>
+                    <td>{{ message.spam_category }}</td>
+                    <td>{{ message.sent }}</td>
+                    <td>{{ message.created_time }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No messages yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% include 'student_app/paginate.html' %}
+    {% if spam_list %}
+        <a class="nav-link" href="{% url 'contact_us:message_list' %}">
+            View non spam
+        </a>
+    {% else %}
+        <a class="nav-link" href="{% url 'contact_us:message_list' 1 %}">
+            View spam messages
+        </a>
+    {% endif %}
+
 {% endblock %}

@@ -13,3 +13,6 @@ class Minutes(models.Model):
     balance = models.IntegerField(default=None, null=True)
     discussion = models.TextField()
     end_time = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return f'Minutes: {self.meeting_date.date()}'
