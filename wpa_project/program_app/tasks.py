@@ -13,11 +13,6 @@ logger = logging.getLogger(__name__)
 crh = ClassRegistrationHelper()
 
 
-# @shared_task
-# def add_classes(day_of_week=timezone.now().weekday()):
-#     logging.warning(day_of_week)
-#     classes = BeginnerSchedule.objects.filter(day_of_week=day_of_week)
-
 @shared_task
 def charge_group(reg_list):  # pragma: no cover
     crh.charge_group(ClassRegistration.objects.filter(id__in=reg_list))
@@ -39,7 +34,8 @@ def daily_update():
 
 
 @shared_task
-def init_class():
+def init_class():  # pragma: no cover
+    # used to set up classes for the first time, should only need to be run once.
     UpdatePrograms().add_weekly()
     for c in BeginnerSchedule.objects.all():
         # Schedule the reminder email 2 days prior to the event.

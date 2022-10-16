@@ -56,7 +56,6 @@ def check_spam(message):
         except ValueError:
             pass
 
-        # logging.warning(f'{message_array[i]} english: {words["english"]}, spanish: {words["spanish"]}, russian: {words["russian"]}, other: {words["other"]}')
     if words["russian"] / len(message_array) >= 0.07:
         logging.warning('to many russian words')
         return False
@@ -67,6 +66,14 @@ def check_spam(message):
             return False
 
     return True
+
+
+def is_it_real(address):  # pragma no cover
+    response = requests.get(
+        "https://isitarealemail.com/api/email/validate",
+        params={'email': address},
+        headers={'Authorization': "Bearer " + settings.ISITAREALEMAIL_API})
+    return response.json()['status']
 
 
 def naive_bayes(message):
@@ -84,6 +91,7 @@ def naive_bayes(message):
         return model.predict(data)[0]
     else:
         return False
+
 
 @shared_task
 def send_contact_email(message_id):
@@ -106,25 +114,23 @@ def send_contact_email(message_id):
 
 
 def validate_email(address, default_state=True):
-    u, d = address.split('@')
-    logging.warning(f'{u} {d}')
-    blocked = BlockedDomain.objects.filter(domain=d).count()
-    logging.warning(blocked)
-    if blocked:
-        raise forms.ValidationError("Email domain blocked")
+    try:
+        record = Email.objects.get(email=address)
+    except Email.DoesNotExist:
+        u, d = address.split('@')
+        logging.warning(f'{u} {d}')
+        blocked = BlockedDomain.objects.filter(domain=d).count()
+        logging.warning(blocked)
+        if blocked:
+            raise forms.ValidationError("Email domain blocked")
 
-    # check if we can validate email address.
-    count = Email.objects.filter(created_time__gt=timezone.now() + timezone.timedelta(hours=24)).count()
-    if count > 95:
-        raise forms.ValidationError("Email cannot be checked at this time.")
+        # check if we can validate email address.
+        count = Email.objects.filter(created_time__gt=timezone.now() + timezone.timedelta(hours=24)).count()
+        if count > 95:
+            raise forms.ValidationError("Email cannot be checked at this time.")
 
-    record, created = Email.objects.get_or_create(email=address)
-    if created:
-        response = requests.get(
-            "https://isitarealemail.com/api/email/validate",
-            params={'email': address},
-            headers={'Authorization': "Bearer " + settings.ISITAREALEMAIL_API})
-        status = response.json()['status']
+        record = Email.objects.create(email=address)
+        status = is_it_real(address)
         logging.warning(str(status))
         if status == "valid":
             logging.warning(f'{address} is valid')

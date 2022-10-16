@@ -96,44 +96,54 @@ class TestsUpdatePrograms(TestCase):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=18)
         d = timezone.make_aware(d, timezone.get_current_timezone())
-        bc1 = BeginnerClass(class_date=d, class_type='beginner', beginner_limit=10, returnee_limit=0, state='open')
+        bc1 = BeginnerClass(class_date=d, class_type='beginner', beginner_limit=3, beginner_wait_limit=5,
+                            returnee_limit=0, state='open')
         bc1.save()
         u = User.objects.get(pk=3)
         u.is_staff = True
         u.is_instructor = True
         u.save()
-
+        ps = ['paid', 'paid', 'paid', 'waiting', 'waiting']
         for i in range(5):
             cr = ClassRegistration(beginner_class=bc1,
                                    student=Student.objects.get(pk=i + 1),
                                    new_student=True,
-                                   pay_status='paid',
+                                   pay_status=ps[i],
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
 
         # UpdatePrograms().beginner_class()
         UpdatePrograms().reminder_email(timezone.datetime.time(d))
+        logging.warning(len(mail.outbox))
+        for m in mail.outbox:
+            logging.warning(m.subject)
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Reminder {d.strftime('%Y-%m-%d')}")
         s = 'Either you or a member of your family is signed up for a class'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
         self.assertTrue(mail.outbox[0].body.find('will not be allowed to participate') > 0)
 
+        self.assertEqual(mail.outbox[1].subject, f"WPA Class Wait List Reminder {d.strftime('%Y-%m-%d')}")
+        s = 'Either you or a member of your family is on the wait-list for a class'
+        self.assertTrue(mail.outbox[1].body.find(s) > 0)
+        self.assertTrue(mail.outbox[1].body.find('will not be allowed to participate') > 0)
+
     def test_email_returnee_reminder(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=11)
         d = timezone.make_aware(d, timezone.get_current_timezone())
-        bc1 = BeginnerClass(class_date=d, class_type='returnee', beginner_limit=10, returnee_limit=0, state='open')
+        bc1 = BeginnerClass(class_date=d, class_type='returnee', beginner_limit=0, returnee_limit=3,
+                            returnee_wait_limit=5, state='open')
         bc1.save()
         u = User.objects.get(pk=3)
         u.is_staff = True
         u.is_instructor = True
         u.save()
-
+        ps = ['paid', 'paid', 'paid', 'waiting', 'waiting']
         for i in range(5):
             cr = ClassRegistration(beginner_class=bc1,
                                    student=Student.objects.get(pk=i + 1),
                                    new_student=True,
-                                   pay_status='paid',
+                                   pay_status=ps[i],
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
 
@@ -141,6 +151,9 @@ class TestsUpdatePrograms(TestCase):
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Reminder {d.strftime('%Y-%m-%d')}")
         s = 'Either you or a member of your family is signed up for a class'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
+        self.assertEqual(mail.outbox[1].subject, f"WPA Class Wait List Reminder {d.strftime('%Y-%m-%d')}")
+        s = 'Either you or a member of your family is on the wait-list for a class'
+        self.assertTrue(mail.outbox[1].body.find(s) > 0)
 
 
 class TestsUpdatePrograms2(TestCase):
