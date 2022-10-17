@@ -9,4 +9,5 @@ class Email(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
     email = models.EmailField(unique=True)
     is_valid = models.BooleanField(default=True)
+    ip = models.GenericIPAddressField(default=None, null=True)
 
