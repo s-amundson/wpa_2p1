@@ -125,8 +125,8 @@ def validate_email(address, default_state=True):
             raise forms.ValidationError("Email domain blocked")
 
         # check if we can validate email address.
-        count_day = Email.objects.filter(created_time__gt=timezone.now() + timezone.timedelta(hours=24)).count()
-        count_hour = Email.objects.filter(created_time__gt=timezone.now() + timezone.timedelta(hours=1)).count()
+        count_day = Email.objects.filter(created_time__gt=timezone.now() - timezone.timedelta(hours=24)).count()
+        count_hour = Email.objects.filter(created_time__gt=timezone.now() - timezone.timedelta(hours=1)).count()
         if count_day > 95 or count_hour > 9:
             raise forms.ValidationError("Email cannot be checked at this time.")
 
