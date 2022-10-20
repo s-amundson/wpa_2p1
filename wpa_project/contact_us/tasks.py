@@ -128,10 +128,12 @@ def validate_email(address, default_state=True):
         count_day = Email.objects.filter(created_time__gt=timezone.now() - timezone.timedelta(hours=24)).count()
         count_hour = Email.objects.filter(created_time__gt=timezone.now() - timezone.timedelta(hours=1)).count()
         if count_day > 95 or count_hour > 9:
+            logging.warning('Email validation count to high')
             raise forms.ValidationError("Email cannot be checked at this time.")
 
         record = Email.objects.create(email=address)
         status = is_it_real(address)
+        # status = 'valid'
         logging.warning(str(status))
         if status == "valid":
             logging.warning(f'{address} is valid')

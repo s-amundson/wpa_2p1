@@ -58,10 +58,6 @@ class CreatePaymentView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # if settings.SQUARE_CONFIG['environment'] == "production":   # pragma: no cover
-        #     context['pay_url'] = "https://web.squarecdn.com/v1/square.js"
-        # else:  # pragma: no cover
-        #     context['pay_url'] = "https://sandbox.web.squarecdn.com/v1/square.js"
         context['pay_url'] = self.pay_url
         context['app_id'] = settings.SQUARE_CONFIG['application_id']
         context['location_id'] = settings.SQUARE_CONFIG['location_id']

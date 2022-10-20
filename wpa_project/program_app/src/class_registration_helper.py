@@ -63,7 +63,7 @@ class ClassRegistrationHelper:
 
             if returnee and enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
                 if returnee and enrolled_count['returnee'] + returnee > beginner_class.returnee_limit + \
-                        beginner_class.returneewait_limit:
+                        beginner_class.returnee_wait_limit:
                     return 'full'
                 if enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
                     wait = True

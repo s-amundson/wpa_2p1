@@ -7,7 +7,6 @@
     {% include "contact_us/is_it_real_email.html" %}
     <form method="post">{% csrf_token %}
         {{ form.as_p }}
-
         <button class="m-2 btn btn-primary submit-btn" type="submit">
             Submit
         </button>

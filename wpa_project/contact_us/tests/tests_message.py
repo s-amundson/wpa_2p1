@@ -6,7 +6,6 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 from django.core import mail
-from captcha.conf import settings as captcha_settings
 
 from ..models import Category, Message, SpamWords
 from ..tasks import send_contact_email
@@ -45,7 +44,6 @@ class TestsMessage(TestCase):
         self.client.force_login(self.test_user)
         self.json_response = {'status': 'valid'}
         self.settings(CAPTCHA_TEST_MODE=True)
-        captcha_settings.CAPTCHA_TEST_MODE = True
         self.post_dict = {'contact_name': ['Emily Conlan'],
                           'email': ['EmilyNConlan@einrot.com'],
                           'category': ['2'],
@@ -57,7 +55,6 @@ class TestsMessage(TestCase):
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
-        captcha_settings.CAPTCHA_TEST_MODE = False
 
     def _category_post(self):
         c = Category.objects.create(title='test category')

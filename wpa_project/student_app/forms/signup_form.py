@@ -1,9 +1,10 @@
 from allauth.account.forms import SignupForm
 from django import forms
+from django.conf import settings
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
-
+from captcha.fields import ReCaptchaField
 from contact_us.tasks import validate_email
 
 import logging
@@ -19,6 +20,7 @@ class SignUpForm(SignupForm):
                 attrs={'class': "m-2"}), required=True,
                 label=mark_safe(_(f"I have read and agree with the <a href='{terms}'>Terms and Conditions</a>")),
                 initial=False)
+        self.fields['captcha'] = ReCaptchaField()
 
     def clean_email(self):
         value = super().clean_email()

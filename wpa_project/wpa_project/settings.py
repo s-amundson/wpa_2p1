@@ -128,6 +128,8 @@ CSP_SCRIPT_SRC = ("'self' 'sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgn
                   "https://*.squareupsandbox.com",
                   "https://*.squareup.com",
                   "https://*.facebook.net",
+                  "https://*.google.com",
+                  "https://*.gstatic.com"
                   )
 
 CSRF_COOKIE_SECURE = True
@@ -249,6 +251,11 @@ MIDDLEWARE = [
 PHONENUMBER_DB_FORMAT = 'NATIONAL'
 PHONENUMBER_DEFAULT_REGION = 'US'
 PRIVATE_LINKS = get_secret('PRIVATE_LINKS')
+
+RECAPTCHA_PRIVATE_KEY = get_secret('RECAPTCHA')['SECRET_KEY']
+RECAPTCHA_PUBLIC_KEY = get_secret('RECAPTCHA')['SITE_KEY']
+
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 ROOT_URLCONF = 'wpa_project.urls'
 

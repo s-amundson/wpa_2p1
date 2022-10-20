@@ -7,6 +7,9 @@ $(document).ready(function(){
         $(this).prop('disabled', true);
         $(this).parents("form").submit()
     });
+    $('#cookieConsent').cookieConsent({
+        message: 'This website uses cookies. By using this website you consent to our use of these cookies.'
+    });
 });
 
 async function add_student_function(student_id) {
