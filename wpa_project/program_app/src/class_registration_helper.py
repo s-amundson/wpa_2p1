@@ -48,22 +48,23 @@ class ClassRegistrationHelper:
                     beginner += 1
                 else:
                     returnee += 1
-        return {'beginner': beginner, 'staff': staff_count, 'returnee': returnee}
+        return {'beginner': beginner, 'staff': staff_count, 'returnee': returnee,
+                'waiting': records.filter(pay_status='waiting').count()}
 
     def has_space(self, user, beginner_class, beginner, instructor, returnee):
         enrolled_count = self.enrolled_count(beginner_class)
         wait = False
         if beginner_class.state in ['open', 'wait']:  # in case it changed since user got the self.form.
             if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
-                if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit + \
-                        beginner_class.beginner_wait_limit:
+                if beginner and enrolled_count['beginner'] + enrolled_count['waiting'] + beginner > \
+                        beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
                     return 'full'
                 if enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
                     wait = True
 
             if returnee and enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
-                if returnee and enrolled_count['returnee'] + returnee > beginner_class.returnee_limit + \
-                        beginner_class.returnee_wait_limit:
+                if returnee and enrolled_count['returnee'] + enrolled_count['waiting'] + returnee > \
+                        beginner_class.returnee_limit + beginner_class.returnee_wait_limit:
                     return 'full'
                 if enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
                     wait = True
@@ -87,10 +88,8 @@ class ClassRegistrationHelper:
 
     def update_class_state(self, beginner_class):
         records = self.student_registrations(beginner_class)
-        logging.warning(len(records))
-        logging.warning(beginner_class.beginner_limit)
         if beginner_class.class_type == 'beginner' and beginner_class.state in ['open', 'wait', 'full']:
-            if len(records) >= beginner_class.beginner_limit and beginner_class.state == 'open':
+            if len(records) >= beginner_class.beginner_limit and beginner_class.state in ['open', 'wait']:
                 if len(records) >= beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
                     beginner_class.state = 'full'
                 else:
@@ -104,7 +103,7 @@ class ClassRegistrationHelper:
                     beginner_class.state = 'wait'
                 beginner_class.save()
         elif beginner_class.class_type == 'returnee' and beginner_class.state in ['open', 'wait', 'full']:
-            if len(records) >= beginner_class.returnee_limit and beginner_class.state == 'open':
+            if len(records) >= beginner_class.returnee_limit and beginner_class.state in ['open', 'wait']:
                 if len(records) >= beginner_class.returnee_limit + beginner_class.returnee_wait_limit:
                     beginner_class.state = 'full'
                 else:
@@ -121,7 +120,7 @@ class ClassRegistrationHelper:
             beginners = len(records.filter(student__safety_class__isnull=True))
             returnees = len(records.filter(student__safety_class__isnull=False))
             if beginners >= beginner_class.beginner_limit and returnees >= beginner_class.returnee_limit and \
-                    beginner_class.state == 'open':
+                    beginner_class.state in ['open', 'wait']:
                 if beginners >= beginner_class.beginner_limit + beginner_class.beginner_wait_limit and \
                         returnees >= beginner_class.returnee_limit + beginner_class.returnee_wait_limit:
                     beginner_class.state = 'full'

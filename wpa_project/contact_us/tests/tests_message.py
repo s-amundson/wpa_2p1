@@ -1,5 +1,5 @@
 import logging
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from django.apps import apps
 from django.test import TestCase, Client
@@ -48,8 +48,7 @@ class TestsMessage(TestCase):
                           'email': ['EmilyNConlan@einrot.com'],
                           'category': ['2'],
                           'message': ['test message'],
-                          'captcha_0': 'PASSED',
-                          'captcha_1': 'PASSED',
+                          'captcha': ['on'],
                           }
 
     @classmethod
@@ -102,8 +101,7 @@ class TestsMessage(TestCase):
         is_it_real.return_value = "valid"
 
         self._category_post()
-        self.post_dict.pop('captcha_0')
-        self.post_dict.pop('captcha_1')
+        self.post_dict.pop('captcha')
         response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
         message = Message.objects.all()
         self.assertEqual(len(message), 1)
@@ -117,9 +115,10 @@ class TestsMessage(TestCase):
 
         self.assertEqual(len(message), 0)
 
+    @patch("captcha.fields.ReCaptchaField.validate")
     @patch('contact_us.tasks.is_it_real')
     @patch('contact_us.views.message_view.send_contact_email.delay')
-    def test_post_message_nonuser(self, sce, is_it_real):
+    def test_post_message_nonuser(self, sce, is_it_real, cap):
         sce.side_effect = self.send_email
         is_it_real.return_value = "valid"
 
@@ -130,8 +129,9 @@ class TestsMessage(TestCase):
         self.assertEqual(len(message), 1)
         self.check_email()
 
+    @patch("captcha.fields.ReCaptchaField.validate")
     @patch('contact_us.views.message_view.send_contact_email.delay')
-    def test_spam_message_spam_word(self, sce):
+    def test_spam_message_spam_word(self, sce, cap):
         sce.side_effect = self.send_email
         SpamWords.objects.create(word='porn')
         self.client.logout()
@@ -143,8 +143,9 @@ class TestsMessage(TestCase):
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 0)
 
+    @patch("captcha.fields.ReCaptchaField.validate")
     @patch('contact_us.views.message_view.send_contact_email.delay')
-    def test_spam_message_ru(self, sce):
+    def test_spam_message_ru(self, sce, cap):
         sce.side_effect = self.send_email
         self.client.logout()
         self._category_post()
@@ -155,9 +156,10 @@ class TestsMessage(TestCase):
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 0)
 
+    @patch("captcha.fields.ReCaptchaField.validate")
     @patch('contact_us.tasks.is_it_real')
     @patch('contact_us.views.message_view.send_contact_email.delay')
-    def test_spam_message_english(self, sce, is_it_real):
+    def test_spam_message_english(self, sce, is_it_real, cap):
         sce.side_effect = self.send_email
         is_it_real.return_value = "valid"
         self.client.logout()
@@ -170,9 +172,10 @@ class TestsMessage(TestCase):
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 0)
 
+    @patch("captcha.fields.ReCaptchaField.validate")
     @patch('contact_us.tasks.is_it_real')
     @patch('contact_us.views.message_view.send_contact_email.delay')
-    def test_message_english(self, sce, is_it_real):
+    def test_message_english(self, sce, is_it_real, cap):
         sce.side_effect = self.send_email
         is_it_real.return_value = "valid"
 
@@ -186,8 +189,9 @@ class TestsMessage(TestCase):
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 1)
 
+    @patch("captcha.fields.ReCaptchaField.validate")
     @patch('contact_us.views.message_view.send_contact_email.delay')
-    def test_message_english2(self, sce):
+    def test_message_english2(self, sce, cap):
         sce.side_effect = self.send_email
         self.client.logout()
         self._category_post()
@@ -199,8 +203,9 @@ class TestsMessage(TestCase):
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 0)
 
+    @patch("captcha.fields.ReCaptchaField.validate")
     @patch('contact_us.views.message_view.send_contact_email.delay')
-    def test_message_email_ru(self, sce):
+    def test_message_email_ru(self, sce, cap):
         sce.side_effect = self.send_email
         self.client.logout()
         self._category_post()
@@ -210,8 +215,10 @@ class TestsMessage(TestCase):
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 0)
 
+
+    @patch("captcha.fields.ReCaptchaField.validate")
     @patch('contact_us.views.message_view.send_contact_email.delay')
-    def test_message_timeout(self, sce):
+    def test_message_timeout(self, sce, cap):
         sce.side_effect = self.send_email
         self.client.logout()
         self._category_post()
@@ -238,8 +245,9 @@ class TestsMessage(TestCase):
         self.assertEqual(len(message), 1)
         self.assertEqual(len(mail.outbox), 0)
 
+    @patch("captcha.fields.ReCaptchaField.validate")
     @patch('contact_us.views.message_view.send_contact_email.delay')
-    def test_message_naive_bayes(self, sce):
+    def test_message_naive_bayes(self, sce, cap):
         sce.side_effect = self.send_email
         self.client.logout()
         c = self._category_post()

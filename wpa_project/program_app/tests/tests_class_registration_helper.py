@@ -213,6 +213,14 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         registrations = ClassRegistration.objects.filter(beginner_class=bc)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 3)
 
+        # change wait  limit to 2 so that the class is full.
+        bc.beginner_wait_limit = 2
+        bc.save()
+        self.crh.update_class_state(bc)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'full')
+
+
         # chang the beginnner limit so that one waiting can change to paid.
         bc.beginner_limit = 3
         bc.save()
@@ -323,6 +331,13 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         registrations = ClassRegistration.objects.filter(beginner_class=bc)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 3)
 
+        # change wait  limit to 2 so that the class is full.
+        bc.returnee_wait_limit = 2
+        bc.save()
+        self.crh.update_class_state(bc)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.state, 'full')
+
         # chang the beginnner limit so that one waiting can change to paid.
         bc.returnee_limit = 3
         bc.save()
@@ -338,3 +353,47 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         registrations = ClassRegistration.objects.filter(beginner_class=bc)
         self.assertEqual(len(registrations), 5)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
+
+    def test_has_space_beginner(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_type = 'beginner'
+        bc.beginner_limit = 5
+        bc.returnee_limit = 0
+        bc.save()
+        for i in range(3):
+            s = Student.objects.get(pk=i + 3)
+            s.safety_class = None
+            s.save()
+            cr = ClassRegistration(beginner_class=bc,
+                                   student=s,
+                                   new_student=True,
+                                   pay_status='paid',
+                                   idempotency_key=str(uuid.uuid4()))
+            cr.save()
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 1, 0, 0), 'open')
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 3, 0, 0), 'full')
+        bc.beginner_wait_limit = 3
+        bc.save()
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 3, 0, 0), 'wait')
+
+    def test_has_space_returnee(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_type = 'returnee'
+        bc.beginner_limit = 0
+        bc.returnee_limit = 5
+        bc.save()
+        for i in range(3):
+            s = Student.objects.get(pk=i + 3)
+            s.safety_class = "2021-05-31"
+            s.save()
+            cr = ClassRegistration(beginner_class=bc,
+                                   student=s,
+                                   new_student=True,
+                                   pay_status='paid',
+                                   idempotency_key=str(uuid.uuid4()))
+            cr.save()
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 1), 'open')
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 3), 'full')
+        bc.returnee_wait_limit = 3
+        bc.save()
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 3), 'wait')
