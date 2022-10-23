@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 class SignUpForm(SignupForm):
     def __init__(self, *args, **kwargs):
+        self.client_ip = kwargs.pop('client_ip')
+        self.is_routable = kwargs.pop('is_routable')
         super().__init__(*args, **kwargs)
         logging.warning("signup")
         terms = reverse_lazy("information:info", kwargs={'info': 'terms'})
@@ -22,7 +24,7 @@ class SignUpForm(SignupForm):
                 label=mark_safe(_(f"I have read and agree with the <a href='{terms}'>Terms and Conditions</a>")),
                 initial=False)
         self.fields['captcha'] = ReCaptchaField()
-        self.client_ip = kwargs.get('client_ip')
+
 
     def clean_email(self):
         address = super().clean_email()

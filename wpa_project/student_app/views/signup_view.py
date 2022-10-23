@@ -6,9 +6,6 @@ logger = logging.getLogger(__name__)
 
 
 class SignupView(ASV):
-    template_name = 'account/login_insert.html'
-    # client_ip = None
-    # is_routable = None
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
