@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from ipware import get_client_ip
 
 from ..forms import MessageForm
 from ..models import Message
@@ -88,7 +89,8 @@ class MessageView(FormView):
         # save record
         self.request.session['contact_us'] = timezone.now().isoformat()
         message = form.save()
-        send_contact_email.delay(message.id)
+        client_ip, is_routable = get_client_ip(self.request)
+        send_contact_email.delay(message.id, client_ip)
         return super().form_valid(form)
 
     def post(self, request, *args, **kwargs):

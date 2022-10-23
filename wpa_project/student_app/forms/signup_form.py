@@ -1,11 +1,12 @@
 from allauth.account.forms import SignupForm
 from django import forms
-from django.conf import settings
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from captcha.fields import ReCaptchaField
+
 from contact_us.tasks import validate_email
+from contact_us.models import Email
 
 import logging
 logger = logging.getLogger(__name__)
@@ -21,11 +22,19 @@ class SignUpForm(SignupForm):
                 label=mark_safe(_(f"I have read and agree with the <a href='{terms}'>Terms and Conditions</a>")),
                 initial=False)
         self.fields['captcha'] = ReCaptchaField()
+        self.client_ip = kwargs.get('client_ip')
 
     def clean_email(self):
-        value = super().clean_email()
-        is_valid = validate_email(value)
-        if is_valid:
-            return value
-        logging.warning(f'Invalid email {value}')
-        raise forms.ValidationError("Email validation error")
+        address = super().clean_email()
+        try:
+            record = Email.objects.get(email=address)
+            if record.is_valid:
+                return address
+            else:
+                raise forms.ValidationError("Email validation error")
+        except Email.DoesNotExist:
+            is_valid = validate_email(address, self.client_ip)
+            if is_valid:
+                return address
+            logging.warning(f'Invalid email {address}')
+            raise forms.ValidationError("Email validation error")

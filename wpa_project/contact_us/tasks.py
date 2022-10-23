@@ -5,6 +5,7 @@ from django import forms
 from django.conf import settings
 from django.utils import timezone
 from django_pandas.io import read_frame
+from ipware import get_client_ip
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 
@@ -94,7 +95,7 @@ def naive_bayes(message):
 
 
 @shared_task
-def send_contact_email(message_id):
+def send_contact_email(message_id, client_ip):
     message = Message.objects.get(pk=message_id)
     logging.warning('here')
     naive_bayes(message)
@@ -102,7 +103,7 @@ def send_contact_email(message_id):
         return
     if message.spam_category == 'legit' or check_spam(message):
         try:
-            is_valid = validate_email(message.email)
+            is_valid = validate_email(message.email, client_ip)
         except forms.ValidationError as e:
             is_valid = False
         if is_valid:
@@ -113,10 +114,14 @@ def send_contact_email(message_id):
             logging.warning(message.sent)
 
 
-def validate_email(address, default_state=True):
+def validate_email(address, client_ip, default_state=True):
     try:
         record = Email.objects.get(email=address)
     except Email.DoesNotExist:
+        if client_ip is None or Email.objects.filter(
+                ip=client_ip, created_time__gt=timezone.now() - timezone.timedelta(hours=24)).count() > 2:
+            logging.warning(f'IP {client_ip} count to high. Address: {address}')
+            raise forms.ValidationError("Email validation error")
         u, d = address.split('@')
         logging.warning(f'{u} {d}')
         blocked = BlockedDomain.objects.filter(domain=d).count()
@@ -127,6 +132,8 @@ def validate_email(address, default_state=True):
         # check if we can validate email address.
         count_day = Email.objects.filter(created_time__gt=timezone.now() - timezone.timedelta(hours=24)).count()
         count_hour = Email.objects.filter(created_time__gt=timezone.now() - timezone.timedelta(hours=1)).count()
+        logging.warning(f'count hour {count_hour}')
+
         if count_day > 95 or count_hour > 9:
             logging.warning('Email validation count to high')
             raise forms.ValidationError("Email cannot be checked at this time.")

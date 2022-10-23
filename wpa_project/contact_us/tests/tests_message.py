@@ -50,6 +50,7 @@ class TestsMessage(TestCase):
                           'message': ['test message'],
                           'captcha': ['on'],
                           }
+        self.client_ip = '0.0.0.0'
 
     @classmethod
     def tearDownClass(cls):
@@ -65,8 +66,8 @@ class TestsMessage(TestCase):
         self.assertEqual(mail.outbox[0].subject, 'WPA Contact Us test category')
         self.assertTrue(mail.outbox[0].body.find('test message') > 0)
 
-    def send_email(self, message_id):
-        send_contact_email(message_id)
+    def send_email(self, message_id, client_ip):
+        send_contact_email(message_id, client_ip)
 
     def test_get_message_user(self):
         response = self.client.get(reverse('contact_us:contact'), secure=True)
