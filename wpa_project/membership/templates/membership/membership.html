@@ -11,68 +11,67 @@
     </div>
     <div class="row p-3">
         <div class="col">
-            {% for form in forms %}
-                <form method="post">
-                    {% csrf_token %}
+            <form method="post">
+                {% csrf_token %}
 
-                    <div class="row p-3">
-                        <div class="col-3 text-right">
-                            Select students to join:
-                        </div>
-                        <div class="col">
-                            {% for student in form.get_boxes %}
-                                <div class="row">
-                                    <div class="col input-group input-group-md">
-                                        {{ student }} {{ student.label }}
-                                    </div>
+                <div class="row p-3">
+                    <div class="col-3 text-right">
+                        Select students to join:
+                    </div>
+                    <div class="col">
+                        {% for student in form.get_boxes %}
+                            <div class="row">
+                                <div class="col input-group input-group-md">
+                                    {{ student }} {{ student.label }}
                                 </div>
-                            {% endfor %}
-                        </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                    <div class="row p-3">
+                </div>
+                <div class="row p-3">
 
-                        <table class="table table-bordered
-                                {% if user.dark_theme %}
-                                    table-dark
-                                {% else %}
-                                    table-light
-                                {% endif %}">
-                            <thead>
+                    <table class="table table-bordered
+                            {% if user.dark_theme %}
+                                table-dark
+                            {% else %}
+                                table-light
+                            {% endif %}">
+                        <thead>
+                            <tr>
+                                <th> Membership Level </th>
+                                <th> Cost </th>
+                                <th> Description </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for l in levels %}
                                 <tr>
-                                    <th> Membership Level </th>
-                                    <th> Cost </th>
-                                    <th> Description </th>
+                                    <td>
+                                        <label for="id_level_{{ l.id }}">
+                                            <input type="radio" name="level" value="{{ l.id }}" id="id_level_{{ l.id }}" required="">
+                                            {{ l.name }}
+                                        </label>
+                                    </td>
+                                    <td>${{ l.cost }}</td>
+                                    <td>
+                                        {{ l.description }}
+                                        <input type="hidden" id="max_age_{{l.id}}" value="{{ l.max_age }}">
+                                        <input type="hidden" id="min_age_{{l.id}}" value="{{ l.min_age }}">
+                                        <input type="hidden" id="family_{{l.id}}" value="{{ l.is_family }}">
+                                        <input type="hidden" id="additional_cost_{{l.id}}" value="{{ l.additional_cost }}">
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% for l in levels %}
-                                    <tr>
-                                        <td>
-                                            <label for="id_level_{{ l.id }}">
-                                                <input type="radio" name="level" value="{{ l.id }}" id="id_level_{{ l.id }}" required="">
-                                                {{ l.name }}
-                                            </label>
-                                        </td>
-                                        <td>${{ l.cost }}</td>
-                                        <td>
-                                            {{ l.description }}
-                                            <input type="hidden" id="max_age_{{l.id}}" value="{{ l.max_age }}">
-                                            <input type="hidden" id="min_age_{{l.id}}" value="{{ l.min_age }}">
-                                            <input type="hidden" id="family_{{l.id}}" value="{{ l.is_family }}">
-                                            <input type="hidden" id="additional_cost_{{l.id}}" value="{{ l.additional_cost }}">
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 
 
-                    </div>
-                    <div class="row">
-                        <input class="btn btn-primary" type="submit" value="Submit">
-                    </div>
-                </form>
-            {% endfor %}
+                </div>
+                <div class="row">
+                    <input class="btn btn-primary" type="submit" value="Submit">
+                </div>
+            </form>
+
         </div>
     </div>
     <hr/>

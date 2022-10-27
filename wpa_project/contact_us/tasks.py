@@ -154,5 +154,6 @@ def validate_email(address, client_ip, default_state=True):
             record.is_valid = default_state
             if not default_state:
                 raise forms.ValidationError("Email validation error")
+        record.ip = client_ip
         record.save()
     return record.is_valid
