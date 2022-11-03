@@ -64,7 +64,37 @@ hr {
   border-top: 1px solid rgba(255, 255, 255, 0.5);
 
 }
+#block-main.browser-theme {
+    background-color: var(--bs-white);
+    --bs-text-opacity: 1;
+    color: rgba(var(--bs-dark-rgb),var(--bs-text-opacity)) !important;
+}
 
+#block-main.dark-theme {
+    background-color: var(--bs-dark);
+    --bs-text-opacity: 1;
+    color: var(--bs-light) !important;
+}
+
+#block-main.light-theme {
+    background-color: var(--bs-white);
+    --bs-text-opacity: 1;
+    --text-color: var(--bs-dark-rgb);
+    color: rgba(var(--bs-dark-rgb),var(--bs-text-opacity)) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    #block-main.browser-theme {
+        background-color: var(--bs-dark);
+        --bs-text-opacity: 1;
+        --text-color: var(--bs-light);
+        color: var(--bs-light) !important;
+    }
+
+}
+.table {
+    color: var(--text-color);
+}
 .calendar {
   width: 98%;
   margin: auto;

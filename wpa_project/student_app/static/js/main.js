@@ -10,6 +10,37 @@ $(document).ready(function(){
     $('#cookieConsent').cookieConsent({
         message: 'This website uses cookies. By using this website you consent to our use of these cookies.'
     });
+
+    var prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+    if ($("#block-main").hasClass("browser-theme")) {
+        console.log("no session theme")
+        if (prefersDarkScheme.matches) {
+            $("#icon-dark").hide();
+            $("#block-main").addClass("dark-theme");
+        } else {
+            $("#icon-bright").hide();
+            $("#block-main").addClass("light-theme");
+        }
+        $("#block-main").removeClass("browser-theme");
+    }
+    if ($("#block-main").hasClass("light-theme")) {
+        $("#icon-bright").hide();
+    }
+    if ($("#block-main").hasClass("dark-theme")) {
+        $("#icon-dark").hide();
+    }
+    $("#theme-button").click(function() {
+        $("#block-main").toggleClass(["light-theme", "dark-theme"]);
+        change_theme($("#block-main").hasClass("dark-theme"));
+//        if (prefersDarkScheme.matches) {
+//            $("#block-main").toggleClass("light-theme");
+//            change_theme(!$("#block-main").hasClass("light-theme"));
+//
+//        } else {
+//            $("#block-main").toggleClass("dark-theme");
+//            change_theme($("#block-main").hasClass("dark-theme"));
+//        }
+    });
 });
 
 async function add_student_function(student_id) {
@@ -75,6 +106,25 @@ function alert_notice(title, message) {
     $("#alert-title").html(title)
     $("#div-warning").html(message)
     $("#alert-warning").modal("show");
+}
+
+async function change_theme(dark_theme) {
+    let theme_string = 'light'
+    if (dark_theme) {
+        $("#icon-dark").hide();
+        $("#icon-bright").show();
+        theme_string = 'dark'
+    } else {
+        $("#icon-dark").show();
+        $("#icon-bright").hide();
+    }
+
+    let data = await $.post(url_theme, {
+        csrfmiddlewaretoken: $("#theme-form").find('[name="csrfmiddlewaretoken"]').val(),
+        theme: theme_string,
+        }, function(data, status) {
+        return data;
+    }, "json");
 }
 
 function load_student_family_form(family_id) {

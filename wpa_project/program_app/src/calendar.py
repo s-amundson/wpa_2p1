@@ -118,7 +118,7 @@ class Calendar(HTMLCalendar):
             bg = 'table-dark'
         else:
             bg = 'table-light'
-        cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar table table-bordered {bg}">\n'
+        cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar table table-bordered">\n'
         cal += f'{self.formatmonthname(self.year, self.month, withyear=withyear)}\n'
         cal += f'{self.formatweekheader()}\n'
         for week in self.monthdays2calendar(self.year, self.month):

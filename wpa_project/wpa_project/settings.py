@@ -109,7 +109,7 @@ CSP_FRAME_SRC = ("'self'",
                  "https://www.facebook.com",
                  "https://*.google.com",
                  )
-CSP_IMG_SRC = ("'self' ",
+CSP_IMG_SRC = ("'self'", "data:",
                "https://www.facebook.com",
                "http://www.w3.org")
 CSP_INCLUDE_NONCE_IN = ['script-src']

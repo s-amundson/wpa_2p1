@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         {% load static %}
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
@@ -23,6 +24,10 @@
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
         <script src="{% static 'js/main.js' %}"></script>
+        <script nonce="{{request.csp_nonce}}">
+            let url_theme = "{% url 'registration:theme' %}"
+            let theme = "{{request.session.theme}}"
+        </script>
         <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -54,13 +59,7 @@
                     {% endif %}
                     {% block left %}{% endblock %}
                 </div>
-                <div class="col-lg container
-                {% if user.dark_theme %}
-                    bg-dark text-white
-                {% else %}
-                    bg-light text-dark
-                {% endif %}
-                " id="block-main">
+                <div class="col-lg container block-main {{request.session.theme|default:'browser'}}-theme" id="block-main">
                     {% block main %}{% endblock %}
                 </div>
                 <div class="col-lg-2">

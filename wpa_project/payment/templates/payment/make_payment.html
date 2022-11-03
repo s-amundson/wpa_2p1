@@ -43,12 +43,7 @@
           {% for error in form.payment_errors %}
             <p>{{ error }}</p>
           {% endfor %}
-          <table class="col table table-bordered
-                {% if user.dark_theme %}
-                    table-dark
-                {% else %}
-                    table-light
-                {% endif %}">
+          <table class="col table table-bordered">
             <thead>
                 <tr>
                   <th> Item </th>

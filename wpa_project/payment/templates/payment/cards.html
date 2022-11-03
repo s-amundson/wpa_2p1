@@ -32,12 +32,7 @@
         {% csrf_token %}
         {{ form.source_id }}
 
-        <table class="col table table-bordered
-                {% if user.dark_theme %}
-                    table-dark
-                {% else %}
-                    table-light
-                {% endif %}">
+        <table class="col table table-bordered">
             <thead>
             <tr>
                 <th colspan="2" class="text-center"> Saved Cards</th>
