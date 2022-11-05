@@ -1,4 +1,4 @@
-from django.forms import Form, ModelChoiceField, RadioSelect
+from django.forms import Form, ModelChoiceField, RadioSelect, CharField
 from src.model_form import MyModelForm
 from ..models import Category, Faq
 
@@ -17,3 +17,8 @@ class FaqFilterForm(Form):
         super().__init__(*args, **kwargs)
         self.fields['category'] = ModelChoiceField(Category.objects.all(), empty_label="---------", required=False)
 
+
+class FaqSearchForm(Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['search'] = CharField(required=False)

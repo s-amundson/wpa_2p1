@@ -13,7 +13,6 @@ $(document).ready(function(){
 
     var prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
     if ($("#block-main").hasClass("browser-theme")) {
-        console.log("no session theme")
         if (prefersDarkScheme.matches) {
             $("#icon-dark").hide();
             $("#block-main").addClass("dark-theme");
@@ -33,14 +32,6 @@ $(document).ready(function(){
     $("#theme-button").click(function() {
         $("#block-main").toggleClass(["light-theme", "dark-theme"]);
         change_theme($("#block-main").hasClass("dark-theme"));
-//        if (prefersDarkScheme.matches) {
-//            $("#block-main").toggleClass("light-theme");
-//            change_theme(!$("#block-main").hasClass("light-theme"));
-//
-//        } else {
-//            $("#block-main").toggleClass("dark-theme");
-//            change_theme($("#block-main").hasClass("dark-theme"));
-//        }
     });
 });
 
