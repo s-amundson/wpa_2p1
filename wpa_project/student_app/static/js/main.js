@@ -28,6 +28,7 @@ $(document).ready(function(){
     }
     if ($("#block-main").hasClass("dark-theme")) {
         $("#icon-dark").hide();
+        $(".table-striped").addClass("table-dark")
     }
     $("#theme-button").click(function() {
         $("#block-main").toggleClass(["light-theme", "dark-theme"]);
@@ -114,9 +115,11 @@ async function change_theme(dark_theme) {
         $("#icon-dark").hide();
         $("#icon-bright").show();
         theme_string = 'dark'
+        $(".table-striped").addClass("table-dark")
     } else {
         $("#icon-dark").show();
         $("#icon-bright").hide();
+        $(".table-striped").removeClass("table-dark")
     }
 
     let data = await $.post(url_theme, {
