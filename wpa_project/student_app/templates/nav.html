@@ -12,6 +12,9 @@
                 <a class="nav-link" href="{% url 'information:info' 'about' %}">About</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="{% url 'information:info' 'directions' %}">Directions</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="{% url 'information:info' 'class_description' %}">Class Description</a>
             </li>
             {% if user.is_board %}
