@@ -6,6 +6,15 @@ logger = logging.getLogger(__name__)
 
 
 class SignupView(ASV):
+    def dispatch(self, request, *args, **kwargs):
+        dispatch = super().dispatch(request, *args, **kwargs)
+        scores = self.request.session.get('recaptcha_scores', [])
+        if len(scores):
+            average = sum(scores) / len(scores)
+        else:
+            average = 0
+        logging.warning(average)
+        return dispatch
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

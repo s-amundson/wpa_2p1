@@ -33,6 +33,17 @@ $(document).ready(function(){
         $("#block-main").toggleClass(["light-theme", "dark-theme"]);
         change_theme($("#block-main").hasClass("dark-theme"));
     });
+//    $(".nav-link").click(async function(e) {
+//        if (!$(this).hasClass('dropdown-toggle')) {
+//            e.preventDefault();
+//            await post_recapcha_href($(this).attr('href'));
+//        }
+//    });
+    $(".captcha-link").one("click", async function(e) {
+        e.preventDefault();
+        await post_recapcha_href($(this).attr('href'));
+        window.location = $(this).attr("href");
+    });
 });
 
 async function add_student_function(student_id) {
@@ -280,4 +291,22 @@ async function post_is_joad(checkbox, send_data) {
         }
         return data;
     }, "json");
+}
+
+async function post_recapcha_href(href) {
+    let arr = href.split("/")
+    let action = arr[2]
+    if (action == 'info') {
+        action = arr[3]
+    }
+    grecaptcha.ready(function() {
+        grecaptcha.execute(recaptcha_site_v3, {action: action}).then(async function(token) {
+            let data = await $.post(url_recaptcha, {
+                csrfmiddlewaretoken: $("#recaptcha-form").find('[name="csrfmiddlewaretoken"]').val(),
+                captcha: token,
+            }, function(data, status) {
+            return data;
+            }, "json");
+        });
+    });
 }

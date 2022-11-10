@@ -4,6 +4,7 @@ from .instructor_update_view import InstructorUpdateView
 from .login_view import LoginView
 from .pdf_view import PdfGetView
 from .profile_view import ProfileView
+from .recaptcha_view import RecaptchaView
 from .search_view import SearchEmailView, SearchNameView, SearchPhoneView, SearchResultListView, SearchResultView
 from .send_email_view import SendEmailView
 from .signup_view import SignupView

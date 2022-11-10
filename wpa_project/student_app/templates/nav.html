@@ -9,13 +9,13 @@
     <div class="navbar-expand-md" id="navbar">
         <ul class="navbar-nav md-auto mt-2">
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'information:info' 'about' %}">About</a>
+                <a class="nav-link captcha-link" href="{% url 'information:info' 'about' %}">About</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'information:info' 'directions' %}">Directions</a>
+                <a class="nav-link captcha-link" href="{% url 'information:info' 'directions' %}">Directions</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'information:info' 'class_description' %}">Class Description</a>
+                <a class="nav-link captcha-link" href="{% url 'information:info' 'class_description' %}">Class Description</a>
             </li>
             {% if user.is_board %}
                 <li class="nav-item dropdown">
@@ -30,11 +30,11 @@
                 </li>
             {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'contact_us:contact' %}">Contact Us</a>
+                    <a class="nav-link captcha-link" href="{% url 'contact_us:contact' %}">Contact Us</a>
                 </li>
             {% endif %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'payment:make_payment' %}">Donate</a>
+                <a class="nav-link captcha-link" href="{% url 'payment:make_payment' %}">Donate</a>
             </li>
             {% if user.is_board %}
                 <li class="nav-item dropdown">
@@ -48,7 +48,7 @@
                 </li>
             {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'information:faq' %}">Faq</a>
+                    <a class="nav-link captcha-link" href="{% url 'information:faq' %}">Faq</a>
                 </li>
             {% endif %}
             <li class="nav-item dropdown">
@@ -56,12 +56,12 @@
                     Policies
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{% url 'information:info' 'terms' %}">Terms</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'privacy' %}">Privacy</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'covid' %}">Covid 19</a>
+                    <a class="dropdown-item captcha-link" href="{% url 'information:info' 'terms' %}">Terms</a>
+                    <a class="dropdown-item captcha-link" href="{% url 'information:info' 'privacy' %}">Privacy</a>
+                    <a class="dropdown-item captcha-link" href="{% url 'information:info' 'covid' %}">Covid 19</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{% url 'information:info' 'constitution' %}">Constitution</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'by-laws' %}">By-Laws</a>
+                    <a class="dropdown-item captcha-link" href="{% url 'information:info' 'constitution' %}">Constitution</a>
+                    <a class="dropdown-item captcha-link" href="{% url 'information:info' 'by-laws' %}">By-Laws</a>
                 </div>
             </li>
 
@@ -121,7 +121,7 @@
                     </li>
                 {% else %}
                      <li class="nav-item">
-                        <a class="nav-link" href="{% url 'joad:index'%}">JOAD</a>
+                        <a class="nav-link captcha-link" href="{% url 'joad:index'%}">JOAD</a>
                     </li>
                 {% endif %}
                 <li class="nav-item dropdown">
@@ -129,15 +129,15 @@
                         Calendar
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{% url 'programs:calendar' %}">Classes</a>
-                        <a class="dropdown-item" href="{% url 'programs:google_calendar' %}">Events</a>
+                        <a class="dropdown-item captcha-link" href="{% url 'programs:calendar' %}">Classes</a>
+                        <a class="dropdown-item captcha-link" href="{% url 'programs:google_calendar' %}">Events</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+                    <a class="nav-link captcha-link" href="{% url 'account_logout' %}">Logout</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'registration:profile' %}">Profile</a>
+                    <a class="nav-link captcha-link" href="{% url 'registration:profile' %}">Profile</a>
 
             {% else %}
                 <li class="nav-item dropdown">
@@ -145,15 +145,15 @@
                         Calendar
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{% url 'programs:calendar' %}">Classes</a>
-                        <a class="dropdown-item" href="{% url 'programs:google_calendar' %}">Events</a>
+                        <a class="dropdown-item captcha-link" href="{% url 'programs:calendar' %}">Classes</a>
+                        <a class="dropdown-item captcha-link" href="{% url 'programs:google_calendar' %}">Events</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                    <a class="nav-link captcha-link" href="{% url 'account_login' %}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'account_signup' %}">Join</a>
+                    <a class="nav-link captcha-link" href="{% url 'account_signup' %}">Join</a>
                 </li>
             {% endif %}
             <li class="nav-item">
