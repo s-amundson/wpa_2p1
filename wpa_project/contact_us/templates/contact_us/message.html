@@ -2,6 +2,10 @@
 
 {% block title %} Contact Us {% endblock %}
 
+{% block script %}
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endblock %}
+
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
     {% include "contact_us/is_it_real_email.html" %}
