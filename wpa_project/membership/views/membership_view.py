@@ -84,7 +84,8 @@ class MembershipView(UserPassesTestMixin, FormView):
         if self.request.user.is_authenticated:
             student = self.request.user.student_set.last()
             if student:
-                self.students = student.student_family.student_set.all()
+                if student.student_family is not None:
+                    self.students = student.student_family.student_set.all()
                 return student.student_family is not None
         return False
 

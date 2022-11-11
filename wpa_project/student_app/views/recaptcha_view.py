@@ -25,10 +25,7 @@ class RecaptchaView(FormView):
         client_ip, is_routable = get_client_ip(self.request)
         score = form.get_score(client_ip)
         if score is not None:
-            scores = self.request.session.get('recaptcha_scores', [])
-            scores.append(score)
-            logging.warning(scores)
-            self.request.session['recaptcha_scores'] = scores
+            self.request.session['recaptcha_score'] = score
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
             logging.warning('json response')
             return JsonResponse({'status': 'success'})
