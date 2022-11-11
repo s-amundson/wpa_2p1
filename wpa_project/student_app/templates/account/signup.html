@@ -4,6 +4,10 @@
 {% load account socialaccount %}
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
+{% block script %}
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endblock %}
+
 {% block content %}
 <h1>{% trans "Sign Up" %}</h1>
 

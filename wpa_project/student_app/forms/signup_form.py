@@ -3,6 +3,7 @@ from django import forms
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
+from django.conf import settings
 from captcha.fields import ReCaptchaField
 
 from contact_us.tasks import validate_email
@@ -23,7 +24,12 @@ class SignUpForm(SignupForm):
                 attrs={'class': "m-2"}), required=True,
                 label=mark_safe(_(f"I have read and agree with the <a href='{terms}'>Terms and Conditions</a>")),
                 initial=False)
-        self.fields['captcha'] = ReCaptchaField()
+        # self.fields['captcha'] = forms.CharField()
+        # self.fields['captcha'].widget.attrs.update({'class': 'form-control m-2', 'style': 'display:none'})
+        self.fields['captcha'] = ReCaptchaField(
+            public_key=settings.RECAPTCHA_PUBLIC_KEY,
+            private_key=settings.RECAPTCHA_PRIVATE_KEY,
+        )
 
 
     def clean_email(self):

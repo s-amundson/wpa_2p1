@@ -33,13 +33,8 @@ $(document).ready(function(){
         $("#block-main").toggleClass(["light-theme", "dark-theme"]);
         change_theme($("#block-main").hasClass("dark-theme"));
     });
-//    $(".nav-link").click(async function(e) {
-//        if (!$(this).hasClass('dropdown-toggle')) {
-//            e.preventDefault();
-//            await post_recapcha_href($(this).attr('href'));
-//        }
-//    });
-    $(".captcha-link").one("click", async function(e) {
+
+    $(".captcha-link").click(async function(e) {
         e.preventDefault();
         await post_recapcha_href($(this).attr('href'));
         window.location = $(this).attr("href");
