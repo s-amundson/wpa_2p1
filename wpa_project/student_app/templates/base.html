@@ -67,10 +67,12 @@
                 </div>
                 <div class="col-lg-2">
                     {% block right %}{% endblock %}
-                    <form id="recaptcha-form" method="post">{% csrf_token %}
+                    <form id="recaptcha-form" method="post" action="{% url 'registration:recaptcha' %}">{% csrf_token %}
                         {{ recaptcha_form.captcha }}
+                        {{ recaptcha_form.url }}
                     </form>
                 </div>
+
             </div>
         </div>
 

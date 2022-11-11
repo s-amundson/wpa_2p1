@@ -37,7 +37,7 @@ $(document).ready(function(){
     $(".captcha-link").click(async function(e) {
         e.preventDefault();
         await post_recapcha_href($(this).attr('href'));
-        window.location = $(this).attr("href");
+//        window.location = $(this).attr("href");
     });
 });
 
@@ -296,12 +296,16 @@ async function post_recapcha_href(href) {
     }
     grecaptcha.ready(function() {
         grecaptcha.execute(recaptcha_site_v3, {action: action}).then(async function(token) {
-            let data = await $.post(url_recaptcha, {
-                csrfmiddlewaretoken: $("#recaptcha-form").find('[name="csrfmiddlewaretoken"]').val(),
-                captcha: token,
-            }, function(data, status) {
-            return data;
-            }, "json");
+//            let data = await $.post(url_recaptcha, {
+//                csrfmiddlewaretoken: $("#recaptcha-form").find('[name="csrfmiddlewaretoken"]').val(),
+//                captcha: token,
+//                url: href,
+//            }, function(data, status) {
+//            return data;
+//            }, "json");
+        $("#recaptcha-form").find("#id_captcha").val(token)
+        $("#recaptcha-form").find("#id_url").val(href)
+        $("#recaptcha-form").submit()
         });
     });
 }
