@@ -36,7 +36,7 @@ $(document).ready(function(){
 
     $(".captcha-link").click(async function(e) {
         e.preventDefault();
-        await post_recapcha_href($(this).attr('href'));
+        await post_recapcha_href($(this).attr('href'), false);
 //        window.location = $(this).attr("href");
     });
 });
@@ -288,7 +288,7 @@ async function post_is_joad(checkbox, send_data) {
     }, "json");
 }
 
-async function post_recapcha_href(href) {
+async function post_recapcha_href(href, as_json) {
     let arr = href.split("/")
     let action = arr[2]
     if (action == 'info') {
@@ -296,16 +296,26 @@ async function post_recapcha_href(href) {
     }
     grecaptcha.ready(function() {
         grecaptcha.execute(recaptcha_site_v3, {action: action}).then(async function(token) {
-//            let data = await $.post(url_recaptcha, {
-//                csrfmiddlewaretoken: $("#recaptcha-form").find('[name="csrfmiddlewaretoken"]').val(),
-//                captcha: token,
-//                url: href,
-//            }, function(data, status) {
-//            return data;
-//            }, "json");
-        $("#recaptcha-form").find("#id_captcha").val(token)
-        $("#recaptcha-form").find("#id_url").val(href)
-        $("#recaptcha-form").submit()
+            if (as_json) {
+                let data = await $.post(url_recaptcha, {
+                    csrfmiddlewaretoken: $("#recaptcha-form").find('[name="csrfmiddlewaretoken"]').val(),
+                    captcha: token,
+                    url: href,
+                }, function(data, status) {
+                return data;
+                }, "json");
+            } else {
+                $("#recaptcha-form").find("#id_captcha").val(token)
+                $("#recaptcha-form").find("#id_url").val(href)
+                $("#recaptcha-form").submit()
+            }
         });
     });
+}
+
+async function recaptchaCallback() {
+    if ($.inArray(window.location.pathname, recaptcha_url_list) >=0) {
+        console.log(window.location.pathname);
+        post_recapcha_href(window.location.pathname, true)
+    }
 }
