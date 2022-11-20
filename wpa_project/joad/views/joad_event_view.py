@@ -128,15 +128,68 @@ class EventAttendListView(UserPassesTestMixin, ListView):
         return False
 
 
-class JoadEventListView(LoginRequiredMixin, ListView):
+class JoadEventListView(UserPassesTestMixin, ListView):
     model = JoadEvent
     template_name = 'joad/event_list.html'
 
-    def get_queryset(self):
-        queryset = self.model.objects.filter(event_date__lt=timezone.now())
-        # if not self.request.user.is_staff:
-        #     queryset = queryset.filter()
-        return queryset
+    def __init__(self):
+        super().__init__()
+        self.today = timezone.localdate(timezone.now())
+        self.min_dob = self.today.replace(year=self.today.year - 21)
+        self.max_dob = self.today.replace(year=self.today.year - 9)
+        self.past_events = True
+        self.students = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['event_list'] = self.get_events()
+        context['past_events'] = self.past_events
+        return context
+
+    def get_events(self):
+        if self.past_events:
+            events = JoadEvent.objects.filter(event_date__lt=self.today)
+        else:
+            events = JoadEvent.objects.filter(event_date__gte=self.today)
+        events = events.exclude(state='recorded')
+        if not self.request.user.is_board:
+            events = events.exclude(state='scheduled').exclude(state='canceled')
+        event_list = []
+        logging.debug(events)
+        for event in events:
+            e = model_to_dict(event)
+            reg_list = []
+            if self.students:
+                for student in self.students:
+                    reg = event.eventregistration_set.filter(student=student).order_by('id')
+                    reg_id = None
+                    reg_status = 'closed'
+                    if len(reg.filter(pay_status='paid')) > 0:
+                        attend = event.pinattendance_set.filter(student=student).last()
+                        if attend is not None and attend.attended:
+                            reg_status = 'attending'
+                        else:
+                            reg_status = 'registered'
+                        logging.debug(attend)
+                    elif len(reg.filter(pay_status='start')) > 0 and event.state in ['open', 'full']:
+                        reg_status = 'start'
+                        reg_id = reg.filter(pay_status='start').last().id
+                    elif event.state in ['open', 'full']:
+                        reg_status = 'not registered'
+                    reg_list.append({'reg_status': reg_status, 'reg_id': reg_id, 'student_id': student.id})
+            e['registrations'] = reg_list
+            logging.debug(e)
+            event_list.append(e)
+        return event_list
+
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            student = self.request.user.student_set.last()
+            if student and student.student_family:
+                self.students = student.student_family.student_set.filter(
+                    dob__gt=self.min_dob, dob__lt=self.max_dob).order_by('last_name', 'first_name')
+            return True
+        return False
 
 
 class JoadEventView(UserPassesTestMixin, FormView):

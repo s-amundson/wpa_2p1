@@ -36,6 +36,8 @@
                             <a href="{% url 'joad:resume_event_registration' row.reg_id %}">
                                 Unsuccessful
                             </a>
+                        {% elif row.reg_status == 'closed' %}
+                            Closed
                         {% else %}
                             <a href="{% url 'joad:event_registration' event.id %}" class="btn btn-primary" role="button">
                                 Register
@@ -53,6 +55,10 @@
             Add Event
         </a>
     {% endif %}
-    <a href="{% url 'joad:event_list' %}">Past Events</a>
+    {% if past_events %}
+        <a href="{% url 'joad:index' %}">Upcoming Events</a>
+    {% else %}
+        <a href="{% url 'joad:event_list' %}">Past Events</a>
+    {% endif %}
 </div>
 
