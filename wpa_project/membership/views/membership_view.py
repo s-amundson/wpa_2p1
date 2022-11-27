@@ -1,94 +1,95 @@
 import logging
 import uuid
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, reverse
-from django.http import HttpResponseRedirect
-from django.views.generic.base import View
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.urls import reverse_lazy
+from django.views.generic.edit import FormView
 from django.utils.datetime_safe import date
-from django.contrib import messages
 from ..forms import MembershipForm
 from ..models import Level
-from student_app.models import Student, StudentFamily
 
 logger = logging.getLogger(__name__)
 
 
-class MembershipView(LoginRequiredMixin, View):
-    def get(self, request, sf_id=None):
-        template = 'membership/membership.html'
-        if request.user.is_board:
-            template = 'membership/membership.html'
-        if sf_id is not None and request.user.is_board:
-            sf = StudentFamily.objects.get(pk=sf_id)
-        else:
-            student = Student.objects.filter(user=request.user).last()
-            if student is None:
-                return HttpResponseRedirect(reverse('registration:profile'))
-            sf = student.student_family
-        forms = []
-        forms.append(MembershipForm(students=sf.student_set.all()))
-        levels = Level.objects.filter(enabled=True)
-        return render(request, template, {'forms': forms, 'levels': levels})
+class MembershipView(UserPassesTestMixin, FormView):
+    template_name = 'membership/membership.html'
+    form_class = MembershipForm
+    students = None
+    success_url = reverse_lazy('payment:make_payment')
 
-    def post(self, request, sf_id=None):
-        if sf_id is not None and request.user.is_board:
-            sf = StudentFamily.objects.get(pk=sf_id)
-        else:
-            sf = Student.objects.get(user=request.user).student_family
-        students = sf.student_set.all()
-        form = MembershipForm(students, request.POST)
-        if form.is_valid():
-            members = []
-            for s in students:
-                if form.cleaned_data.get(f'student_{s.id}', False):
-                    members.append(s)
-            level = form.cleaned_data.get('level', None)
-            if len(members) == 0:
-                logging.debug('nobody selected')
-                messages.add_message(request, messages.ERROR, 'no students selected')
-            elif len(members) > 1:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['levels'] = Level.objects.filter(enabled=True)
+        return context
 
-                if len(members) > 4:
-                    cost = level.cost + (level.additional_cost * (len(members) - 4))
-                else:
-                    cost = level.cost
-                if not level.is_family:
-                    logging.debug('multiple members not family')
-                    messages.add_message(request, messages.ERROR, 'incorrect membership selected')
-                else:
-                    self.transact(form, request, members, cost)
-                    return HttpResponseRedirect(reverse('payment:make_payment'))
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['students'] = self.students
+        return kwargs
 
+    def form_invalid(self, form):
+        logging.warning(form.errors)
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        logging.warning(form.cleaned_data)
+        members = []
+        for s in self.students:
+            if form.cleaned_data.get(f'student_{s.id}', False):
+                members.append(s)
+        level = form.cleaned_data.get('level', None)
+        if len(members) == 0:
+            logging.debug('nobody selected')
+            form.add_error(None, 'No students selected')
+            return self.form_invalid(form)
+        elif len(members) > 1:
+
+            if len(members) > 4:
+                cost = level.cost + (level.additional_cost * (len(members) - 4))
             else:
-                max_age = 999
-                if level.max_age is not None:
-                    max_age = level.max_age
-                min_age = 0
-                if level.min_age is not None:
-                    min_age = level.min_age
+                cost = level.cost
+            if not level.is_family:
+                logging.debug('multiple members not family')
+                form.add_error(None, 'Incorrect membership selected')
+                return self.form_invalid(form)
+            else:
+                self.transact(form, members, cost)
+                return super().form_valid(form)
 
-                member = members[0]
-                age = date.today().year - member.dob.year
-                logging.debug(age)
+        else:
+            max_age = 999
+            if level.max_age is not None:
+                max_age = level.max_age
+            min_age = 0
+            if level.min_age is not None:
+                min_age = level.min_age
 
-                if age > max_age:
-                    logging.debug("to old for this membership")
-                    messages.add_message(request, messages.ERROR, 'incorrect membership selected')
-                elif age < min_age:
-                    logging.debug("to young for this membership")
-                    messages.add_message(request, messages.ERROR, 'incorrect membership selected')
-                else:
-                    self.transact(form, request, members, level.cost)
-                    return HttpResponseRedirect(reverse('payment:make_payment'))
+            member = members[0]
+            age = date.today().year - member.dob.year
+            logging.debug(age)
 
-        else:  # pragma: no cover
-            logging.debug(form.errors)
-            messages.add_message(request, messages.ERROR, 'other membership error')
-        levels = Level.objects.filter(enabled=True)
-        return render(request, 'membership/membership.html', {'forms': [form], 'levels': levels})
+            if age > max_age:
+                logging.debug("to old for this membership")
+                form.add_error(None, 'Incorrect membership selected')
+                return self.form_invalid(form)
+            elif age < min_age:
+                logging.debug("to young for this membership")
+                form.add_error(None, 'Incorrect membership selected')
+                return self.form_invalid(form)
+            else:
+                self.transact(form, members, level.cost)
+        return super().form_valid(form)
 
-    def transact(self, form, request, members, cost):
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            student = self.request.user.student_set.last()
+            if student:
+                if student.student_family is not None:
+                    self.students = student.student_family.student_set.all()
+                return student.student_family is not None
+        return False
+
+    def transact(self, form, members, cost):
         uid = str(uuid.uuid4())
         membership = form.save(commit=False)
         membership.pay_status = 'start'
@@ -97,9 +98,9 @@ class MembershipView(LoginRequiredMixin, View):
         for m in members:
             membership.students.add(m)
 
-        request.session['idempotency_key'] = uid
-        request.session['line_items'] = [{'name': f'{membership.level.name} Membership',
-                                          'quantity': 1, 'amount_each': cost}]
-        request.session['payment_category'] = 'membership'
-        request.session['payment_description'] = f'{membership.level.name} Membership'
+        self.request.session['idempotency_key'] = uid
+        self.request.session['line_items'] = [{'name': f'{membership.level.name} Membership',
+                                              'quantity': 1, 'amount_each': cost}]
+        self.request.session['payment_category'] = 'membership'
+        self.request.session['payment_description'] = f'{membership.level.name} Membership'
         membership.save()

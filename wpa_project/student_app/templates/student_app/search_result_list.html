@@ -20,12 +20,7 @@
     {% for sf in families %}
         <h3>Result {{ forloop.counter }} of {{ families|length }}</h3>
         <div class="p-2">
-            <table class="table table-bordered
-                    {% if user.dark_theme %}
-                        table-dark
-                    {% else %}
-                        table-light
-                    {% endif %}">
+            <table class="table table-bordered table-striped">
                 <thead>
                     <th> First Name </th>
                     <th> Last Name </th>

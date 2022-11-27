@@ -7,6 +7,38 @@ $(document).ready(function(){
         $(this).prop('disabled', true);
         $(this).parents("form").submit()
     });
+    $('#cookieConsent').cookieConsent({
+        message: 'This website uses cookies. By using this website you consent to our use of these cookies.'
+    });
+
+    var prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+    if ($("#block-main").hasClass("browser-theme")) {
+        if (prefersDarkScheme.matches) {
+            $("#icon-dark").hide();
+            $("#block-main").addClass("dark-theme");
+        } else {
+            $("#icon-bright").hide();
+            $("#block-main").addClass("light-theme");
+        }
+        $("#block-main").removeClass("browser-theme");
+    }
+    if ($("#block-main").hasClass("light-theme")) {
+        $("#icon-bright").hide();
+    }
+    if ($("#block-main").hasClass("dark-theme")) {
+        $("#icon-dark").hide();
+        $(".table-striped").addClass("table-dark")
+    }
+    $("#theme-button").click(function() {
+        $("#block-main").toggleClass(["light-theme", "dark-theme"]);
+        change_theme($("#block-main").hasClass("dark-theme"));
+    });
+
+    $(".captcha-link").click(async function(e) {
+        e.preventDefault();
+        await post_recapcha_href($(this).attr('href'), false);
+//        window.location = $(this).attr("href");
+    });
 });
 
 async function add_student_function(student_id) {
@@ -72,6 +104,27 @@ function alert_notice(title, message) {
     $("#alert-title").html(title)
     $("#div-warning").html(message)
     $("#alert-warning").modal("show");
+}
+
+async function change_theme(dark_theme) {
+    let theme_string = 'light'
+    if (dark_theme) {
+        $("#icon-dark").hide();
+        $("#icon-bright").show();
+        theme_string = 'dark'
+        $(".table-striped").addClass("table-dark")
+    } else {
+        $("#icon-dark").show();
+        $("#icon-bright").hide();
+        $(".table-striped").removeClass("table-dark")
+    }
+
+    let data = await $.post(url_theme, {
+        csrfmiddlewaretoken: $("#theme-form").find('[name="csrfmiddlewaretoken"]').val(),
+        theme: theme_string,
+        }, function(data, status) {
+        return data;
+    }, "json");
 }
 
 function load_student_family_form(family_id) {
@@ -233,4 +286,36 @@ async function post_is_joad(checkbox, send_data) {
         }
         return data;
     }, "json");
+}
+
+async function post_recapcha_href(href, as_json) {
+    let arr = href.split("/")
+    let action = arr[2]
+    if (action == 'info') {
+        action = arr[3]
+    }
+    grecaptcha.ready(function() {
+        grecaptcha.execute(recaptcha_site_v3, {action: action}).then(async function(token) {
+            if (as_json) {
+                let data = await $.post(url_recaptcha, {
+                    csrfmiddlewaretoken: $("#recaptcha-form").find('[name="csrfmiddlewaretoken"]').val(),
+                    captcha: token,
+                    url: href,
+                }, function(data, status) {
+                return data;
+                }, "json");
+            } else {
+                $("#recaptcha-form").find("#id_captcha").val(token)
+                $("#recaptcha-form").find("#id_url").val(href)
+                $("#recaptcha-form").submit()
+            }
+        });
+    });
+}
+
+async function recaptchaCallback() {
+    if ($.inArray(window.location.pathname, recaptcha_url_list) >=0) {
+        console.log(window.location.pathname);
+        post_recapcha_href(window.location.pathname, true)
+    }
 }

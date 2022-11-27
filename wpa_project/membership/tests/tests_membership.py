@@ -32,9 +32,8 @@ class TestsMembership(TestCase):
     def test_membership_to_old(self):
         response = self.client.post(reverse('membership:membership'), {'student_2': 'on', 'level': '2'},
                                     secure=True)
-        # self.assertEqual(response.status_code, 200)
-        messages = list(response.context['messages'])
-        self.assertEqual(len(messages), 1)
+        logging.warning(response.context['form'].errors)
+        self.assertIn('Incorrect membership selected', response.context['form'].errors['__all__'])
 
     def test_membership_good(self):
         response = self.client.post(reverse('membership:membership'), {'student_2': 'on', 'level': '1'},
@@ -50,9 +49,7 @@ class TestsMembership(TestCase):
 
         response = self.client.post(reverse('membership:membership'), {'student_2': 'on', 'level': '1'},
                                     secure=True)
-        # self.assertEqual(response.status_code, 200)
-        messages = list(response.context['messages'])
-        self.assertEqual(len(messages), 1)
+        self.assertIn('Incorrect membership selected', response.context['form'].errors['__all__'])
 
     def test_membership_family(self):
         response = self.client.post(reverse('membership:membership'), {'student_2': 'on', 'student_3': 'on', 'level': '3'},
@@ -69,8 +66,6 @@ class TestsMembership(TestCase):
 
         d = {'student_2': 'on', 'student_3': 'on', 'student_4': 'on', 'student_5': 'on', 'student_6': 'on', 'level': '3'}
         response = self.client.post(reverse('membership:membership'), d, secure=True)
-        # self.assertEqual(response.status_code, 200)
-        # self.assertEqual(self.client.session['payment_db'][1], 'Membership')
         self.assertEqual(self.client.session['line_items'][0]['amount_each'], 50)
         self.assertEqual(len(Membership.objects.all()), 1)
         self.assertEqual(Membership.objects.last().students.count(), 5)
@@ -79,17 +74,12 @@ class TestsMembership(TestCase):
 
     def test_membership_no_student(self):
         response = self.client.post(reverse('membership:membership'), {'level': '3'}, secure=True)
-        # self.assertEqual(response.status_code, 200)
-        messages = list(response.context['messages'])
-        self.assertEqual(len(messages), 1)
+        self.assertIn('No students selected', response.context['form'].errors['__all__'])
 
     def test_membership_multiple_not_family(self):
         response = self.client.post(reverse('membership:membership'), {'student_2': 'on', 'student_3': 'on', 'level': '1'},
                                     secure=True)
-        # self.assertEqual(response.status_code, 200)
-        messages = list(response.context['messages'])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(len(Membership.objects.all()), 0)
+        self.assertIn('Incorrect membership selected', response.context['form'].errors['__all__'])
 
     def test_get_student_table(self):
         d_now = timezone.localtime(timezone.now()).date()

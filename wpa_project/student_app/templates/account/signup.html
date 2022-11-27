@@ -4,40 +4,51 @@
 {% load account socialaccount %}
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
+{% block script %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endblock %}
+
 {% block content %}
 <h1>{% trans "Sign Up" %}</h1>
 
 <p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
+{% if probably_human %}
+    {% get_providers as socialaccount_providers %}
 
-{% get_providers as socialaccount_providers %}
+    {% if socialaccount_providers %}
+    <p>{% blocktrans with site.name as site_name %}Please sign in with one
+        of your existing third party accounts. {% endblocktrans %}</p>
 
-{% if socialaccount_providers %}
-<p>{% blocktrans with site.name as site_name %}Please sign in with one
-of your existing third party accounts. {% endblocktrans %}</p>
+    <div class="socialaccount_ballot">
 
-<div class="socialaccount_ballot">
+        <ul class="socialaccount_providers">
+            {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+        </ul>
 
-  <ul class="socialaccount_providers">
-    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-  </ul>
+        <div class="login-or">{% trans 'or' %}</div>
 
-  <div class="login-or">{% trans 'or' %}</div>
+    </div>
+    {% include "socialaccount/snippets/login_extra.html" %}
 
-</div>
-{% include "socialaccount/snippets/login_extra.html" %}
+    {% else %}
+    <p>{% blocktrans %}If you have not created an account yet, then please
+        <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
+    {% endif %}
 
+    <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% include "contact_us/is_it_real_email.html" %}
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+        <button class="btn btn-primary" type="submit">{% trans "Sign Up" %} &raquo;</button>
+    </form>
 {% else %}
-<p>{% blocktrans %}If you have not created an account yet, then please
-<a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
+    <p>
+        {% blocktrans %}
+            It looks like you might be a bot. If you are not, please check out our site and then come back.
+        {% endblocktrans %}
+    </p>
 {% endif %}
-
-<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
-  {% csrf_token %}
-  {{ form.as_p }}
-  {% include "contact_us/is_it_real_email.html" %}
-  {% if redirect_field_value %}
-  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-  {% endif %}
-  <button class="btn btn-primary" type="submit">{% trans "Sign Up" %} &raquo;</button>
-</form>
 {% endblock %}

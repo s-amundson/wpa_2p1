@@ -1,11 +1,12 @@
 from django.views.generic import ListView
 from django.views.generic.edit import FormView
+from django.db.models import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
 from ..models import Faq
-from ..forms import FaqForm, FaqFilterForm
+from ..forms import FaqForm, FaqFilterForm, FaqSearchForm
 
 import logging
 logger = logging.getLogger(__name__)
@@ -48,6 +49,7 @@ class FaqList(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['form'] = FaqFilterForm(initial=self.request.GET)
+        context['search_form'] = FaqSearchForm(initial=self.request.GET)
         return context
 
     def get_queryset(self):
@@ -59,4 +61,9 @@ class FaqList(ListView):
                 object_list = object_list.filter(category=form.cleaned_data['category'])
         else:
             logging.warning(form.errors)
+        search_form = FaqSearchForm(self.request.GET)
+        if search_form.is_valid():
+            logging.warning(search_form.cleaned_data)
+            object_list = object_list.filter(Q(question__icontains=search_form.cleaned_data['search']) |
+                                             Q(answer__icontains=search_form.cleaned_data['search']))
         return object_list.order_by('-created_at')

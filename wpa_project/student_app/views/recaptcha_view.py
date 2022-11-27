@@ -1,31 +1,33 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import FormView
 from django.urls import reverse_lazy
 from django.http import JsonResponse
+from ipware import get_client_ip
 
-from ..forms import ThemeForm
+from ..forms import RecaptchaForm
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class ThemeView(FormView):
+class RecaptchaView(FormView):
     template_name = 'student_app/form_as_p.html'
-    form_class = ThemeForm
+    form_class = RecaptchaForm
     success_url = reverse_lazy('registration:profile')
 
     def form_invalid(self, form):
+        logging.warning(self.request.POST)
         logging.warning(form.errors)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
             return JsonResponse({'status': 'error'})
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.warning(form.cleaned_data)
-        self.request.session['theme'] = form.cleaned_data.get('theme', 'browser')
-        if self.request.user.is_authenticated:
-            self.request.user.theme = form.cleaned_data.get('theme', 'browser')
-            self.request.user.save()
+        client_ip, is_routable = get_client_ip(self.request)
+        score = form.get_score(client_ip)
+        if score is not None:
+            self.request.session['recaptcha_score'] = score
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
+            logging.warning('json response')
             return JsonResponse({'status': 'success'})
+        self.success_url = form.cleaned_data['url']
         return super().form_valid(form)

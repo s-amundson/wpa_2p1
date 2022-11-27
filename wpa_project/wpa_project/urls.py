@@ -18,11 +18,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from student_app.views import SignupView
+
 urlpatterns = [
     path('', include('student_app.urls', namespace='registration')),
+    path('accounts/signup/', SignupView.as_view(), name="account_signup"),
     path('accounts/', include('allauth.urls')),
     path('admin/', admin.site.urls),
-    path('captcha/', include('captcha.urls')),
     path('contact_us/', include('contact_us.urls', namespace='contact_us')),
     path('facebook/', include('facebook.urls', namespace='facebook')),
     path('information/', include('info.urls', namespace='information')),

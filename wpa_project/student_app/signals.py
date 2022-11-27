@@ -1,8 +1,10 @@
 import logging
 
 from django.dispatch import receiver
-from allauth.account.signals import email_changed, email_confirmed
+from allauth.account.signals import email_changed, email_confirmed, user_logged_in, user_signed_up
+from ipware import get_client_ip
 from .models import Student, User
+from contact_us.models import Email
 
 logger = logging.getLogger(__name__)
 
@@ -29,3 +31,9 @@ def email_confirmed_(request, email_address, **kwargs):
             user = User.objects.get(email=email_address.email)
             student.user = user
             student.save()
+
+@receiver(user_logged_in)
+def user_logged_in(request, user, **kwargs):
+    logging.warning(user.theme)
+    request.session['theme'] = user.theme
+

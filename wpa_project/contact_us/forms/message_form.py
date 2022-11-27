@@ -1,6 +1,6 @@
 import logging
-from captcha.fields import CaptchaField
-
+from django.conf import settings
+from captcha.fields import ReCaptchaField
 from src.model_form import MyModelForm
 from ..models import Message
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ class MessageForm(MyModelForm):
         super().__init__(*args, **kwargs)
         logging.debug(self.instance)
         if not self.user.is_authenticated:
-            self.fields['captcha'] = CaptchaField(required=True)
+            self.fields['captcha'] = ReCaptchaField()
             self.fields.pop('spam_category')
         elif not self.user.is_board:
             self.fields.pop('spam_category')

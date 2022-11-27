@@ -5,6 +5,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.conf import settings
+from ipware import get_client_ip
 
 from ..forms import MessageForm
 from ..models import Message
@@ -43,6 +45,15 @@ class MessageView(FormView):
     form_class = MessageForm
     success_url = reverse_lazy('registration:index')
     message = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # self.request.session.pop('recaptcha_score')
+        score = self.request.session.get('recaptcha_score', 0)
+        logging.warning(score)
+        context['probably_human'] = score > 0.5
+        context['email'] = settings.DEFAULT_FROM_EMAIL
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -88,7 +99,8 @@ class MessageView(FormView):
         # save record
         self.request.session['contact_us'] = timezone.now().isoformat()
         message = form.save()
-        send_contact_email.delay(message.id)
+        client_ip, is_routable = get_client_ip(self.request)
+        send_contact_email.delay(message.id, client_ip)
         return super().form_valid(form)
 
     def post(self, request, *args, **kwargs):

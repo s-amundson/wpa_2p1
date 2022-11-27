@@ -11,6 +11,7 @@ urlpatterns = [
         path('login/', LoginView.as_view(), name='login'),
         path('pdf/<int:student_id>/', PdfGetView.as_view(), name='pdf'),
         path('profile/', ProfileView.as_view(), name='profile'),
+        path('recaptcha/', RecaptchaView.as_view(), name='recaptcha'),
         path('search/', SearchEmailView.as_view(), name='search'),
         path('search_name/', SearchNameView.as_view(), name='search_name'),
         path('search_phone/', SearchPhoneView.as_view(), name='search_phone'),
