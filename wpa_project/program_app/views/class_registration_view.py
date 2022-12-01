@@ -56,7 +56,6 @@ class ClassRegistrationView(AccessMixin, FormView):
         # logging.debug(kwargs)
         if self.kwargs.get('beginner_class', None) is not None:
             kwargs['initial']['beginner_class'] = self.kwargs.get('beginner_class')
-        # logging.debug(kwargs)
         return kwargs
 
     def get_form(self):
@@ -88,7 +87,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                 s = Student.objects.get(pk=i)
 
                 # logging.debug(s)
-                if StudentHelper().calculate_age(s.dob, beginner_class.class_date) < 9:
+                if StudentHelper().calculate_age(s.dob, beginner_class.event.event_date) < 9:
                     return self.has_error('Student must be at least 9 years old to participate')
 
                 if s.user is not None and s.user.is_staff:
@@ -112,7 +111,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                         pay_status__in=['canceled', "refunded", 'refund donated'])
                     if len(reg.filter(beginner_class=beginner_class)) == 0:
                         if s.safety_class is None:
-                            future_reg = reg.filter(beginner_class__class_date__gt=timezone.now())
+                            future_reg = reg.filter(beginner_class__event__event_date__gt=timezone.now())
                             if beginner_class.state == 'wait' and len(future_reg.filter(pay_status='waiting')) > 0:
                                 return self.has_error(f'{s.first_name} is on wait list for another beginner class')
                             elif beginner_class.state != 'wait' and len(future_reg.exclude(pay_status='waiting')) > 0:
@@ -248,7 +247,8 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                         )
                     ncr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
                                                            pay_status=pay_status, idempotency_key=uid,
-                                                           user=form.cleaned_data['student'].user, reg_time=timezone.now())
+                                                           user=form.cleaned_data['student'].user,
+                                                           reg_time=timezone.now())
                     note = form.cleaned_data['notes']
                     ClassRegistrationAdmin.objects.create(class_registration=ncr, staff=self.request.user, note=note)
 
@@ -300,16 +300,16 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             request.session['idempotency_key'] = str(cr.idempotency_key)
             request.session['line_items'] = []
             request.session['payment_category'] = 'intro'
-            request.session['payment_description'] = f'Class on {str(cr.beginner_class.class_date)[:10]}'
+            request.session['payment_description'] = f'Class on {str(cr.beginner_class.event.event_date)[:10]}'
             beginner = 0
             returnee = 0
 
             for r in registrations:
-                class_date = timezone.localtime(r.beginner_class.class_date)
+                class_date = timezone.localtime(r.beginner_class.event.event_date)
                 request.session['line_items'].append({
                         'name': f'Class on {str(class_date)[:10]} student: {r.student.first_name}',
                         'quantity': 1,
-                        'amount_each': r.beginner_class.cost,
+                        'amount_each': r.beginner_class.event.cost_standard,
                     }
 
                 )

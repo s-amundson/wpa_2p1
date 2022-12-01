@@ -20,7 +20,7 @@ User = apps.get_model('student_app', 'User')
 
 
 class TestsBeginnerClass(MockSideEffects, TestCase):
-    fixtures = ['f1', 'f3']
+    fixtures = ['f1']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -108,8 +108,8 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.assertEquals(len(bc), 2)
         bc = BeginnerClass.objects.get(pk=1)
 
-        self.assertEqual(bc.class_date.year, date(2022, 5, 30).year)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.event_date.year, date(2022, 5, 30).year)
+        self.assertEqual(bc.event.state, 'open')
 
     def test_2nd_class_error(self):
         bc = BeginnerClass.objects.get(pk=1)

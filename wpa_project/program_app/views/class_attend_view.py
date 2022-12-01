@@ -44,13 +44,13 @@ class ClassAttendView(UserPassesTestMixin, View):
         if f'check_{cr.student.id}' in request.POST:
             cr.attended = request.POST[f'check_{cr.student.id}'] in ['true', 'on']
 
-            logging.debug(f'safety_class date: {cr.student.safety_class} class_date: {cr.beginner_class.class_date}')
+            logging.debug(f'safety_class date: {cr.student.safety_class} class_date: {cr.beginner_class.event.event_date}')
             if cr.attended:
                 if cr.student.safety_class is None:
-                    cr.student.safety_class = cr.beginner_class.class_date.date()
+                    cr.student.safety_class = cr.beginner_class.event.event_date.date()
                     cr.student.save()
             else:
-                if cr.beginner_class.class_date.date() == cr.student.safety_class:
+                if cr.beginner_class.event.event_date.date() == cr.student.safety_class:
                     cr.student.safety_class = None
                     cr.student.save()
             cr.save()

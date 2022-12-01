@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from ..src.calendar import Calendar
 from ..models import BeginnerClass
+from event.models import Event
 from joad.models import JoadClass, JoadEvent, Session
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -19,6 +20,20 @@ class TestsCalendar(TestCase):
         super().__init__(*args, **kwargs)
         self.test_UID = 3
 
+    def create_beginner_class(self, date, state, class_type):
+        BeginnerClass.objects.create(
+            class_date=date,
+            class_type=class_type,
+            beginner_limit=2,
+            returnee_limit=2,
+            event=Event.objects.create(
+                event_date=date,
+                cost_standard=5,
+                cost_member=5,
+                state=state,
+                type='class'
+            )
+        )
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
@@ -68,12 +83,9 @@ class TestsCalendar(TestCase):
     def test_day(self):
         date = timezone.datetime.now() + timezone.timedelta(days=1)
         date = date.replace(hour=9, minute=0, second=0, microsecond=0)
-        BeginnerClass.objects.create(class_date=date, class_type='beginner', beginner_limit=2, returnee_limit=2,
-                                          state='open')
-        BeginnerClass.objects.create(class_date=date.replace(hour=11), class_type='returnee', beginner_limit=2,
-                                     returnee_limit=2, state='open')
-        BeginnerClass.objects.create(class_date=date.replace(hour=15), class_type='combined', beginner_limit=2,
-                                     returnee_limit=2, state='open')
+        self.create_beginner_class(date, 'open', 'beginner')
+        self.create_beginner_class(date.replace(hour=11), 'open', 'returnee')
+        self.create_beginner_class(date.replace(hour=15), 'open', 'combined')
         session = Session.objects.create(cost=120, start_date=date, state='open', student_limit=12)
         jc = JoadClass.objects.create(class_date=date.replace(hour=10), session=session, state='open')
         je = JoadEvent.objects.create(cost=15, event_date=date.replace(hour=13), event_type="joad_indoor", state='open',
@@ -90,12 +102,9 @@ class TestsCalendar(TestCase):
     def test_day_closed(self):
         date = timezone.datetime.now() + timezone.timedelta(days=1)
         date = date.replace(hour=9, minute=0, second=0, microsecond=0)
-        BeginnerClass.objects.create(class_date=date, class_type='beginner', beginner_limit=2, returnee_limit=2,
-                                          state='closed')
-        BeginnerClass.objects.create(class_date=date.replace(hour=11), class_type='returnee', beginner_limit=2,
-                                     returnee_limit=2, state='closed')
-        BeginnerClass.objects.create(class_date=date.replace(hour=15), class_type='combined', beginner_limit=2,
-                                     returnee_limit=2, state='closed')
+        self.create_beginner_class(date, 'closed', 'beginner')
+        self.create_beginner_class(date.replace(hour=11), 'closed', 'returnee')
+        self.create_beginner_class(date.replace(hour=15), 'closed', 'combined')
         session = Session.objects.create(cost=120, start_date=date, state='closed', student_limit=12)
         jc = JoadClass.objects.create(class_date=date.replace(hour=10), session=session, state='past')
         je = JoadEvent.objects.create(cost=15, event_date=date.replace(hour=13), event_type="joad_indoor",

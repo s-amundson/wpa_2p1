@@ -1,7 +1,5 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.views.generic import ListView
 from django.views.generic import FormView
-from django.utils import timezone
 from django.urls import reverse_lazy
 from django.forms import model_to_dict
 
@@ -29,9 +27,9 @@ class StaffReportView(UserPassesTestMixin, FormView):
             cr = ClassRegistration.objects.filter(student=i, pay_status__in=['paid', 'admin'])
             bc = BeginnerClass.objects.all()
             if self.start_date is not None:
-                bc = bc.filter(class_date__gte=self.start_date)
+                bc = bc.filter(event__event_date__gte=self.start_date)
             if self.end_date is not None:
-                bc = bc.filter(class_date__lte=self.end_date)
+                bc = bc.filter(event__event_date__lte=self.end_date)
             cr = cr.filter(beginner_class__in=bc)
             i_dict = model_to_dict(i)
             # logging.debug(i_dict)

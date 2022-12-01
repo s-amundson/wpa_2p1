@@ -19,9 +19,9 @@ class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None, dark=False, staff=False):
         self.year = year
         self.month = month
-        self.events = BeginnerClass.objects.filter(class_date__gt=timezone.now(),
-                                                   class_date__year=year,
-                                                   class_date__month=month).order_by('class_date')
+        self.events = BeginnerClass.objects.filter(event__event_date__gt=timezone.now(),
+                                                   event__event_date__year=year,
+                                                   event__event_date__month=month).order_by('class_date')
         if not staff:
             self.events = self.events.exclude(class_type='special')
         self.joad_class_events = JoadClass.objects.filter(class_date__gt=timezone.now(),
@@ -48,8 +48,9 @@ class Calendar(HTMLCalendar):
     # filter events by day
     def formatday(self, day):
         event_list = []
-        for event in self.events.filter(class_date__day=day):
-            event_list.append(self.Event(event.id, event.class_date, event.class_type, event.state))
+        for event in self.events.filter(event__event_date__day=day):
+            event_list.append(self.Event(event.id, event.event.event_date, event.class_type, event.event.state))
+            logging.warning(event.event.state)
         for event in self.joad_class_events.filter(class_date__day=day):
             event_list = self.insert_event(event_list, self.Event(event.id, event.class_date, 'JOAD Class',
                                                                   event.state, event.session))

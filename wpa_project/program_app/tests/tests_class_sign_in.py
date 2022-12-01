@@ -5,6 +5,7 @@ from django.utils import timezone
 from unittest.mock import patch
 
 from ..models import BeginnerClass, ClassRegistration
+from event.models import Event
 from student_app.models import Student
 from payment.models import PaymentLog
 from payment.tests import MockSideEffects
@@ -85,6 +86,13 @@ class TestsClassSignIn(MockSideEffects, TestCase):
             beginner_wait_limit=10,
             returnee_limit=0,
             returnee_wait_limit=0,
+            event=Event.objects.create(
+                event_date="2023-06-05T16:00:00.000Z",
+                cost_standard=5,
+                cost_member=5,
+                state="wait",
+                type='class'
+            ),
             state="wait"
         )
         reg3 = ClassRegistration.objects.create(

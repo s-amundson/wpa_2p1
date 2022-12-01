@@ -3,6 +3,7 @@ from django.utils import timezone
 from datetime import timedelta
 from ..models import BeginnerClass, BeginnerSchedule, ClassRegistration
 from ..src import ClassRegistrationHelper, EmailMessage
+from event.models import Event
 from student_app.models import Student, User
 
 logger = logging.getLogger(__name__)
@@ -30,14 +31,22 @@ class UpdatePrograms:
                 class_day = next_class + timedelta(days=(7 * i))
                 class_day = timezone.datetime.combine(class_day, c.class_time)
                 class_day = timezone.make_aware(class_day, timezone.get_current_timezone())
-                classes = BeginnerClass.objects.filter(class_date=class_day)
+                classes = BeginnerClass.objects.filter(event__event_date=class_day)
                 if len(classes) == 0:
                     bc = BeginnerClass(
                         class_date=class_day,
                         class_type=c.class_type,
                         beginner_limit=c.beginner_limit,
                         returnee_limit=c.returnee_limit,
-                        state=c.state)
+                        state=c.state,
+                        event= Event.objects.create(
+                            event_date=class_day,
+                            cost_standard=5,
+                            cost_member=5,
+                            state=c.state,
+                            type='class'
+                        )
+                    )
                     bc.save()
 
     def create_class(self, beginner_schedule):
@@ -47,19 +56,29 @@ class UpdatePrograms:
         bc, created = BeginnerClass.objects.get_or_create(
             class_date=class_date,
             class_type=beginner_schedule.class_type,
-            beginner_limit=beginner_schedule.beginner_limit,
-            beginner_wait_limit=beginner_schedule.beginner_wait_limit,
-            returnee_limit=beginner_schedule.returnee_limit,
-            returnee_wait_limit=beginner_schedule.returnee_wait_limit,
-            state=beginner_schedule.state)
+            defaults={
+                'beginner_limit': beginner_schedule.beginner_limit,
+                'beginner_wait_limit': beginner_schedule.beginner_wait_limit,
+                'returnee_limit': beginner_schedule.returnee_limit,
+                'returnee_wait_limit': beginner_schedule.returnee_wait_limit,
+                'state': beginner_schedule.state,
+                'event': Event.objects.create(
+                        event_date=class_date,
+                        cost_standard=beginner_schedule.cost,
+                        cost_member=beginner_schedule.cost,
+                        state=beginner_schedule.state,
+                        type='class'
+                    )
+            }
+        )
 
     def close_class(self, class_time):
         class_date = timezone.datetime.combine(self.today + timedelta(days=1), class_time)
         classes = BeginnerClass.objects.filter(
-            class_date=class_date, state__in=self.states[:self.states.index('closed')])
+            event__event_date=class_date, event__state__in=self.states[:self.states.index('closed')])
         for c in classes:
-            c.state = self.states[self.states.index('closed')]  # 'closed'
-            c.save()
+            c.event.state = self.states[self.states.index('closed')]  # 'closed'
+            c.event.save()
             # logging.debug(c.state)
 
     def daily_update(self):
@@ -80,17 +99,17 @@ class UpdatePrograms:
         # set past classes to recorded
         yesterday = self.today - timedelta(days=1)
         classes = BeginnerClass.objects.filter(
-            class_date__lte=yesterday, state__in=self.states[:self.states.index('recorded')])
+            event__event_date__lte=yesterday, event__state__in=self.states[:self.states.index('recorded')])
         for c in classes:
-            c.state = 'recorded'
-            c.save()
+            c.event.state = 'recorded'
+            c.event.save()
 
     def reminder_email(self, class_time):
         # send reminder email to students for classes 2 days from now.
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         class_date = timezone.datetime.combine(self.today + timedelta(days=2), class_time)
         classes = BeginnerClass.objects.filter(
-            class_date=class_date, state__in=self.states[:self.states.index('closed')])
+            event__event_date=class_date, event__state__in=self.states[:self.states.index('closed')])
         for c in classes:
             self.email = EmailMessage()
             # send email to students that are registered
@@ -123,7 +142,7 @@ class UpdatePrograms:
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         staff_students = Student.objects.filter(user__in=staff_query)
         classes = BeginnerClass.objects.filter(
-            class_date__date=email_date, state__in=self.states[:self.states.index('closed')])
+            event__event_date__date=email_date, event__state__in=self.states[:self.states.index('closed')])
         if len(classes):
             class_list = []
             for c in classes:
@@ -137,6 +156,6 @@ class UpdatePrograms:
                         staff.append(r.student)
                 class_list.append({'class': c, 'instructors': instructors, 'staff': staff,
                                    'count': crh.enrolled_count(c)})
-            # logging.debug(class_list)
+            logging.warning(class_list)
             self.email.status_email(class_list, staff_query)
             # logging.debug('emailed')

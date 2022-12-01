@@ -1,7 +1,7 @@
 
 Hi,
 {% for c in class_list %}
-{{ c.class.class_type|capfirst }} class on {{ c.class.class_date }} has {{ c.count.beginner|add:c.count.returnee }} students signed up and {{ c.count.staff }} volunteers signed up. The following volunteers are signed up:
+{{ c.class.class_type|capfirst }} class on {{ c.class.event.event_date }} has {{ c.count.beginner|add:c.count.returnee }} students signed up and {{ c.count.staff }} volunteers signed up. The following volunteers are signed up:
 Instructors:
 {% for i in c.instructors %}{{ i.first_name }} {{ i.last_name|slice:":1" }}
 {% empty %}

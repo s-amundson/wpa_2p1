@@ -1,14 +1,10 @@
 import logging
 
 from django.db import models
+from src.model_helper import choices
+from event.models import Event
+
 logger = logging.getLogger(__name__)
-
-
-def choices(choice_list):
-    choice = []
-    for c in choice_list:
-        choice.append((c, c))
-    return choice
 
 
 class BeginnerCommonClass(models.Model):
@@ -33,6 +29,7 @@ class BeginnerCommonClass(models.Model):
 
 class BeginnerClass(BeginnerCommonClass):
     class_date = models.DateTimeField()
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, default=None)
 
 
 class BeginnerSchedule(BeginnerCommonClass):

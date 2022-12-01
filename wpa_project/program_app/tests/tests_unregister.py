@@ -173,10 +173,10 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         logging.debug(cr)
         bc = BeginnerClass.objects.get(pk=1)
         class_date = timezone.now() + timedelta(hours=18)
-        bc.class_date = bc.class_date.replace(year=class_date.year, month=class_date.month, day=class_date.day)
-        bc.state = 'closed'
-        bc.save()
-        logging.warning(bc.class_date)
+        bc.event.event_date = bc.event.event_date.replace(year=class_date.year, month=class_date.month, day=class_date.day)
+        bc.event.state = 'closed'
+        bc.event.save()
+        logging.warning(bc.event.event_date)
 
         d = {'donation': False}
         for r in cr:
@@ -185,7 +185,7 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         self.assertRedirects(response, self.url_registration)
 
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'closed')
+        self.assertEqual(bc.event.state, 'closed')
 
         cr = bc.classregistration_set.all()
         self.assertEqual(cr[0].pay_status, 'canceled')

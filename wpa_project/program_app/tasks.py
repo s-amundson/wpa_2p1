@@ -113,7 +113,7 @@ def refund_class(beginner_class, message=''):
                         if c.student.user is not None:
                             email_message.refund_canceled_email(
                                 c.student.user,
-                                f'Class on {str(timezone.localtime(beginner_class.class_date))[:10]}',
+                                f'Class on {str(timezone.localtime(beginner_class.event.event_date))[:10]}',
                                 message
                             )
                             email_sent = True
@@ -123,7 +123,7 @@ def refund_class(beginner_class, message=''):
                             if s.user is not None:
                                 email_message.refund_canceled_email(
                                     s.user,
-                                    f'Class on {str(timezone.localtime(beginner_class.class_date))[:10]}',
+                                    f'Class on {str(timezone.localtime(beginner_class.event.event_date))[:10]}',
                                     message
                                 )
 

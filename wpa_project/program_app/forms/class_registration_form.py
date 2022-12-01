@@ -33,16 +33,16 @@ class ClassRegistrationForm(forms.Form):
 
     def get_open_classes(self, user):
         date = timezone.now() - timezone.timedelta(hours=6)
-        classes = BeginnerClass.objects.filter(class_date__gt=date).order_by('class_date')
+        classes = BeginnerClass.objects.filter(event__event_date__gt=date).order_by('event__event_date')
         if user.is_board:
-            classes = classes.filter(state__in=['open', 'wait', 'full', 'closed'])
+            classes = classes.filter(event__state__in=['open', 'wait', 'full', 'closed'])
         elif user.is_staff:
-            classes = classes.filter(state__in=['open', 'wait', 'full'])
+            classes = classes.filter(event__state__in=['open', 'wait', 'full'])
         else:
-            classes = classes.filter(state__in=['open', 'wait'])
+            classes = classes.filter(event__state__in=['open', 'wait'])
         d = [("", "None")]
         for c in classes:
-            cd = timezone.localtime(c.class_date)
+            cd = timezone.localtime(c.event.event_date)
             s = cd.strftime("%d %b, %Y %I:%M %p")
             d.append((str(c.id), s))
         return d

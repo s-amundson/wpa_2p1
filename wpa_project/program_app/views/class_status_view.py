@@ -18,7 +18,7 @@ class ClassStatusView(LoginRequiredMixin, View):
             return JsonResponse({'beginner': bc.beginner_limit - ec['beginner'],
                                  'returnee': bc.returnee_limit - ec['returnee'],
                                  'instructor': bc.instructor_limit - ec['staff'],
-                                 'status': bc.state, 'class_type': bc.class_type})
+                                 'status': bc.event.state, 'class_type': bc.class_type})
         except ValueError:  # pragma: no cover
             return HttpResponseBadRequest()
 

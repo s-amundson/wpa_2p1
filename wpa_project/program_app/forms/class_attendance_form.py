@@ -15,10 +15,10 @@ class ClassAttendanceForm(forms.Form):
         super().__init__(*args, **kwargs)
         staff = Student.objects.filter(user__is_staff=True)
         self.student_helper = StudentHelper()
-        self.is_closed = beginner_class.state == 'closed'
+        self.is_closed = beginner_class.event.state == 'closed'
         registrations = beginner_class.classregistration_set.filter(
             pay_status__in=['admin', 'comped', 'paid', 'waiting']).order_by('attended', 'student__last_name')
-        self.class_date = beginner_class.class_date
+        self.class_date = beginner_class.event.event_date
 
         self.adult_dob = self.class_date.date().replace(year=self.class_date.year - 18)
 

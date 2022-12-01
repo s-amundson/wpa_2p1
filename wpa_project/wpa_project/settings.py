@@ -166,6 +166,7 @@ FACEBOOK_USER = get_secret('FACEBOOK_USER')
 
 # Application definition
 INSTALLED_APPS = [
+    'event',
     'student_app',
     'payment',
     'program_app',

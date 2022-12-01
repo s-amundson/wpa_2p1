@@ -16,7 +16,7 @@ class ClassRegistrationHelper:
             logging.warning(ikey)
             icr = queryset.filter(idempotency_key=str(ikey['idempotency_key']))
             cost = icr[0].beginner_class.cost
-            note = f'Class on {str(icr[0].beginner_class.class_date)[:10]}, Students: '
+            note = f'Class on {str(icr[0].beginner_class.event.event_date)[:10]}, Students: '
             for cr in icr:
                 note += f'{cr.student.first_name}, '
             payment = None
@@ -44,7 +44,7 @@ class ClassRegistrationHelper:
                 if is_staff:
                     staff_count += 1
                 elif record.student.safety_class is None \
-                        or record.student.safety_class >= beginner_class.class_date.date():
+                        or record.student.safety_class >= beginner_class.event.event_date.date():
                     beginner += 1
                 else:
                     returnee += 1

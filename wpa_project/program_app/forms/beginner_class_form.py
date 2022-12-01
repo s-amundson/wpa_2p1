@@ -15,5 +15,4 @@ class BeginnerClassForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['cancel_message'] = forms.CharField(required=False)
-        # logging.debug(self.instance)
-        # logging.debug(self.instance is not None)
+        self.fields['event'].required = False

@@ -4,9 +4,9 @@ from django.contrib.auth.admin import UserAdmin
 from .models import BeginnerClass, ClassRegistration
 
 
-@admin.register(BeginnerClass)
-class BeginnerClassAdmin(admin.ModelAdmin):
-    list_display = ['id', 'class_date', 'state']
+# @admin.register(BeginnerClass)
+# class BeginnerClassAdmin(admin.ModelAdmin):
+#     list_display = ['id', 'event__class_date', 'event__state']
 
 
 @admin.register(ClassRegistration)
