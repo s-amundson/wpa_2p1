@@ -72,8 +72,8 @@ class TestsClassAttendance(TestCase):
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
-        bc.state = 'closed'
-        bc.save()
+        bc.event.state = 'closed'
+        bc.event.save()
 
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
@@ -85,7 +85,7 @@ class TestsClassAttendance(TestCase):
 
         cr = ClassRegistration.objects.get(pk=cr.pk)
         self.assertEqual(cr.attended, True)
-        self.assertEqual(cr.student.safety_class, timezone.datetime.date(bc.class_date))
+        self.assertEqual(cr.student.safety_class, timezone.datetime.date(bc.event.event_date))
 
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
@@ -100,8 +100,8 @@ class TestsClassAttendance(TestCase):
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
-        bc.state = 'closed'
-        bc.save()
+        bc.event.state = 'closed'
+        bc.event.save()
 
         # mark instructor as attending.
         self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
@@ -125,8 +125,8 @@ class TestsClassAttendance(TestCase):
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
-        bc.state = 'closed'
-        bc.save()
+        bc.event.state = 'closed'
+        bc.event.save()
 
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
@@ -153,8 +153,8 @@ class TestsClassAttendance(TestCase):
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
-        bc.state = 'closed'
-        bc.save()
+        bc.event.state = 'closed'
+        bc.event.save()
 
         # mark instructor as attending.
         response = self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
@@ -176,10 +176,10 @@ class TestsClassAttendance(TestCase):
                                idempotency_key=str(uuid.uuid4()),
                                attended=True)
         cr.save()
-        cr.student.safety_class = bc.class_date
+        cr.student.safety_class = bc.event.event_date
         cr.student.save()
-        bc.state = 'closed'
-        bc.save()
+        bc.event.state = 'closed'
+        bc.event.save()
 
         # mark instructor as attending.
         response = self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),

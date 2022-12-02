@@ -173,7 +173,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         for c in cr:
             self.assertEqual(c.pay_status, 'refund')
 
-        self.assertEqual(bc.state, 'canceled')
+        self.assertEqual(bc.event.state, 'canceled')
         pl = PaymentLog.objects.filter(Q(idempotency_key=cr[0].idempotency_key) | Q(idempotency_key=cr[2].idempotency_key))
         self.assertEqual(len(pl), 2)
         for l in pl:

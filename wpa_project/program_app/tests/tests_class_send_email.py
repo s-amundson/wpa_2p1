@@ -16,7 +16,7 @@ User = apps.get_model('student_app', 'User')
 
 
 class TestsClassSendEmail(TestCase):
-    fixtures = ['f1', 'f3']
+    fixtures = ['f1']
 
     def setUp(self):
         # Every test needs a client.

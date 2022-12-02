@@ -17,7 +17,7 @@ class ClassSignInView(WaiverView):
         # logging.debug(rid)
         if rid is not None:
             self.class_registration = get_object_or_404(ClassRegistration, pk=rid)
-            self.class_date = self.class_registration.beginner_class.class_date.date()
+            self.class_date = self.class_registration.beginner_class.event.event_date.date()
             self.student = self.class_registration.student
             self.success_url = reverse_lazy('programs:class_attend_list',
                                             kwargs={'beginner_class': self.class_registration.beginner_class.id})
@@ -37,7 +37,8 @@ class ClassSignInView(WaiverView):
         waiting.update(pay_status='canceled')
         for r in cr.filter(pay_status='paid'):
             if not r == self.class_registration:
-                refund = RefundHelper().refund_with_idempotency_key(r.idempotency_key, r.beginner_class.cost * 100)
+                refund = RefundHelper().refund_with_idempotency_key(r.idempotency_key,
+                                                                    r.beginner_class.event.cost_standard * 100)
                 if refund['status'] == 'SUCCESS':
                     r.pay_status = 'refunded'
                     r.save()

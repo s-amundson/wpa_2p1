@@ -34,11 +34,9 @@ class UpdatePrograms:
                 classes = BeginnerClass.objects.filter(event__event_date=class_day)
                 if len(classes) == 0:
                     bc = BeginnerClass(
-                        class_date=class_day,
                         class_type=c.class_type,
                         beginner_limit=c.beginner_limit,
                         returnee_limit=c.returnee_limit,
-                        state=c.state,
                         event= Event.objects.create(
                             event_date=class_day,
                             cost_standard=5,
@@ -54,14 +52,13 @@ class UpdatePrograms:
             self.today + timedelta(days=(7 * beginner_schedule.frequency * beginner_schedule.future_classes) + 1),
             beginner_schedule.class_time)
         bc, created = BeginnerClass.objects.get_or_create(
-            class_date=class_date,
+            event__event_date=class_date,
             class_type=beginner_schedule.class_type,
             defaults={
                 'beginner_limit': beginner_schedule.beginner_limit,
                 'beginner_wait_limit': beginner_schedule.beginner_wait_limit,
                 'returnee_limit': beginner_schedule.returnee_limit,
                 'returnee_wait_limit': beginner_schedule.returnee_wait_limit,
-                'state': beginner_schedule.state,
                 'event': Event.objects.create(
                         event_date=class_date,
                         cost_standard=beginner_schedule.cost,

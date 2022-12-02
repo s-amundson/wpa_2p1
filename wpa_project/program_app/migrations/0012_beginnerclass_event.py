@@ -9,7 +9,7 @@ def copy_event_data(apps, schema_editor):
     bc = apps.get_model('program_app', 'BeginnerClass')
     event = apps.get_model('event', 'Event')
 
-    for c in bc.objects.all():
+    for c in bc.objects.all().order_by('id'):
         c.event = event.objects.create(
             event_date=c.class_date,
             cost_standard=c.cost,

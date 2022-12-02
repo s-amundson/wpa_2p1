@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 def create_beginner_class(date, state, class_type, beginner_limit=2, returnee_limit=2):
     return BeginnerClass.objects.create(
-        class_date=date,
         class_type=class_type,
         beginner_limit=beginner_limit,
         returnee_limit=returnee_limit,

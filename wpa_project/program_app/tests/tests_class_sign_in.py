@@ -76,11 +76,10 @@ class TestsClassSignIn(MockSideEffects, TestCase):
             receipt='',
             source_type='',
             status='SUCCESS',
-            total_money=bc2.cost*100,
+            total_money=bc2.event.cost_standard*100,
             user=self.test_user
         )
         bc3 = BeginnerClass.objects.create(
-            class_date="2023-06-05T16:00:00.000Z",
             class_type="beginner",
             beginner_limit=0,
             beginner_wait_limit=10,
@@ -93,7 +92,6 @@ class TestsClassSignIn(MockSideEffects, TestCase):
                 state="wait",
                 type='class'
             ),
-            state="wait"
         )
         reg3 = ClassRegistration.objects.create(
             beginner_class=bc3,

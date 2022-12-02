@@ -48,7 +48,7 @@ class TestsClassAdminRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:
@@ -58,7 +58,8 @@ class TestsClassAdminRegistration(TestCase):
     def test_add_student_to_full(self):
         bc = BeginnerClass.objects.get(pk=1)
         bc.beginner_limit = 1
-        bc.state = 'full'
+        bc.event.state = 'full'
+        bc.event.save()
         bc.save()
 
         s = Student.objects.get(pk=5)
@@ -67,7 +68,7 @@ class TestsClassAdminRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
+        self.assertEqual(bc.event.state, 'full')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:
@@ -77,7 +78,8 @@ class TestsClassAdminRegistration(TestCase):
     def test_add_student_to_closed(self):
         bc = BeginnerClass.objects.get(pk=1)
         bc.beginner_limit = 1
-        bc.state = 'closed'
+        bc.event.state = 'closed'
+        bc.event.save()
         bc.save()
 
         s = Student.objects.get(pk=5)
@@ -87,7 +89,7 @@ class TestsClassAdminRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'closed')
+        self.assertEqual(bc.event.state, 'closed')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:
@@ -133,13 +135,14 @@ class TestsClassAdminRegistration(TestCase):
     def test_class_add_student_after_class(self):
         bc = BeginnerClass.objects.get(pk=1)
         bc.class_date = timezone.now() - timezone.timedelta(hours=3)
-        bc.state = 'closed'
+        bc.event.state = 'closed'
+        bc.event.save()
         bc.save()
 
         response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'closed')
+        self.assertEqual(bc.event.state, 'closed')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:
@@ -151,7 +154,7 @@ class TestsClassAdminRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:

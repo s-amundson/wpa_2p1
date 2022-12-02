@@ -123,7 +123,7 @@ class UnregisterForm(forms.Form):
         for ikey in cr.values('idempotency_key', 'pay_status').annotate(ik_count=Count('idempotency_key')).order_by():
             logging.debug(ikey)
             icr = cr.filter(idempotency_key=ikey['idempotency_key'])
-            cost = icr[0].beginner_class.cost
+            cost = icr[0].beginner_class.event.cost_standard
             if ikey['pay_status'] in ['start', 'waiting']:
                 icr.update(pay_status='canceled')
                 continue

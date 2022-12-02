@@ -35,9 +35,9 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
             kwargs['instance'] = self.beginner_class
         else:
             try:
-                c = BeginnerClass.objects.latest('class_date').class_date
+                c = BeginnerClass.objects.latest('event__event_date').event.event_date
                 c = c + timedelta(days=7)
-            except BeginnerClass.DoesNotExist:  # pragma: no cover
+            except (BeginnerClass.DoesNotExist, AttributeError):  # pragma: no cover
                 c = timezone.now()
             try:
                 cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1] #[0].standard_cost
@@ -93,7 +93,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
                                  "returning class can't have a beginner limit greater then 0")
             bc.beginner_limit = 0
             bc.save()
-        if bc.state == 'canceled':
+        if bc.event.state == 'canceled':
             refund_class.delay(bc.id, form.cleaned_data['cancel_message'])
         return super().form_valid(form)
 

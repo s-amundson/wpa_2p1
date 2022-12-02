@@ -83,7 +83,7 @@ class TestsClassRegistration(TestCase):
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].beginner_class, bc)
@@ -103,7 +103,7 @@ class TestsClassRegistration(TestCase):
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '2022-06 ', 'student_4': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 0)
 
@@ -125,7 +125,7 @@ class TestsClassRegistration(TestCase):
                      {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         time.sleep(1)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertContains(response, 'Not enough space available in this class')
@@ -147,7 +147,7 @@ class TestsClassRegistration(TestCase):
         self.assertContains(response, 'Student is already enrolled')
         # self.assertEqual(response.context['message'] == "")
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
 
@@ -168,7 +168,7 @@ class TestsClassRegistration(TestCase):
         self.assertContains(response, 'Rosalva is already enrolled')
         # self.assertEqual(response.context['message'] == "")
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
 
@@ -187,7 +187,7 @@ class TestsClassRegistration(TestCase):
                          {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
 
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)
         for c in cr:
@@ -199,7 +199,7 @@ class TestsClassRegistration(TestCase):
         bc = BeginnerClass.objects.get(pk=1)
         # self.assertEqual(bc.enrolled_beginners, 2)
         # self.assertEqual(bc.enrolled_returnee, 1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)
 
@@ -218,13 +218,13 @@ class TestsClassRegistration(TestCase):
         """test that no payment is required if the cost is set to 0"""
         # change the cost of the class
         bc = BeginnerClass.objects.get(pk=1)
-        bc.cost = 0
-        bc.save()
+        bc.event.cost_standard = 0
+        bc.event.save()
         # add a user to the class
         response = self.client.post(reverse('programs:class_registration'),
                                     {'beginner_class': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].beginner_class, bc)
@@ -282,7 +282,7 @@ class TestsClassRegistration(TestCase):
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].beginner_class, bc)
@@ -307,7 +307,7 @@ class TestsClassRegistration(TestCase):
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 0)
 
@@ -330,7 +330,7 @@ class TestsClassRegistration(TestCase):
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 0)
 
@@ -345,14 +345,14 @@ class TestsClassRegistration(TestCase):
         self.test_user.save()
 
         bc = BeginnerClass.objects.get(pk=1)
-        bc.state = 'full'
-        bc.save()
+        bc.event.state = 'full'
+        bc.event.save()
 
         # add a user to the class
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
+        self.assertEqual(bc.event.state, 'full')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
 
@@ -364,14 +364,14 @@ class TestsClassRegistration(TestCase):
         d = timezone.now()
 
         bc = BeginnerClass.objects.get(pk=1)
-        bc.state = 'full'
-        bc.save()
+        bc.event.state = 'full'
+        bc.event.save()
 
         # add a user to the class
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
+        self.assertEqual(bc.event.state, 'full')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 1)
 
@@ -392,8 +392,9 @@ class TestsClassRegistration(TestCase):
     def test_new_student_register_twice(self):
         d = timezone.now() + datetime.timedelta(days=2)
         bc = BeginnerClass.objects.get(pk=1)
-        bc.class_date = d
+        bc.event.event_date = d
         bc.class_type = 'beginner'
+        bc.event.save()
         bc.save()
         s = Student.objects.get(pk=4)
         cr = ClassRegistration(
@@ -407,9 +408,10 @@ class TestsClassRegistration(TestCase):
         cr.save()
 
         bc2 = BeginnerClass.objects.get(pk=2)
-        bc2.class_date = d + datetime.timedelta(days=2)
+        bc2.event.event_date = d + datetime.timedelta(days=2)
         bc2.class_type = 'beginner'
-        bc2.state = 'open'
+        bc2.event.state = 'open'
+        bc2.event.save()
         bc2.save()
 
         response = self.client.post(reverse('programs:class_registration'),
@@ -439,7 +441,7 @@ class TestsClassRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration'),
                      {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)
         # self.assertContains(response, 'Not enough space available in this class')
@@ -467,7 +469,7 @@ class TestsClassRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration'),
                      {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'wait')
+        self.assertEqual(bc.event.state, 'wait')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 3)
         # self.assertContains(response, 'Not enough space available in this class')
@@ -478,7 +480,8 @@ class TestsClassRegistration(TestCase):
         bc1.class_type = 'beginner'
         bc1.beginner_limit = 0
         bc1.beginner_wait_limit = 10
-        bc1.state = 'wait'
+        bc1.event.state = 'wait'
+        bc1.event.save()
         bc1.save()
         students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
         for s in students:
@@ -496,7 +499,8 @@ class TestsClassRegistration(TestCase):
         bc2.class_type = 'beginner'
         bc2.beginner_limit = 0
         bc2.beginner_wait_limit = 10
-        bc2.state = 'wait'
+        bc2.event.state = 'wait'
+        bc2.event.save()
         bc2.save()
 
         u = User.objects.get(pk=2)
@@ -509,7 +513,7 @@ class TestsClassRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration'),
                      {'beginner_class': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=2)
-        self.assertEqual(bc.state, 'wait')
+        self.assertEqual(bc.event.state, 'wait')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 2)
         self.assertContains(response, f'{students[0].first_name} is on wait list for another beginner class')
@@ -519,7 +523,8 @@ class TestsClassRegistration(TestCase):
         bc1.class_type = 'beginner'
         bc1.beginner_limit = 2
         bc1.beginner_wait_limit = 10
-        bc1.state = 'wait'
+        bc1.event.state = 'wait'
+        bc1.event.save()
         bc1.save()
         students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
         for s in students:
@@ -537,7 +542,8 @@ class TestsClassRegistration(TestCase):
         bc2.class_type = 'beginner'
         bc2.beginner_limit = 0
         bc2.beginner_wait_limit = 10
-        bc2.state = 'wait'
+        bc2.event.state = 'wait'
+        bc2.event.save()
         bc2.save()
 
         u = User.objects.get(pk=2)
@@ -550,7 +556,7 @@ class TestsClassRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration'),
                      {'beginner_class': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=2)
-        self.assertEqual(bc.state, 'wait')
+        self.assertEqual(bc.event.state, 'wait')
         cr = ClassRegistration.objects.all()
         self.assertEqual(len(cr), 4)
         self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
@@ -560,7 +566,8 @@ class TestsClassRegistration(TestCase):
         bc.class_type = 'beginner'
         bc.beginner_limit = 0
         bc.beginner_wait_limit = 10
-        bc.state = 'wait'
+        bc.event.state = 'wait'
+        bc.event.save()
         bc.save()
         cr = ClassRegistration(
             beginner_class=bc,
@@ -581,7 +588,8 @@ class TestsClassRegistration(TestCase):
         bc.class_type = 'beginner'
         bc.beginner_limit = 0
         bc.beginner_wait_limit = 10
-        bc.state = 'wait'
+        bc.event.state = 'wait'
+        bc.event.save()
         bc.save()
         cr = ClassRegistration(
             beginner_class=bc,

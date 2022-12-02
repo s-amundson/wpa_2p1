@@ -10,7 +10,7 @@ User = apps.get_model('student_app', 'User')
 
 
 class TestsStaffReport(TestCase):
-    fixtures = ['f1', 'f2', 'f3']
+    fixtures = ['f1', 'f2']
 
     def setUp(self):
         # Every test needs a client.

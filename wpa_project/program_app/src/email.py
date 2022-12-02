@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class EmailMessage(EmailMessage):
     def beginner_reminder(self, beginner_class, students):
         self.bcc_from_students(students)
-        self.subject = f'WPA Class Reminder {timezone.localtime(beginner_class.class_date).date()}'
+        self.subject = f'WPA Class Reminder {timezone.localtime(beginner_class.event.event_date).date()}'
         if beginner_class.class_type == 'beginner':
             d = {'beginner_class': beginner_class, 'minutes': 30}
         elif  beginner_class.class_type == 'returnee':
@@ -33,7 +33,7 @@ class EmailMessage(EmailMessage):
 
     def wait_list_reminder(self, beginner_class, students):
         self.bcc_from_students(students)
-        self.subject = f'WPA Class Wait List Reminder {timezone.localtime(beginner_class.class_date).date()}'
+        self.subject = f'WPA Class Wait List Reminder {timezone.localtime(beginner_class.event.event_date).date()}'
         if beginner_class.class_type == 'beginner':
             d = {'beginner_class': beginner_class, 'minutes': 30}
         elif beginner_class.class_type == 'returnee':
@@ -54,13 +54,13 @@ class EmailMessage(EmailMessage):
 
         for r in registrations:
             line_items.append({
-                'name': f'Class on {str(r.beginner_class.class_date)[:10]} student: {r.student.first_name}',
+                'name': f'Class on {str(r.beginner_class.event.event_date)[:10]} student: {r.student.first_name}',
                 'quantity': 1,
-                'amount_each': r.beginner_class.cost,
-                'cost': r.beginner_class.cost})
+                'amount_each': r.beginner_class.event.cost_standard,
+                'cost': r.beginner_class.event.cost_standard})
         d['line_items'] = line_items
-        d['total'] = beginner_class.cost * len(registrations)
-        self.subject = f'WPA class registration status change for class on {beginner_class.class_date.date()}'
+        d['total'] = beginner_class.event.cost_standard * len(registrations)
+        self.subject = f'WPA class registration status change for class on {beginner_class.event.event_date.date()}'
         self.body = get_template('program_app/email/wait_list_off.txt').render(d)
         self.attach_alternative(get_template('program_app/email/wait_list_off.html').render(d),
                                 'text/html')

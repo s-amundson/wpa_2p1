@@ -84,7 +84,7 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].status, 'refund')
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
         # refund.assert_called_with(pl[0].idempotency_key, 1000)
 
         cr = bc.classregistration_set.all()

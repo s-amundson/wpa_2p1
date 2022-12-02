@@ -27,12 +27,10 @@
    "user_permissions": [], "dark_theme": false, "is_member": false}},
   {"model": "event.event", "pk": 1, "fields": {"event_date": "2023-06-05T16:00:00.000Z", "type": "class", "cost_standard": 5,
   "cost_member": 5, "state": "open", "volunteer_points": 2}},
-  {"model": "event.event", "pk": 2, "fields": {"event_date": "2023-06-05T16:00:00.000Z", "type": "class", "cost_standard": 5,
+  {"model": "event.event", "pk": 2, "fields": {"event_date": "2023-06-12T16:00:00.000Z", "type": "class", "cost_standard": 5,
   "cost_member": 5, "state": "open", "volunteer_points": 2}},
-  {"model": "program_app.beginnerclass", "pk": 1, "fields": {"class_date": "2023-06-05T16:00:00.000Z", "class_type": "combined",
-  "beginner_limit": 2, "returnee_limit": 2, "state": "open", "event": 1}},
-  {"model": "program_app.beginnerclass", "pk": 2, "fields": {"class_date": "2023-06-12T16:00:00.000Z", "class_type": "combined",
-  "beginner_limit": 20, "returnee_limit": 20, "state": "scheduled", "event": 2}},
+  {"model": "program_app.beginnerclass", "pk": 1, "fields": {"class_type": "combined", "beginner_limit": 2, "returnee_limit": 2, "event": 1}},
+  {"model": "program_app.beginnerclass", "pk": 2, "fields": {"class_type": "combined", "beginner_limit": 20, "returnee_limit": 20, "event": 2}},
 
   {"model": "payment.costsmodel", "pk": 1, "fields": {"name": "Beginner Class", "member_cost": 5, "standard_cost": 5, "membership": false, "enabled": true}},
 

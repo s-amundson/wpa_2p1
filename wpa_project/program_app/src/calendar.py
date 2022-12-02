@@ -21,7 +21,7 @@ class Calendar(HTMLCalendar):
         self.month = month
         self.events = BeginnerClass.objects.filter(event__event_date__gt=timezone.now(),
                                                    event__event_date__year=year,
-                                                   event__event_date__month=month).order_by('class_date')
+                                                   event__event_date__month=month).order_by('event__event_date')
         if not staff:
             self.events = self.events.exclude(class_type='special')
         self.joad_class_events = JoadClass.objects.filter(class_date__gt=timezone.now(),

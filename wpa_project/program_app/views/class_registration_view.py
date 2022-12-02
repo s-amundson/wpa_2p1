@@ -68,12 +68,12 @@ class ClassRegistrationView(AccessMixin, FormView):
 
     def form_invalid(self, form):
         logging.debug(self.request.POST)
-        logging.debug(form.errors)
+        logging.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
         self.form = form
-
+        logging.warning(form.cleaned_data)
         beginner_class = BeginnerClass.objects.get(pk=self.form.cleaned_data['beginner_class'])
         beginner = 0
         returnee = 0
@@ -112,9 +112,9 @@ class ClassRegistrationView(AccessMixin, FormView):
                     if len(reg.filter(beginner_class=beginner_class)) == 0:
                         if s.safety_class is None:
                             future_reg = reg.filter(beginner_class__event__event_date__gt=timezone.now())
-                            if beginner_class.state == 'wait' and len(future_reg.filter(pay_status='waiting')) > 0:
+                            if beginner_class.event.state == 'wait' and len(future_reg.filter(pay_status='waiting')) > 0:
                                 return self.has_error(f'{s.first_name} is on wait list for another beginner class')
-                            elif beginner_class.state != 'wait' and len(future_reg.exclude(pay_status='waiting')) > 0:
+                            elif beginner_class.event.state != 'wait' and len(future_reg.exclude(pay_status='waiting')) > 0:
                                 return self.has_error(f'{s.first_name} is enrolled in another beginner class')
                             else:
                                 beginner += 1
@@ -138,7 +138,7 @@ class ClassRegistrationView(AccessMixin, FormView):
             return self.transact(beginner_class, students, instructors)
 
     def has_error(self, message):
-        logging.debug(message)
+        logging.warning(message)
         messages.add_message(self.request, messages.ERROR, message)
         return self.form_invalid(self.form)
 
@@ -149,8 +149,8 @@ class ClassRegistrationView(AccessMixin, FormView):
             if self.wait:
                 logging.debug(self.has_card)
                 if self.has_card:
-                    beginner_class.state = 'wait'
-                    beginner_class.save()
+                    beginner_class.event.state = 'wait'
+                    beginner_class.event.save()
                     pay_status = 'waiting'
                     self.success_url = reverse_lazy('programs:wait_list', kwargs={'beginner_class': beginner_class.id})
                 else:
@@ -158,7 +158,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                     messages.add_message(self.request, messages.INFO,
                                          "To be placed on the wait list you need to have a card on file")
             uid = str(uuid.uuid4())
-            class_date = timezone.localtime(beginner_class.class_date)
+            class_date = timezone.localtime(beginner_class.event.event_date)
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
@@ -174,7 +174,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                 self.request.session['line_items'].append({
                     'name': f'Class on {str(class_date)[:10]} student: {s.first_name}',
                     'quantity': 1,
-                    'amount_each': beginner_class.cost,
+                    'amount_each': beginner_class.event.cost_standard,
                      }
                 )
                 # logging.debug(cr)
@@ -208,7 +208,7 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
         # logging.debug(beginner_class.cost)
 
         uid = str(uuid.uuid4())
-        class_date = timezone.localtime(beginner_class.class_date)
+        class_date = timezone.localtime(beginner_class.event.event_date)
         if form.cleaned_data['payment']:
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
@@ -242,7 +242,7 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                         self.request.session['line_items'].append({
                             'name': f'Class on {str(class_date)[:10]} student: {s.first_name}',
                             'quantity': 1,
-                            'amount_each': beginner_class.cost,
+                            'amount_each': beginner_class.event.cost_standard,
                              }
                         )
                     ncr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,

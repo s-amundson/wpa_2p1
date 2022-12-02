@@ -101,7 +101,7 @@ def refund_class(beginner_class, message=''):
                 ik_list.append(reg.idempotency_key)
                 qty = len(cr.filter(idempotency_key=reg.idempotency_key).filter(pay_status='paid'))
                 square_response = refund.refund_with_idempotency_key(
-                    reg.idempotency_key, qty * beginner_class.cost * 100)
+                    reg.idempotency_key, qty * beginner_class.event.cost_standard * 100)
                 if square_response['status'] == 'error':
                     if square_response['error'] != 'Previously refunded':  # pragma: no cover
                         logging.error(square_response)
