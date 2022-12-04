@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class EventRegistration(models.Model):
-    event = models.ForeignKey(JoadEvent, on_delete=models.SET_NULL, null=True)
+    joad_event = models.ForeignKey(JoadEvent, on_delete=models.SET_NULL, null=True)
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
     pay_status = models.CharField(max_length=20)
     idempotency_key = models.UUIDField()

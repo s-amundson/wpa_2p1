@@ -72,8 +72,6 @@ class RegistrationView(RegistrationSuperView):
         if session.state != "open":  # pragma: no cover
             return self.has_error('Session in wrong state')
 
-        # reg = Registration.objects.filter(session=session).exclude(
-        #     pay_status="refunded").exclude(pay_status='canceled')
         reg = session.registration_set.exclude(pay_status="refunded").exclude(pay_status='canceled')
         logging.debug(len(reg.filter(pay_status='paid')))
 

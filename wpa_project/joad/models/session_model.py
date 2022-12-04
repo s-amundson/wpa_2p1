@@ -1,15 +1,9 @@
 from django.db import models
-from django.conf import settings
-from django.utils import timezone
+
+from src.model_helper import choices
+
 import logging
 logger = logging.getLogger(__name__)
-
-
-def choices(choice_list):
-    choice = []
-    for c in choice_list:
-        choice.append((c, c))
-    return choice
 
 
 class Session(models.Model):

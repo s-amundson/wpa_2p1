@@ -43,13 +43,13 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
         students = []
         # message = ""
         logging.debug(form.cleaned_data)
-        event = form.cleaned_data['event']
-        logging.debug(event.state)
-        logging.debug(event.id)
-        if event.state != "open": # pragma: no cover
-            return self.has_error('Session in wrong state')
+        joad_event = form.cleaned_data['joad_event']
+        logging.debug(joad_event.event.state)
+        logging.debug(joad_event.id)
+        if joad_event.event.state != "open": # pragma: no cover
+            return self.has_error('Event in wrong state')
 
-        reg = EventRegistration.objects.filter(event=event).exclude(
+        reg = EventRegistration.objects.filter(joad_event=joad_event).exclude(
             pay_status="refunded").exclude(pay_status='canceled')
         logging.debug(len(reg.filter(pay_status='paid')))
 
@@ -59,7 +59,7 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
-                age = StudentHelper().calculate_age(s.dob, event.event_date)
+                age = StudentHelper().calculate_age(s.dob, joad_event.event_date)
                 logging.debug(age)
                 if age < 9:
                     return self.has_error('Student is to young.')
@@ -80,7 +80,7 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
             return self.has_error('Invalid student selected')
         logging.debug(len(reg.filter(pay_status='paid')))
         logging.debug(len(students))
-        if len(reg.filter(pay_status='paid')) + len(students) > event.student_limit:
+        if len(reg.filter(pay_status='paid')) + len(students) > joad_event.student_limit:
             return self.has_error('Class is full')
 
         with transaction.atomic():
@@ -88,13 +88,13 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'joad'
-            self.request.session['payment_description'] = f'Joad event on {str(event.event_date)[:10]}'
+            self.request.session['payment_description'] = f'Joad event on {str(joad_event.event_date)[:10]}'
             logging.debug(students)
-            description = f"Joad event on {str(event.event_date)[:10]} student: "
+            description = f"Joad event on {str(joad_event.event_date)[:10]} student: "
             for s in students:
-                cr = EventRegistration(event=event, student=s, pay_status='start', idempotency_key=uid).save()
-                self.request.session['line_items'].append({'name': description + f'{s.first_name}',
-                                                           'quantity': 1, 'amount_each': event.cost})
+                cr = EventRegistration(joad_event=joad_event, student=s, pay_status='start', idempotency_key=uid).save()
+                self.request.session['line_items'].append({'name': description + f'{s.first_name}', 'quantity': 1,
+                                                           'amount_each': joad_event.event.cost_standard})
                 logging.debug(cr)
         return HttpResponseRedirect(reverse('payment:make_payment'))
 
@@ -102,10 +102,6 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
         messages.add_message(self.request, messages.ERROR, message)
         return self.form_invalid(self.form)
         # return render(self.request, self.template_name, {'form': self.form})
-
-    def post(self, request, *args, **kwargs):
-        logging.debug(self.request.POST)
-        return super().post(request, *args, **kwargs)
 
 
 class ResumeEventRegistrationView(LoginRequiredMixin, View):
@@ -116,10 +112,8 @@ class ResumeEventRegistrationView(LoginRequiredMixin, View):
         self.request.session['idempotency_key'] = str(registration.idempotency_key)
         self.request.session['line_items'] = []
         self.request.session['payment_category'] = 'joad'
-        # self.request.session['payment_db'] = ['joad', 'Registration']
-        # self.request.session['action_url'] = reverse('programs:class_payment')
         for r in registrations:
-            description = f"Joad event on {str(registration.event.event_date)[:10]} student: "
-            self.request.session['line_items'].append({'name': description + f'{r.student.first_name}',
-                                                           'quantity': 1, 'amount_each': r.event.cost})
+            description = f"Joad event on {str(registration.joad_event.event.event_date)[:10]} student: "
+            self.request.session['line_items'].append({'name': description + f'{r.student.first_name}', 'quantity': 1,
+                                                           'amount_each': r.joad_event.event.cost_standard})
         return HttpResponseRedirect(reverse('payment:make_payment'))

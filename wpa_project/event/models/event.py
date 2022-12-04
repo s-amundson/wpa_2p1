@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class Event(models.Model):
     event_states = ['scheduled', 'open', 'wait', 'full', 'closed', 'canceled', 'recorded']
-    event_types = ['class', 'joad', 'special', 'work']
+    event_types = ['class', 'joad class', 'joad event', 'special', 'work']
     # Fields
     event_date = models.DateTimeField()
     cost_standard = models.IntegerField(default=0)

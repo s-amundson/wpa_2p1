@@ -1,9 +1,8 @@
 import logging
-import json
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
-from ..models import JoadEvent, EventRegistration
+from ..models import JoadEvent
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')

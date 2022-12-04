@@ -1,9 +1,7 @@
-from django.views.generic.list import ListView
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
 from django.forms import model_to_dict
 
-from ..models import JoadEvent, Session
+from ..models import Session
 from .joad_event_view import JoadEventListView
 import logging
 logger = logging.getLogger(__name__)

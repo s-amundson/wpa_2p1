@@ -58,7 +58,7 @@ class TestsJoadEventRegistration(TestCase):
         self._set_joad_age(Student.objects.get(pk=5))
 
         response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 1}),
-                                    {'event': 1, 'student_5': 'on'}, secure=True)
+                                    {'joad_event': 1, 'student_5': 'on'}, secure=True)
         # self.assertEqual(response.status_code, 200)
         reg = EventRegistration.objects.all()
         self.assertEqual(len(reg), 2)
@@ -72,7 +72,7 @@ class TestsJoadEventRegistration(TestCase):
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 1}),
-                                    {'event': 1, 'student_5': 'on'}, secure=True)
+                                    {'joad_event': 1, 'student_5': 'on'}, secure=True)
         # self.assertEqual(response.status_code, 200)
         events = EventRegistration.objects.all()
         self.assertEqual(len(events), 1)
@@ -85,7 +85,7 @@ class TestsJoadEventRegistration(TestCase):
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 1}),
-                                    {'event': 1, 'student_5': 'on'}, secure=True)
+                                    {'joad_event': 1, 'student_5': 'on'}, secure=True)
         # self.assertEqual(response.status_code, 200)
         events = EventRegistration.objects.all()
         self.assertEqual(len(events), 1)
@@ -94,7 +94,7 @@ class TestsJoadEventRegistration(TestCase):
     def test_student_post_reregister(self):
         self._set_joad_age(Student.objects.get(pk=5), 10)
 
-        EventRegistration.objects.create(event=JoadEvent.objects.get(pk=1),
+        EventRegistration.objects.create(joad_event=JoadEvent.objects.get(pk=1),
                                          student=Student.objects.get(pk=5),
                                          pay_status='paid',
                                          idempotency_key='7b16fadf-4851-4206-8dc6-81a92b70e52f')
@@ -102,7 +102,7 @@ class TestsJoadEventRegistration(TestCase):
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 1}),
-                                    {'event': 1, 'student_5': 'on'}, secure=True)
+                                    {'joad_event': 1, 'student_5': 'on'}, secure=True)
         # self.assertEqual(response.status_code, 200)
         events = EventRegistration.objects.all()
         self.assertEqual(len(events), 2)
@@ -110,7 +110,7 @@ class TestsJoadEventRegistration(TestCase):
 
     def test_student_post_invalid(self):
         self._set_joad_age(Student.objects.get(pk=5), 10)
-        EventRegistration.objects.create(event=JoadEvent.objects.get(pk=1),
+        EventRegistration.objects.create(joad_event=JoadEvent.objects.get(pk=1),
                                          student=Student.objects.get(pk=5),
                                          pay_status='paid',
                                          idempotency_key='7b16fadf-4851-4206-8dc6-81a92b70e52f')
@@ -118,7 +118,7 @@ class TestsJoadEventRegistration(TestCase):
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 1}),
-                                    {'event': 1}, secure=True)
+                                    {'joad_event': 1}, secure=True)
         # self.assertEqual(response.status_code, 200)
         events = EventRegistration.objects.all()
         self.assertEqual(len(events), 2)
@@ -134,7 +134,7 @@ class TestsJoadEventRegistration(TestCase):
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 1}),
-                                    {'event': 1, 'student_5': 'on'}, secure=True)
+                                    {'joad_event': 1, 'student_5': 'on'}, secure=True)
         events = EventRegistration.objects.all()
         self.assertEqual(len(events), 1)
         self.assertContains(response, 'Class is full')
@@ -149,14 +149,14 @@ class TestsJoadEventRegistration(TestCase):
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 1}),
-                                    {'event': 1, 'student_5': 'on'}, secure=True)
+                                    {'joad_event': 1, 'student_5': 'on'}, secure=True)
         events = EventRegistration.objects.all()
         self.assertEqual(len(events), 1)
 
     def test_resume_registration(self):
         self._set_joad_age(Student.objects.get(pk=5), 10)
 
-        event = EventRegistration.objects.create(event=JoadEvent.objects.get(pk=1),
+        event = EventRegistration.objects.create(joad_event=JoadEvent.objects.get(pk=1),
                                          student=Student.objects.get(pk=5),
                                          pay_status='paid',
                                          idempotency_key='7b16fadf-4851-4206-8dc6-81a92b70e52f')

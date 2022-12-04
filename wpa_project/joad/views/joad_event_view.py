@@ -10,6 +10,7 @@ from django.utils import timezone
 from ..forms import JoadEventForm, PinAttendanceStaffForm, PinAttendanceStudentForm
 from ..models import JoadEvent, PinAttendance
 from ..src import Choices
+from src.mixin import BoardMixin
 from student_app.models import Student
 
 import uuid
@@ -22,7 +23,7 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
     form_class = PinAttendanceStudentForm
     success_url = reverse_lazy('joad:index')
     success_message = "No pins earned today. Thank you"
-    event = None
+    joad_event = None
     student = None
     attendance = None  # if there's an attendance record for the student this will be set to that record.
 
@@ -44,9 +45,9 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
                 initial['target'] = hs.target
                 initial['inner_scoring'] = hs.inner_scoring
                 initial['previous_stars'] = hs.stars
-        if self.event is not None and self.event.event_type == 'joad_indoor':
+        if self.joad_event is not None and self.joad_event.event_type == 'joad_indoor':
             choices = Choices()
-            initial['event'] = self.event
+            initial['event'] = self.joad_event
             initial['student'] = self.student
             initial['category'] = choices.pin_shoot_catagory()[0]
         return initial
@@ -59,14 +60,14 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
     def form_valid(self, form):
         logging.debug(form.cleaned_data)
         record = form.save()
-        record.event = self.event
+        record.event = self.joad_event
         record.student = self.student
-        record.category = self.event.event_type
+        record.category = self.joad_event.event_type
         if self.request.user.student_set.first().student_family == self.student.student_family:
             pins_earned = form.calculate_pins()
             logging.debug(pins_earned)
             if pins_earned > 0:
-                pin_cost = self.event.pin_cost
+                pin_cost = self.joad_event.pin_cost
                 if pin_cost is None:  # pragma: no cover
                     pin_cost = 0
                 uid = str(uuid.uuid4())
@@ -88,9 +89,9 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
         eid = self.kwargs.get("event_id", None)
         sid = self.kwargs.get('student_id', None)
         if eid is not None and sid is not None:
-            self.event = get_object_or_404(JoadEvent, pk=eid)
+            self.joad_event = get_object_or_404(JoadEvent, pk=eid)
             self.student = get_object_or_404(Student, pk=sid)
-            self.attendance = self.event.pinattendance_set.filter(student=self.student).last()
+            self.attendance = self.joad_event.pinattendance_set.filter(student=self.student).last()
         if not self.request.user.is_authenticated:
             return False
         if self.request.user and self.request.user.is_staff:
@@ -99,21 +100,20 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
             return True
         elif self.request.user.student_set.first().student_family == self.student.student_family:
             self.form_class = PinAttendanceStudentForm
-            self.attendance = self.event.pinattendance_set.filter(student=self.student).last()
+            self.attendance = self.joad_event.pinattendance_set.filter(student=self.student).last()
             if self.attendance is not None and self.attendance.attended:
                 return True
         return False
 
 
 class EventAttendListView(UserPassesTestMixin, ListView):
-    event = None
+    joad_event = None
     template_name = 'joad/event_attend_list.html'
     def get_queryset(self):
-        # qs1 = self.event.eventregistration_set.filter(pay_status='paid')
         object_list = []
 
-        for row in self.event.eventregistration_set.filter(pay_status='paid'):
-            pa = self.event.pinattendance_set.filter(student=row.student).last()
+        for row in self.joad_event.eventregistration_set.filter(pay_status='paid'):
+            pa = self.joad_event.pinattendance_set.filter(student=row.student).last()
             logging.debug(pa)
             d = {'reg': row, 'pa': pa}
             object_list.append(d)
@@ -123,7 +123,7 @@ class EventAttendListView(UserPassesTestMixin, ListView):
         if self.request.user.is_authenticated:
             sid = self.kwargs.get("event_id", None)
             if sid is not None:
-                self.event = get_object_or_404(JoadEvent, pk=sid)
+                self.joad_event = get_object_or_404(JoadEvent, pk=sid)
             return self.request.user.is_board
         return False
 
@@ -192,17 +192,17 @@ class JoadEventListView(UserPassesTestMixin, ListView):
         return False
 
 
-class JoadEventView(UserPassesTestMixin, FormView):
+class JoadEventView(BoardMixin, FormView):
     template_name = 'joad/event.html'
     form_class = JoadEventForm
     success_url = reverse_lazy('joad:index')
-    event = None
+    joad_event = None
 
     def get_form(self):
         sid = self.kwargs.get("event_id", None)
         if sid is not None:
-            self.event = get_object_or_404(JoadEvent, pk=sid)
-            form = self.form_class(instance=self.event, **self.get_form_kwargs())
+            self.joad_event = get_object_or_404(JoadEvent, pk=sid)
+            form = self.form_class(instance=self.joad_event, **self.get_form_kwargs())
         else:
             form = self.form_class(**self.get_form_kwargs())
         return form
@@ -210,10 +210,10 @@ class JoadEventView(UserPassesTestMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         student_list = []
-        if self.event is not None:
-            for reg in self.event.eventregistration_set.filter(pay_status='paid'):
+        if self.joad_event is not None:
+            for reg in self.joad_event.eventregistration_set.filter(pay_status='paid'):
                 s = model_to_dict(reg.student)
-                attendance = PinAttendance.objects.filter(event=self.event, student=reg.student)
+                attendance = PinAttendance.objects.filter(event=self.joad_event, student=reg.student)
                 s['attend_record'] = len(attendance) > 0
                 s['attend'] = False
                 logging.debug(s['attend_record'])
@@ -232,8 +232,3 @@ class JoadEventView(UserPassesTestMixin, FormView):
         logging.debug(form.cleaned_data)
         form.save()
         return super().form_valid(form)
-
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            return self.request.user.is_board
-        return False

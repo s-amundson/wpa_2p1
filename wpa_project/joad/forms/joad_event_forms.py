@@ -16,7 +16,7 @@ class EventRegistrationForm(MyModelForm):
 
     class Meta(MyModelForm.Meta):
         model = EventRegistration
-        required_fields = ['event']
+        required_fields = ['joad_event']
         optional_fields = []
         fields = optional_fields + required_fields
 
@@ -38,7 +38,7 @@ class EventRegistrationForm(MyModelForm):
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2 student-check"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
-        self.fields['event'].queryset = JoadEvent.objects.filter(state='open').order_by('event_date')
+        self.fields['joad_event'].queryset = JoadEvent.objects.filter(state='open').order_by('event_date')
         self.student_count = len(students)
 
     def get_boxes(self):

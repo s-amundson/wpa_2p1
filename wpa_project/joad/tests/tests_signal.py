@@ -26,7 +26,7 @@ class TestsSignal(TestCase):
 
     def test_event_registration_signal_good_new(self):
         uid = '7b16fadf-4851-4206-8dc6-81a92b70e52f'
-        event = EventRegistration.objects.create(event=JoadEvent.objects.get(pk=1),
+        event = EventRegistration.objects.create(joad_event=JoadEvent.objects.get(pk=1),
                                                  student=Student.objects.get(pk=5),
                                                  pay_status='started',
                                                  idempotency_key=uid)

@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 import logging
@@ -8,11 +7,12 @@ from django.views.generic.list import ListView
 
 from ..models import Attendance, Registration, JoadClass
 from student_app.models import Student
+from src.mixin import StaffMixin
 
 logger = logging.getLogger(__name__)
 
 
-class AttendView(UserPassesTestMixin, View):
+class AttendView(StaffMixin, View):
     def post(self, request, class_id=None):
         logging.debug(request.POST.dict())
         jc = get_object_or_404(JoadClass, pk=class_id)
@@ -34,11 +34,8 @@ class AttendView(UserPassesTestMixin, View):
 
         return JsonResponse({'attend': attend, 'error': True})
 
-    def test_func(self):
-        return self.request.user.is_staff
 
-
-class AttendanceListView(UserPassesTestMixin, ListView):
+class AttendanceListView(StaffMixin, ListView):
     model = Registration
     template_name = 'joad/attendance.html'
     joad_class = None
@@ -76,6 +73,3 @@ class AttendanceListView(UserPassesTestMixin, ListView):
                                 })
 
         return object_list
-
-    def test_func(self):
-        return self.request.user.is_staff

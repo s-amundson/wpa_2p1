@@ -21,9 +21,9 @@ class TestsJoadIndex(TestCase):
     def set_event_date(self, date=None):
         if date is None:
             date = timezone.now() + timezone.timedelta(days=8)
-        event = JoadEvent.objects.get(pk=1)
-        event.event_date = date
-        event.save()
+        joad_event = JoadEvent.objects.get(pk=1)
+        joad_event.event_date = date
+        joad_event.save()
 
     def test_user_normal_no_student(self):
         self.test_user = User.objects.get(pk=3)
@@ -105,7 +105,7 @@ class TestsJoadIndex(TestCase):
         self.client.force_login(self.test_user)
         self.set_event_date()
 
-        EventRegistration.objects.create(event=JoadEvent.objects.get(pk=1),
+        EventRegistration.objects.create(joad_event=JoadEvent.objects.get(pk=1),
                                          student=Student.objects.get(pk=11),
                                          pay_status='paid',
                                          idempotency_key='7b16fadf-4851-4206-8dc6-81a92b70e52f')
@@ -130,7 +130,7 @@ class TestsJoadIndex(TestCase):
         self.client.force_login(self.test_user)
         self.set_event_date()
 
-        event_reg = EventRegistration.objects.create(event=JoadEvent.objects.get(pk=1),
+        event_reg = EventRegistration.objects.create(joad_event=JoadEvent.objects.get(pk=1),
                                          student=Student.objects.get(pk=11),
                                          pay_status='start',
                                          idempotency_key='7b16fadf-4851-4206-8dc6-81a92b70e52f')

@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
@@ -7,11 +7,12 @@ from django.urls import reverse_lazy
 
 from ..models import JoadClass, Session
 from ..forms import ClassForm
+from src.mixin import BoardMixin
 import logging
 logger = logging.getLogger(__name__)
 
 
-class JoadClassView(UserPassesTestMixin, FormView):
+class JoadClassView(BoardMixin, FormView):
     template_name = 'joad/forms/class_form.html'
     form_class = ClassForm
     success_url = reverse_lazy('joad:session')
@@ -33,10 +34,12 @@ class JoadClassView(UserPassesTestMixin, FormView):
         return JsonResponse({'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True})
 
     def test_func(self):
-        self.session = get_object_or_404(Session, pk=self.kwargs['session_id'])
-        if self.kwargs.get('class_id', None) is not None:
-            self.joad_class = get_object_or_404(JoadClass, pk=self.kwargs['class_id'])
-        return self.request.user.is_board
+        is_board = super().test_func()
+        if is_board:
+            self.session = get_object_or_404(Session, pk=self.kwargs['session_id'])
+            if self.kwargs.get('class_id', None) is not None:
+                self.joad_class = get_object_or_404(JoadClass, pk=self.kwargs['class_id'])
+        return is_board
 
 
 class ClassListView(LoginRequiredMixin, ListView):
