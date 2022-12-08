@@ -4,6 +4,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from student_app.models import Student
+from .helper import create_joad_event
 from ..models import JoadEvent, PinAttendance
 
 logger = logging.getLogger(__name__)
@@ -54,12 +55,7 @@ class TestsEventAttendance(TestCase):
                                           event=JoadEvent.objects.get(pk=1),
                                           student=Student.objects.get(pk=10),
                                           attended=True)
-        event = JoadEvent.objects.create(cost=15,
-                                         event_date='2022-01-16T16:00:00.000Z',
-                                         event_type="joad_indoor",
-                                         state="open",
-                                         student_limit=10,
-                                         pin_cost=5)
+        event = create_joad_event('2022-01-16T16:00:00.000Z', "open")
         pa2 = PinAttendance.objects.create(event=event,
                                           student=Student.objects.get(pk=10),
                                           attended=True)

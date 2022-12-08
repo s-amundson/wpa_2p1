@@ -10,6 +10,7 @@ from django.utils import timezone
 from ..forms import JoadEventForm, PinAttendanceStaffForm, PinAttendanceStudentForm
 from ..models import JoadEvent, PinAttendance
 from ..src import Choices
+from event.models import Event
 from src.mixin import BoardMixin
 from student_app.models import Student
 
@@ -148,12 +149,12 @@ class JoadEventListView(UserPassesTestMixin, ListView):
 
     def get_events(self):
         if self.past_events:
-            events = JoadEvent.objects.filter(event_date__lt=self.today)
+            events = JoadEvent.objects.filter(event__event_date__lt=self.today)
         else:
-            events = JoadEvent.objects.filter(event_date__gte=self.today)
-        events = events.exclude(state='recorded')
+            events = JoadEvent.objects.filter(event__event_date__gte=self.today)
+        events = events.exclude(event__state='recorded')
         if not self.request.user.is_board:
-            events = events.exclude(state='scheduled').exclude(state='canceled')
+            events = events.exclude(event__state='scheduled').exclude(event__state='canceled')
         event_list = []
         logging.debug(events)
         for event in events:
@@ -171,13 +172,16 @@ class JoadEventListView(UserPassesTestMixin, ListView):
                         else:
                             reg_status = 'registered'
                         logging.debug(attend)
-                    elif len(reg.filter(pay_status='start')) > 0 and event.state in ['open', 'full']:
+                    elif len(reg.filter(pay_status='start')) > 0 and event.event.state in ['open', 'full']:
                         reg_status = 'start'
                         reg_id = reg.filter(pay_status='start').last().id
-                    elif event.state in ['open', 'full']:
+                    elif event.event.state in ['open', 'full']:
                         reg_status = 'not registered'
                     reg_list.append({'reg_status': reg_status, 'reg_id': reg_id, 'student_id': student.id})
             e['registrations'] = reg_list
+            e['event_date'] = event.event.event_date
+            e['state'] = event.event.state
+            e['cost'] = event.event.cost_standard
             logging.debug(e)
             event_list.append(e)
         return event_list
@@ -230,5 +234,21 @@ class JoadEventView(BoardMixin, FormView):
 
     def form_valid(self, form):
         logging.debug(form.cleaned_data)
-        form.save()
+        event = form.save()
+        logging.warning(event)
+        if event.event is None:
+            event.event = Event.objects.create(
+                event_date=form.cleaned_data['event_date'],
+                cost_standard=form.cleaned_data['cost'],
+                cost_member=form.cleaned_data['cost'],
+                state=form.cleaned_data['state'],
+                type='joad event'
+            )
+        else:
+            event.event.event_date = form.cleaned_data['event_date']
+            event.event.cost_standard = form.cleaned_data['cost']
+            event.event.cost_member = form.cleaned_data['cost']
+            event.event.state = form.cleaned_data['state']
+            event.event.save()
+        event.save()
         return super().form_valid(form)

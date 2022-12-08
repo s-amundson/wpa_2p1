@@ -88,10 +88,18 @@ class TestsCalendar(TestCase):
         create_beginner_class(date.replace(hour=11), 'open', 'returnee')
         create_beginner_class(date.replace(hour=15), 'open', 'combined')
         session = Session.objects.create(cost=120, start_date=date, state='open', student_limit=12)
-        jc = JoadClass.objects.create(class_date=date.replace(hour=10), session=session, state='open')
-        je = JoadEvent.objects.create(cost=15, event_date=date.replace(hour=13), event_type="joad_indoor", state='open',
-                                      student_limit=10, pin_cost=5)
-
+        jc = JoadClass.objects.create(
+            event=Event.objects.create(event_date=date.replace(hour=10), state='open', type='joad class'),
+            session=session)
+        je = JoadEvent.objects.create(
+            event=Event.objects.create(
+                event_date=date.replace(hour=13),
+                state='open',
+                cost_standard=15,
+                cost_member=15),
+            event_type="joad_indoor",
+            student_limit=10,
+            pin_cost=5)
         cal = Calendar(year=date.year, month=date.month)
         html_cal = cal.formatmonth(withyear=True)
         self.assertEqual(html_cal.count('Beginner 09:00 AM'), 1)
@@ -107,9 +115,18 @@ class TestsCalendar(TestCase):
         create_beginner_class(date.replace(hour=11), 'closed', 'returnee')
         create_beginner_class(date.replace(hour=15), 'closed', 'combined')
         session = Session.objects.create(cost=120, start_date=date, state='closed', student_limit=12)
-        jc = JoadClass.objects.create(class_date=date.replace(hour=10), session=session, state='past')
-        je = JoadEvent.objects.create(cost=15, event_date=date.replace(hour=13), event_type="joad_indoor",
-                                      state='closed', student_limit=10, pin_cost=5)
+        jc = JoadClass.objects.create(
+            event=Event.objects.create(event_date=date.replace(hour=10), state='past', type='joad class'),
+            session=session)
+        je = JoadEvent.objects.create(
+            event=Event.objects.create(
+                event_date=date.replace(hour=13),
+                state='closed',
+                cost_standard=15,
+                cost_member=15),
+            event_type="joad_indoor",
+            student_limit=10,
+            pin_cost=5)
 
         cal = Calendar(year=date.year, month=date.month)
         html_cal = cal.formatmonth(withyear=True)

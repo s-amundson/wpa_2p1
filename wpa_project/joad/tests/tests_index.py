@@ -22,8 +22,8 @@ class TestsJoadIndex(TestCase):
         if date is None:
             date = timezone.now() + timezone.timedelta(days=8)
         joad_event = JoadEvent.objects.get(pk=1)
-        joad_event.event_date = date
-        joad_event.save()
+        joad_event.event.event_date = date
+        joad_event.event.save()
 
     def test_user_normal_no_student(self):
         self.test_user = User.objects.get(pk=3)
@@ -134,9 +134,6 @@ class TestsJoadIndex(TestCase):
                                          student=Student.objects.get(pk=11),
                                          pay_status='start',
                                          idempotency_key='7b16fadf-4851-4206-8dc6-81a92b70e52f')
-        # pa = PinAttendance.objects.create(event=JoadEvent.objects.get(pk=1),
-        #                                   student=Student.objects.get(pk=11),
-        #                                   attended=True)
 
         response = self.client.get(reverse('joad:index'), secure=True)
         self.assertEqual(response.context['is_auth'], True)

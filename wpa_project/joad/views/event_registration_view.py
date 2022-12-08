@@ -42,7 +42,7 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
         self.form = form
         students = []
         # message = ""
-        logging.debug(form.cleaned_data)
+        logging.warning(form.cleaned_data)
         joad_event = form.cleaned_data['joad_event']
         logging.debug(joad_event.event.state)
         logging.debug(joad_event.id)
@@ -59,7 +59,7 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
-                age = StudentHelper().calculate_age(s.dob, joad_event.event_date)
+                age = StudentHelper().calculate_age(s.dob, joad_event.event.event_date)
                 logging.debug(age)
                 if age < 9:
                     return self.has_error('Student is to young.')
@@ -88,14 +88,14 @@ class EventRegistrationView(LoginRequiredMixin, FormView):
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'joad'
-            self.request.session['payment_description'] = f'Joad event on {str(joad_event.event_date)[:10]}'
-            logging.debug(students)
-            description = f"Joad event on {str(joad_event.event_date)[:10]} student: "
+            self.request.session['payment_description'] = f'Joad event on {str(joad_event.event.event_date)[:10]}'
+            logging.warning(students)
+            description = f"Joad event on {str(joad_event.event.event_date)[:10]} student: "
             for s in students:
                 cr = EventRegistration(joad_event=joad_event, student=s, pay_status='start', idempotency_key=uid).save()
                 self.request.session['line_items'].append({'name': description + f'{s.first_name}', 'quantity': 1,
                                                            'amount_each': joad_event.event.cost_standard})
-                logging.debug(cr)
+                logging.warning(cr)
         return HttpResponseRedirect(reverse('payment:make_payment'))
 
     def has_error(self, message):

@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 
 from ..models import JoadClass, Session
 from ..forms import ClassForm
+from event.models import Event
 from src.mixin import BoardMixin
 import logging
 logger = logging.getLogger(__name__)
@@ -30,8 +31,28 @@ class JoadClassView(BoardMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
+        # don't add a class on a date that already has a class.
+        if self.joad_class is None:
+            event = Event.objects.create(
+                event_date=form.cleaned_data['class_date'],
+                # cost_standard=form.cleaned_data['cost'],
+                # cost_member=form.cleaned_data['cost'],
+                state=form.cleaned_data['state'],
+                type='joad class'
+            )
+        else:
+            event = self.joad_class.event
+            event.event_date = form.cleaned_data['class_date']
+            # event.cost_standard = form.cleaned_data['cost']
+            # event.cost_member = form.cleaned_data['cost']
+            event.state = form.cleaned_data['state']
+            event.save()
+
         f = form.save()
-        return JsonResponse({'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True})
+        f.event = event
+        f.save()
+
+        return JsonResponse({'id': f.id, 'class_date': f.event.event_date, 'state': f.event.state, 'success': True})
 
     def test_func(self):
         is_board = super().test_func()
@@ -52,7 +73,7 @@ class ClassListView(LoginRequiredMixin, ListView):
         if sid == 0:
             object_list = self.model.objects.filter(session__state="open")
         elif sid is not None:
-            object_list = self.model.objects.filter(session_id=sid).order_by('class_date')
+            object_list = self.model.objects.filter(session_id=sid).order_by('event__event_date')
         else:
             object_list = []
 

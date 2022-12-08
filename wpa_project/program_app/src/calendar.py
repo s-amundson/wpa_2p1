@@ -24,12 +24,12 @@ class Calendar(HTMLCalendar):
                                                    event__event_date__month=month).order_by('event__event_date')
         if not staff:
             self.events = self.events.exclude(class_type='special')
-        self.joad_class_events = JoadClass.objects.filter(class_date__gt=timezone.now(),
-                                                          class_date__year=year,
-                                                          class_date__month=month).order_by('class_date')
-        self.joad_events = JoadEvent.objects.filter(event_date__gt=timezone.now(),
-                                                    event_date__year=year,
-                                                    event_date__month=month).order_by('event_date')
+        self.joad_class_events = JoadClass.objects.filter(event__event_date__gt=timezone.now(),
+                                                          event__event_date__year=year,
+                                                          event__event_date__month=month).order_by('event__event_date')
+        self.joad_events = JoadEvent.objects.filter(event__event_date__gt=timezone.now(),
+                                                          event__event_date__year=year,
+                                                          event__event_date__month=month).order_by('event__event_date')
 
         self.dark = dark
         self.staff = staff
@@ -51,12 +51,12 @@ class Calendar(HTMLCalendar):
         for event in self.events.filter(event__event_date__day=day):
             event_list.append(self.Event(event.id, event.event.event_date, event.class_type, event.event.state))
             logging.warning(event.event.state)
-        for event in self.joad_class_events.filter(class_date__day=day):
-            event_list = self.insert_event(event_list, self.Event(event.id, event.class_date, 'JOAD Class',
-                                                                  event.state, event.session))
-        for event in self.joad_events.filter(event_date__day=day):
-            event_list = self.insert_event(event_list, self.Event(event.id, event.event_date, event.event_type,
-                                                                  event.state))
+        for event in self.joad_class_events.filter(event__event_date__day=day):
+            event_list = self.insert_event(event_list, self.Event(event.id, event.event.event_date, 'JOAD Class',
+                                                                  event.event.state, event.session))
+        for event in self.joad_events.filter(event__event_date__day=day):
+            event_list = self.insert_event(event_list, self.Event(event.id, event.event.event_date, event.event_type,
+                                                                  event.event.state))
 
         data = ''
 

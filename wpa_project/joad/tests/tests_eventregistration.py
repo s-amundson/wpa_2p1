@@ -142,8 +142,8 @@ class TestsJoadEventRegistration(TestCase):
     def test_student_post_closed(self):
         self._set_joad_age(Student.objects.get(pk=5), 10)
         j = JoadEvent.objects.get(pk=1)
-        j.state = 'closed'
-        j.save()
+        j.event.state = 'closed'
+        j.event.save()
 
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
