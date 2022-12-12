@@ -1,5 +1,4 @@
 import logging
-from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import View
 from django.http import JsonResponse, HttpResponseBadRequest

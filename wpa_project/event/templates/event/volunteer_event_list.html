@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %} Volunteer Event List {% endblock %}
+
+{% block main %}
+    <div class="row p-2" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-2">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>State</th>
+                    <th>Volunteers</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in object_list %}
+                    <tr>
+                        <td>
+                            <a class="nav-link" href="{% url 'event:volunteer_event' c.id %}">
+                                {{ c.event.event_date }}
+                            </a>
+                        </td>
+                        <td>{{ c.event.state }}</td>
+                        <td>{{ c.volunteerregistration_set.registered_count }}/{{ c.volunteer_limit }}</td>
+                        <td>{{ c.description }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include 'student_app/paginate.html' %}
+    <div class="row p-2">
+        <div class="col">
+            {% if past %}
+                <a class="nav-link" href="{% url 'events:volunteer_event_list' %}">
+                    View upcoming classes
+                </a>
+            {% else %}
+                <a class="nav-link" href="{% url 'programs:class_list' 1 %}">
+                    View past classes
+                </a>
+            {% endif %}
+        </div>
+
+        {% if user.is_board %}
+            <div class="col">
+                <a class="nav-link" href="{% url 'event:volunteer_event' %}">
+                    Add
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+

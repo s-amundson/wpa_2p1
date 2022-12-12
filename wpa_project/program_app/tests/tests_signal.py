@@ -5,7 +5,7 @@ from django.test import TestCase, Client
 from django.apps import apps
 from django.utils import timezone
 
-from ..models import BeginnerClass, ClassRegistration
+from event.models import Event, Registration
 from payment.models import PaymentLog
 from payment.signals import payment_error_signal
 from student_app.models import Student, StudentFamily
@@ -31,10 +31,9 @@ class TestsSignal(TestCase):
         # sf = self.test_user.studentfamily_set.all()
         # sf = Student.objects.get(user=sef.user).student_family
         uid = uuid.uuid4()
-        cr = ClassRegistration.objects.create(
-            beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration.objects.create(
+            event=Event.objects.get(pk=1),
             student=Student.objects.get(pk=2),
-            new_student=True,
             pay_status='started',
             idempotency_key=uid
         )
@@ -54,16 +53,15 @@ class TestsSignal(TestCase):
                                         )
         log.save()
 
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].pay_status, "paid")
 
     def test_membership_signal_different_uuid(self):
         uid = uuid.uuid4()
-        cr = ClassRegistration.objects.create(
-            beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration.objects.create(
+            event=Event.objects.get(pk=1),
             student=Student.objects.get(pk=2),
-            new_student=True,
             pay_status='started',
             idempotency_key=uid
         )
@@ -83,17 +81,16 @@ class TestsSignal(TestCase):
                                         )
         log.save()
 
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].pay_status, "started")
 
     def test_payment_error_signal_good(self):
         uid = uuid.uuid4()
         student = Student.objects.get(pk=2)
-        cr = ClassRegistration.objects.create(
-            beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration.objects.create(
+            event=Event.objects.get(pk=1),
             student=student,
-            new_student=True,
             pay_status='started',
             idempotency_key=uid,
             user=student.user
@@ -102,7 +99,7 @@ class TestsSignal(TestCase):
         new_ik = uuid.uuid4()
         payment_error_signal.send(self.__class__, old_idempotency_key=uid, new_idempotency_key=new_ik)
 
-        cr = ClassRegistration.objects.last()
+        cr = Registration.objects.last()
         self.assertEqual(cr.idempotency_key, new_ik)
 
     # def test_off_wait_list_email(self):

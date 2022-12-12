@@ -4,14 +4,14 @@ from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import BeginnerClass, ClassRegistration, ClassRegistrationAdmin
+from event.models import Event, Registration, RegistrationAdmin
 from student_app.models import Student
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
-class TestsAdminRegistration(TestCase):
+class TestsLogs(TestCase):
     fixtures = ['f1']
 
     def setUp(self):
@@ -39,13 +39,13 @@ class TestsAdminRegistration(TestCase):
     def test_board_get(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        ncr = ClassRegistration.objects.create(beginner_class=BeginnerClass.objects.get(pk=1),
-                                               student=Student.objects.get(pk=4),
-                                               new_student=True,
-                                               pay_status='admin',
-                                               idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f")
+        ncr = Registration.objects.create(
+            event=Event.objects.get(pk=1),
+            student=Student.objects.get(pk=4),
+            pay_status='admin',
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f")
         note = 'test note'
-        cra = ClassRegistrationAdmin.objects.create(class_registration=ncr, staff=self.test_user, note=note)
+        cra = RegistrationAdmin.objects.create(class_registration=ncr, staff=self.test_user, note=note)
 
         response = self.client.get(self.url, secure=True)
         self.assertEqual(response.status_code, 200)

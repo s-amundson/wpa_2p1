@@ -5,7 +5,8 @@ from django.utils import timezone
 from datetime import timedelta
 from django.test import TestCase, Client
 
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
+from event.models import Event, Registration, RegistrationAdmin
 from .helper import create_beginner_class
 from student_app.models import Student, User
 from ..src import UpdatePrograms
@@ -50,11 +51,11 @@ class TestsUpdatePrograms(TestCase):
         u.save()
 
         for i in range(5):
-            cr = ClassRegistration(beginner_class=bc1,
-                                   student=Student.objects.get(pk=i + 1),
-                                   new_student=True,
-                                   pay_status='paid',
-                                   idempotency_key=str(uuid.uuid4()))
+            cr = Registration(
+                event=bc1.event,
+                student=Student.objects.get(pk=i + 1),
+                pay_status='paid',
+                idempotency_key=str(uuid.uuid4()))
             cr.save()
 
         UpdatePrograms().status_email()
@@ -77,11 +78,11 @@ class TestsUpdatePrograms(TestCase):
         u.save()
 
         for i in range(5):
-            cr = ClassRegistration(beginner_class=bc1,
-                                   student=Student.objects.get(pk=i + 1),
-                                   new_student=True,
-                                   pay_status='paid',
-                                   idempotency_key=str(uuid.uuid4()))
+            cr = Registration(
+                event=bc1.event,
+                student=Student.objects.get(pk=i + 1),
+                pay_status='paid',
+                idempotency_key=str(uuid.uuid4()))
             cr.save()
 
         UpdatePrograms().status_email()
@@ -100,16 +101,16 @@ class TestsUpdatePrograms(TestCase):
         u.save()
         ps = ['paid', 'paid', 'paid', 'waiting', 'waiting']
         for i in range(5):
-            cr = ClassRegistration(beginner_class=bc1,
-                                   student=Student.objects.get(pk=i + 1),
-                                   new_student=True,
-                                   pay_status=ps[i],
-                                   idempotency_key=str(uuid.uuid4()))
+            cr = Registration(
+                event=bc1.event,
+                student=Student.objects.get(pk=i + 1),
+                pay_status=ps[i],
+                idempotency_key=str(uuid.uuid4()))
             cr.save()
 
         # UpdatePrograms().beginner_class()
         UpdatePrograms().reminder_email(timezone.datetime.time(d))
-        logging.warning(len(mail.outbox))
+        # logging.warning(len(mail.outbox))
         for m in mail.outbox:
             logging.warning(m.subject)
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Reminder {d.strftime('%Y-%m-%d')}")
@@ -135,11 +136,11 @@ class TestsUpdatePrograms(TestCase):
         u.save()
         ps = ['paid', 'paid', 'paid', 'waiting', 'waiting']
         for i in range(5):
-            cr = ClassRegistration(beginner_class=bc1,
-                                   student=Student.objects.get(pk=i + 1),
-                                   new_student=True,
-                                   pay_status=ps[i],
-                                   idempotency_key=str(uuid.uuid4()))
+            cr = Registration(
+                event=bc1.event,
+                student=Student.objects.get(pk=i + 1),
+                pay_status=ps[i],
+                idempotency_key=str(uuid.uuid4()))
             cr.save()
 
         UpdatePrograms().reminder_email(timezone.datetime.time(d))

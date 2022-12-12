@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %} Volunteer Registration {% endblock %}
+
+{% block script %}
+    {% load static %}
+
+{% endblock %}
+
+{% block main %}
+    <div class="row p-3" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-3">
+        <h3>Volunteer Registration {% if form.cancel_form %} Cancellation {% endif %} </h3>
+    </div>
+    <div class="row p-3">
+        <form id="registration-form" method="post">
+            {% csrf_token %}
+            <div class="fieldWrapper">
+                {{ form.volunteer_event.errors }}
+                {{ form.volunteer_event.label_tag }}
+                {{ form.volunteer_event }}
+                {{ form.volunteer_event.id }}
+            </div>
+            <div id="status-div"></div>
+            {% if form.student_count %}
+                <div> Student(s): </div>
+            {% endif %}
+            {% for student in form.get_boxes %}
+                <div class="input-group input-group-md">
+                    {{ student }} {{ student.label }} {{ student.errors }}
+                </div>
+            {% empty %}
+                <div>No Students registered</div>
+                {% if form.cancel_form %}
+                    <div>No Students registered</div>
+                {% else %}
+                    <div>No Students to register</div>
+                {% endif %}
+            {% endfor %}
+            {% if form.student_count %}
+                <input id="session-btn" class="btn btn-primary" type="submit"
+                   {% if form.cancel_form %}
+                       value="Cancel Registration(s)"
+                    {% else %}
+                        value="Submit"
+                {% endif %}>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}

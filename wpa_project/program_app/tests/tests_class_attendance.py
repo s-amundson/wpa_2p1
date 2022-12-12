@@ -7,7 +7,8 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
+from event.models import Registration
 Student = apps.get_model('student_app', 'Student')
 User = apps.get_model('student_app', 'User')
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class TestsClassAttendance(TestCase):
         self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
 
         # set pay status to paid
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         for c in cr:
             c.pay_status = 'paid'
             c.save()
@@ -66,9 +67,8 @@ class TestsClassAttendance(TestCase):
     def test_class_beginner_attendance(self):
         # register instructor and close class.
         bc = BeginnerClass.objects.get(pk=1)
-        cr = ClassRegistration(beginner_class=bc,
+        cr = Registration(event=bc.event,
                                student=Student.objects.get(pk=1),
-                               new_student=False,
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
@@ -83,7 +83,7 @@ class TestsClassAttendance(TestCase):
         self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
                          {'check_1': 'on'}, secure=True)
 
-        cr = ClassRegistration.objects.get(pk=cr.pk)
+        cr = Registration.objects.get(pk=cr.pk)
         self.assertEqual(cr.attended, True)
         self.assertEqual(cr.student.safety_class, timezone.datetime.date(bc.event.event_date))
 
@@ -94,11 +94,10 @@ class TestsClassAttendance(TestCase):
     def test_class_beginner_unattend(self):
         # register instructor and close class.
         bc = BeginnerClass.objects.get(pk=1)
-        cr = ClassRegistration(beginner_class=bc,
-                               student=Student.objects.get(pk=1),
-                               new_student=False,
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()))
+        cr = Registration(event=bc.event,
+                          student=Student.objects.get(pk=1),
+                          pay_status='paid',
+                          idempotency_key=str(uuid.uuid4()))
         cr.save()
         bc.event.state = 'closed'
         bc.event.save()
@@ -107,7 +106,7 @@ class TestsClassAttendance(TestCase):
         self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
                          {'check_1': ''}, secure=True)
 
-        cr = ClassRegistration.objects.get(pk=cr.pk)
+        cr = Registration.objects.get(pk=cr.pk)
         self.assertEqual(cr.attended, False)
         self.assertIsNone(cr.student.safety_class)
 
@@ -119,11 +118,10 @@ class TestsClassAttendance(TestCase):
 
         # register instructor and close class.
         bc = BeginnerClass.objects.get(pk=1)
-        cr = ClassRegistration(beginner_class=bc,
-                               student=Student.objects.get(pk=1),
-                               new_student=False,
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()))
+        cr = Registration(event=bc.event,
+                          student=Student.objects.get(pk=1),
+                          pay_status='paid',
+                          idempotency_key=str(uuid.uuid4()))
         cr.save()
         bc.event.state = 'closed'
         bc.event.save()
@@ -136,7 +134,7 @@ class TestsClassAttendance(TestCase):
         self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
                          {'check_1': 'on'}, secure=True)
 
-        cr = ClassRegistration.objects.get(pk=cr.pk)
+        cr = Registration.objects.get(pk=cr.pk)
         self.assertEqual(cr.attended, True)
 
         # check that the attending column is there with checkboxes
@@ -147,11 +145,10 @@ class TestsClassAttendance(TestCase):
 
         # register student and close class.
         bc = BeginnerClass.objects.get(pk=1)
-        cr = ClassRegistration(beginner_class=bc,
-                               student=Student.objects.get(pk=3),
-                               new_student=False,
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()))
+        cr = Registration(event=bc.event,
+                          student=Student.objects.get(pk=3),
+                          pay_status='paid',
+                          idempotency_key=str(uuid.uuid4()))
         cr.save()
         bc.event.state = 'closed'
         bc.event.save()
@@ -160,7 +157,7 @@ class TestsClassAttendance(TestCase):
         response = self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
                          {'check_A': 'on'}, secure=True)
 
-        cr = ClassRegistration.objects.get(pk=cr.pk)
+        cr = Registration.objects.get(pk=cr.pk)
         self.assertEqual(cr.attended, False)
         content = json.loads(response.content)
         self.assertTrue(content['error'])
@@ -169,12 +166,11 @@ class TestsClassAttendance(TestCase):
 
         # register student and close class.
         bc = BeginnerClass.objects.get(pk=1)
-        cr = ClassRegistration(beginner_class=bc,
-                               student=Student.objects.get(pk=3),
-                               new_student=False,
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()),
-                               attended=True)
+        cr = Registration(event=bc.event,
+                          student=Student.objects.get(pk=3),
+                          pay_status='paid',
+                          idempotency_key=str(uuid.uuid4()),
+                          attended=True)
         cr.save()
         cr.student.safety_class = bc.event.event_date
         cr.student.save()
@@ -185,7 +181,7 @@ class TestsClassAttendance(TestCase):
         response = self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
                          {'check_3': 'off'}, secure=True)
 
-        cr = ClassRegistration.objects.get(pk=cr.pk)
+        cr = Registration.objects.get(pk=cr.pk)
         self.assertEqual(cr.attended, False)
         content = json.loads(response.content)
         self.assertFalse(content['error'])

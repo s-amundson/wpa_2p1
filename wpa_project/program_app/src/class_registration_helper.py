@@ -2,7 +2,8 @@ import logging
 from django.db.models import Count
 
 from .email import EmailMessage
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
+from event.models import Registration
 from payment.src import PaymentHelper
 
 logger = logging.getLogger(__name__)
@@ -13,8 +14,8 @@ class ClassRegistrationHelper:
         for ikey in queryset.values('idempotency_key').annotate(ik_count=Count('idempotency_key')).order_by():
             logging.warning(ikey)
             icr = queryset.filter(idempotency_key=str(ikey['idempotency_key']))
-            cost = icr[0].beginner_class.event.cost_standard
-            note = f'Class on {str(icr[0].beginner_class.event.event_date)[:10]}, Students: '
+            cost = icr[0].event.cost_standard
+            note = f'Class on {str(icr[0].event.event_date)[:10]}, Students: '
             for cr in icr:
                 note += f'{cr.student.first_name}, '
             payment = None
@@ -27,30 +28,15 @@ class ClassRegistrationHelper:
                 icr.update(pay_status='start')
 
     def enrolled_count(self, beginner_class):
-        beginner = 0
-        staff_count = 0
-        returnee = 0
-        records = ClassRegistration.objects.filter(beginner_class=beginner_class)
-        pay_statuses = ['paid', 'admin']
-        for record in records:
-            if record.pay_status in pay_statuses:
-                try:
-                    is_staff = record.student.user.is_staff
-                except (record.student.DoesNotExist, AttributeError):
-                    is_staff = False
-
-                if is_staff:
-                    staff_count += 1
-                elif record.student.safety_class is None \
-                        or record.student.safety_class >= beginner_class.event.event_date.date():
-                    beginner += 1
-                else:
-                    returnee += 1
-        return {'beginner': beginner, 'staff': staff_count, 'returnee': returnee,
-                'waiting': records.filter(pay_status='waiting').count()}
+        event = Registration.objects.filter(event=beginner_class.event)
+        return {'beginner': event.filter(event=beginner_class.event).beginner_count(beginner_class.event.event_date.date()),
+                'staff': event.filter(event=beginner_class.event).staff_count(),
+                'returnee': event.filter(event=beginner_class.event).returnee_count(beginner_class.event.event_date.date()),
+                'waiting': event.filter(pay_status='waiting').count()}
 
     def has_space(self, user, beginner_class, beginner, instructor, returnee):
         enrolled_count = self.enrolled_count(beginner_class)
+        logging.warning(enrolled_count)
         wait = False
         if beginner_class.event.state in ['open', 'wait']:  # in case it changed since user got the self.form.
             if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
@@ -80,9 +66,9 @@ class ClassRegistrationHelper:
                 return 'open'
 
     def student_registrations(self, beginner_class):
-        return ClassRegistration.objects.filter(
-            beginner_class=beginner_class,pay_status__in=['paid', 'admin', 'waiting']).exclude(
-            student__user__is_staff=True)
+        return Registration.objects.filter(
+            event=beginner_class.event,
+            pay_status__in=['paid', 'admin', 'waiting']).exclude(student__user__is_staff=True)
 
     def update_class_state(self, beginner_class):
         records = self.student_registrations(beginner_class)

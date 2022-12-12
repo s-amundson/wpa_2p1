@@ -6,6 +6,7 @@ omit=
     *temp_tests.py
     student_app/management/commands/*
     */tests/*
+    */migrations/*
 
     # minutes/*
     # membership/*

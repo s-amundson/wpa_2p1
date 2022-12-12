@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.forms import model_to_dict
 
 from ..forms import StaffReportForm
-from ..models import BeginnerClass, ClassRegistration
+from event.models import Registration
 from student_app.models import Student, User
 
 import logging
@@ -24,15 +24,12 @@ class StaffReportView(UserPassesTestMixin, FormView):
         staff_students = Student.objects.filter(user__in=staff_users).order_by('last_name')
         context['staff_list'] = []
         for i in staff_students:
-            cr = ClassRegistration.objects.filter(student=i, pay_status__in=['paid', 'admin'])
-            bc = BeginnerClass.objects.all()
+            cr = Registration.objects.filter(student=i, pay_status__in=['paid', 'admin'])
             if self.start_date is not None:
-                bc = bc.filter(event__event_date__gte=self.start_date)
+                cr = cr.filter(event__event_date__gte=self.start_date)
             if self.end_date is not None:
-                bc = bc.filter(event__event_date__lte=self.end_date)
-            cr = cr.filter(beginner_class__in=bc)
+                cr = cr.filter(event__event_date__lte=self.end_date)
             i_dict = model_to_dict(i)
-            # logging.debug(i_dict)
             i_dict['registrations'] = len(cr)
             i_dict['attended'] = len(cr.filter(attended=True))
             i_dict['user'] = model_to_dict(i.user)

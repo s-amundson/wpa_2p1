@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from ..src import ClassRegistrationHelper
 from ..models import BeginnerClass, ClassRegistration
+from event.models import Event, Registration
 from student_app.models import Student, StudentFamily, User
 from payment.models import Card, Customer
 
@@ -84,9 +85,9 @@ class TestsClassRegistration(TestCase):
                          {'beginner_class': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
-        self.assertEqual(cr[0].beginner_class, bc)
+        self.assertEqual(cr[0].event, bc.event)
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          'Class on 2023-06-05 student: Charles')
         self.assertEqual(self.client.session['payment_category'], 'intro')
@@ -104,14 +105,13 @@ class TestsClassRegistration(TestCase):
                          {'beginner_class': '2022-06 ', 'student_4': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 0)
 
     def test_class_register_over_limit(self):
         # put a record in to the database
-        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration(event=Event.objects.get(pk=1),
                                student=Student.objects.get(pk=4),
-                               new_student=True,
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
@@ -126,15 +126,14 @@ class TestsClassRegistration(TestCase):
         time.sleep(1)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertContains(response, 'Not enough space available in this class')
 
     def test_class_register_readd(self):
         # put a record in to the database
-        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration(event=Event.objects.get(pk=1),
                                student=Student.objects.get(pk=4),
-                               new_student=True,
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
@@ -148,18 +147,16 @@ class TestsClassRegistration(TestCase):
         # self.assertEqual(response.context['message'] == "")
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
 
     def test_class_register_readd_staff(self):
         # put a record in to the database
-        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration(event=Event.objects.get(pk=1),
                                student=Student.objects.get(pk=2),
-                               new_student=True,
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
-
         # try to add first user to class again.
         self.client.force_login(User.objects.get(pk=2))
         response = self.client.post(reverse('programs:class_registration'),
@@ -169,14 +166,13 @@ class TestsClassRegistration(TestCase):
         # self.assertEqual(response.context['message'] == "")
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
 
     def test_class_register_add2(self):
         # put a record in to the database
-        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration(event=Event.objects.get(pk=1),
                                student=Student.objects.get(pk=1),
-                               new_student=True,
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
@@ -188,7 +184,7 @@ class TestsClassRegistration(TestCase):
         bc = BeginnerClass.objects.get(pk=1)
 
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 3)
         for c in cr:
             c.pay_status = 'paid'
@@ -200,7 +196,7 @@ class TestsClassRegistration(TestCase):
         # self.assertEqual(bc.enrolled_beginners, 2)
         # self.assertEqual(bc.enrolled_returnee, 1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 3)
 
         # change user, then add 1 returnee.
@@ -211,7 +207,7 @@ class TestsClassRegistration(TestCase):
         # self.assertEqual(bc[0].enrolled_beginners, 2)
         # self.assertEqual(bc[0].enrolled_returnee, 2)
         # self.assertEqual(bc[0].state, 'full')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 4)
 
     def test_no_pay_if_cost_zero(self):
@@ -225,9 +221,9 @@ class TestsClassRegistration(TestCase):
                                     {'beginner_class': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
-        self.assertEqual(cr[0].beginner_class, bc)
+        self.assertEqual(cr[0].event, bc.event)
 
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          'Class on 2023-06-05 student: Charles')
@@ -244,7 +240,7 @@ class TestsClassRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_4': 'on', f'student_{s.id}': 'on',
                           'terms': 'on'}, secure=True)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 0)
         self.assertContains(response, 'Student must be at least 9 years old to participate')
 
@@ -263,7 +259,7 @@ class TestsClassRegistration(TestCase):
         self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
 
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 2)
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': 1}), secure=True)
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
@@ -283,9 +279,9 @@ class TestsClassRegistration(TestCase):
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
-        self.assertEqual(cr[0].beginner_class, bc)
+        self.assertEqual(cr[0].event, bc.event)
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          'Class on 2023-06-05 instructor: Emily')
 
@@ -308,7 +304,7 @@ class TestsClassRegistration(TestCase):
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 0)
 
     def test_class_register_instructor_full(self):
@@ -331,7 +327,7 @@ class TestsClassRegistration(TestCase):
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 0)
 
     def test_class_register_instructor_full2(self):
@@ -353,7 +349,7 @@ class TestsClassRegistration(TestCase):
                          {'beginner_class': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'full')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
 
     def test_class_register_staff_full(self):
@@ -372,20 +368,17 @@ class TestsClassRegistration(TestCase):
                          {'beginner_class': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'full')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
 
     def test_resume_registration_no_wait(self):
-        cr = ClassRegistration(
-            beginner_class=BeginnerClass.objects.get(pk=1),
-            student=Student.objects.get(pk=4),
-            new_student=True,
-            pay_status="start",
-            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
-            reg_time='2021-06-09',
-            attended=False)
+        cr = Registration(event=Event.objects.get(pk=1),
+                          student=Student.objects.get(pk=4),
+                          pay_status='start',
+                          idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+                          reg_time='2021-06-09',
+                          attended=False)
         cr.save()
-
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
         self.assertRedirects(response, reverse('payment:make_payment'))
 
@@ -397,14 +390,12 @@ class TestsClassRegistration(TestCase):
         bc.event.save()
         bc.save()
         s = Student.objects.get(pk=4)
-        cr = ClassRegistration(
-            beginner_class=bc,
-            student=s,
-            new_student=True,
-            pay_status="start",
-            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
-            reg_time='2021-06-09',
-            attended=False)
+        cr = Registration(event=bc.event,
+                          student=s,
+                          pay_status='start',
+                          idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+                          reg_time='2021-06-09',
+                          attended=False)
         cr.save()
 
         bc2 = BeginnerClass.objects.get(pk=2)
@@ -416,19 +407,18 @@ class TestsClassRegistration(TestCase):
 
         response = self.client.post(reverse('programs:class_registration'),
                          {'beginner_class': '2', 'student_4': 'on', 'terms': 'on'}, secure=True)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertContains(response, f'{s.first_name} is enrolled in another beginner class')
 
     def test_class_register_wait_no_card(self):
         # put a record in to the database
-        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
-                               student=Student.objects.get(pk=4),
-                               new_student=True,
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()))
+        cr = Registration(event=Event.objects.get(pk=1),
+                          student=Student.objects.get(pk=4),
+                          pay_status='paid',
+                          idempotency_key=str(uuid.uuid4()))
         cr.save()
-        bc = cr.beginner_class
+        bc = cr.event.beginnerclass_set.last()
         bc.beginner_wait_limit = 10
         bc.save()
 
@@ -442,20 +432,19 @@ class TestsClassRegistration(TestCase):
                      {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 3)
         # self.assertContains(response, 'Not enough space available in this class')
         self.assertRedirects(response, reverse('payment:card_manage'))
 
     def test_class_register_wait_with_card(self):
         # put a record in to the database
-        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration(event=Event.objects.get(pk=1),
                                student=Student.objects.get(pk=4),
-                               new_student=True,
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
         cr.save()
-        bc = cr.beginner_class
+        bc = cr.event.beginnerclass_set.last()
         bc.beginner_wait_limit = 10
         bc.save()
 
@@ -470,7 +459,7 @@ class TestsClassRegistration(TestCase):
                      {'beginner_class': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'wait')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 3)
         # self.assertContains(response, 'Not enough space available in this class')
         self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
@@ -485,10 +474,9 @@ class TestsClassRegistration(TestCase):
         bc1.save()
         students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
         for s in students:
-            cr = ClassRegistration(
-                beginner_class=bc1,
+            cr = Registration(
+                event=bc1.event,
                 student=s,
-                new_student=True,
                 pay_status="waiting",
                 idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
                 reg_time='2021-06-09',
@@ -514,7 +502,7 @@ class TestsClassRegistration(TestCase):
                      {'beginner_class': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=2)
         self.assertEqual(bc.event.state, 'wait')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 2)
         self.assertContains(response, f'{students[0].first_name} is on wait list for another beginner class')
 
@@ -528,10 +516,9 @@ class TestsClassRegistration(TestCase):
         bc1.save()
         students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
         for s in students:
-            cr = ClassRegistration(
-                beginner_class=bc1,
+            cr = Registration(
+                event=bc1.event,
                 student=s,
-                new_student=True,
                 pay_status="paid",
                 idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
                 reg_time='2021-06-09',
@@ -557,7 +544,7 @@ class TestsClassRegistration(TestCase):
                      {'beginner_class': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=2)
         self.assertEqual(bc.event.state, 'wait')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 4)
         self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
 
@@ -569,10 +556,9 @@ class TestsClassRegistration(TestCase):
         bc.event.state = 'wait'
         bc.event.save()
         bc.save()
-        cr = ClassRegistration(
-            beginner_class=bc,
+        cr = Registration(
+            event=bc.event,
             student=Student.objects.get(pk=4),
-            new_student=True,
             pay_status="start",
             idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
             reg_time='2021-06-09',
@@ -591,10 +577,9 @@ class TestsClassRegistration(TestCase):
         bc.event.state = 'wait'
         bc.event.save()
         bc.save()
-        cr = ClassRegistration(
-            beginner_class=bc,
+        cr = Registration(
+            event=bc.event,
             student=Student.objects.get(pk=4),
-            new_student=True,
             pay_status="start",
             idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
             reg_time='2021-06-09',

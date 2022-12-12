@@ -4,7 +4,8 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
+from event.models import Registration
 from student_app.models import Student, User
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ class TestsClassAdminRegistration(TestCase):
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')
@@ -69,7 +70,7 @@ class TestsClassAdminRegistration(TestCase):
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'full')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')
@@ -90,7 +91,7 @@ class TestsClassAdminRegistration(TestCase):
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'closed')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')
@@ -99,10 +100,9 @@ class TestsClassAdminRegistration(TestCase):
     def test_add_student_registered(self):
         bc = BeginnerClass.objects.get(pk=1)
         s = Student.objects.get(pk=4)
-        cr = ClassRegistration(
-            beginner_class=bc,
+        cr = Registration(
+            event=bc.event,
             student=s,
-            new_student=True,
             pay_status="paid",
             idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
             reg_time='2021-06-09',
@@ -110,17 +110,16 @@ class TestsClassAdminRegistration(TestCase):
         cr.save()
         response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
                                     self.post_dict, secure=True)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertContains(response, f'{s.first_name} {s.last_name} already registered')
 
     def test_add_student_registered_admin(self):
         bc = BeginnerClass.objects.get(pk=1)
         s = Student.objects.get(pk=4)
-        cr = ClassRegistration(
-            beginner_class=bc,
+        cr = Registration(
+            event=bc.event,
             student=s,
-            new_student=True,
             pay_status="admin",
             idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
             reg_time='2021-06-09',
@@ -128,7 +127,7 @@ class TestsClassAdminRegistration(TestCase):
         cr.save()
         response = self.client.post(reverse('programs:class_registration_admin', kwargs={'family_id': 3}),
                                     self.post_dict, secure=True)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertContains(response, f'{s.first_name} {s.last_name} already registered by admin')
 
@@ -143,7 +142,7 @@ class TestsClassAdminRegistration(TestCase):
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'closed')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')
@@ -155,7 +154,7 @@ class TestsClassAdminRegistration(TestCase):
                                     self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'start')

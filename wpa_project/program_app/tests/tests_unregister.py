@@ -6,7 +6,8 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
+from event.models import Event, Registration
 from student_app.models import Student, User
 from payment.models import PaymentLog, RefundLog
 from payment.tests import MockSideEffects
@@ -22,9 +23,10 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
     def create_payment(self, students, amount=500):
         ik = uuid.uuid4()
         for student in students:
-            reg = ClassRegistration.objects.create(
-                beginner_class=BeginnerClass.objects.get(pk=1),
-                student=student, new_student=True, pay_status="paid",
+            reg = Registration.objects.create(
+                event=Event.objects.get(pk=1),
+                student=student,
+                pay_status="paid",
                 idempotency_key=ik, reg_time="2021-06-09", attended=False
             )
         payment = PaymentLog.objects.create(
@@ -61,7 +63,7 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         student.user.save()
 
         self.create_payment([student, Student.objects.get(pk=3)], 1000)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         logging.debug(cr)
 
         # make student a returnee and the class full
@@ -87,7 +89,7 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         self.assertEqual(bc.event.state, 'open')
         # refund.assert_called_with(pl[0].idempotency_key, 1000)
 
-        cr = bc.classregistration_set.all()
+        cr = bc.event.registration_set.all()
         self.assertEqual(cr[0].pay_status, 'refunded')
         self.assertEqual(cr[1].pay_status, 'refunded')
         task_update_waiting.assert_called_with(1)
@@ -97,7 +99,7 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
     def test_refund_success_partial_purchase(self, task_update_waiting, refund):
         refund.side_effect = self.refund_side_effect
         self.create_payment([Student.objects.get(pk=2), Student.objects.get(pk=3)], 1000)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
 
         d = {'donation': False, f'unreg_{cr[0].id}': True}
         response = self.client.post(self.test_url, d, secure=True)
@@ -133,13 +135,13 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         student.user.save()
 
         self.create_payment([student, Student.objects.get(pk=3)], 1000)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         d = {'donation': True}
         for r in cr:
             d[f'unreg_{r.id}'] = True
         response = self.client.post(self.test_url, d, secure=True)
         self.assertRedirects(response, self.url_registration)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         for r in cr:
             self.assertEqual(r.pay_status, 'refund donated')
         task_update_waiting.assert_called_with(1)
@@ -148,18 +150,19 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         ik = uuid.uuid4()
         students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
         for student in students:
-            reg = ClassRegistration.objects.create(
-                beginner_class=BeginnerClass.objects.get(pk=1),
-                student=student, new_student=True, pay_status="waiting",
+            reg = Registration.objects.create(
+                event=Event.objects.get(pk=1),
+                student=student,
+                pay_status="waiting",
                 idempotency_key=ik, reg_time="2021-06-09", attended=False
             )
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         d = {'donation': True}
         for r in cr:
             d[f'unreg_{r.id}'] = True
         response = self.client.post(self.test_url, d, secure=True)
         self.assertRedirects(response, self.url_registration)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         for r in cr:
             self.assertEqual(r.pay_status, 'canceled')
 
@@ -169,7 +172,7 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         student.user.save()
 
         self.create_payment([student, Student.objects.get(pk=3)], 1000)
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         logging.debug(cr)
         bc = BeginnerClass.objects.get(pk=1)
         class_date = timezone.now() + timedelta(hours=18)
@@ -187,7 +190,7 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'closed')
 
-        cr = bc.classregistration_set.all()
+        cr = bc.event.registration_set.all()
         self.assertEqual(cr[0].pay_status, 'canceled')
         self.assertEqual(cr[1].pay_status, 'canceled')
 

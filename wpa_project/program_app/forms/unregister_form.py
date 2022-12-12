@@ -4,8 +4,8 @@ from django.db.models import Count
 
 from ..src import ClassRegistrationHelper
 from payment.src import EmailMessage, RefundHelper
-from ..models import BeginnerClass, ClassRegistration
 from ..tasks import update_waiting
+from event.models import Event, Registration
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,11 +18,12 @@ class BooleanField(forms.BooleanField):
 
     def get_bound_field(self, form, field_name):
         bf = RegBoundField(form, self, field_name)
-        d = timezone.localtime(self.reg.beginner_class.event.event_date, timezone.get_current_timezone())
-        bf.bc_id = self.reg.beginner_class.id
-        bf.class__cost = self.reg.beginner_class.event.cost_standard
-        bf.class_date_string = f'{d.strftime("%B %d, %Y %I %p")} ({self.reg.beginner_class.class_type})'
-        bf.class__state = self.reg.beginner_class.event.state
+        d = timezone.localtime(self.reg.event.event_date, timezone.get_current_timezone())
+        bc = self.reg.event.beginnerclass_set.last()
+        bf.bc_id = bc.id
+        bf.class__cost = self.reg.event.cost_standard
+        bf.class_date_string = f'{d.strftime("%B %d, %Y %I %p")} ({bc.class_type})'
+        bf.class__state = self.reg.event.state
         bf.student_string = f'{self.reg.student.first_name} {self.reg.student.last_name}'
         bf.pay_status_string = self.reg.pay_status
         bf.reg_id = self.reg.id
@@ -70,17 +71,17 @@ class UnregisterForm(forms.Form):
         self.template_name = 'program_app/forms/unregister.html'
         self.refund_errors = []
         if self.family:
-            self.registrations = ClassRegistration.objects.filter(beginner_class__event__event_date__gte=timezone.now(),
+            self.registrations = Registration.objects.filter(event__event_date__gte=timezone.now(),
                                                                   student__in=self.family.student_set.all())
             self.registrations = self.registrations.exclude(pay_status__in=['refund donated', 'refunded', 'canceled'])
             self.can_refund = False
             for reg in self.registrations:
                 f = BooleanField(reg, widget=forms.CheckboxInput(attrs={'class': f"m-2 unreg {reg.pay_status}"}),
                                  required=False, initial=False)
-                f.beginner_class = str(reg.beginner_class.id)
-                f.class_date = reg.beginner_class.event.event_date
+                f.beginner_class = str(reg.event.beginnerclass_set.last().id)
+                f.class_date = reg.event.event_date
                 f.pay_status = reg.pay_status
-                if reg.beginner_class.event.state in reg.beginner_class.event.event_states[4:]:  # class closed
+                if reg.event.state in reg.event.event_states[4:]:  # class closed
                     # f.widget.attrs.update({'disabled': 'disabled'})
                     f.label = '(no refund)'
                 else:
@@ -103,18 +104,18 @@ class UnregisterForm(forms.Form):
                 # logging.debug(k.split('_'))
                 class_list.append(int(k.split('_')[1]))
         logging.warning(class_list)
-        cr = ClassRegistration.objects.filter(
+        cr = Registration.objects.filter(
             id__in=class_list,
             student__in=student_family.student_set.all())
         logging.warning(cr)
         if not len(cr):  # no registrations found
             return True
         not_refundable = cr.filter(
-            beginner_class__event__event_date__lt=timezone.now() + timezone.timedelta(hours=24),
-            beginner_class__event__state__in=BeginnerClass.class_states[:5])
+            event__event_date__lt=timezone.now() + timezone.timedelta(hours=24),
+            event__state__in=Event.event_states[:5])
         not_refundable.update(pay_status='canceled')
-        cr = cr.filter(beginner_class__event__event_date__gte=timezone.now() + timezone.timedelta(hours=24),
-                       beginner_class__event__state__in=BeginnerClass.class_states[:4])
+        cr = cr.filter(event__event_date__gte=timezone.now() + timezone.timedelta(hours=24),
+                       event__state__in=Event.event_states[:4])
         logging.warning(cr)
         # if not user.is_board:
         #     cr = cr.filter(
@@ -123,7 +124,7 @@ class UnregisterForm(forms.Form):
         for ikey in cr.values('idempotency_key', 'pay_status').annotate(ik_count=Count('idempotency_key')).order_by():
             logging.debug(ikey)
             icr = cr.filter(idempotency_key=ikey['idempotency_key'])
-            cost = icr[0].beginner_class.event.cost_standard
+            cost = icr[0].event.cost_standard
             if ikey['pay_status'] in ['start', 'waiting']:
                 icr.update(pay_status='canceled')
                 continue
@@ -151,8 +152,8 @@ class UnregisterForm(forms.Form):
                     else:
                         r.pay_status = 'canceled'
                     r.save()
-                    crh.update_class_state(r.beginner_class)
-                update_waiting.delay(icr[0].beginner_class.id)
+                    crh.update_class_state(r.event.beginnerclass_set.last())
+                update_waiting.delay(icr[0].event.beginnerclass_set.last().id)
             else:
                 for r in icr:
                     self.add_error(f'unreg_{r.id}', square_response['error'])

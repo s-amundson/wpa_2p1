@@ -4,7 +4,8 @@ from django.urls import reverse
 from django.utils import timezone
 from unittest.mock import patch
 
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
+from event.models import Registration
 from event.models import Event
 from student_app.models import Student
 from payment.models import PaymentLog
@@ -40,14 +41,14 @@ class TestsClassSignIn(MockSideEffects, TestCase):
     def test_post_sign_in_page_good(self):
         response = self.client.post(reverse('programs:class_sign_in', kwargs={'reg_id': 1}), self.img, secure=True)
         self.assertEqual(response.status_code, 302)
-        cr = ClassRegistration.objects.get(pk=1)
+        cr = Registration.objects.get(pk=1)
         self.assertTrue(cr.student.signature)
         self.assertEqual(cr.student.safety_class, timezone.datetime(year=2023, month=6, day=5).date())
 
     def test_post_sign_in_page_none(self):
         response = self.client.post(reverse('programs:class_sign_in', kwargs={'reg_id': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
-        cr = ClassRegistration.objects.get(pk=1)
+        cr = Registration.objects.get(pk=1)
         self.assertFalse(cr.student.signature)
 
     @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
@@ -55,10 +56,9 @@ class TestsClassSignIn(MockSideEffects, TestCase):
         refund.side_effect = self.refund_side_effect
 
         bc2 = BeginnerClass.objects.get(pk=2)
-        reg2 = ClassRegistration.objects.create(
-            beginner_class=bc2,
+        reg2 = Registration.objects.create(
+            event=bc2.event,
             student=Student.objects.get(pk=2),
-            new_student=True,
             pay_status="paid",
             idempotency_key='3239ed71-6740-4540-86f3-86fff79898a0',
             reg_time="2021-06-09",
@@ -93,10 +93,9 @@ class TestsClassSignIn(MockSideEffects, TestCase):
                 type='class'
             ),
         )
-        reg3 = ClassRegistration.objects.create(
-            beginner_class=bc3,
+        reg3 = Registration.objects.create(
+            event=bc3.event,
             student=Student.objects.get(pk=2),
-            new_student=True,
             pay_status="waiting",
             idempotency_key='3239ed71-6740-4540-86f3-86fff79898a1',
             reg_time="2021-06-09",
@@ -104,10 +103,10 @@ class TestsClassSignIn(MockSideEffects, TestCase):
         )
         response = self.client.post(reverse('programs:class_sign_in', kwargs={'reg_id': 1}), self.img, secure=True)
         self.assertEqual(response.status_code, 302)
-        cr = ClassRegistration.objects.get(pk=1)
+        cr = Registration.objects.get(pk=1)
         self.assertTrue(cr.student.signature)
         self.assertEqual(cr.student.safety_class, timezone.datetime(year=2023, month=6, day=5).date())
-        cr2 = ClassRegistration.objects.get(pk=reg2.id)
+        cr2 = Registration.objects.get(pk=reg2.id)
         self.assertEqual(cr2.pay_status, 'refunded')
-        cr3 = ClassRegistration.objects.get(pk=reg3.id)
+        cr3 = Registration.objects.get(pk=reg3.id)
         self.assertEqual(cr3.pay_status, 'canceled')

@@ -1,7 +1,6 @@
 from django import forms
 
-from ..src import ClassRegistrationHelper
-from ..models import ClassRegistration
+from event.models import Registration
 from ..tasks import charge_group
 import logging
 
@@ -22,8 +21,7 @@ class AdmitWaitForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.refund_errors = []
         if self.beginner_class:
-            self.registrations = ClassRegistration.objects.filter(beginner_class=self.beginner_class,
-                                                                  pay_status='waiting')
+            self.registrations = Registration.objects.filter(event=self.beginner_class.event, pay_status='waiting')
             if self.family:
                 self.registrations = self.registrations.filter(student__in=self.family.student_set.all())
             for reg in self.registrations.order_by('student__last_name', 'student__first_name'):
@@ -46,5 +44,4 @@ class AdmitWaitForm(forms.Form):
         # logging.debug(self.registrations.filter(id__in=reg_list))
         logging.debug(reg_list)
         charge_group.delay(reg_list)
-        # ClassRegistrationHelper().charge_group(self.registrations.filter(id__in=reg_list))
         return True

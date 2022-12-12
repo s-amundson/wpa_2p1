@@ -1,7 +1,7 @@
-# from datetime import timedelta
 from django import forms
 from django.utils import timezone
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
+from event.models import Registration
 import logging
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class ClassRegistrationForm(forms.Form):
         return d
 
     class Meta:
-        model = ClassRegistration
+        model = Registration
         exclude = ['pay_status', 'order_id', 'reg_time']
 
 

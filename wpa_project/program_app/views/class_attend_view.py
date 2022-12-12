@@ -5,9 +5,9 @@ from django.views.generic.base import View
 from django.views.generic import FormView
 from django.urls import reverse_lazy
 
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
 from ..forms import ClassAttendanceForm
-from ..src import ClassRegistrationHelper
+from event.models import Registration, VolunteerRecord
 import logging
 logger = logging.getLogger(__name__)
 
@@ -40,17 +40,24 @@ class ClassAttendListView(UserPassesTestMixin, FormView):
 class ClassAttendView(UserPassesTestMixin, View):
     def post(self, request, registration):
         # logging.debug(request.POST)
-        cr = ClassRegistration.objects.get(pk=registration)
+        cr = Registration.objects.get(pk=registration)
         if f'check_{cr.student.id}' in request.POST:
             cr.attended = request.POST[f'check_{cr.student.id}'] in ['true', 'on']
 
-            logging.debug(f'safety_class date: {cr.student.safety_class} class_date: {cr.beginner_class.event.event_date}')
+            logging.debug(f'safety_class date: {cr.student.safety_class} class_date: {cr.event.event_date}')
             if cr.attended:
                 if cr.student.safety_class is None:
-                    cr.student.safety_class = cr.beginner_class.event.event_date.date()
+                    cr.student.safety_class = cr.event.event_date.date()
                     cr.student.save()
+                elif cr.student.user is not None and cr.student.user.is_staff:
+                    VolunteerRecord.objects.update_points(
+                        cr.event,
+                        cr.student,
+                        cr.event.volunteer_points
+                    )
+
             else:
-                if cr.beginner_class.event.event_date.date() == cr.student.safety_class:
+                if cr.event.event_date.date() == cr.student.safety_class:
                     cr.student.safety_class = None
                     cr.student.save()
             cr.save()

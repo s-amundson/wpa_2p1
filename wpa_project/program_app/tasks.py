@@ -5,7 +5,8 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from django.conf import settings
 
 from .src import ClassRegistrationHelper, UpdatePrograms
-from .models import BeginnerClass, BeginnerSchedule, ClassRegistration
+from .models import BeginnerClass, BeginnerSchedule
+from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
 
 import logging
@@ -15,7 +16,7 @@ crh = ClassRegistrationHelper()
 
 @shared_task
 def charge_group(reg_list):  # pragma: no cover
-    crh.charge_group(ClassRegistration.objects.filter(id__in=reg_list))
+    crh.charge_group(Registration.objects.filter(id__in=reg_list))
 
 
 @shared_task
@@ -94,7 +95,7 @@ def refund_class(beginner_class, message=''):
     email_message = EmailMessage()
     # need to refund students if any
     if ec["beginner"] > 0 or ec["returnee"] > 0:
-        cr = ClassRegistration.objects.filter(beginner_class__id=beginner_class.id)
+        cr = Registration.objects.filter(event=beginner_class.event)
         ik_list = []
         for reg in cr:
             if reg.idempotency_key not in ik_list:

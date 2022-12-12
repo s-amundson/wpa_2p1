@@ -7,15 +7,6 @@ class Choices:
                 ('recurve', 'Recurve/Para Recurve Open'),
                 ('compound', 'Compound/Para Compound Open/W1/Fixed Pins**')]
 
-    def choices(self, choice_list):
-        choice = []
-        for c in choice_list:
-            choice.append((c, c))
-        return choice
-
-    def class_states(self):
-        return self.choices(['scheduled', 'open', 'full', 'closed', 'canceled', 'recorded'])
-
     def distances(self):
         return [(None, None), (9, 9), (18, 18)]
 

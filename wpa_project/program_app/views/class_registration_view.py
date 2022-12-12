@@ -1,6 +1,5 @@
 import uuid
 from django.apps import apps
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, AccessMixin
 from django.contrib import messages
 from django.db import transaction
@@ -14,7 +13,8 @@ import logging
 
 
 from ..forms import ClassRegistrationForm, ClassRegistrationAdminForm
-from ..models import BeginnerClass, ClassRegistration, ClassRegistrationAdmin
+from ..models import BeginnerClass
+from event.models import Registration, RegistrationAdmin
 from ..src import ClassRegistrationHelper
 from payment.models.card import Card
 from student_app.src import StudentHelper
@@ -98,8 +98,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                                 or s.user.instructor_expire_date < timezone.localdate(timezone.now()):
                             return self.has_error('Please update your instructor certification')
 
-                    if len(ClassRegistration.objects.filter(
-                            beginner_class=beginner_class, student=s).exclude(
+                    if len(Registration.objects.filter(event=beginner_class.event, student=s).exclude(
                             pay_status__in=['canceled', "refunded", 'refund donated'])) == 0:
                         instructor += 1
                         instructors.append(s)
@@ -107,11 +106,11 @@ class ClassRegistrationView(AccessMixin, FormView):
                         return self.has_error(f'{s.first_name} is already enrolled')
 
                 else:
-                    reg = ClassRegistration.objects.filter(student=s).exclude(
-                        pay_status__in=['canceled', "refunded", 'refund donated'])
-                    if len(reg.filter(beginner_class=beginner_class)) == 0:
+                    reg = Registration.objects.filter(student=s).exclude(
+                        pay_status__in=['canceled', "refunded", 'refund', 'refund donated'])
+                    if len(reg.filter(event=beginner_class.event)) == 0:
                         if s.safety_class is None:
-                            future_reg = reg.filter(beginner_class__event__event_date__gt=timezone.now())
+                            future_reg = reg.filter(event__event_date__gt=timezone.now())
                             if beginner_class.event.state == 'wait' and len(future_reg.filter(pay_status='waiting')) > 0:
                                 return self.has_error(f'{s.first_name} is on wait list for another beginner class')
                             elif beginner_class.event.state != 'wait' and len(future_reg.exclude(pay_status='waiting')) > 0:
@@ -131,6 +130,7 @@ class ClassRegistrationView(AccessMixin, FormView):
         self.request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                       'returnee': returnee}
         space = ClassRegistrationHelper().has_space(self.request.user, beginner_class, beginner, instructor, returnee)
+
         if space == 'full':
             return self.has_error('Not enough space available in this class')
         else:
@@ -169,7 +169,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                     n = True
                 else:
                     n = False
-                cr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
+                cr = Registration.objects.create(event=beginner_class.event, student=s,
                                        pay_status=pay_status, idempotency_key=uid, user=self.request.user)
                 self.request.session['line_items'].append({
                     'name': f'Class on {str(class_date)[:10]} student: {s.first_name}',
@@ -179,7 +179,7 @@ class ClassRegistrationView(AccessMixin, FormView):
                 )
                 # logging.debug(cr)
             for i in instructors:
-                cr = ClassRegistration.objects.create(beginner_class=beginner_class, student=i, new_student=False,
+                cr = Registration.objects.create(event=beginner_class.event, student=i,
                                        pay_status='paid', idempotency_key=uid, user=self.request.user)
                 self.request.session['line_items'].append({
                     'name': f"Class on {str(class_date)[:10]} instructor: {i.first_name}",
@@ -219,8 +219,8 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
             self.success_url = reverse_lazy('programs:class_attend_list',
                                             kwargs={'beginner_class': form.cleaned_data['beginner_class']})
 
-        cr = ClassRegistration.objects.filter(beginner_class=beginner_class)
-        # logging.debug(timezone.now())
+        cr = Registration.objects.filter(event=beginner_class.event)
+
         for k, v in form.cleaned_data.items():
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
@@ -245,12 +245,12 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                             'amount_each': beginner_class.event.cost_standard,
                              }
                         )
-                    ncr = ClassRegistration.objects.create(beginner_class=beginner_class, student=s, new_student=n,
+                    ncr = Registration.objects.create(event=beginner_class.event, student=s,
                                                            pay_status=pay_status, idempotency_key=uid,
                                                            user=form.cleaned_data['student'].user,
                                                            reg_time=timezone.now())
                     note = form.cleaned_data['notes']
-                    ClassRegistrationAdmin.objects.create(class_registration=ncr, staff=self.request.user, note=note)
+                    RegistrationAdmin.objects.create(class_registration=ncr, staff=self.request.user, note=note)
 
         return HttpResponseRedirect(self.success_url)
 
@@ -274,13 +274,14 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse('registration:profile'))
 
         if reg_id:  # to regain an interrupted payment
-            cr = get_object_or_404(ClassRegistration, pk=reg_id)
+            cr = get_object_or_404(Registration, pk=reg_id)
             # logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
             if cr.student.student_family != students[0].student_family:  # pragma: no cover
                 return Http404("registration mismatch")
-            registrations = ClassRegistration.objects.filter(idempotency_key=cr.idempotency_key)
+            registrations = Registration.objects.filter(idempotency_key=cr.idempotency_key)
+            logging.warning(cr.event.beginnerclass_set.last())
             space = ClassRegistrationHelper().has_space(self.request.user,
-                                                        cr.beginner_class,
+                                                        cr.event.beginnerclass_set.last(),
                                                         len(registrations.filter(student__safety_class__isnull=True)),
                                                         0,
                                                         len(registrations.filter(student__safety_class__isnull=False))
@@ -293,23 +294,23 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
                 if Card.objects.filter(customer__user=self.request.user, enabled=True):
                     registrations.update(pay_status='waiting')
                     return HttpResponseRedirect(reverse('programs:wait_list',
-                                                        kwargs={'beginner_class': cr.beginner_class.id}))
+                                                        kwargs={'beginner_class': cr.event.beginnerclass_set.last().id}))
                 else:
                     return HttpResponseRedirect(reverse('payment:card_manage'))
 
             request.session['idempotency_key'] = str(cr.idempotency_key)
             request.session['line_items'] = []
             request.session['payment_category'] = 'intro'
-            request.session['payment_description'] = f'Class on {str(cr.beginner_class.event.event_date)[:10]}'
+            request.session['payment_description'] = f'Class on {str(cr.event.event_date)[:10]}'
             beginner = 0
             returnee = 0
 
             for r in registrations:
-                class_date = timezone.localtime(r.beginner_class.event.event_date)
+                class_date = timezone.localtime(r.event.event_date)
                 request.session['line_items'].append({
                         'name': f'Class on {str(class_date)[:10]} student: {r.student.first_name}',
                         'quantity': 1,
-                        'amount_each': r.beginner_class.event.cost_standard,
+                        'amount_each': r.event.cost_standard,
                     }
 
                 )
@@ -318,6 +319,9 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
                 else:
                     returnee += 1
 
-            request.session['class_registration'] = {'beginner_class': r.beginner_class.id, 'beginner': beginner,
-                                                     'returnee': returnee}
+            request.session['class_registration'] = {
+                'beginner_class': r.event.beginnerclass_set.last().id,
+                'beginner': beginner,
+                'returnee': returnee
+            }
             return HttpResponseRedirect(reverse('payment:make_payment'))

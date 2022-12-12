@@ -1,7 +1,8 @@
 import logging
 from django.utils import timezone
 from datetime import timedelta
-from ..models import BeginnerClass, BeginnerSchedule, ClassRegistration
+from ..models import BeginnerClass, BeginnerSchedule
+from event.models import Registration
 from ..src import ClassRegistrationHelper, EmailMessage
 from event.models import Event
 from student_app.models import Student, User
@@ -110,7 +111,7 @@ class UpdatePrograms:
         for c in classes:
             self.email = EmailMessage()
             # send email to students that are registered
-            cr = c.classregistration_set.filter(pay_status__in=['paid', 'admin'])
+            cr = c.event.registration_set.filter(pay_status__in=['paid', 'admin'])
             student_list = []
             for r in cr:
                 student_list.append(r.student.id)
@@ -122,7 +123,7 @@ class UpdatePrograms:
 
             # send email to students that are on the wait list
             self.email = EmailMessage()
-            cr = c.classregistration_set.filter(pay_status__in=['waiting'])
+            cr = c.event.registration_set.filter(pay_status__in=['waiting'])
             student_list = []
             for r in cr:
                 student_list.append(r.student.id)
@@ -138,6 +139,7 @@ class UpdatePrograms:
         # logging.debug(email_date)
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         staff_students = Student.objects.filter(user__in=staff_query)
+        # staff_students = Student.objects.filter(user__is_staff=True)
         classes = BeginnerClass.objects.filter(
             event__event_date__date=email_date, event__state__in=self.states[:self.states.index('closed')])
         if len(classes):
@@ -145,7 +147,7 @@ class UpdatePrograms:
             for c in classes:
                 instructors = []
                 staff = []
-                cr = ClassRegistration.objects.filter(beginner_class=c, student__in=staff_students)
+                cr = Registration.objects.filter(event=c.event, student__in=staff_students)
                 for r in cr:
                     if r.student.user.is_instructor:
                         instructors.append(r.student)

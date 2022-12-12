@@ -9,8 +9,9 @@ from django.urls import reverse
 from django.utils import timezone
 from unittest.mock import patch
 
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
 from ..tasks import refund_class
+from event.models import Event, Registration
 from payment.models import PaymentLog
 from payment.tests import MockSideEffects
 from student_app.models import Student
@@ -29,10 +30,13 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
     def create_payment(self, students, amount=500):
         ik = uuid.uuid4()
         for student in students:
-            ClassRegistration.objects.create(
-                beginner_class=BeginnerClass.objects.get(pk=1),
-                student=student, new_student=True, pay_status="paid",
-                idempotency_key=ik, reg_time="2021-06-09", attended=False
+            Registration.objects.create(
+                event=Event.objects.get(pk=1),
+                student=student,
+                pay_status="paid",
+                idempotency_key=ik,
+                reg_time="2021-06-09",
+                attended=False
             )
         PaymentLog.objects.create(
             category='joad',
@@ -168,7 +172,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
                                     self.class_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         refund_class(bc, 'due to extreme bytes') # this is typically called by celery
-        cr = ClassRegistration.objects.all()
+        cr = Registration.objects.all()
         self.assertEqual(len(cr), 3)
         for c in cr:
             self.assertEqual(c.pay_status, 'refund')
@@ -178,7 +182,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.assertEqual(len(pl), 2)
         for l in pl:
             self.assertEqual(l.status, 'refund')
-        logging.warning(mail.outbox[0].body)
+        # logging.warning(mail.outbox[0].body)
 
     def test_beginner_class_with_returnee(self):
         self.class_dict['class_type'] = 'beginner'

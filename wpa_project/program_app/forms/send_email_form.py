@@ -16,7 +16,7 @@ class SendClassEmailForm(SendEmailForm):
     def send_message(self):
         em = EmailMessage()
         users = User.objects.filter(is_active=True)
-        class_registrations = self.beginner_class.classregistration_set.filter(pay_status__in=['paid', 'admin'])
+        class_registrations = self.beginner_class.event.registration_set.filter(pay_status__in=['paid', 'admin'])
         if self.cleaned_data['attending_only']:
             class_registrations = class_registrations.filter(attended=True)
         student_list = []
