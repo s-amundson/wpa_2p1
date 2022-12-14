@@ -16,10 +16,10 @@
         <form id="registration-form" method="post">
             {% csrf_token %}
             <div class="fieldWrapper">
-                {{ form.volunteer_event.errors }}
-                {{ form.volunteer_event.label_tag }}
-                {{ form.volunteer_event }}
-                {{ form.volunteer_event.id }}
+                {{ form.event.errors }}
+                {{ form.event.label_tag }}
+                {{ form.event }}
+                {{ form.event.id }}
             </div>
             <div id="status-div"></div>
             {% if form.student_count %}

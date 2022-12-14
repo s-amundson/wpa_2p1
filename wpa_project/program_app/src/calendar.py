@@ -90,7 +90,7 @@ class Calendar(HTMLCalendar):
                 elif event.class_type == 'special':
                     btn_color = 'btn-outline-primary'
                 cd = timezone.localtime(event.class_date)
-                url = reverse('programs:class_registration', kwargs={'beginner_class': event.id})
+                url = reverse('programs:class_registration', kwargs={'event': event.id})
                 data += f'<li><a href="{url}" role="button" type="button" bc_id="{event.id}" class="btn {btn_color} '
                 if self.staff or event.state in ['open', 'wait']:
                     data += f'bc-btn m-1" >'

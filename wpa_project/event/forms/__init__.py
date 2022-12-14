@@ -1,2 +1,2 @@
-from .registration_form import VolunteerRegistrationForm
+from .registration_form import RegistrationForm, RegistrationAdminForm
 from .volunteer_event_form import VolunteerEventForm

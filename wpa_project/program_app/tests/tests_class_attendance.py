@@ -28,7 +28,7 @@ class TestsClassAttendance(TestCase):
 
     def test_class_attendance(self):
         # Get the page
-        response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
         # list the class students but since class is not closed Attending column is missing
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/class_attendance.html')
@@ -44,7 +44,7 @@ class TestsClassAttendance(TestCase):
                          {'beginner_class': 1, 'student_6': 'on', 'terms': 'on'}, secure=True)
 
         self.client.force_login(User.objects.get(pk=1))
-        self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
+        self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
 
         # set pay status to paid
         cr = Registration.objects.all()
@@ -60,7 +60,7 @@ class TestsClassAttendance(TestCase):
                                     secure=True)
         self.assertEqual(response.status_code, 302)
         # check that the attending column is there with checkboxes
-        response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Attending', 6)
 
@@ -76,7 +76,7 @@ class TestsClassAttendance(TestCase):
         bc.event.save()
 
         # check that the attending column is there with checkboxes
-        response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
 
         # mark instructor as attending.
@@ -88,7 +88,7 @@ class TestsClassAttendance(TestCase):
         self.assertEqual(cr.student.safety_class, timezone.datetime.date(bc.event.event_date))
 
         # check that the attending column is there with checkboxes
-        response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
 
     def test_class_beginner_unattend(self):
@@ -127,7 +127,7 @@ class TestsClassAttendance(TestCase):
         bc.event.save()
 
         # check that the attending column is there with checkboxes
-        response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
 
         # mark instructor as attending.
@@ -138,7 +138,7 @@ class TestsClassAttendance(TestCase):
         self.assertEqual(cr.attended, True)
 
         # check that the attending column is there with checkboxes
-        response = self.client.get(reverse('programs:class_attend_list', kwargs={'beginner_class': 1}), secure=True)
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
 
     def test_class_attend_error(self):

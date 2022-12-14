@@ -31,8 +31,6 @@ class AdmitWaitView(UserPassesTestMixin, FormView):
         kwargs = super().get_form_kwargs()
         kwargs['beginner_class'] = self.beginner_class
         kwargs['family'] = self.student_family
-        # if self.request.user.is_board:
-        #     kwargs['user'] = self.request.user
         return kwargs
 
     def test_func(self):
@@ -40,7 +38,7 @@ class AdmitWaitView(UserPassesTestMixin, FormView):
             if self.kwargs.get('beginner_class'):
                 self.beginner_class = get_object_or_404(BeginnerClass, pk=self.kwargs.get('beginner_class'))
                 self.success_url = reverse_lazy('programs:class_attend_list',
-                                                kwargs={'beginner_class': self.kwargs.get('beginner_class')})
+                                                kwargs={'event': self.beginner_class.event.id})
             if self.kwargs.get('family_id'):
                 self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id'))
         return self.beginner_class is not None

@@ -81,6 +81,6 @@ class TestsAdmitWait(MockSideEffects, TestCase):
         mock_payment.side_effect = self.payment_side_effect
         d = {'admit_1': True, 'admit_2': True, 'admit_3': False, 'admit_4': False}
         response = self.client.post(reverse('programs:admit_wait', kwargs={'beginner_class': 1}), d, secure=True)
-        self.assertRedirects(response, reverse('programs:class_attend_list', kwargs={'beginner_class': 1}))
+        self.assertRedirects(response, reverse('programs:class_attend_list', kwargs={'event': 1}))
         chg_group.assert_called_with([2, 1])
 

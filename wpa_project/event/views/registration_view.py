@@ -1,28 +1,50 @@
+from django.apps import apps
 from django.views.generic.edit import FormView
-from django.views.generic.base import View
 from django.urls import reverse, reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
-from ..forms import VolunteerRegistrationForm
-from ..models import Registration
-from student_app.models import Student
-from student_app.src import StudentHelper
 
-import uuid
+from ..forms import RegistrationForm
+from ..models import Registration
+from src.mixin import StudentFamilyMixin
+from student_app.models import Student
+StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamily')
+
 import logging
 logger = logging.getLogger(__name__)
 
 
-class RegistrationSuperView(UserPassesTestMixin, FormView):
+class RegistrationSuperView(StudentFamilyMixin, FormView):
     template_name = 'event/registration.html'
-    form_class = VolunteerRegistrationForm
+    form_class = RegistrationForm
+    event_type = 'class'
+    # students = None
     student_family = None
     success_url = reverse_lazy('payment:make_payment')
     form = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.wait = False
+        self.has_card = False
+
+    def get_form_kwargs(self):
+        fid = self.kwargs.get('family_id', None)
+        if fid is not None and self.request.user.is_board:
+            self.student_family = get_object_or_404(StudentFamily, pk=fid)
+        else:
+            self.student_family = self.request.user.student_set.last().student_family
+        # self.students = Student.objects.get(user=self.request.user).student_family.student_set.all()
+        kwargs = super().get_form_kwargs()
+        # logging.warning(self.kwargs)
+        if self.kwargs.get('event', None) is not None:
+            kwargs['initial']['event'] = self.kwargs.get('event')
+        kwargs['event_type'] = self.event_type
+        kwargs['students'] = self.student_family.student_set.all()
+        return kwargs
 
     def get_initial(self):
         evt = self.kwargs.get('event', False)
@@ -34,29 +56,17 @@ class RegistrationSuperView(UserPassesTestMixin, FormView):
         logging.warning(form.errors)
         return super().form_invalid(form)
 
-    def has_error(self, message):
+    def has_error(self, form, message):
         messages.add_message(self.request, messages.ERROR, message)
-        return self.form_invalid(self.form)
+        return self.form_invalid(form)
 
     def post(self, request, *args, **kwargs):
         logging.warning(self.request.POST)
         return super().post(request, *args, **kwargs)
 
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            self.student_family = self.request.user.student_set.first().student_family
-            if self.student_family is None:
-                return False
-            return True
-        else:
-            return False
-
 
 class RegistrationView(RegistrationSuperView):
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['students'] = self.student_family.student_set.all()
-        return kwargs
+    event_type = 'work'
 
     def form_valid(self, form):
         self.form = form
@@ -78,10 +88,10 @@ class RegistrationView(RegistrationSuperView):
                 if len(sreg) == 0:
                     students.append(s)
                 else:
-                    return self.has_error('Student is already enrolled')
+                    return self.has_error(form, 'Student is already enrolled')
 
         if len(students) == 0:
-            return self.has_error('Invalid student selected')
+            return self.has_error(form, 'Invalid student selected')
         else:
             if volunteer_event.volunteer_limit >= volunteer_event.volunteerregistration_set.registered_count() + len(students):
                 for s in students:
@@ -91,7 +101,7 @@ class RegistrationView(RegistrationSuperView):
                         user=self.request.user
                     )
                 return super().form_valid(form)
-            return self.has_error('view incomplete')
+            return self.has_error(form, 'view incomplete')
 
 
 # class ResumeRegistrationView(LoginRequiredMixin, View):

@@ -1,21 +1,20 @@
 import uuid
 from django.apps import apps
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, AccessMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic.base import View
-from django.views.generic.edit import FormView
 import logging
 
-
-from ..forms import ClassRegistrationForm, ClassRegistrationAdminForm
-from ..models import BeginnerClass
+from event.forms import RegistrationAdminForm
 from event.models import Registration, RegistrationAdmin
+from event.views.registration_view import RegistrationSuperView
 from ..src import ClassRegistrationHelper
+from src.mixin import BoardMixin
 from payment.models.card import Card
 from student_app.src import StudentHelper
 
@@ -24,71 +23,29 @@ Student = apps.get_model(app_label='student_app', model_name='Student')
 StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamily')
 
 
-class ClassRegistrationView(AccessMixin, FormView):
+class ClassRegistrationView(RegistrationSuperView):
     template_name = 'program_app/class_registration.html'
-    form_class = ClassRegistrationForm
-    success_url = reverse_lazy('payment:make_payment')
-    form = None
-    students = None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.wait = False
-        self.has_card = False
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return self.handle_no_permission()
-        if request.user.student_set.last() is None or request.user.student_set.last().student_family is None:
-            request.session['message'] = 'Address form is required'
-            return HttpResponseRedirect(reverse('registration:profile'))
-        self.has_card = bool(Card.objects.filter(customer__user=self.request.user, enabled=True))
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['this_month'] = timezone.localtime(timezone.now()).month
-        context['family'] = self.request.user.student_set.last().student_family
-        return context
 
     def get_form_kwargs(self):
+        self.has_card = bool(Card.objects.filter(customer__user=self.request.user, enabled=True))
         kwargs = super().get_form_kwargs()
-        # logging.debug(kwargs)
-        if self.kwargs.get('beginner_class', None) is not None:
-            kwargs['initial']['beginner_class'] = self.kwargs.get('beginner_class')
         return kwargs
 
-    def get_form(self):
-        try:
-            self.students = Student.objects.get(user=self.request.user).student_family.student_set.all()
-        except (Student.DoesNotExist, AttributeError):  # pragma: no cover
-            self.request.session['message'] = 'Address form is required'
-            return HttpResponseRedirect(reverse('registration:profile'))
-        return self.form_class(self.students, self.request.user, **self.get_form_kwargs())
-
-    def form_invalid(self, form):
-        logging.debug(self.request.POST)
-        logging.warning(form.errors)
-        return super().form_invalid(form)
-
     def form_valid(self, form):
-        self.form = form
-        logging.warning(form.cleaned_data)
-        beginner_class = BeginnerClass.objects.get(pk=self.form.cleaned_data['beginner_class'])
+        event = form.cleaned_data['event']
         beginner = 0
         returnee = 0
         instructor = 0
         students = []
         instructors = []
-        logging.debug(self.form.cleaned_data)
-        for k, v in self.form.cleaned_data.items():
+        for k, v in form.cleaned_data.items():
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
 
                 # logging.debug(s)
-                if StudentHelper().calculate_age(s.dob, beginner_class.event.event_date) < 9:
-                    return self.has_error('Student must be at least 9 years old to participate')
+                if StudentHelper().calculate_age(s.dob, event.event_date) < 9:
+                    return self.has_error(form, 'Student must be at least 9 years old to participate')
 
                 if s.user is not None and s.user.is_staff:
                     logging.debug('student is staff')
@@ -96,25 +53,25 @@ class ClassRegistrationView(AccessMixin, FormView):
                         # logging.debug(s.user.instructor_expire_date)
                         if s.user.instructor_expire_date is None \
                                 or s.user.instructor_expire_date < timezone.localdate(timezone.now()):
-                            return self.has_error('Please update your instructor certification')
+                            return self.has_error(form, 'Please update your instructor certification')
 
-                    if len(Registration.objects.filter(event=beginner_class.event, student=s).exclude(
+                    if len(Registration.objects.filter(event=event, student=s).exclude(
                             pay_status__in=['canceled', "refunded", 'refund donated'])) == 0:
                         instructor += 1
                         instructors.append(s)
                     else:
-                        return self.has_error(f'{s.first_name} is already enrolled')
+                        return self.has_error(form, f'{s.first_name} is already enrolled')
 
                 else:
                     reg = Registration.objects.filter(student=s).exclude(
                         pay_status__in=['canceled', "refunded", 'refund', 'refund donated'])
-                    if len(reg.filter(event=beginner_class.event)) == 0:
+                    if len(reg.filter(event=event)) == 0:
                         if s.safety_class is None:
                             future_reg = reg.filter(event__event_date__gt=timezone.now())
-                            if beginner_class.event.state == 'wait' and len(future_reg.filter(pay_status='waiting')) > 0:
-                                return self.has_error(f'{s.first_name} is on wait list for another beginner class')
-                            elif beginner_class.event.state != 'wait' and len(future_reg.exclude(pay_status='waiting')) > 0:
-                                return self.has_error(f'{s.first_name} is enrolled in another beginner class')
+                            if event.state == 'wait' and len(future_reg.filter(pay_status='waiting')) > 0:
+                                return self.has_error(form, f'{s.first_name} is on wait list for another beginner class')
+                            elif event.state != 'wait' and len(future_reg.exclude(pay_status='waiting')) > 0:
+                                return self.has_error(form, f'{s.first_name} is enrolled in another beginner class')
                             else:
                                 beginner += 1
                                 students.append(s)
@@ -122,25 +79,20 @@ class ClassRegistrationView(AccessMixin, FormView):
                             returnee += 1
                             students.append(s)
                     else:
-                        return self.has_error('Student is already enrolled')
+                        return self.has_error(form, 'Student is already enrolled')
 
         if 0 == beginner + returnee + instructor:
-            return self.has_error('No students selected')
-
+            return self.has_error(form, 'No students selected')
+        beginner_class = event.beginnerclass_set.last()
         self.request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                       'returnee': returnee}
         space = ClassRegistrationHelper().has_space(self.request.user, beginner_class, beginner, instructor, returnee)
 
         if space == 'full':
-            return self.has_error('Not enough space available in this class')
+            return self.has_error(form, 'Not enough space available in this class')
         else:
             self.wait = space == 'wait'
             return self.transact(beginner_class, students, instructors)
-
-    def has_error(self, message):
-        logging.warning(message)
-        messages.add_message(self.request, messages.ERROR, message)
-        return self.form_invalid(self.form)
 
     def transact(self, beginner_class, students, instructors):
         with transaction.atomic():
@@ -191,24 +143,16 @@ class ClassRegistrationView(AccessMixin, FormView):
         return HttpResponseRedirect(self.success_url)
 
 
-class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
+class ClassRegistrationAdminView(BoardMixin, ClassRegistrationView):
     template_name = 'student_app/form_as_p.html'
-    form = None
-    form_class = ClassRegistrationAdminForm
-    students = None
-
-    def get_form(self):
-        # logging.debug('get_form')
-        return self.form_class(self.students, self.request.user, **self.get_form_kwargs())
+    form_class = RegistrationAdminForm
 
     def form_valid(self, form):
-        self.form = form
         logging.debug(form.cleaned_data)
-        beginner_class = BeginnerClass.objects.get(pk=form.cleaned_data['beginner_class'])
-        # logging.debug(beginner_class.cost)
+        event = form.cleaned_data['event']
 
         uid = str(uuid.uuid4())
-        class_date = timezone.localtime(beginner_class.event.event_date)
+        class_date = timezone.localtime(event.event_date)
         if form.cleaned_data['payment']:
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
@@ -217,9 +161,9 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
         else:
             self.success_url = reverse_lazy('programs:class_attend_list',
-                                            kwargs={'beginner_class': form.cleaned_data['beginner_class']})
+                                            kwargs={'event': event.id})
 
-        cr = Registration.objects.filter(event=beginner_class.event)
+        cr = Registration.objects.filter(event=event)
 
         for k, v in form.cleaned_data.items():
             if str(k).startswith('student_') and v:
@@ -232,9 +176,9 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                     n = False
 
                 if len(cr.filter(student=s, pay_status='admin')) > 0:
-                    return self.has_error(f'{s.first_name} {s.last_name} already registered by admin')
+                    return self.has_error(form, f'{s.first_name} {s.last_name} already registered by admin')
                 elif len(cr.filter(student=s, pay_status='paid')) > 0:
-                    return self.has_error(f'{s.first_name} {s.last_name} already registered')
+                    return self.has_error(form, f'{s.first_name} {s.last_name} already registered')
                 else:
                     pay_status = 'admin'
                     if form.cleaned_data['payment']:
@@ -242,10 +186,10 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                         self.request.session['line_items'].append({
                             'name': f'Class on {str(class_date)[:10]} student: {s.first_name}',
                             'quantity': 1,
-                            'amount_each': beginner_class.event.cost_standard,
+                            'amount_each': event.cost_standard,
                              }
                         )
-                    ncr = Registration.objects.create(event=beginner_class.event, student=s,
+                    ncr = Registration.objects.create(event=event, student=s,
                                                            pay_status=pay_status, idempotency_key=uid,
                                                            user=form.cleaned_data['student'].user,
                                                            reg_time=timezone.now())
@@ -253,16 +197,6 @@ class ClassRegistrationAdminView(UserPassesTestMixin, ClassRegistrationView):
                     RegistrationAdmin.objects.create(class_registration=ncr, staff=self.request.user, note=note)
 
         return HttpResponseRedirect(self.success_url)
-
-    def test_func(self):
-        fid = self.kwargs.get('family_id', None)
-        if fid is not None:
-            student_family = get_object_or_404(StudentFamily, pk=fid)
-            self.students = student_family.student_set.all()
-        if self.request.user.is_authenticated:
-            return self.request.user.is_board
-        else:
-            return False
 
 
 class ResumeRegistrationView(LoginRequiredMixin, View):

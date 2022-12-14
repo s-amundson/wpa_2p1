@@ -11,7 +11,7 @@
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
     {% if user.is_board %}
-        <a href="{% url 'programs:beginner_class' beginner_class %}" class="btn btn-primary" role="button">
+        <a href="{% url 'programs:beginner_class' form.event.id %}" class="btn btn-primary" role="button">
             Edit Class
         </a>
         <hr/>
@@ -79,7 +79,7 @@
                             {% endfor %}
                             <tr>
                                 <td colspan="6">
-                                    <a class="nav-link" href="{% url 'programs:admit_wait' form.beginner_class.id %}">Wait List</a>
+                                    <a class="nav-link" href="{% url 'programs:admit_wait' form.event.id %}">Wait List</a>
                                 </td>
                             </tr>
                             {% for cr in form.new_students_waiting %}

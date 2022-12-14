@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import *
-app_name = 'event'
+app_name = 'events'
 urlpatterns = [
     path('registration/', RegistrationView.as_view(), name='registration'),
     path('registration/<int:event>/', RegistrationView.as_view(), name='registration'),

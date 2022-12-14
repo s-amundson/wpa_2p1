@@ -10,15 +10,15 @@ logger = logging.getLogger(__name__)
 
 class ClassAttendanceForm(forms.Form):
 
-    def __init__(self, beginner_class, *args, **kwargs):
-        self.beginner_class = beginner_class
+    def __init__(self, *args, **kwargs):
+        self.event = kwargs.pop('event')
         super().__init__(*args, **kwargs)
         staff = Student.objects.filter(user__is_staff=True)
         self.student_helper = StudentHelper()
-        self.is_closed = beginner_class.event.state == 'closed'
-        registrations = beginner_class.classregistration_set.filter(
+        self.is_closed = self.event.state == 'closed'
+        registrations = self.event.registration_set.filter(
             pay_status__in=['admin', 'comped', 'paid', 'waiting']).order_by('attended', 'student__last_name')
-        self.class_date = beginner_class.event.event_date
+        self.class_date = self.event.event_date
 
         self.adult_dob = self.class_date.date().replace(year=self.class_date.year - 18)
 
