@@ -144,7 +144,7 @@ class RegistrationCancelView(RegistrationSuperView):
         else:
             students = self.request.user.student_set.last().student_family.student_set.filter(is_joad=True)
         logging.debug(students)
-        kwargs['students'] = students.filter(registration__in=self.session.registration_set.all())
+        kwargs['students'] = students.filter(session_registration__in=self.session.registration_set.all())
         kwargs['cancel'] = True
         logging.debug(kwargs)
         return kwargs

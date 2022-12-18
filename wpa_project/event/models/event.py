@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 from src.model_helper import choices
 
 import logging
@@ -32,4 +32,4 @@ class Event(models.Model):
     # objects = EventManager()
 
     def __str__(self):
-        return f'{self.event_date.strftime("%d %b, %Y %I:%M %p")}'
+        return f'{timezone.localtime(self.event_date, timezone.get_default_timezone()).strftime("%d %b, %Y %I:%M %p")}'

@@ -21,7 +21,7 @@ class EventRegistration(models.Model):
 class Registration(models.Model):
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True)
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, limit_choices_to={'is_joad': True}, null=True,
-                                related_name='student_related')
+                                related_name='session_registration')
     pay_status = models.CharField(max_length=20)
     idempotency_key = models.UUIDField()
     reg_time = models.DateTimeField(default=timezone.now)
