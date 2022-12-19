@@ -132,6 +132,7 @@ class BeginnerClassListView(LoginRequiredMixin, ListView):
         queryset = []
         for c in bc:
             d = model_to_dict(c)
+            d['event_id'] = c.event.id
             d['event_date'] = c.event.event_date
             d = {**d, **crh.enrolled_count(c)}
             queryset.append(d)
