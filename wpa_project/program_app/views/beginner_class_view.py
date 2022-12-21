@@ -123,18 +123,23 @@ class BeginnerClassListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         crh = ClassRegistrationHelper()
+        # queryset = Event.objects.filter(type='class')
         if self.kwargs.get('past', False):
             bc = BeginnerClass.objects.filter(
                 event__event_date__lte=timezone.localtime(timezone.now()).date()).order_by('-event__event_date')
+            # queryset = queryset.filter(event_date__lte=timezone.localtime(timezone.now()).date()).order_by('-event__event_date')
         else:
             bc = BeginnerClass.objects.filter(
                 event__event_date__gte=timezone.localtime(timezone.now()).date()).order_by('event__event_date')
+            # queryset = queryset.filter(event_date__gte=timezone.localtime(timezone.now()).date())
         queryset = []
         for c in bc:
             d = model_to_dict(c)
             d['event_id'] = c.event.id
             d['event_date'] = c.event.event_date
+            d['event_state'] = c.event.state
             d = {**d, **crh.enrolled_count(c)}
             queryset.append(d)
-        # logging.debug(len(queryset))
+        logging.debug(len(queryset))
+
         return queryset

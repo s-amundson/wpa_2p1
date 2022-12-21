@@ -1,8 +1,7 @@
 from django.utils import timezone
 from django.urls import reverse
 from calendar import HTMLCalendar
-from ..models import BeginnerClass
-from joad.models import JoadClass, JoadEvent
+from event.models import Event
 import logging
 logger = logging.getLogger(__name__)
 
@@ -19,60 +18,39 @@ class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None, dark=False, staff=False):
         self.year = year
         self.month = month
-        self.events = BeginnerClass.objects.filter(event__event_date__gt=timezone.now(),
-                                                   event__event_date__year=year,
-                                                   event__event_date__month=month).order_by('event__event_date')
-        if not staff:
-            self.events = self.events.exclude(class_type='special')
-        self.joad_class_events = JoadClass.objects.filter(event__event_date__gt=timezone.now(),
-                                                          event__event_date__year=year,
-                                                          event__event_date__month=month).order_by('event__event_date')
-        self.joad_events = JoadEvent.objects.filter(event__event_date__gt=timezone.now(),
-                                                          event__event_date__year=year,
-                                                          event__event_date__month=month).order_by('event__event_date')
+        self.events = Event.objects.filter(event_date__gt=timezone.now(),
+                                           event_date__year=year,
+                                           event_date__month=month).order_by('event_date')
 
         self.dark = dark
         self.staff = staff
         super(Calendar, self).__init__()
         self.setfirstweekday(6)
 
-    def insert_event(self, event_list, event):
-        for i in range(len(event_list)):
-            if event_list[i].class_date > event.class_date:
-                event_list.insert(i, event)
-                return event_list
-        event_list.append(event)
-        return event_list
-
     # formats a day as a td
     # filter events by day
     def formatday(self, day):
-        event_list = []
-        for event in self.events.filter(event__event_date__day=day):
-            event_list.append(self.Event(event.id, event.event.event_date, event.class_type, event.event.state))
-            logging.warning(event.event.state)
-        for event in self.joad_class_events.filter(event__event_date__day=day):
-            event_list = self.insert_event(event_list, self.Event(event.id, event.event.event_date, 'JOAD Class',
-                                                                  event.event.state, event.session))
-        for event in self.joad_events.filter(event__event_date__day=day):
-            event_list = self.insert_event(event_list, self.Event(event.id, event.event.event_date, event.event_type,
-                                                                  event.event.state))
 
         data = ''
+        if day == 0:
+            return '<td></td>'
 
-        for event in event_list:
-            cd = timezone.localtime(event.class_date)
-            if event.class_type == 'JOAD Class':
-                url = reverse('joad:registration', kwargs={'session_id': event.session.id})
-                data += f'<a href="{url}" role="button"'
+        for event in self.events.filter(event_date__day=day):
+            cd = timezone.localtime(event.event_date)
+            if event.type == 'joad class':
+                if event.joadclass_set.last() is not None:
+                    url = reverse('joad:registration', kwargs={'session_id': event.joadclass_set.last().session.id})
+                    data += f'<a href="{url}" role="button"'
 
-                if event.session.state not in ['open']:
-                    data += f' class="btn btn-warning disabled m-1" disabled aria-disabled="true"> ' \
-                            f'JOAD Class {cd.strftime("%I:%M %p")} CLOSED</a>'
+                    if event.state not in ['open']:
+                        data += f' class="btn btn-warning disabled m-1" disabled aria-disabled="true"> ' \
+                                f'JOAD Class {cd.strftime("%I:%M %p")} CLOSED</a>'
+                    else:
+                        data += f'  class="btn btn-warning m-1"> JOAD Class {cd.strftime("%I:%M %p")}</a>'
                 else:
-                    data += f'  class="btn btn-warning m-1"> JOAD Class {cd.strftime("%I:%M %p")}</a>'
+                    logging.error('event record mismatch.')
 
-            elif event.class_type == 'joad_indoor':
+            elif event.type == 'joad event':
                 url = reverse('joad:event_registration', kwargs={'event_id': event.id})
                 data += f'<a href="{url}" role="button"'
                 if event.state not in ['open']:
@@ -81,30 +59,31 @@ class Calendar(HTMLCalendar):
                 else:
                     data += f'  class="btn btn-warning m-1"> JOAD Pin Shoot {cd.strftime("%I:%M %p")}</a>'
 
-            else:  # elif event.class_type in ['beginner', 'combined', 'returnee']:
+            elif event.type == 'class':
                 btn_color = 'btn-primary'
-                if event.class_type == 'combined':
-                    btn_color = 'btn-info'
-                elif event.class_type == 'returnee':
-                    btn_color = 'btn-success'
-                elif event.class_type == 'special':
-                    btn_color = 'btn-outline-primary'
-                cd = timezone.localtime(event.class_date)
-                url = reverse('programs:class_registration', kwargs={'event': event.id})
-                data += f'<li><a href="{url}" role="button" type="button" bc_id="{event.id}" class="btn {btn_color} '
-                if self.staff or event.state in ['open', 'wait']:
-                    data += f'bc-btn m-1" >'
+                bc = event.beginnerclass_set.last()
+                if bc is not None:
+                    if bc.class_type == 'combined':
+                        btn_color = 'btn-info'
+                    elif bc.class_type == 'returnee':
+                        btn_color = 'btn-success'
+                    elif bc.class_type == 'special':
+                        btn_color = 'btn-outline-primary'
+                    url = reverse('programs:class_registration', kwargs={'event': event.id})
+                    data += f'<li><a href="{url}" role="button" type="button" bc_id="{event.id}" class="btn {btn_color} '
+                    if self.staff or event.state in ['open', 'wait']:
+                        data += f'bc-btn m-1" >'
+                    else:
+                        data += f'bc-btn m-1 disabled" >'
+                    data += f'{bc.class_type.capitalize()} {cd.strftime("%I:%M %p")} '
+                    if event.state == 'wait':
+                        data += 'Wait List</a></li>'
+                    else:
+                        data += f'{event.state.capitalize()}</a></li>'
                 else:
-                    data += f'bc-btn m-1 disabled" >'
-                data += f'{event.class_type.capitalize()} {cd.strftime("%I:%M %p")} '
-                if event.state == 'wait':
-                    data += 'Wait List</a></li>'
-                else:
-                    data += f'{event.state.capitalize()}</a></li>'
+                    logging.error('event record mismatch.')
 
-        if day != 0:
-            return f"<td><span class='date'>{day}</span><ul> {data} </ul></td>"
-        return '<td></td>'
+        return f"<td><span class='date'>{day}</span><ul> {data} </ul></td>"
 
     def formatweek(self, theweek):
         week = ''

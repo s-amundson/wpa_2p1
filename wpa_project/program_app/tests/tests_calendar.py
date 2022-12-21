@@ -53,33 +53,6 @@ class TestsCalendar(TestCase):
         response = self.client.get(reverse('programs:calendar', kwargs={'year': 2023, 'month': 14}), secure=True)
         self.assertEqual(response.status_code, 200)
 
-    def test_insert_event(self):
-        cal = Calendar()
-        start_list = [
-            cal.Event(id=1, class_date=timezone.datetime(year=2022, month=2, day=2, hour=9), class_type='test_type1',
-                      state='test_state'),
-            cal.Event(id=1, class_date=timezone.datetime(year=2022, month=2, day=2, hour=11), class_type='test_type3',
-                      state='test_state')
-        ]
-        e2 = cal.Event(id=1, class_date=timezone.datetime(year=2022, month=2, day=2, hour=10), class_type='test_type2',
-                       state='test_state')
-        end_list = cal.insert_event(start_list, e2)
-        self.assertEqual(end_list[1].class_date, e2.class_date)
-        self.assertEqual(len(end_list), 3)
-
-    def test_insert_event_last(self):
-        cal = Calendar()
-        start_list = [
-            cal.Event(id=1, class_date=timezone.datetime(year=2022, month=2, day=2, hour=9), class_type='test_type1',
-                      state='test_state'),
-            cal.Event(id=1, class_date=timezone.datetime(year=2022, month=2, day=2, hour=11), class_type='test_type3',
-                      state='test_state')
-        ]
-        e2 = cal.Event(id=1, class_date=timezone.datetime(year=2022, month=2, day=2, hour=12), class_type='test_type2',
-                       state='test_state')
-        end_list = cal.insert_event(start_list, e2)
-        self.assertEqual(end_list[2].class_date, e2.class_date)
-        self.assertEqual(len(end_list), 3)
 
     def test_day(self):
         date = timezone.datetime.now() + timezone.timedelta(days=1)
@@ -96,12 +69,14 @@ class TestsCalendar(TestCase):
                 event_date=date.replace(hour=13),
                 state='open',
                 cost_standard=15,
-                cost_member=15),
+                cost_member=15,
+                type='joad event'),
             event_type="joad_indoor",
             student_limit=10,
             pin_cost=5)
         cal = Calendar(year=date.year, month=date.month)
         html_cal = cal.formatmonth(withyear=True)
+        logging.warning(html_cal)
         self.assertEqual(html_cal.count('Beginner 09:00 AM'), 1)
         self.assertEqual(html_cal.count('Returnee 11:00 AM'), 1)
         self.assertEqual(html_cal.count('Combined 03:00 PM'), 1)
@@ -123,7 +98,8 @@ class TestsCalendar(TestCase):
                 event_date=date.replace(hour=13),
                 state='closed',
                 cost_standard=15,
-                cost_member=15),
+                cost_member=15,
+                type='joad event'),
             event_type="joad_indoor",
             student_limit=10,
             pin_cost=5)
