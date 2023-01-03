@@ -2,6 +2,7 @@ from django.utils import timezone
 from django.urls import reverse
 from calendar import HTMLCalendar
 from event.models import Event
+from joad.models import JoadClass
 import logging
 logger = logging.getLogger(__name__)
 
@@ -38,8 +39,12 @@ class Calendar(HTMLCalendar):
         for event in self.events.filter(event_date__day=day):
             cd = timezone.localtime(event.event_date)
             if event.type == 'joad class':
-                if event.joadclass_set.last() is not None:
-                    url = reverse('joad:registration', kwargs={'session_id': event.joadclass_set.last().session.id})
+                logging.warning(event.id)
+                logging.warning(event.joadclass_set)
+                logging.warning(JoadClass.objects.filter(event=event))
+                jc = JoadClass.objects.filter(event=event).last() # should be able to do this with a reverse relation but not working
+                if jc is not None:
+                    url = reverse('joad:registration', kwargs={'session_id': jc.session.id})
                     data += f'<a href="{url}" role="button"'
 
                     if event.state not in ['open']:
@@ -51,6 +56,7 @@ class Calendar(HTMLCalendar):
                     logging.error('event record mismatch.')
 
             elif event.type == 'joad event':
+                logging.warning(event.id)
                 url = reverse('joad:event_registration', kwargs={'event_id': event.id})
                 data += f'<a href="{url}" role="button"'
                 if event.state not in ['open']:
@@ -81,7 +87,7 @@ class Calendar(HTMLCalendar):
                     else:
                         data += f'{event.state.capitalize()}</a></li>'
                 else:
-                    logging.error('event record mismatch.')
+                    logging.error(f'event record mismatch. event: {event.id}')
 
         return f"<td><span class='date'>{day}</span><ul> {data} </ul></td>"
 

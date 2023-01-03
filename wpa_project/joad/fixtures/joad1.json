@@ -55,8 +55,8 @@
   {"model": "payment.costsmodel", "pk": 2, "fields": {"name": "Pin Shoot", "member_cost": 20, "standard_cost": 20, "membership": false, "enabled": true}},
   {"model": "payment.costsmodel", "pk": 3, "fields": {"name": "JOAD Pin", "member_cost": 5, "standard_cost": 5, "membership": false, "enabled": true}},
 
-  {"model": "event.event", "pk": 8, "fields": {"event_date": "2022-02-16T16:00:00.000Z", "type": "pin shoot indoor", "cost_standard": 15,
+  {"model": "event.event", "pk": 8, "fields": {"event_date": "2022-02-16T16:00:00.000Z", "type": "joad event", "cost_standard": 15,
   "cost_member": 15, "state": "open", "volunteer_points": 2}},
   {"model": "joad.joadevent", "pk": 1, "fields": {"event_type": "joad_indoor", "student_limit":  10, "pin_cost": 5, "event": 8}},
-  {"model": "joad.eventregistration", "pk": 1, "fields": {"pay_status": "paid", "idempotency_key": "49aa95a1-b104-4199-8eb8-ecb7a784bf67", "joad_event": 1, "student": 10}}
+  {"model": "event.registration", "pk": 1, "fields": {"pay_status": "paid", "idempotency_key": "49aa95a1-b104-4199-8eb8-ecb7a784bf67", "event": 8, "student": 10, "reg_time": "2022-02-16T16:00:00.000Z", "modified":  "2022-02-16T16:00:00.000Z"}}
 ]

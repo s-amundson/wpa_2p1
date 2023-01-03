@@ -2,10 +2,6 @@ import logging
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.utils import timezone
-
-from student_app.models import Student
-from ..models import JoadEvent, EventRegistration, PinAttendance
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')

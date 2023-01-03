@@ -91,6 +91,7 @@ def refund_class(beginner_class, message=''):
     if type(beginner_class) == int:
         beginner_class = BeginnerClass.objects.get(pk=beginner_class)
     ec = ClassRegistrationHelper().enrolled_count(beginner_class)
+    logging.warning(ec)
     refund = RefundHelper()
     email_message = EmailMessage()
     # need to refund students if any
@@ -98,6 +99,7 @@ def refund_class(beginner_class, message=''):
         cr = Registration.objects.filter(event=beginner_class.event)
         ik_list = []
         for reg in cr:
+            logging.warning(reg.id)
             if reg.idempotency_key not in ik_list:
                 ik_list.append(reg.idempotency_key)
                 qty = len(cr.filter(idempotency_key=reg.idempotency_key).filter(pay_status='paid'))

@@ -21,6 +21,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
     template_name = 'event/registration.html'
     form_class = RegistrationForm
     event_type = 'class'
+    model = Registration
     # students = None
     student_family = None
     success_url = reverse_lazy('payment:make_payment')

@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class EventRegistrationForm(MyModelForm):
+class EventRegistrationForm(forms.ModelForm):
 
     class Meta(MyModelForm.Meta):
         model = EventRegistration
@@ -25,7 +25,8 @@ class EventRegistrationForm(MyModelForm):
     def __init__(self, user, *args, **kwargs):
         # if "instance"
         super().__init__(*args, **kwargs)
-        logging.debug(self.instance)
+        logging.warning(kwargs)
+        # logging.warning(self.initial['event'].id)
         if user.is_board:
             students = Student.objects.all()
         else:
@@ -35,12 +36,15 @@ class EventRegistrationForm(MyModelForm):
         old = d.replace(year=d.year - 21)
         young = d.replace(year=d.year - 9)
         students = students.filter(dob__gt=old).filter(dob__lte=young).order_by('last_name')
+
         # students = list(students.values())
         for student in students:
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2 student-check"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
+        logging.warning(JoadEvent.objects.filter(event__state='open').order_by('event__event_date'))
         self.fields['joad_event'].queryset = JoadEvent.objects.filter(event__state='open').order_by('event__event_date')
+        self.fields['joad_event'].default = self.initial['joad_event']
         self.student_count = len(students)
 
     def get_boxes(self):

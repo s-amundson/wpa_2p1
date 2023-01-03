@@ -101,10 +101,11 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
         if self.request.user.is_authenticated:
             bid = self.kwargs.get('beginner_class', None)
             if bid is not None:
-                self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
-                logging.warning(self.beginner_class.event)
-                logging.warning(self.beginner_class.event.event_date)
-                logging.warning(timezone.localtime(self.beginner_class.event.event_date))
+                event = get_object_or_404(Event, pk=bid)
+                self.beginner_class = event.beginnerclass_set.last()
+                # logging.warning(self.beginner_class.event)
+                # logging.warning(self.beginner_class.event.event_date)
+                # logging.warning(timezone.localtime(self.beginner_class.event.event_date))
                 self.success_url = reverse_lazy('programs:class_attend_list',
                                                 kwargs={'event': self.beginner_class.event.id})
             return self.request.user.is_board

@@ -5,7 +5,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from student_app.models import Student
-from ..models import JoadEvent, EventRegistration, Session, PinAttendance
+from ..models import JoadEvent, Session, PinAttendance
+from event.models import Event, Registration
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -105,7 +106,7 @@ class TestsJoadIndex(TestCase):
         self.client.force_login(self.test_user)
         self.set_event_date()
 
-        EventRegistration.objects.create(joad_event=JoadEvent.objects.get(pk=1),
+        Registration.objects.create(event=Event.objects.get(pk=8),
                                          student=Student.objects.get(pk=11),
                                          pay_status='paid',
                                          idempotency_key='7b16fadf-4851-4206-8dc6-81a92b70e52f')
@@ -130,7 +131,7 @@ class TestsJoadIndex(TestCase):
         self.client.force_login(self.test_user)
         self.set_event_date()
 
-        event_reg = EventRegistration.objects.create(joad_event=JoadEvent.objects.get(pk=1),
+        event_reg = Registration.objects.create(event=Event.objects.get(pk=8),
                                          student=Student.objects.get(pk=11),
                                          pay_status='start',
                                          idempotency_key='7b16fadf-4851-4206-8dc6-81a92b70e52f')

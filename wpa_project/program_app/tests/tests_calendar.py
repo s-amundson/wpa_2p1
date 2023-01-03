@@ -21,20 +21,6 @@ class TestsCalendar(TestCase):
         super().__init__(*args, **kwargs)
         self.test_UID = 3
 
-    # def create_beginner_class(self, date, state, class_type):
-    #     BeginnerClass.objects.create(
-    #         class_date=date,
-    #         class_type=class_type,
-    #         beginner_limit=2,
-    #         returnee_limit=2,
-    #         event=Event.objects.create(
-    #             event_date=date,
-    #             cost_standard=5,
-    #             cost_member=5,
-    #             state=state,
-    #             type='class'
-    #         )
-    #     )
     def setUp(self):
         # Every test needs a client.
         self.client = Client()

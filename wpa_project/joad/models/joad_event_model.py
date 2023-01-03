@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 
 from ..src import Choices
@@ -21,6 +20,6 @@ class JoadEvent(models.Model):
     def __str__(self):
         if self.event:
             d = timezone.localtime(self.event.event_date).strftime("%d %b, %Y %I:%M %p")
-            return f'{d} Cost: ${self.event.cost} Pin Cost: ${self.pin_cost}'
+            return f'{d} Cost: ${self.event.cost_standard} Pin Cost: ${self.pin_cost}'
         else:
             return super().__str__()
