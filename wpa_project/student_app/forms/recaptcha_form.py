@@ -21,7 +21,7 @@ class RecaptchaForm(Form):
         try:
             response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
             response_data = response.json()
-            logging.warning(response_data)
+            # logging.warning(response_data)
             if response_data['success']:
                 return response_data['score']
             else:

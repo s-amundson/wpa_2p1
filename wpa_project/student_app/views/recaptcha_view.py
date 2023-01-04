@@ -27,7 +27,7 @@ class RecaptchaView(FormView):
         if score is not None:
             self.request.session['recaptcha_score'] = score
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
-            logging.warning('json response')
+            # logging.warning('json response')
             return JsonResponse({'status': 'success'})
         self.success_url = form.cleaned_data['url']
         return super().form_valid(form)

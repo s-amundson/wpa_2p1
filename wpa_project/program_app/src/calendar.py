@@ -44,26 +44,23 @@ class Calendar(HTMLCalendar):
                 logging.warning(JoadClass.objects.filter(event=event))
                 jc = JoadClass.objects.filter(event=event).last() # should be able to do this with a reverse relation but not working
                 if jc is not None:
-                    url = reverse('joad:registration', kwargs={'session_id': jc.session.id})
-                    data += f'<a href="{url}" role="button"'
-
-                    if event.state not in ['open']:
-                        data += f' class="btn btn-warning disabled m-1" disabled aria-disabled="true"> ' \
-                                f'JOAD Class {cd.strftime("%I:%M %p")} CLOSED</a>'
-                    else:
-                        data += f'  class="btn btn-warning m-1"> JOAD Class {cd.strftime("%I:%M %p")}</a>'
+                    if event.state in ['open', 'wait', 'full', 'closed', 'canceled']:
+                        url = reverse('joad:registration', kwargs={'session_id': jc.session.id})
+                        data = f'<a href="{url}" role="button" class="btn btn-warning m-1'
+                        if event.state in ['full', 'closed', 'canceled']:
+                            data += f' disabled" disabled aria-disabled="true'
+                        data += f'"> JOAD Class {cd.strftime("%I:%M %p")} {event.state.capitalize()}</a>'
                 else:
                     logging.error('event record mismatch.')
 
             elif event.type == 'joad event':
                 logging.warning(event.id)
-                url = reverse('joad:event_registration', kwargs={'event_id': event.id})
-                data += f'<a href="{url}" role="button"'
-                if event.state not in ['open']:
-                    data += f' class="btn btn-warning disabled m-1" disabled aria-disabled="true"> ' \
-                            f'JOAD Pin Shoot {cd.strftime("%I:%M %p")} CLOSED</a>'
-                else:
-                    data += f'  class="btn btn-warning m-1"> JOAD Pin Shoot {cd.strftime("%I:%M %p")}</a>'
+                if event.state in ['open', 'wait', 'full', 'closed', 'canceled']:
+                    url = reverse('joad:event_registration', kwargs={'event_id': event.id})
+                    data += f'<a href="{url}" role="button" class="btn btn-warning m-1'
+                    if event.state not in ['open', 'wait']:
+                        data += f' disabled" disabled aria-disabled="true'
+                    data += f'"> JOAD Pin Shoot {cd.strftime("%I:%M %p")} {event.state.capitalize()}</a>'
 
             elif event.type == 'class':
                 btn_color = 'btn-primary'
