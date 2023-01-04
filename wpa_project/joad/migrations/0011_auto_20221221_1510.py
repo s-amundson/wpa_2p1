@@ -2,23 +2,23 @@
 
 from django.db import migrations
 
+def copy_registration_data(apps, schema_editor):
+    # copy the joad event data from the joad.EventRegistration table to the event.Registration table
+
+    jer = apps.get_model('joad', 'EventRegistration')
+    registration = apps.get_model('event', 'Registration')
+
+    for r in jer.objects.all().order_by('id'):
+        registration.objects.create(
+            pay_status=r.pay_status,
+            idempotency_key=r.idempotency_key,
+            reg_time=r.reg_time,
+            event=r.joad_event.event,
+            student=r.student,
+            user=None
+        )
 
 class Migration(migrations.Migration):
-    def copy_registration_data(apps, schema_editor):
-        # copy the joad event data from the joad.EventRegistration table to the event.Registration table
-
-        jer = apps.get_model('joad', 'EventRegistration')
-        registration = apps.get_model('event', 'Event')
-
-        for r in jer.objects.all().order_by('id'):
-            registration.objects.create(
-                pay_status=r.pay_status,
-                idempotency_key=r.idempotency_key,
-                reg_time=r.reg_time,
-                event=r.joad_event.event,
-                student=r.student,
-                user=None
-            )
 
     dependencies = [
         ('joad', '0010_alter_registration_student'),

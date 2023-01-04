@@ -7,8 +7,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 
-from ..src import ClassRegistrationHelper
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
 from event.models import Event, Registration
 from student_app.models import Student, StudentFamily, User
 from payment.models import Card, Customer
@@ -53,121 +52,121 @@ class TestsClassRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
 
-    # def test_class_get(self):
-    #     response = self.client.get(reverse('programs:class_registration'), secure=True)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed(response, 'program_app/class_registration.html')
-    #
-    # def test_class_get_no_auth(self):
-    #     self.client.logout()
-    #     response = self.client.get(reverse('programs:class_registration'), secure=True)
-    #     self.assertEqual(response.status_code, 302)
-    #
-    # def test_class_get_no_student(self):
-    #     student = self.test_user.student_set.first()
-    #     student.user = None
-    #     student.save()
-    #
-    #     response = self.client.get(reverse('programs:class_registration'), secure=True)
-    #     self.assertRedirects(response, reverse('registration:profile'))
-    #
-    # def test_class_get_no_student_family(self):
-    #     student = self.test_user.student_set.first()
-    #     student.student_family = None
-    #     student.save()
-    #
-    #     response = self.client.get(reverse('programs:class_registration'), secure=True)
-    #     self.assertRedirects(response, reverse('registration:profile'))
-    #
-    # def test_class_register_good(self):
-    #     # add a user to the class
-    #     self.client.post(reverse('programs:class_registration'),
-    #                      {'event': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
-    #     bc = BeginnerClass.objects.get(pk=1)
-    #     self.assertEqual(bc.event.state, 'open')
-    #     cr = Registration.objects.all()
-    #     self.assertEqual(len(cr), 1)
-    #     self.assertEqual(cr[0].event, bc.event)
-    #     self.assertEqual(self.client.session['line_items'][0]['name'],
-    #                      'Class on 2023-06-05 student: Charles')
-    #     self.assertEqual(self.client.session['payment_category'], 'intro')
-    #
-    # def test_class_register_with_error(self):
-    #     # Get the page
-    #     # self.client.force_login(self.test_user)
-    #
-    #     response = self.client.get(reverse('programs:class_registration'), secure=True)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed(response, 'program_app/class_registration.html')
-    #
-    #     # add a user to the class with error
-    #     self.client.post(reverse('programs:class_registration'),
-    #                      {'event': '2022-06 ', 'student_4': 'on', 'terms': 'on'}, secure=True)
-    #     bc = BeginnerClass.objects.get(pk=1)
-    #     self.assertEqual(bc.event.state, 'open')
-    #     cr = Registration.objects.all()
-    #     self.assertEqual(len(cr), 0)
-    #
-    # def test_class_register_over_limit(self):
-    #     # put a record in to the database
-    #     cr = Registration(event=Event.objects.get(pk=1),
-    #                            student=Student.objects.get(pk=4),
-    #                            pay_status='paid',
-    #                            idempotency_key=str(uuid.uuid4()))
-    #     cr.save()
-    #     u = User.objects.get(pk=2)
-    #     u.is_staff = False
-    #     u.save()
-    #
-    #     # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
-    #     self.client.force_login(u)
-    #     response = self.client.post(reverse('programs:class_registration'),
-    #                  {'event': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
-    #     time.sleep(1)
-    #     bc = BeginnerClass.objects.get(pk=1)
-    #     self.assertEqual(bc.event.state, 'open')
-    #     cr = Registration.objects.all()
-    #     self.assertEqual(len(cr), 1)
-    #     self.assertContains(response, 'Not enough space available in this class')
-    #
-    # def test_class_register_readd(self):
-    #     # put a record in to the database
-    #     cr = Registration(event=Event.objects.get(pk=1),
-    #                            student=Student.objects.get(pk=4),
-    #                            pay_status='paid',
-    #                            idempotency_key=str(uuid.uuid4()))
-    #     cr.save()
-    #
-    #     # try to add first user to class again.
-    #     self.client.force_login(User.objects.get(pk=3))
-    #     response = self.client.post(reverse('programs:class_registration'),
-    #                      {'event': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
-    #     time.sleep(1)
-    #     self.assertContains(response, 'Student is already enrolled')
-    #     # self.assertEqual(response.context['message'] == "")
-    #     bc = BeginnerClass.objects.get(pk=1)
-    #     self.assertEqual(bc.event.state, 'open')
-    #     cr = Registration.objects.all()
-    #     self.assertEqual(len(cr), 1)
-    #
-    # def test_class_register_readd_staff(self):
-    #     # put a record in to the database
-    #     cr = Registration(event=Event.objects.get(pk=1),
-    #                            student=Student.objects.get(pk=2),
-    #                            pay_status='paid',
-    #                            idempotency_key=str(uuid.uuid4()))
-    #     cr.save()
-    #     # try to add first user to class again.
-    #     self.client.force_login(User.objects.get(pk=2))
-    #     response = self.client.post(reverse('programs:class_registration'),
-    #                      {'event': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)
-    #     time.sleep(1)
-    #     self.assertContains(response, 'Rosalva is already enrolled')
-    #     # self.assertEqual(response.context['message'] == "")
-    #     bc = BeginnerClass.objects.get(pk=1)
-    #     self.assertEqual(bc.event.state, 'open')
-    #     cr = Registration.objects.all()
-    #     self.assertEqual(len(cr), 1)
+    def test_class_get(self):
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'program_app/class_registration.html')
+
+    def test_class_get_no_auth(self):
+        self.client.logout()
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
+        self.assertEqual(response.status_code, 302)
+
+    def test_class_get_no_student(self):
+        student = self.test_user.student_set.first()
+        student.user = None
+        student.save()
+
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
+        self.assertRedirects(response, reverse('registration:profile'))
+
+    def test_class_get_no_student_family(self):
+        student = self.test_user.student_set.first()
+        student.student_family = None
+        student.save()
+
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
+        self.assertRedirects(response, reverse('registration:profile'))
+
+    def test_class_register_good(self):
+        # add a user to the class
+        self.client.post(reverse('programs:class_registration'),
+                         {'event': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.event.state, 'open')
+        cr = Registration.objects.all()
+        self.assertEqual(len(cr), 1)
+        self.assertEqual(cr[0].event, bc.event)
+        self.assertEqual(self.client.session['line_items'][0]['name'],
+                         'Class on 2023-06-05 student: Charles')
+        self.assertEqual(self.client.session['payment_category'], 'intro')
+
+    def test_class_register_with_error(self):
+        # Get the page
+        # self.client.force_login(self.test_user)
+
+        response = self.client.get(reverse('programs:class_registration'), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'program_app/class_registration.html')
+
+        # add a user to the class with error
+        self.client.post(reverse('programs:class_registration'),
+                         {'event': '2022-06 ', 'student_4': 'on', 'terms': 'on'}, secure=True)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.event.state, 'open')
+        cr = Registration.objects.all()
+        self.assertEqual(len(cr), 0)
+
+    def test_class_register_over_limit(self):
+        # put a record in to the database
+        cr = Registration(event=Event.objects.get(pk=1),
+                               student=Student.objects.get(pk=4),
+                               pay_status='paid',
+                               idempotency_key=str(uuid.uuid4()))
+        cr.save()
+        u = User.objects.get(pk=2)
+        u.is_staff = False
+        u.save()
+
+        # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
+        self.client.force_login(u)
+        response = self.client.post(reverse('programs:class_registration'),
+                     {'event': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        time.sleep(1)
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.event.state, 'open')
+        cr = Registration.objects.all()
+        self.assertEqual(len(cr), 1)
+        self.assertContains(response, 'Not enough space available in this class')
+
+    def test_class_register_readd(self):
+        # put a record in to the database
+        cr = Registration(event=Event.objects.get(pk=1),
+                               student=Student.objects.get(pk=4),
+                               pay_status='paid',
+                               idempotency_key=str(uuid.uuid4()))
+        cr.save()
+
+        # try to add first user to class again.
+        self.client.force_login(User.objects.get(pk=3))
+        response = self.client.post(reverse('programs:class_registration'),
+                         {'event': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
+        time.sleep(1)
+        self.assertContains(response, 'Student is already enrolled')
+        # self.assertEqual(response.context['message'] == "")
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.event.state, 'open')
+        cr = Registration.objects.all()
+        self.assertEqual(len(cr), 1)
+
+    def test_class_register_readd_staff(self):
+        # put a record in to the database
+        cr = Registration(event=Event.objects.get(pk=1),
+                               student=Student.objects.get(pk=2),
+                               pay_status='paid',
+                               idempotency_key=str(uuid.uuid4()))
+        cr.save()
+        # try to add first user to class again.
+        self.client.force_login(User.objects.get(pk=2))
+        response = self.client.post(reverse('programs:class_registration'),
+                         {'event': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)
+        time.sleep(1)
+        self.assertContains(response, 'Rosalva is already enrolled')
+        # self.assertEqual(response.context['message'] == "")
+        bc = BeginnerClass.objects.get(pk=1)
+        self.assertEqual(bc.event.state, 'open')
+        cr = Registration.objects.all()
+        self.assertEqual(len(cr), 1)
 
     def test_class_register_add2(self):
         # put a record in to the database

@@ -1,9 +1,7 @@
-# from datetime import timedelta
 from django import forms
 from django.utils import timezone
 from django.utils.datetime_safe import date
-from django.db.models import Q
-from ..models import BeginnerClass, ClassRegistration
+
 import logging
 
 logger = logging.getLogger(__name__)

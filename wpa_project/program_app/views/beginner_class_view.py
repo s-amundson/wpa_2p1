@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.forms import model_to_dict
 
 from ..forms import BeginnerClassForm, SendClassEmailForm
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
 from ..src import ClassRegistrationHelper
 from ..tasks import refund_class
 from event.models import Event
