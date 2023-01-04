@@ -6,7 +6,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 from ..src.calendar import Calendar
-from ..models import BeginnerClass
 from .helper import create_beginner_class
 from event.models import Event
 from joad.models import JoadClass, JoadEvent, Session
@@ -77,7 +76,7 @@ class TestsCalendar(TestCase):
         create_beginner_class(date.replace(hour=15), 'closed', 'combined')
         session = Session.objects.create(cost=120, start_date=date, state='closed', student_limit=12)
         jc = JoadClass.objects.create(
-            event=Event.objects.create(event_date=date.replace(hour=10), state='past', type='joad class'),
+            event=Event.objects.create(event_date=date.replace(hour=10), state='closed', type='joad class'),
             session=session)
         je = JoadEvent.objects.create(
             event=Event.objects.create(
@@ -92,9 +91,9 @@ class TestsCalendar(TestCase):
 
         cal = Calendar(year=date.year, month=date.month)
         html_cal = cal.formatmonth(withyear=True)
-        logging.debug(html_cal)
+        logging.warning(html_cal)
         self.assertEqual(html_cal.count('Beginner 09:00 AM Closed'), 1)
         self.assertEqual(html_cal.count('Returnee 11:00 AM Closed'), 1)
         self.assertEqual(html_cal.count('Combined 03:00 PM Closed'), 1)
-        self.assertEqual(html_cal.count('JOAD Class 10:00 AM CLOSED'), 1)
-        self.assertEqual(html_cal.count('JOAD Pin Shoot 01:00 PM CLOSED'), 1)
+        self.assertEqual(html_cal.count('JOAD Class 10:00 AM Closed'), 1)
+        self.assertEqual(html_cal.count('JOAD Pin Shoot 01:00 PM Closed'), 1)

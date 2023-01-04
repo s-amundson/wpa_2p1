@@ -38,15 +38,16 @@ class Calendar(HTMLCalendar):
 
         for event in self.events.filter(event_date__day=day):
             cd = timezone.localtime(event.event_date)
+            data += '</br>'
             if event.type == 'joad class':
-                logging.warning(event.id)
-                logging.warning(event.joadclass_set)
-                logging.warning(JoadClass.objects.filter(event=event))
+                # logging.warning(event.id)
+                # logging.warning(event.joadclass_set)
+                # logging.warning(JoadClass.objects.filter(event=event))
                 jc = JoadClass.objects.filter(event=event).last() # should be able to do this with a reverse relation but not working
                 if jc is not None:
                     if event.state in ['open', 'wait', 'full', 'closed', 'canceled']:
                         url = reverse('joad:registration', kwargs={'session_id': jc.session.id})
-                        data = f'<a href="{url}" role="button" class="btn btn-warning m-1'
+                        data += f'<a href="{url}" role="button" class="btn btn-warning m-1'
                         if event.state in ['full', 'closed', 'canceled']:
                             data += f' disabled" disabled aria-disabled="true'
                         data += f'"> JOAD Class {cd.strftime("%I:%M %p")} {event.state.capitalize()}</a>'
@@ -54,7 +55,6 @@ class Calendar(HTMLCalendar):
                     logging.error('event record mismatch.')
 
             elif event.type == 'joad event':
-                logging.warning(event.id)
                 if event.state in ['open', 'wait', 'full', 'closed', 'canceled']:
                     url = reverse('joad:event_registration', kwargs={'event_id': event.id})
                     data += f'<a href="{url}" role="button" class="btn btn-warning m-1'
@@ -73,20 +73,19 @@ class Calendar(HTMLCalendar):
                     elif bc.class_type == 'special':
                         btn_color = 'btn-outline-primary'
                     url = reverse('programs:class_registration', kwargs={'event': event.id})
-                    data += f'<li><a href="{url}" role="button" type="button" bc_id="{event.id}" class="btn {btn_color} '
+                    data += f'<a href="{url}" role="button" type="button" bc_id="{event.id}" class="btn {btn_color} '
                     if self.staff or event.state in ['open', 'wait']:
                         data += f'bc-btn m-1" >'
                     else:
                         data += f'bc-btn m-1 disabled" >'
                     data += f'{bc.class_type.capitalize()} {cd.strftime("%I:%M %p")} '
                     if event.state == 'wait':
-                        data += 'Wait List</a></li>'
+                        data += 'Wait List</a>'
                     else:
-                        data += f'{event.state.capitalize()}</a></li>'
+                        data += f'{event.state.capitalize()}</a>'
                 else:
                     logging.error(f'event record mismatch. event: {event.id}')
-
-        return f"<td><span class='date'>{day}</span><ul> {data} </ul></td>"
+        return f"<td><span class='date'>{day}</span>{data}</td>"
 
     def formatweek(self, theweek):
         week = ''
