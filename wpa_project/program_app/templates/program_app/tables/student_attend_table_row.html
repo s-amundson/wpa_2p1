@@ -37,5 +37,5 @@
             {% if cr.student.covid_vax %} checked="checked" {% endif %}>
         {% endif %}
     </td>
-    <td>{{ cr.student.classregistration_set.attendance.attended }}/{{ cr.student.classregistration_set.attendance.registrations }}</td>
+    <td>{{ cr.student.registration_set.attendance_intro.attended }}/{{ cr.student.registration_set.attendance_intro.registrations }}</td>
 </tr>

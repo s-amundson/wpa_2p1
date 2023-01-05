@@ -29,9 +29,9 @@ class ClassRegistrationHelper:
 
     def enrolled_count(self, beginner_class):
         event = Registration.objects.filter(event=beginner_class.event)
-        return {'beginner': event.filter(event=beginner_class.event).beginner_count(beginner_class.event.event_date.date()),
-                'staff': event.filter(event=beginner_class.event).staff_count(),
-                'returnee': event.filter(event=beginner_class.event).returnee_count(beginner_class.event.event_date.date()),
+        return {'beginner': event.filter(event=beginner_class.event).intro_beginner_count(beginner_class.event.event_date.date()),
+                'staff': event.filter(event=beginner_class.event).intro_staff_count(),
+                'returnee': event.filter(event=beginner_class.event).intro_returnee_count(beginner_class.event.event_date.date()),
                 'waiting': event.filter(pay_status='waiting').count()}
 
     def has_space(self, user, beginner_class, beginner, instructor, returnee):

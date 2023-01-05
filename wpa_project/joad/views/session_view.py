@@ -37,8 +37,11 @@ class SessionFormView(UserPassesTestMixin, FormView):
         return context
 
     def form_valid(self, form):
-        logging.debug('here')
         f = form.save()
+        if 'state' in form.initial:
+            for c in f.joadclass_set.filter(event__state=form.initial['state'], event__event_date__gte=timezone.now()):
+                c.event.state = f.state
+                c.event.save()
         if self.session:
             return JsonResponse({'session_id': f.id, 'success': True})
         else:

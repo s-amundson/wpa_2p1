@@ -12,36 +12,37 @@ class RegistrationManager(models.Manager):
     def get_queryset(self):
         return RegistrationQuerySet(self.model, using=self._db)
 
-    def attendance(self):
-        return self.get_queryset().attendance()
+    def attendance_intro(self):
+        return self.get_queryset().attendance_intro()
 
 
 class RegistrationQuerySet(models.QuerySet):
-    def attendance(self):
+    def attendance_intro(self):
         return self.filter(
-            beginner_class__event__event_date__lt=timezone.now(),
+            event__event_date__lt=timezone.now(),
+            event__type='class',
             pay_status__in=['paid', 'admin']
         ).aggregate(
             attended=models.Count('id', filter=models.Q(attended=True)),
             registrations=models.Count('id', distinct=True)
         )
 
-    def attended_count(self):
-        return self.attendance()['attended']
+    def attended_count_intro(self):
+        return self.attendance_intro()['attended']
 
-    def beginner_count(self, date):
-        qs = self.filter(pay_status__in=['paid', 'admin'])
+    def intro_beginner_count(self, date):
+        qs = self.filter(event__type='class', pay_status__in=['paid', 'admin'])
         qs = qs.filter(models.Q(student__safety_class__isnull=True) | models.Q(student__safety_class__gte=date))
         qs = qs.filter(models.Q(student__user__is_staff=False) | models.Q(student__user__isnull=True))
         return qs.count()
 
-    def returnee_count(self, date):
-        qs = self.filter(pay_status__in=['paid', 'admin'], student__safety_class__isnull=False)
+    def intro_returnee_count(self, date):
+        qs = self.filter(event__type='class', pay_status__in=['paid', 'admin'], student__safety_class__isnull=False)
         qs = qs.filter(models.Q(student__user__is_staff=False) | models.Q(student__user__isnull=True))
         return qs.filter(student__safety_class__lt=date).count()
 
-    def staff_count(self):
-        return self.filter(student__user__is_staff=True, pay_status__in=['paid', 'admin']).count()
+    def intro_staff_count(self):
+        return self.filter(event__type='class', student__user__is_staff=True, pay_status__in=['paid', 'admin']).count()
 
 class Registration(models.Model):
     pay_statuses = ['admin', 'canceled', 'paid', 'refund', 'refund donated', 'refunded', 'start']
