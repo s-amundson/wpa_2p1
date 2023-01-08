@@ -65,7 +65,8 @@ class UpdatePrograms:
                         cost_standard=beginner_schedule.cost,
                         cost_member=beginner_schedule.cost,
                         state=beginner_schedule.state,
-                        type='class'
+                        type='class',
+                        volunteer_points=2,
                     )
             }
         )
