@@ -46,6 +46,6 @@ class VolunteerRecordManager(models.Manager):
 class VolunteerRecord(models.Model):
     event = models.ForeignKey(Event, on_delete=models.SET_NULL, null=True, default=None)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    volunteer_points = models.IntegerField(default=0)
+    volunteer_points = models.FloatField(default=0)
 
     objects = VolunteerRecordManager()

@@ -19,7 +19,7 @@ class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None, dark=False, staff=False):
         self.year = year
         self.month = month
-        self.events = Event.objects.filter(event_date__gt=timezone.now(),
+        self.events = Event.objects.filter(event_date__gte=timezone.now().date(),
                                            event_date__year=year,
                                            event_date__month=month).order_by('event_date')
 

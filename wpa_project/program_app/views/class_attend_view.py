@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic.base import View
 from django.views.generic import FormView
 from django.urls import reverse_lazy
+from django.utils import timezone
 
 from ..forms import ClassAttendanceForm
 from event.models import Event, Registration, VolunteerRecord
@@ -30,22 +31,26 @@ class ClassAttendView(StaffMixin, View):
         if f'check_{cr.student.id}' in request.POST:
             cr.attended = request.POST[f'check_{cr.student.id}'] in ['true', 'on']
 
-            logging.debug(f'safety_class date: {cr.student.safety_class} class_date: {cr.event.event_date}')
             if cr.attended:
                 if cr.student.safety_class is None:
                     cr.student.safety_class = cr.event.event_date.date()
                     cr.student.save()
-                elif cr.student.user is not None and cr.student.user.is_staff:
-                    VolunteerRecord.objects.update_points(
-                        cr.event,
-                        cr.student,
-                        cr.event.volunteer_points
-                    )
-
             else:
                 if cr.event.event_date.date() == cr.student.safety_class:
                     cr.student.safety_class = None
                     cr.student.save()
+            if cr.student.user is not None and cr.student.user.is_staff:
+                points = 0
+                if cr.event.volunteer_points and cr.attended:
+                    if cr.reg_time <= cr.event.event_date - timezone.timedelta(days=3):
+                        points = cr.event.volunteer_points
+                    elif cr.reg_time <= cr.event.event_date - timezone.timedelta(days=1):
+                        points = cr.event.volunteer_points / 2
+                VolunteerRecord.objects.update_points(
+                    cr.event,
+                    cr.student,
+                    points
+                )
             cr.save()
             return JsonResponse({'attending': cr.attended, 'error': False,
                                  'name': f'{cr.student.first_name} {cr.student.last_name}'})

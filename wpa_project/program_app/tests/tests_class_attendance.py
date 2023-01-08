@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from ..models import BeginnerClass
-from event.models import Registration
+from event.models import Registration, VolunteerRecord
 Student = apps.get_model('student_app', 'Student')
 User = apps.get_model('student_app', 'User')
 logger = logging.getLogger(__name__)
@@ -118,11 +118,18 @@ class TestsClassAttendance(TestCase):
 
         # register instructor and close class.
         bc = BeginnerClass.objects.get(pk=1)
+        student = Student.objects.get(pk=1)
         cr = Registration(event=bc.event,
-                          student=Student.objects.get(pk=1),
+                          student=student,
                           pay_status='paid',
                           idempotency_key=str(uuid.uuid4()))
+        cr.student.safety_class = '2020-01-01'
+        cr.student.save()
         cr.save()
+
+        d = timezone.now() + timezone.timedelta(days=4)
+        bc.event.event_date = bc.event.event_date.replace(year=d.year, month=d.month, day=d.day)
+        bc.event.volunteer_points = 2
         bc.event.state = 'closed'
         bc.event.save()
 
@@ -136,6 +143,111 @@ class TestsClassAttendance(TestCase):
 
         cr = Registration.objects.get(pk=cr.pk)
         self.assertEqual(cr.attended, True)
+
+        # check points
+        vr = VolunteerRecord.objects.all()
+        self.assertEqual(len(vr), 1)
+        self.assertEqual(vr[0].student, student)
+        self.assertEqual(vr[0].volunteer_points, 2)
+
+        # check that the attending column is there with checkboxes
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
+        self.assertEqual(response.status_code, 200)
+
+        # remove attandance and check volunteer points
+        self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
+                        {'check_1': 'off'}, secure=True)
+        cr = Registration.objects.get(pk=cr.pk)
+        self.assertEqual(cr.attended, False)
+
+        # check points
+        vr = VolunteerRecord.objects.all()
+        self.assertEqual(len(vr), 1)
+        self.assertEqual(vr[0].student, student)
+        self.assertEqual(vr[0].volunteer_points, 0)
+
+    def test_class_instructor_attendance_late_half_points(self):
+        # make user instructor
+        u = User.objects.get(pk=1)
+        u.is_instructor = True
+        u.save()
+
+        # register instructor and close class.
+        bc = BeginnerClass.objects.get(pk=1)
+        student = Student.objects.get(pk=1)
+        cr = Registration(event=bc.event,
+                          student=student,
+                          pay_status='paid',
+                          idempotency_key=str(uuid.uuid4()))
+        cr.student.safety_class = '2020-01-01'
+        cr.student.save()
+        cr.save()
+
+        d = timezone.now() + timezone.timedelta(days=2)
+        bc.event.event_date = bc.event.event_date.replace(year=d.year, month=d.month, day=d.day)
+        bc.event.volunteer_points = 2
+        bc.event.state = 'closed'
+        bc.event.save()
+
+        # check that the attending column is there with checkboxes
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
+        self.assertEqual(response.status_code, 200)
+
+        # mark instructor as attending.
+        self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
+                         {'check_1': 'on'}, secure=True)
+
+        cr = Registration.objects.get(pk=cr.pk)
+        self.assertEqual(cr.attended, True)
+
+        # check points
+        vr = VolunteerRecord.objects.all()
+        self.assertEqual(len(vr), 1)
+        self.assertEqual(vr[0].student, student)
+        self.assertEqual(vr[0].volunteer_points, 1)
+
+        # check that the attending column is there with checkboxes
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_class_instructor_attendance_late_no_points(self):
+        # make user instructor
+        u = User.objects.get(pk=1)
+        u.is_instructor = True
+        u.save()
+
+        # register instructor and close class.
+        bc = BeginnerClass.objects.get(pk=1)
+        student = Student.objects.get(pk=1)
+        cr = Registration(event=bc.event,
+                          student=student,
+                          pay_status='paid',
+                          idempotency_key=str(uuid.uuid4()))
+        cr.student.safety_class = '2020-01-01'
+        cr.student.save()
+        cr.save()
+
+        d = timezone.now()
+        bc.event.event_date = bc.event.event_date.replace(year=d.year, month=d.month, day=d.day)
+        bc.event.volunteer_points = 2
+        bc.event.state = 'closed'
+        bc.event.save()
+
+        # check that the attending column is there with checkboxes
+        response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
+        self.assertEqual(response.status_code, 200)
+
+        # mark instructor as attending.
+        self.client.post(reverse('programs:class_attend', kwargs={'registration': cr.id}),
+                         {'check_1': 'on'}, secure=True)
+
+        cr = Registration.objects.get(pk=cr.pk)
+        self.assertEqual(cr.attended, True)
+
+        # check points
+        vr = VolunteerRecord.objects.all()
+        self.assertEqual(len(vr), 0)
 
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('programs:class_attend_list', kwargs={'event': 1}), secure=True)
