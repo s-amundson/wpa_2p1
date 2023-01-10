@@ -71,10 +71,14 @@ class JoadEventForm(MyModelForm):
         if pin_cost is not None:
             self.initial['pin_cost'] = pin_cost.standard_cost
         logging.debug(self.initial)
-        logging.debug(self.instance.id)
-        d = UpdatePrograms().next_class_day(1) + timedelta(days=14)
-        d = timezone.datetime.now().replace(year=d.year, month=d.month, day=d.day, hour=16, minute=0, second=0)
-        self.fields['event_date'] = forms.DateTimeField(initial=d)
-        self.fields['cost'] = forms.IntegerField()
+        logging.warning(self.instance.id)
         self.fields['state'] = forms.ChoiceField(choices=choices(Event.event_states))
-        # self.fields['event_date'].initial = d
+        self.fields['cost'] = forms.IntegerField()
+        if self.instance and self.instance.event:
+            d = self.instance.event.event_date
+            self.fields['state'].initial = self.instance.event.state
+            self.fields['cost'].initial = self.instance.event.cost_standard
+        else:
+            d = UpdatePrograms().next_class_day(1) + timedelta(days=14)
+            d = timezone.datetime.now().replace(year=d.year, month=d.month, day=d.day, hour=16, minute=0, second=0)
+        self.fields['event_date'] = forms.DateTimeField(initial=d)

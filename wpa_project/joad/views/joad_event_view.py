@@ -113,7 +113,7 @@ class EventAttendListView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         object_list = []
 
-        for row in self.joad_event.event.registration_set.filter(pay_status='paid'):
+        for row in self.joad_event.event.registration_set.filter(pay_status__in=['paid', 'admin']):
             pa = self.joad_event.pinattendance_set.filter(student=row.student).last()
             logging.debug(pa)
             d = {'reg': row, 'pa': pa}

@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Sum
 from django.views.generic import FormView
 from django.urls import reverse_lazy
@@ -6,13 +5,14 @@ from django.forms import model_to_dict
 
 from ..forms import StaffReportForm
 from event.models import Registration, VolunteerRecord
+from src.mixin import BoardMixin
 from student_app.models import Student, User
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class StaffReportView(UserPassesTestMixin, FormView):
+class StaffReportView(BoardMixin, FormView):
     template_name = 'program_app/staff_attend_report.html'
     form_class = StaffReportForm
     success_url = reverse_lazy('registration:index')
@@ -46,6 +46,3 @@ class StaffReportView(UserPassesTestMixin, FormView):
         self.start_date = form.cleaned_data.get('start_date', None)
         self.end_date = form.cleaned_data.get('end_date', None)
         return self.form_invalid(form)
-
-    def test_func(self):
-        return self.request.user.is_board
