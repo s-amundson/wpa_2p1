@@ -27,4 +27,5 @@ def registration_update(sender, instance, created, **kwargs):
         for c in cr:
             c.pay_status = 'paid'
             c.save()
-            crh.update_class_state(c.event.beginnerclass_set.last())
+            if c.event.beginnerclass_set.last():
+                crh.update_class_state(c.event.beginnerclass_set.last())

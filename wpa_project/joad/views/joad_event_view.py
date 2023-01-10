@@ -145,6 +145,7 @@ class JoadEventListView(UserPassesTestMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['event_list'] = self.get_events()
         context['past_events'] = self.past_events
+        context['students'] = self.students
         return context
 
     def get_events(self):
@@ -165,7 +166,7 @@ class JoadEventListView(UserPassesTestMixin, ListView):
                     reg = event.event.registration_set.filter(student=student).order_by('id')
                     reg_id = None
                     reg_status = 'closed'
-                    if len(reg.filter(pay_status='paid')) > 0:
+                    if len(reg.filter(pay_status__in=['paid', 'admin'])) > 0:
                         attend = event.pinattendance_set.filter(student=student).last()
                         if attend is not None and attend.attended:
                             reg_status = 'attending'
@@ -215,7 +216,7 @@ class JoadEventView(BoardMixin, FormView):
         context = super().get_context_data(**kwargs)
         student_list = []
         if self.joad_event is not None:
-            for reg in self.joad_event.event.registration_set.filter(pay_status='paid'):
+            for reg in self.joad_event.event.registration_set.filter(pay_status__in=['paid', 'admin']):
                 s = model_to_dict(reg.student)
                 attendance = PinAttendance.objects.filter(event=self.joad_event, student=reg.student)
                 s['attend_record'] = len(attendance) > 0
