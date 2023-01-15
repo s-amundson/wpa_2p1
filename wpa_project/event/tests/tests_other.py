@@ -15,10 +15,12 @@ class TestsOther(TestCase):
         self.client = Client()
 
     def test_update_points(self):
-        VolunteerRecord.objects.update_points(Event.objects.get(pk=1), Student.objects.get(pk=1), 2)
+        student = Student.objects.get(pk=1)
+        VolunteerRecord.objects.update_points(Event.objects.get(pk=1), student, 2)
         records = VolunteerRecord.objects.all()
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0].volunteer_points, 2)
+        self.assertEqual(VolunteerRecord.objects.get_family_points(student.student_family), 2)
 
         VolunteerRecord.objects.update_points(Event.objects.get(pk=1), Student.objects.get(pk=1), 5)
         records = VolunteerRecord.objects.all()

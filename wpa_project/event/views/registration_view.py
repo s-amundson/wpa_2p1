@@ -22,8 +22,6 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
     form_class = RegistrationForm
     event_type = 'class'
     model = Registration
-    # students = None
-    student_family = None
     success_url = reverse_lazy('payment:make_payment')
     form = None
 
@@ -33,12 +31,8 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         self.has_card = False
 
     def get_form_kwargs(self):
-        fid = self.kwargs.get('family_id', None)
-        if fid is not None and self.request.user.is_board:
-            self.student_family = get_object_or_404(StudentFamily, pk=fid)
-        else:
-            self.student_family = self.request.user.student_set.last().student_family
-        # self.students = Student.objects.get(user=self.request.user).student_family.student_set.all()
+        if self.request.user.is_board and 'family_id' in self.kwargs:
+            self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id', None))
         kwargs = super().get_form_kwargs()
         # logging.warning(self.kwargs)
         if self.kwargs.get('event', None) is not None:
