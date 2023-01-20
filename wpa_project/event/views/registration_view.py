@@ -53,6 +53,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
 
     def has_error(self, form, message):
         messages.add_message(self.request, messages.ERROR, message)
+        logging.warning(message)
         return self.form_invalid(form)
 
     def post(self, request, *args, **kwargs):

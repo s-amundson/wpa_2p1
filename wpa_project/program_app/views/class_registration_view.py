@@ -87,6 +87,7 @@ class ClassRegistrationView(RegistrationSuperView):
         self.request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                       'returnee': returnee}
         space = ClassRegistrationHelper().has_space(self.request.user, beginner_class, beginner, instructor, returnee)
+        logging.warning(space)
 
         if space == 'full':
             return self.has_error(form, 'Not enough space available in this class')

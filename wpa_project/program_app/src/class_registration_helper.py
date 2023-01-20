@@ -37,6 +37,7 @@ class ClassRegistrationHelper:
     def has_space(self, user, beginner_class, beginner, instructor, returnee):
         enrolled_count = self.enrolled_count(beginner_class)
         logging.warning(enrolled_count)
+        logging.warning(f'Adding beginner: {beginner}, returnee: {returnee}, instructor: {instructor}')
         wait = False
         if beginner_class.event.state in ['open', 'wait']:  # in case it changed since user got the self.form.
             if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
