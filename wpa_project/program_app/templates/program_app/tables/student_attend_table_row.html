@@ -13,7 +13,7 @@
     <td>
         {% if form.is_closed %}
             {% if cr.pay_status == 'waiting' %}
-                <a href="{% url 'programs:admit_wait' cr.beginner_class.id cr.student.student_family.id %}">Admit</a>
+                <a href="{% url 'programs:admit_wait' form.event.id cr.student.student_family.id %}">Admit</a>
             {% else %}
                 {% if cr.student.signature or cr.student.user.is_staff %}
                     <input type="checkbox" class="m-2 attend-check" id="check_{{ cr.student.id }}"
