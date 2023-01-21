@@ -34,6 +34,10 @@ class AddStudentView(UserPassesTestMixin, FormView):
             f = form.save()
         else:
             f = form.save(commit=False)
+
+            # student can't update thier own safety class. Fixes safety class date set to None student update.
+            f.safety_class = form.initial.get('safety_class', None)
+
             if self.student:
                 s = self.request.user.student_set.last()
                 if s is None:  # pragma: no cover
@@ -89,7 +93,6 @@ class AddStudentView(UserPassesTestMixin, FormView):
                 self.student = get_object_or_404(Student, id=student_id, student_family=sf)
         if self.student:
             kwargs['instance'] = self.student
-            kwargs['student_is_user'] = self.student.user_id
         else:
             s = Student.objects.filter(user=self.request.user)
             if s.count() == 0:

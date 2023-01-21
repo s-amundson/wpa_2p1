@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core import mail
 
 from ..models import Card, PaymentLog, PaymentErrorLog
+from event.models import VolunteerRecord
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -198,3 +199,25 @@ class TestsPayment(TestCase):
         self.assertEqual(len(pl), 1)
         # self.assertTemplateUsed(response, 'payment/view_payment.html')
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
+
+    def test_payment_success_volunteer_points(self):
+        student = self.test_user.student_set.last()
+        vr = VolunteerRecord.objects.create(
+            student=student,
+            volunteer_points=6.5
+        )
+        self.pay_dict['amount'] = 0
+        self.pay_dict['volunteer_points'] = 5
+        self.pay_dict['source_id'] = ''
+
+        # process a good payment
+        response = self.client.post(self.url, self.pay_dict, secure=True)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].description, 'Class on test_date')
+        self.assertEqual(pl[0].volunteer_points, 5)
+        self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Payment Confirmation')
+        self.assertTrue(mail.outbox[0].body.find('Class on None student: test_user') >= 0)
+        self.assertEqual(VolunteerRecord.objects.get_family_points(student.student_family), 1.5)

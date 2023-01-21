@@ -10,9 +10,6 @@ from django.views.generic.detail import DetailView
 from ..forms import PaymentForm
 from ..models import Card, PaymentLog
 from ..signals import payment_error_signal
-from event.models import VolunteerRecord
-from django.utils.decorators import method_decorator
-from csp.decorators import csp
 
 import logging
 logger = logging.getLogger(__name__)

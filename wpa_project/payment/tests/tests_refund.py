@@ -35,7 +35,7 @@ class TestsRefund(TestCase):
         self.assertEqual(rp, {'status': "FAIL", 'error': 'Record does not exist'})
 
     def test_square_helper_refund_payment(self):
-        pf = PaymentForm(user=self.test_user)
+        pf = PaymentForm(user=self.test_user, initial={'amount': 5, 'category': 'donation'})
         pf.cleaned_data = {
             'amount': 5,
             'card': '0',
@@ -68,7 +68,7 @@ class TestsRefund(TestCase):
 
 
     def test_refund_amount_zero(self):
-        pf = PaymentForm(user=self.test_user)
+        pf = PaymentForm(user=self.test_user, initial={'amount': 0, 'category': 'donation'})
         pf.cleaned_data = {
             'amount': 0,
             'card': '0',

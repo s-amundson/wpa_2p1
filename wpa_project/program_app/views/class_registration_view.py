@@ -84,6 +84,11 @@ class ClassRegistrationView(RegistrationSuperView):
         if 0 == beginner + returnee + instructor:
             return self.has_error(form, 'No students selected')
         beginner_class = event.beginnerclass_set.last()
+        if beginner_class.class_type == 'returnee' and beginner:
+            return self.has_error(form, 'First time students cannot enroll in this class')
+        elif beginner_class.class_type == 'beginner' and returnee:
+            return self.has_error(form, 'Returning students cannot enroll in this class')
+
         self.request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                       'returnee': returnee}
         space = ClassRegistrationHelper().has_space(self.request.user, beginner_class, beginner, instructor, returnee)

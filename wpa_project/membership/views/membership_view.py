@@ -79,7 +79,10 @@ class MembershipView(StudentFamilyMixin, FormView):
                 form.add_error(None, 'Incorrect membership selected')
                 return self.form_invalid(form)
             else:
-                self.transact(form, members, level.cost)
+                if 'sf_id' in self.kwargs and self.request.user.is_board:
+                    self.transact(form, members, 0)
+                else:
+                    self.transact(form, members, level.cost)
         return super().form_valid(form)
 
     def transact(self, form, members, cost):

@@ -37,7 +37,6 @@ class StaffReportView(BoardMixin, FormView):
             i_dict['registrations'] = len(cr)
             i_dict['attended'] = len(cr.filter(attended=True))
             i_dict['user'] = model_to_dict(i.user)
-
             i_dict['points'] = vr.aggregate(Sum('volunteer_points'))['volunteer_points__sum']
             context['staff_list'].append(i_dict)
         return context

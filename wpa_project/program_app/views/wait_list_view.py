@@ -40,5 +40,5 @@ class WaitListView(UserPassesTestMixin, ListView):
             bid = self.kwargs.get('beginner_class', None)
             if bid is None:
                 return False
-            self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
+            self.beginner_class = get_object_or_404(BeginnerClass, event__id=bid)
             return True

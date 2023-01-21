@@ -29,7 +29,9 @@ class VolunteerEvent(models.Model):
 class VolunteerRecordManager(models.Manager):
     def get_family_points(self, family):
         vr = self.get_queryset().filter(student__in=family.student_set.all())
-        return vr.aggregate(models.Sum('volunteer_points'))['volunteer_points__sum']
+        if vr:
+            return vr.aggregate(models.Sum('volunteer_points'))['volunteer_points__sum']
+        return 0
 
     def update_points(self, event, student, points):
         if points:
