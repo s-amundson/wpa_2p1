@@ -2,7 +2,7 @@
 {% block main %}
 <form class="form" id="admit_form" method="post" autocomplete="off"
     {% if form.family %}
-        action="{% url 'programs:admit_wait' form.beginner_class.id form.family.id %}">
+        action="{% url 'programs:admit_wait' form.beginner_class.event.id form.family.id %}">
     {% else %}
         action="{% url 'programs:admit_wait' form.beginner_class.id %}">
     {% endif %}
