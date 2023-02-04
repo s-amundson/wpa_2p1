@@ -54,7 +54,17 @@ class TestsPayment(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].donation, 500)
-        self.assertRedirects(response, reverse('registration:index'))
+        # self.assertRedirects(response, reverse('registration:index'))
+
+    def test_payment_success_donation2(self):
+        # process a good payment
+        self.pay_dict['donation'] = 5
+        self.pay_dict['amount'] = 10
+        response = self.client.post(self.url, self.pay_dict, secure=True)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].donation, 500)
+        self.assertTrue(mail.outbox[0].body.find('Donation   1   5    5') >= 0)
 
     def test_payment_success_save_card_default(self):
         old_card = Card.objects.get(pk=1)

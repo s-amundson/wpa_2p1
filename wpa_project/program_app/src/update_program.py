@@ -136,7 +136,7 @@ class UpdatePrograms:
 
     def status_email(self):
         crh = ClassRegistrationHelper()
-        email_date = self.today + timedelta(days=3)
+        email_date = self.today + timedelta(days=2)
         # logging.debug(email_date)
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         staff_students = Student.objects.filter(user__in=staff_query)

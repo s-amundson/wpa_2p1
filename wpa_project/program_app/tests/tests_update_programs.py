@@ -40,7 +40,7 @@ class TestsUpdatePrograms(TestCase):
         self.assertEqual(BeginnerClass.objects.get(pk=bc.id).event.state, 'recorded')
 
     def test_email_staff_notice(self):
-        d = timezone.localtime(timezone.now()).date() + timedelta(days=3)
+        d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
         d = timezone.make_aware(d, timezone.get_current_timezone())
         bc1 = create_beginner_class(d, 'open', 'beginner')

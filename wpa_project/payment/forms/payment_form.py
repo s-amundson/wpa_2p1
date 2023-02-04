@@ -71,6 +71,12 @@ class PaymentForm(forms.ModelForm):
         note = self.description
         if self.cleaned_data['donation'] > 0:
             note = note + f", Donation of {self.cleaned_data['donation']}"
+            self.line_items.append({
+                'name': 'Donation',
+                'quantity': 1,
+                'amount_each': self.cleaned_data['donation'],
+                'total': self.cleaned_data['donation']
+            })
         volunteer_points = self.cleaned_data.get('volunteer_points', 0)
         if volunteer_points is None:
             volunteer_points = 0

@@ -60,11 +60,14 @@ class ClassRegistrationHelper:
                 return 'wait'
             return 'open'
 
-        elif beginner_class.event.state in ['full', 'closed'] and user.is_staff:
-            if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
-                return 'full'
+        elif beginner_class.event.state in ['full', 'closed']:
+            if user.is_staff:
+                if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
+                    return 'full'
+                else:
+                    return 'open'
             else:
-                return 'open'
+                return 'full'
 
     def student_registrations(self, beginner_class):
         return Registration.objects.filter(
@@ -128,10 +131,10 @@ class ClassRegistrationHelper:
         if type(beginner_class) == int:
             beginner_class = BeginnerClass.objects.get(pk=beginner_class)
         records = self.student_registrations(beginner_class)
-        logging.warning(records)
+        logging.warning(len(records))
         waiting = records.filter(pay_status='waiting').order_by('modified')
         admitted = records.filter(pay_status__in=['paid', 'admin']).order_by('modified')
-        logging.warning(waiting)
+        logging.warning(f'waiting: {len(waiting)}, admitted: {len(admitted)}')
         if not len(waiting):
             return
         if beginner_class.class_type == 'beginner':
