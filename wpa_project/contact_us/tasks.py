@@ -141,9 +141,7 @@ def validate_email(address, client_ip, default_state=True):
         record = Email.objects.create(email=address)
         status = is_it_real(address)
         # status = 'valid'
-        logging.warning(str(status))
         if status == "valid":
-            logging.warning(f'{address} is valid')
             record.is_valid = True
         elif status == "invalid":
             logging.warning(f'{address} is invalid')
