@@ -96,6 +96,8 @@ class ClassRegistrationView(RegistrationSuperView):
 
         if space == 'full':
             return self.has_error(form, 'Not enough space available in this class')
+        elif space == 'closed':
+            return self.has_error(form, 'This class is closed')
         else:
             self.wait = space == 'wait'
             return self.transact(beginner_class, students, instructors)

@@ -67,7 +67,8 @@ class ClassRegistrationHelper:
                 else:
                     return 'open'
             else:
-                return 'full'
+                return 'closed'
+        return 'closed'  #  Shouldn't get here
 
     def student_registrations(self, beginner_class):
         return Registration.objects.filter(
