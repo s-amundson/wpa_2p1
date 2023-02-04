@@ -12,7 +12,7 @@ class ClassStatusView(LoginRequiredMixin, View):
         if class_id == 'null':
             return HttpResponseBadRequest()
         try:
-            bc = BeginnerClass.objects.get(pk=class_id)
+            bc = BeginnerClass.objects.get(event__id=class_id)
             ec = ClassRegistrationHelper().enrolled_count(bc)
             return JsonResponse({'beginner': bc.beginner_limit - ec['beginner'],
                                  'returnee': bc.returnee_limit - ec['returnee'],

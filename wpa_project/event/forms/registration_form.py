@@ -31,10 +31,14 @@ class RegistrationForm(MyModelForm):
                 label=f'{student.first_name} {student.last_name}', initial=True)
         # self.fields['session'].queryset = Session.objects.filter(state='open').order_by('start_date')
         self.student_count = len(students)
-        self.fields['event'].queryset = self.fields['event'].queryset.filter(
-            event_date__gt=timezone.now() - timezone.timedelta(hours=6),
-            type=self.event_type
-        ).order_by('event_date')
+        logging.warning(self.initial)
+        if 'event' in self.initial:
+            self.fields['event'].queryset = self.fields['event'].queryset.filter(pk=self.initial['event'])
+        else:
+            self.fields['event'].queryset = self.fields['event'].queryset.filter(
+                event_date__gt=timezone.now() - timezone.timedelta(hours=6),
+                type=self.event_type
+            ).order_by('event_date')
 
     def get_boxes(self):
         for field_name in self.fields:

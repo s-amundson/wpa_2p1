@@ -51,7 +51,7 @@ async function get_class_status() {
         $("#class-description").html("")
     }
     else {
-        let data = await $.get(url_class_status + $("#id_beginner_class").val() +"/", function(data, status){
+        let data = await $.get(url_class_status + $("#id_event").val() +"/", function(data, status){
             msg = "Class openings:</br> &nbsp;&nbsp; ";
             msg += "New Students: " +  data['beginner'];
             msg += "</br> &nbsp;&nbsp; Returning: " + data['returnee'];
