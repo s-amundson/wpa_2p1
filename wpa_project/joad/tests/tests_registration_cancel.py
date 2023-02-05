@@ -99,7 +99,7 @@ class TestsJoadRegistrationCancel(MockSideEffects, TestCase):
         self.create_payment()
 
         reg = Registration.objects.all()
-        logging.debug(reg)
+        logger.debug(reg)
 
         response = self.client.post(self.test_url, self.student_dict, secure=True)
 

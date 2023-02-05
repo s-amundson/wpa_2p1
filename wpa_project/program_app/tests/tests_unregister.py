@@ -194,6 +194,38 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         self.assertEqual(cr[0].pay_status, 'canceled')
         self.assertEqual(cr[1].pay_status, 'canceled')
 
+    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    @patch('program_app.forms.unregister_form.instructor_canceled.delay')
+    def test_cancel_instructor_within_24hrs(self, task_instructor_canceled, refund):
+        self.test_user = User.objects.get(pk=1)
+        self.client.force_login(self.test_user)
+
+        refund.side_effect = self.refund_side_effect
+        student = Student.objects.get(pk=1)
+        student.user.save()
+
+        self.create_payment([student], 500)
+        cr = Registration.objects.all()
+        logging.warning(cr)
+
+        bc = BeginnerClass.objects.get(pk=1)
+        class_date = timezone.now() + timedelta(hours=18)
+        bc.event.event_date = bc.event.event_date.replace(year=class_date.year, month=class_date.month,
+                                                          day=class_date.day)
+
+        bc.event.state = 'closed'
+        bc.event.save()
+        bc.save()
+        d = {'donation': False}
+        for r in cr:
+            logging.warning(r.id)
+            d[f'unreg_{r.id}'] = True
+        response = self.client.post(self.test_url, d, secure=True)
+        self.assertRedirects(response, self.url_registration)
+
+        cr = bc.event.registration_set.all()
+        self.assertEqual(cr[0].pay_status, 'canceled')
+        task_instructor_canceled.assert_called_with(bc.event)
 
 class TestsUnregisterStudent2(TestCase):
     fixtures = ['f1', 'f2']

@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 
 class AttendView(StaffMixin, View):
     def post(self, request, class_id=None):
-        logging.debug(request.POST.dict())
+        logger.debug(request.POST.dict())
         jc = get_object_or_404(JoadClass, pk=class_id)
         student = None
         attend = False
         for k,v in request.POST.items():
-            logging.debug(k)
-            logging.debug(k.split('_'))
+            logger.debug(k)
+            logger.debug(k.split('_'))
             key = k.split('_')
             if key[0] == 'check':
                 student = get_object_or_404(Student, pk=int(key[1]))
@@ -43,7 +43,7 @@ class AttendanceListView(StaffMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['joad_class'] = self.joad_class.id
-        logging.debug(context)
+        logger.debug(context)
         return context
 
     def get_queryset(self):
@@ -53,9 +53,9 @@ class AttendanceListView(StaffMixin, ListView):
         self.request.session['joad_class'] = cid
         registrations = self.model.objects.filter(session=self.joad_class.session, pay_status='paid').order_by(
             'student__last_name')
-        logging.debug(registrations)
+        logger.debug(registrations)
         attendance = self.joad_class.attendance_set.all()
-        logging.debug(attendance)
+        logger.debug(attendance)
         object_list = []
         for registration in registrations:
             checked = False

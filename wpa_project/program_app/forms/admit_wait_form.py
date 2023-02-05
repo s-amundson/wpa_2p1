@@ -41,7 +41,7 @@ class AdmitWaitForm(forms.Form):
         for k, v in self.cleaned_data.items():
             if k[:6] == 'admit_' and v:
                 reg_list.append(int(k.split('_')[1]))
-        # logging.debug(self.registrations.filter(id__in=reg_list))
-        logging.debug(reg_list)
+        # logger.debug(self.registrations.filter(id__in=reg_list))
+        logger.debug(reg_list)
         charge_group.delay(reg_list)
         return True

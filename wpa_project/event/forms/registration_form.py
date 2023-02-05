@@ -31,7 +31,7 @@ class RegistrationForm(MyModelForm):
                 label=f'{student.first_name} {student.last_name}', initial=True)
         # self.fields['session'].queryset = Session.objects.filter(state='open').order_by('start_date')
         self.student_count = len(students)
-        logging.warning(self.initial)
+        logger.warning(self.initial)
         if 'event' in self.initial:
             self.fields['event'].queryset = self.fields['event'].queryset.filter(pk=self.initial['event'])
         else:

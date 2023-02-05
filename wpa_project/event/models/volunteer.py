@@ -16,7 +16,7 @@ class VolunteerEventManager(models.Manager):
 class VolunteerEventQueryset(models.QuerySet):
     def registered_count(self):
         count = self.filter(canceled=False).count()
-        logging.warning(count)
+        logger.warning(count)
         return count
 
 class VolunteerEvent(models.Model):

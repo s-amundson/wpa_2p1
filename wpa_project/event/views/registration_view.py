@@ -34,30 +34,24 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         if self.request.user.is_board and 'family_id' in self.kwargs:
             self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id', None))
         kwargs = super().get_form_kwargs()
-        # logging.warning(self.kwargs)
+        logger.warning(self.kwargs)
         if self.kwargs.get('event', None) is not None:
             kwargs['initial']['event'] = self.kwargs.get('event')
         kwargs['event_type'] = self.event_type
         kwargs['students'] = self.student_family.student_set.all()
         return kwargs
 
-    def get_initial(self):
-        evt = self.kwargs.get('event', False)
-        if evt:
-            self.initial = {'volunteer_event': evt}
-        return super().get_initial()
-
     def form_invalid(self, form):
-        logging.warning(form.errors)
+        logger.warning(form.errors)
         return super().form_invalid(form)
 
     def has_error(self, form, message):
         messages.add_message(self.request, messages.ERROR, message)
-        logging.warning(message)
+        logger.warning(message)
         return self.form_invalid(form)
 
     def post(self, request, *args, **kwargs):
-        logging.warning(self.request.POST)
+        logger.warning(self.request.POST)
         return super().post(request, *args, **kwargs)
 
 
@@ -69,18 +63,18 @@ class RegistrationView(RegistrationSuperView):
         students = []
         volunteer_event = form.cleaned_data['volunteer_event']
         reg = volunteer_event.volunteerregistration_set.exclude(canceled=True)
-        logging.warning(len(reg))
+        logger.warning(len(reg))
 
         for k, v in form.cleaned_data.items():
-            logging.debug(k)
+            logger.debug(k)
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
 
-                logging.warning(s)
-                logging.warning(len(reg.filter(student__id=i)))
+                logger.warning(s)
+                logger.warning(len(reg.filter(student__id=i)))
                 sreg = reg.filter(student=s)
-                logging.warning(len(sreg))
+                logger.warning(len(sreg))
                 if len(sreg) == 0:
                     students.append(s)
                 else:

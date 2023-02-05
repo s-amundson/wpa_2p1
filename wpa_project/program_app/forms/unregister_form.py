@@ -4,7 +4,7 @@ from django.db.models import Count
 
 from ..src import ClassRegistrationHelper
 from payment.src import EmailMessage, RefundHelper
-from ..tasks import update_waiting
+from ..tasks import instructor_canceled, update_waiting
 from event.models import Event, Registration
 import logging
 
@@ -114,11 +114,14 @@ class UnregisterForm(forms.Form):
             event__event_date__lt=timezone.now() + timezone.timedelta(hours=24),
             event__state__in=Event.event_states[:5])
         not_refundable.update(pay_status='canceled')
+        if cr.filter(student__user__is_instructor=True,
+                     event__event_date__lt=timezone.now() + timezone.timedelta(hours=24)):
+            # instructor canceled, check to see if we still have enough instructors.
+            instructor_canceled.delay(cr.last().event)
         cr = cr.filter(event__event_date__gte=timezone.now() + timezone.timedelta(hours=24),
                        event__state__in=Event.event_states[:4])
         logging.warning(cr)
-        # if not user.is_board:
-        #     cr = cr.filter(
+
         refund = RefundHelper()
         error_count = 0
         for ikey in cr.values('idempotency_key', 'pay_status').annotate(ik_count=Count('idempotency_key')).order_by():

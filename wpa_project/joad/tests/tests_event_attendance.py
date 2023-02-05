@@ -220,6 +220,5 @@ class TestsEventAttendance(TestCase):
 
         response = self.client.get(reverse('joad:event_attend_list', kwargs={'event_id': 1}),
                                    secure=True)
-        logging.debug(response.context['object_list'])
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(response.status_code, 200)

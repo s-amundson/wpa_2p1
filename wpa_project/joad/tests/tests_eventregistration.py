@@ -147,7 +147,7 @@ class TestsJoadEventRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
 
-        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 1}),
+        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 8}),
                                     {'event': 8, 'student_5': 'on'}, secure=True)
         events = Registration.objects.all()
         self.assertEqual(len(events), 1)

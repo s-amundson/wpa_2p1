@@ -17,7 +17,7 @@ class PinAttendanceBaseForm(MyModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        logging.debug(self.instance)
+        logger.debug(self.instance)
         self.fields['stars'] = ChoiceField(choices=choices.stars())
         self.fields['previous_stars'] = ChoiceField(choices=choices.stars())
         self.update_attributes()
@@ -31,19 +31,19 @@ class PinAttendanceBaseForm(MyModelForm):
     def calculate_pins(self):
         """Calculates the pins based off of target size, distance, bow class and score"""
         self.instance.stars = 0
-        logging.debug(self.instance.score)
-        logging.debug(model_to_dict(self.instance))
+        logger.debug(self.instance.score)
+        logger.debug(model_to_dict(self.instance))
         rows = PinScores.objects.filter(category=self.instance.category,
                                         bow=self.instance.bow,
                                         distance=self.instance.distance,
                                         target=self.instance.target,
                                         inner_scoring=self.instance.inner_scoring,
                                         score__lte=self.instance.score)
-        logging.debug(len(rows))
+        logger.debug(len(rows))
         for row in rows:
             if row.stars > self.instance.stars:
                 self.instance.stars = row.stars
-        logging.debug(self.instance.stars)
+        logger.debug(self.instance.stars)
         return self.instance.stars - self.instance.previous_stars
 
 
@@ -59,8 +59,8 @@ class PinAttendanceStaffForm(PinAttendanceBaseForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        logging.debug('here')
-        logging.debug(self.instance)
+        logger.debug('here')
+        logger.debug(self.instance)
         self.instruction = 'Staff responsibility is to mark the student as attending. ' \
                            'All other fields are optional and the responsibility of the student/guardian.'
         if self.instance and self.instance.pay_status == 'paid':
@@ -72,7 +72,7 @@ class PinAttendanceStaffForm(PinAttendanceBaseForm):
                 else:
                     self.fields[f].widget.attrs.update({'class': 'form-control m-2', 'readonly': 'readonly'})
             self.fields['award_received'].widget.attrs.pop('disabled')
-            logging.debug(self.fields['award_received'].widget.attrs)
+            logger.debug(self.fields['award_received'].widget.attrs)
 
 
 class PinAttendanceStudentForm(PinAttendanceBaseForm):

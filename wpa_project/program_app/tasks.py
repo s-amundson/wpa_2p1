@@ -85,13 +85,24 @@ def init_class():  # pragma: no cover
             defaults={'name': f'Beginner Schedule {c.id} close create class'}
         )
 
+@shared_task
+def instructor_canceled(event):
+    reg = Registration.objects.filter(
+        event=event,
+        student__user__is_instructor=True,
+        pay_status__in=['admin', 'paid']
+    )
+    logger.warning(len(reg))
+    if len(reg) < 3:
+        logger.warning('send instructors a warning')
+        # TODO send instructors a warning
 
 @shared_task
 def refund_class(beginner_class, message=''):
     if type(beginner_class) == int:
         beginner_class = BeginnerClass.objects.get(pk=beginner_class)
     ec = ClassRegistrationHelper().enrolled_count(beginner_class)
-    logging.warning(ec)
+    logger.warning(ec)
     refund = RefundHelper()
     email_message = EmailMessage()
     # need to refund students if any
@@ -99,7 +110,7 @@ def refund_class(beginner_class, message=''):
         cr = Registration.objects.filter(event=beginner_class.event)
         ik_list = []
         for reg in cr:
-            logging.warning(reg.id)
+            logger.warning(reg.id)
             if reg.idempotency_key not in ik_list:
                 ik_list.append(reg.idempotency_key)
                 qty = len(cr.filter(idempotency_key=reg.idempotency_key).filter(pay_status='paid'))
@@ -107,7 +118,7 @@ def refund_class(beginner_class, message=''):
                     reg.idempotency_key, qty * beginner_class.event.cost_standard * 100)
                 if square_response['status'] == 'error':
                     if square_response['error'] != 'Previously refunded':  # pragma: no cover
-                        logging.error(square_response)
+                        logger.error(square_response)
                 else:
                     email_sent = False
                     for c in cr.filter(idempotency_key=reg.idempotency_key):

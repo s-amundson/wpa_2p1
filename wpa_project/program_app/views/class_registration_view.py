@@ -43,14 +43,14 @@ class ClassRegistrationView(RegistrationSuperView):
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
 
-                # logging.debug(s)
+                # logger.debug(s)
                 if StudentHelper().calculate_age(s.dob, event.event_date) < 9:
                     return self.has_error(form, 'Student must be at least 9 years old to participate')
 
                 if s.user is not None and s.user.is_staff:
-                    logging.debug('student is staff')
+                    logger.debug('student is staff')
                     if s.user.is_instructor:
-                        # logging.debug(s.user.instructor_expire_date)
+                        # logger.debug(s.user.instructor_expire_date)
                         if s.user.instructor_expire_date is None \
                                 or s.user.instructor_expire_date < timezone.localdate(timezone.now()):
                             return self.has_error(form, 'Please update your instructor certification')
@@ -92,7 +92,7 @@ class ClassRegistrationView(RegistrationSuperView):
         self.request.session['class_registration'] = {'beginner_class': beginner_class.id, 'beginner': beginner,
                                                       'returnee': returnee}
         space = ClassRegistrationHelper().has_space(self.request.user, beginner_class, beginner, instructor, returnee)
-        logging.warning(space)
+        logger.warning(space)
 
         if space == 'full':
             return self.has_error(form, 'Not enough space available in this class')
@@ -105,9 +105,9 @@ class ClassRegistrationView(RegistrationSuperView):
     def transact(self, beginner_class, students, instructors):
         with transaction.atomic():
             pay_status = 'start'
-            logging.debug(self.wait)
+            logger.debug(self.wait)
             if self.wait:
-                logging.debug(self.has_card)
+                logger.debug(self.has_card)
                 if self.has_card:
                     beginner_class.event.state = 'wait'
                     beginner_class.event.save()
@@ -123,7 +123,7 @@ class ClassRegistrationView(RegistrationSuperView):
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
-            # logging.debug(students)
+            # logger.debug(students)
             for s in students:
                 if s.safety_class is None:
                     n = True
@@ -137,7 +137,7 @@ class ClassRegistrationView(RegistrationSuperView):
                     'amount_each': beginner_class.event.cost_standard,
                      }
                 )
-                # logging.debug(cr)
+                # logger.debug(cr)
             for i in instructors:
                 cr = Registration.objects.create(event=beginner_class.event, student=i,
                                        pay_status='paid', idempotency_key=uid, user=self.request.user)
@@ -156,7 +156,7 @@ class ClassRegistrationAdminView(BoardMixin, ClassRegistrationView):
     form_class = RegistrationAdminForm
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        logger.debug(form.cleaned_data)
         event = form.cleaned_data['event']
 
         uid = str(uuid.uuid4())
@@ -217,18 +217,18 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
 
         if reg_id:  # to regain an interrupted payment
             cr = get_object_or_404(Registration, pk=reg_id)
-            # logging.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
+            # logger.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
             if cr.student.student_family != students[0].student_family:  # pragma: no cover
                 return Http404("registration mismatch")
             registrations = Registration.objects.filter(idempotency_key=cr.idempotency_key)
-            logging.warning(cr.event.beginnerclass_set.last())
+            logger.warning(cr.event.beginnerclass_set.last())
             space = ClassRegistrationHelper().has_space(self.request.user,
                                                         cr.event.beginnerclass_set.last(),
                                                         len(registrations.filter(student__safety_class__isnull=True)),
                                                         0,
                                                         len(registrations.filter(student__safety_class__isnull=False))
                                                         )
-            logging.debug(space)
+            logger.debug(space)
             if space == 'full':
                 messages.add_message(self.request, messages.ERROR, 'Not enough space available in this class')
                 return HttpResponseRedirect(reverse('programs:calendar'))

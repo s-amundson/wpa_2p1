@@ -30,7 +30,7 @@ class RegistrationSuperView(UserPassesTestMixin, FormView):
         return super().get_initial()
 
     def form_invalid(self, form):
-        logging.debug(form.errors)
+        logger.debug(form.errors)
         return super().form_invalid(form)
 
     def has_error(self, message):
@@ -38,7 +38,7 @@ class RegistrationSuperView(UserPassesTestMixin, FormView):
         return self.form_invalid(self.form)
 
     def post(self, request, *args, **kwargs):
-        logging.debug(self.request.POST)
+        logger.debug(self.request.POST)
         return super().post(request, *args, **kwargs)
 
     def test_func(self):
@@ -67,29 +67,29 @@ class RegistrationView(RegistrationSuperView):
         self.form = form
         students = []
         # message = ""
-        logging.debug(form.cleaned_data['session'])
+        logger.debug(form.cleaned_data['session'])
         session = form.cleaned_data['session']
         if session.state != "open":  # pragma: no cover
             return self.has_error('Session in wrong state')
 
         reg = session.registration_set.exclude(pay_status="refunded").exclude(pay_status='canceled')
-        logging.debug(len(reg.filter(pay_status='paid')))
+        logger.debug(len(reg.filter(pay_status='paid')))
 
         for k, v in form.cleaned_data.items():
-            logging.debug(k)
+            logger.debug(k)
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
                 age = StudentHelper().calculate_age(s.dob, session.start_date)
-                logging.debug(age)
+                logger.debug(age)
                 if age < 9:
                     return self.has_error('Student is to young')
                 if age > 20: # pragma: no cover
                     return self.has_error('Student is to old.')
 
-                logging.debug(s)
+                logger.debug(s)
                 sreg = reg.filter(student=s)
-                logging.debug(len(sreg))
+                logger.debug(len(sreg))
                 if len(sreg) == 0:
                     students.append(s)
                 else:
@@ -107,13 +107,13 @@ class RegistrationView(RegistrationSuperView):
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'joad'
             self.request.session['payment_description'] = f'Joad session starting {str(session.start_date)[:10]}'
-            logging.debug(students)
+            logger.debug(students)
             for s in students:
                 cr = Registration(session=session, student=s, pay_status='start', idempotency_key=uid).save()
                 self.request.session['line_items'].append(
                     {'name': f'Joad session starting {str(session.start_date)[:10]} student id: {str(s.id)}',
                      'quantity': 1, 'amount_each': session.cost})
-                logging.debug(cr)
+                logger.debug(cr)
         return HttpResponseRedirect(reverse('payment:make_payment'))
 
 
@@ -121,7 +121,7 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
     def get(self, request, reg_id=None):
         registration = get_object_or_404(Registration, pk=reg_id)
         registrations = Registration.objects.filter(idempotency_key=registration.idempotency_key)
-        logging.debug(registration)
+        logger.debug(registration)
         self.request.session['idempotency_key'] = str(registration.idempotency_key)
         self.request.session['line_items'] = []
         self.request.session['payment_category'] = 'joad'
@@ -143,14 +143,14 @@ class RegistrationCancelView(RegistrationSuperView):
             students = Student.objects.filter(is_joad=True)
         else:
             students = self.request.user.student_set.last().student_family.student_set.filter(is_joad=True)
-        logging.debug(students)
+        logger.debug(students)
         kwargs['students'] = students.filter(session_registration__in=self.session.registration_set.all())
         kwargs['cancel'] = True
-        logging.debug(kwargs)
+        logger.debug(kwargs)
         return kwargs
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        logger.debug(form.cleaned_data)
         if form.process_refund(self.request.user):
             return super().form_valid(form)
         else:
@@ -158,7 +158,7 @@ class RegistrationCancelView(RegistrationSuperView):
         # self.form = form
         # students = []
         # # message = ""
-        # logging.debug(form.cleaned_data['session'])
+        # logger.debug(form.cleaned_data['session'])
         # session = form.cleaned_data['session']
         # if session.state != "open":  # pragma: no cover
         #     return self.has_error('Session in wrong state')
@@ -166,16 +166,16 @@ class RegistrationCancelView(RegistrationSuperView):
         # # reg = Registration.objects.filter(session=session).exclude(
         # #     pay_status="refunded").exclude(pay_status='canceled')
         # reg = session.registration_set.exclude(pay_status="refunded").exclude(pay_status='canceled')
-        # logging.debug(len(reg.filter(pay_status='paid')))
+        # logger.debug(len(reg.filter(pay_status='paid')))
         #
         # for k, v in form.cleaned_data.items():
-        #     logging.debug(k)
+        #     logger.debug(k)
         #     if str(k).startswith('student_') and v:
         #         i = int(str(k).split('_')[-1])
         #         s = Student.objects.get(pk=i)
-        #         logging.debug(s)
+        #         logger.debug(s)
         #         sreg = reg.filter(student=s)
-        #         logging.debug(len(sreg))
+        #         logger.debug(len(sreg))
         #         if len(sreg) == 0:
         #             return self.has_error('Student is not enrolled')
         #         else:

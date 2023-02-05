@@ -67,7 +67,7 @@ class TestsJoadAttendance(TestCase):
 
         response = self.client.post(reverse('joad:attend', kwargs={'class_id': 1}), {'check_8': True}, secure=True)
         a = Attendance.objects.all()
-        logging.debug(a)
+        logger.debug(a)
         self.assertEqual(len(a), 1)
         self.assertTrue(a[0].attended)
 
@@ -81,7 +81,7 @@ class TestsJoadAttendance(TestCase):
 
         response = self.client.post(reverse('joad:attend', kwargs={'class_id': 1}), {'check_8': False}, secure=True)
         a = Attendance.objects.all()
-        logging.debug(a)
+        logger.debug(a)
         self.assertEqual(len(a), 1)
         self.assertFalse(a[0].attended)
 
@@ -91,9 +91,9 @@ class TestsJoadAttendance(TestCase):
 
         response = self.client.post(reverse('joad:attend', kwargs={'class_id': 1}), {}, secure=True)
         a = Attendance.objects.all()
-        logging.debug(a)
+        logger.debug(a)
         self.assertEqual(len(a), 0)
         content = json.loads(response.content)
-        logging.debug(content)
+        logger.debug(content)
         self.assertFalse(content['attend'])
         self.assertTrue(content['error'])

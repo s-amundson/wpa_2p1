@@ -69,7 +69,7 @@ class ClassListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         sid = self.kwargs.get("session_id", None)
-        logging.debug(sid)
+        logger.debug(sid)
         if sid == 0:
             object_list = self.model.objects.filter(session__state="open")
         elif sid is not None:

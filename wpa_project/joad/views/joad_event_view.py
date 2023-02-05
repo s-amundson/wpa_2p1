@@ -30,7 +30,7 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        logging.debug(self.attendance)
+        logger.debug(self.attendance)
         if self.attendance is not None:
             kwargs['instance'] = self.attendance
         return kwargs
@@ -59,14 +59,14 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
         return context
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        logger.debug(form.cleaned_data)
         record = form.save()
         record.event = self.joad_event
         record.student = self.student
         record.category = self.joad_event.event_type
         if self.request.user.student_set.first().student_family == self.student.student_family:
             pins_earned = form.calculate_pins()
-            logging.debug(pins_earned)
+            logger.debug(pins_earned)
             if pins_earned > 0:
                 pin_cost = self.joad_event.pin_cost
                 if pin_cost is None:  # pragma: no cover
@@ -115,7 +115,7 @@ class EventAttendListView(UserPassesTestMixin, ListView):
 
         for row in self.joad_event.event.registration_set.filter(pay_status__in=['paid', 'admin']):
             pa = self.joad_event.pinattendance_set.filter(student=row.student).last()
-            logging.debug(pa)
+            logger.debug(pa)
             d = {'reg': row, 'pa': pa}
             object_list.append(d)
         return object_list
@@ -157,7 +157,7 @@ class JoadEventListView(UserPassesTestMixin, ListView):
         if not self.request.user.is_board:
             events = events.exclude(event__state='scheduled').exclude(event__state='canceled')
         event_list = []
-        logging.debug(events)
+        logger.debug(events)
         for event in events:
             e = model_to_dict(event)
             reg_list = []
@@ -172,7 +172,7 @@ class JoadEventListView(UserPassesTestMixin, ListView):
                             reg_status = 'attending'
                         else:
                             reg_status = 'registered'
-                        logging.debug(attend)
+                        logger.debug(attend)
                     elif len(reg.filter(pay_status='start')) > 0 and event.event.state in ['open', 'full']:
                         reg_status = 'start'
                         reg_id = reg.filter(pay_status='start').last().id
@@ -183,7 +183,7 @@ class JoadEventListView(UserPassesTestMixin, ListView):
             e['event_date'] = event.event.event_date
             e['state'] = event.event.state
             e['cost'] = event.event.cost_standard
-            logging.debug(e)
+            logger.debug(e)
             event_list.append(e)
         return event_list
 
@@ -221,7 +221,7 @@ class JoadEventView(BoardMixin, FormView):
                 attendance = PinAttendance.objects.filter(event=self.joad_event, student=reg.student)
                 s['attend_record'] = len(attendance) > 0
                 s['attend'] = False
-                logging.debug(s['attend_record'])
+                logger.debug(s['attend_record'])
                 if len(attendance) > 0:
                     s['attend'] = attendance[0].attended
                 student_list.append(s)
@@ -230,11 +230,11 @@ class JoadEventView(BoardMixin, FormView):
         return context
 
     def form_invalid(self, form):
-        logging.debug(form.errors)
+        logger.debug(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.debug(form.cleaned_data)
+        logger.debug(form.cleaned_data)
         event = form.save()
         logging.warning(event)
         if event.event is None:

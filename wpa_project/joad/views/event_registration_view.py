@@ -34,33 +34,33 @@ class EventRegistrationView(RegistrationSuperView):
         eid = self.kwargs.get("event_id", None)
         if eid is not None:
             event = get_object_or_404(Event, pk=eid)
-            self.initial = {'event': event}
+            self.initial = {'event': event.id}
         return super().get_initial()
 
     def form_valid(self, form):
-        logging.warning(form.cleaned_data)
+        logger.warning(form.cleaned_data)
         students = []
         event = form.cleaned_data['event']
         if event.state != "open": # pragma: no cover
             return self.has_error(form, 'Event in wrong state')
         registrations = event.registration_set.all()
-        logging.warning(registrations)
+        logger.warning(registrations)
         for k, v in dict(self.request.POST).items():
-            logging.debug(k)
+            logger.debug(k)
             if str(k).startswith('student_') and v:
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
                 age = StudentHelper().calculate_age(s.dob, event.event_date)
-                logging.debug(age)
+                logger.debug(age)
                 if age < 9:
                     return self.has_error(form, 'Student is to young.')
                 if age > 20:
-                    logging.debug(age)
+                    logger.debug(age)
                     return self.has_error(form, 'Student is to old.')
 
-                logging.warning(s)
+                logger.warning(s)
                 sreg = registrations.filter(student=s)
-                logging.warning(len(sreg))
+                logger.warning(len(sreg))
                 if len(sreg) == 0:
                     students.append(s)
                 else:
@@ -78,14 +78,14 @@ class EventRegistrationView(RegistrationSuperView):
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'joad'
             self.request.session['payment_description'] = f'Joad event on {str(event.event_date)[:10]}'
-            logging.warning(students)
+            logger.warning(students)
             description = f"Joad event on {str(event.event_date)[:10]} student: "
             for s in students:
                 cr = self.model.objects.create(event=event, student=s,
                                             pay_status='start', idempotency_key=uid, user=self.request.user)
                 self.request.session['line_items'].append({'name': description + f'{s.first_name}', 'quantity': 1,
                                                            'amount_each': event.cost_standard})
-                logging.warning(cr)
+                logger.warning(cr)
         return HttpResponseRedirect(reverse('payment:make_payment'))
         # return self.form_invalid(form)
 # class EventRegistrationView(LoginRequiredMixin, FormView):
@@ -102,47 +102,47 @@ class EventRegistrationView(RegistrationSuperView):
 #         if eid is not None:
 #             event = get_object_or_404(Event, pk=eid)
 #             je = event.joadevent_set.last()
-#             logging.warning(je.id)
+#             logger.warning(je.id)
 #             self.initial = {'joad_event': je}
 #
 #         return super().get_initial()
 #
 #     def form_invalid(self, form):
-#         logging.debug(form.errors)
+#         logger.debug(form.errors)
 #         return super().form_invalid(form)
 #
 #     def form_valid(self, form):
 #         self.form = form
 #         students = []
 #         # message = ""
-#         logging.warning(form.cleaned_data)
+#         logger.warning(form.cleaned_data)
 #         joad_event = form.cleaned_data['joad_event']
-#         logging.debug(joad_event.event.state)
-#         logging.debug(joad_event.id)
+#         logger.debug(joad_event.event.state)
+#         logger.debug(joad_event.id)
 #         if joad_event.event.state != "open": # pragma: no cover
 #             return self.has_error('Event in wrong state')
 #
 #         reg = EventRegistration.objects.filter(joad_event=joad_event).exclude(
 #             pay_status="refunded").exclude(pay_status='canceled')
-#         logging.debug(len(reg.filter(pay_status='paid')))
+#         logger.debug(len(reg.filter(pay_status='paid')))
 #
-#         logging.debug(dict(self.request.POST))
+#         logger.debug(dict(self.request.POST))
 #         for k, v in dict(self.request.POST).items():
-#             logging.debug(k)
+#             logger.debug(k)
 #             if str(k).startswith('student_') and v:
 #                 i = int(str(k).split('_')[-1])
 #                 s = Student.objects.get(pk=i)
 #                 age = StudentHelper().calculate_age(s.dob, joad_event.event.event_date)
-#                 logging.debug(age)
+#                 logger.debug(age)
 #                 if age < 9:
 #                     return self.has_error('Student is to young.')
 #                 if age > 20:
-#                     logging.debug(age)
+#                     logger.debug(age)
 #                     return self.has_error('Student is to old.')
 #
-#                 logging.debug(s)
+#                 logger.debug(s)
 #                 sreg = reg.filter(student=s)
-#                 logging.debug(len(sreg))
+#                 logger.debug(len(sreg))
 #                 if len(sreg) == 0:
 #                     students.append(s)
 #                 else:
@@ -151,7 +151,7 @@ class EventRegistrationView(RegistrationSuperView):
 #
 #         if len(students) == 0:
 #             return self.has_error('Invalid student selected')
-#         logging.debug(len(reg.filter(pay_status='paid')))
+#         logger.debug(len(reg.filter(pay_status='paid')))
 #         logging.debug(len(students))
 #         if len(reg.filter(pay_status='paid')) + len(students) > joad_event.student_limit:
 #             return self.has_error('Class is full')
@@ -181,7 +181,7 @@ class ResumeEventRegistrationView(LoginRequiredMixin, View):
     def get(self, request, reg_id=None):
         registration = get_object_or_404(Registration, pk=reg_id)
         registrations = Registration.objects.filter(idempotency_key=registration.idempotency_key)
-        logging.debug(registration)
+        logger.debug(registration)
         self.request.session['idempotency_key'] = str(registration.idempotency_key)
         self.request.session['line_items'] = []
         self.request.session['payment_category'] = 'joad'

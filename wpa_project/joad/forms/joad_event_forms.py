@@ -25,8 +25,8 @@ class EventRegistrationForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         # if "instance"
         super().__init__(*args, **kwargs)
-        logging.warning(kwargs)
-        # logging.warning(self.initial['event'].id)
+        logger.warning(kwargs)
+        # logger.warning(self.initial['event'].id)
         if user.is_board:
             students = Student.objects.all()
         else:
@@ -42,7 +42,7 @@ class EventRegistrationForm(forms.ModelForm):
             self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2 student-check"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
-        logging.warning(JoadEvent.objects.filter(event__state='open').order_by('event__event_date'))
+        logger.warning(JoadEvent.objects.filter(event__state='open').order_by('event__event_date'))
         self.fields['joad_event'].queryset = JoadEvent.objects.filter(event__state='open').order_by('event__event_date')
         self.fields['joad_event'].default = self.initial['joad_event']
         self.student_count = len(students)
@@ -63,15 +63,15 @@ class JoadEventForm(MyModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         costs = CostsModel.objects.filter(name='Pin Shoot', enabled=True).first()
-        logging.debug(costs)
+        logger.debug(costs)
         if costs is not None:
             self.initial['cost'] = costs.standard_cost
 
         pin_cost = CostsModel.objects.filter(name='JOAD Pin', enabled=True).first()
         if pin_cost is not None:
             self.initial['pin_cost'] = pin_cost.standard_cost
-        logging.debug(self.initial)
-        logging.warning(self.instance.id)
+        logger.debug(self.initial)
+        logger.warning(self.instance.id)
         self.fields['state'] = forms.ChoiceField(choices=choices(Event.event_states))
         self.fields['cost'] = forms.IntegerField()
         if self.instance and self.instance.event:

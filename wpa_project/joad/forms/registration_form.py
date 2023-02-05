@@ -39,27 +39,27 @@ class RegistrationForm(MyModelForm):
                 yield self[field_name]
 
     # def save(self, commit=True):
-    #     logging.debug('save')
+    #     logger.debug('save')
     def process_refund(self, user):
         students = []
         session = self.cleaned_data['session']
         for k, v in self.cleaned_data.items():
             if str(k).startswith('student_') and v:
-                # logging.debug(k.split('_'))
+                # logger.debug(k.split('_'))
                 students.append(int(k.split('_')[1]))
-        logging.debug(students)
+        logger.debug(students)
         reg = session.registration_set.filter(student__in=students)
-        logging.debug(reg)
+        logger.debug(reg)
         if len(reg) == 0:
             return False
-        logging.debug(reg.values('idempotency_key', 'pay_status').annotate(ik_count=Count('idempotency_key')).order_by())
+        logger.debug(reg.values('idempotency_key', 'pay_status').annotate(ik_count=Count('idempotency_key')).order_by())
 
         refund = RefundHelper()
         error_count = 0
         for ikey in reg.values('idempotency_key', 'pay_status').annotate(ik_count=Count('idempotency_key')).order_by():
             ireg = reg.filter(idempotency_key=ikey['idempotency_key'])
             cost = session.cost
-            logging.debug(session.cost)
+            logger.debug(session.cost)
             # if ikey['pay_status'] == 'paid' and self.cleaned_data['donation']:
             #     square_response = {'status': 'SUCCESS'}
 

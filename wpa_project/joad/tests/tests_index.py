@@ -78,14 +78,12 @@ class TestsJoadIndex(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['event_list']), 1)
         registrations = response.context['session_list'][0]['registrations']
-        logging.debug(registrations)
         self.assertTrue(registrations[0]['is_joad'])
         self.assertFalse(registrations[1]['is_joad'])
         self.assertTrue(registrations[2]['is_joad'])
         self.assertEqual(registrations[0]['reg_status'], 'not registered')
         self.assertEqual(registrations[1]['reg_status'], 'not registered')
         self.assertEqual(registrations[2]['reg_status'], 'not registered')
-        logging.debug(registrations)
 
     def test_user_normal_is_joad(self):
         student = Student.objects.get(pk=5)
@@ -119,7 +117,7 @@ class TestsJoadIndex(TestCase):
         self.assertEqual(len(response.context['students']), 3)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['event_list']), 1)
-        logging.debug(response.context['event_list'][0])
+        logger.debug(response.context['event_list'][0])
         event = response.context['event_list'][0]
         self.assertEqual(len(event['registrations']), 3)
         self.assertEqual(event['registrations'][0]['reg_status'], 'not registered')
@@ -141,7 +139,7 @@ class TestsJoadIndex(TestCase):
         self.assertEqual(len(response.context['students']), 3)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['event_list']), 1)
-        logging.debug(response.context['event_list'][0])
+        logger.debug(response.context['event_list'][0])
         event = response.context['event_list'][0]
         self.assertEqual(len(event['registrations']), 3)
         self.assertEqual(event['registrations'][0]['reg_status'], 'not registered')
