@@ -56,14 +56,12 @@ class FaqList(ListView):
         form = FaqFilterForm(self.request.GET)
         object_list = self.model.objects.filter(status=1)
         if form.is_valid():
-            logger.warning(form.cleaned_data)
             if form.cleaned_data['category'] is not None:
                 object_list = object_list.filter(category=form.cleaned_data['category'])
         else:
             logger.warning(form.errors)
         search_form = FaqSearchForm(self.request.GET)
         if search_form.is_valid():
-            logger.warning(search_form.cleaned_data)
             object_list = object_list.filter(Q(question__icontains=search_form.cleaned_data['search']) |
                                              Q(answer__icontains=search_form.cleaned_data['search']))
         return object_list.order_by('-created_at')

@@ -218,7 +218,7 @@ LOGGING = {
             'style': '{',
         },
         'verbose2': {
-            'format': '{levelname} {asctime} {name} {module}.{funcName} line:{lineno} {message}',
+            'format': '{levelname} {asctime} {name}.{funcName} line:{lineno} {message}',
             'style': '{',
         },
         'simple': {
