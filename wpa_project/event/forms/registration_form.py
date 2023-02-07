@@ -1,5 +1,4 @@
 from django import forms
-from django.utils import timezone
 
 from src.model_form import MyModelForm
 from ..models import Registration
@@ -18,8 +17,8 @@ class RegistrationForm(MyModelForm):
 
     def __init__(self, students, *args, **kwargs):
         self.cancel_form = kwargs.get('cancel', False)
-        self.event_type = kwargs.get('event_type', 'class')
-        for k in ['cancel', 'event_type']:
+        self.event_queryset = kwargs.get('event_queryset', None)
+        for k in ['cancel', 'event_type', 'event_queryset']:
             if k in kwargs:
                 kwargs.pop(k)
         super().__init__(*args, **kwargs)
@@ -29,16 +28,12 @@ class RegistrationForm(MyModelForm):
                 attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
                        'dob': f"{student.dob}"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
-        # self.fields['session'].queryset = Session.objects.filter(state='open').order_by('start_date')
         self.student_count = len(students)
         logger.warning(self.initial)
+        if self.event_queryset is not None:
+            self.fields['event'].queryset = self.event_queryset
         if 'event' in self.initial:
             self.fields['event'].queryset = self.fields['event'].queryset.filter(pk=self.initial['event'])
-        else:
-            self.fields['event'].queryset = self.fields['event'].queryset.filter(
-                event_date__gt=timezone.now() - timezone.timedelta(hours=6),
-                type=self.event_type
-            ).order_by('event_date')
 
     def get_boxes(self):
         for field_name in self.fields:

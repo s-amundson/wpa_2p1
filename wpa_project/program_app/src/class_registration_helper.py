@@ -79,7 +79,7 @@ class ClassRegistrationHelper:
         records = self.student_registrations(beginner_class)
         if beginner_class.class_type == 'beginner' and beginner_class.event.state in ['open', 'wait', 'full']:
             logger.warning(f'state: {beginner_class.event.state}, registered: {len(records)}, ' +
-                           'limit: {beginner_class.beginner_limit}, wait: {beginner_class.beginner_wait_limit}')
+                           f'limit: {beginner_class.beginner_limit}, wait: {beginner_class.beginner_wait_limit}')
             if len(records) >= beginner_class.beginner_limit and beginner_class.event.state in ['open', 'wait']:
                 if len(records) >= beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
                     beginner_class.event.state = 'full'
@@ -138,7 +138,7 @@ class ClassRegistrationHelper:
         logger.warning(len(records))
         waiting = records.filter(pay_status='waiting').order_by('modified')
         admitted = records.filter(pay_status__in=['paid', 'admin']).order_by('modified')
-        logger.warning(f'waiting: {len(waiting)}, admitted: {len(admitted)}')
+        logger.warning(f'class type: {beginner_class.class_type}, waiting: {len(waiting)}, admitted: {len(admitted)}')
         if not len(waiting):
             return
         if beginner_class.class_type == 'beginner':

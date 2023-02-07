@@ -1,14 +1,12 @@
 from django.apps import apps
 from django.views.generic.edit import FormView
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.contrib import messages
-from django.db import transaction
-from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-
+from django.utils import timezone
 
 from ..forms import RegistrationForm
-from ..models import Registration
+from ..models import Event, Registration
 from src.mixin import StudentFamilyMixin
 from student_app.models import Student
 StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamily')
@@ -29,15 +27,21 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         super().__init__(*args, **kwargs)
         self.wait = False
         self.has_card = False
+        self.event_queryset = Event.objects.filter(
+                event_date__gt=timezone.now() - timezone.timedelta(hours=6),
+                type=self.event_type
+            ).order_by('event_date')
 
     def get_form_kwargs(self):
         if self.request.user.is_board and 'family_id' in self.kwargs:
             self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id', None))
+        if not self.request.user.is_staff:
+            self.event_queryset = self.event_queryset.filter(state__in=['open', 'wait'])
         kwargs = super().get_form_kwargs()
         logger.warning(self.kwargs)
         if self.kwargs.get('event', None) is not None:
             kwargs['initial']['event'] = self.kwargs.get('event')
-        kwargs['event_type'] = self.event_type
+        kwargs['event_queryset'] = self.event_queryset
         kwargs['students'] = self.student_family.student_set.all()
         return kwargs
 
