@@ -9,8 +9,10 @@ from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
 
-import logging
-logger = logging.getLogger(__name__)
+# import logging
+# logger = logging.getLogger(__name__)
+from celery.utils.log import get_task_logger
+logger = get_task_logger(__name__)
 crh = ClassRegistrationHelper()
 
 
@@ -29,6 +31,7 @@ def close_create_class(schedule_id):
 
 @shared_task
 def daily_update():
+    logger.warning('daily_update')
     update_programs = UpdatePrograms()
     update_programs.record_classes()
     update_programs.status_email()

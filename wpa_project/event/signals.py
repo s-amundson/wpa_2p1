@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from .models import Registration
 from payment.models import PaymentLog
 from payment.signals import payment_error_signal
+from program_app.src import ClassRegistrationHelper
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,14 @@ def payment_error(old_idempotency_key, new_idempotency_key, **kwargs):
 
 @receiver(post_save, sender=PaymentLog)
 def registration_update(sender, instance, created, **kwargs):
+    # crh = ClassRegistrationHelper()
+    cr = Registration.objects.filter(idempotency_key=instance.idempotency_key)
+    is_intro_class = False
     if instance.status in ["SUCCESS", "COMPLETED"]:
-        for cr in [Registration.objects.filter(idempotency_key=instance.idempotency_key)]:
-            for c in cr:
-                c.pay_status = 'paid'
-                c.save()
+        for c in cr:
+            c.pay_status = 'paid'
+            c.save()
+            if c.event.beginnerclass_set.last():
+                is_intro_class = True
+        if is_intro_class:
+            ClassRegistrationHelper().update_class_state(cr[0].event.beginnerclass_set.last())

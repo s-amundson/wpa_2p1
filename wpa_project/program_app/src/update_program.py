@@ -122,17 +122,17 @@ class UpdatePrograms:
             if len(students):
                 self.email.beginner_reminder(c, students)
 
-            # send email to students that are on the wait list
-            self.email = EmailMessage()
-            cr = c.event.registration_set.filter(pay_status__in=['waiting'])
-            student_list = []
-            for r in cr:
-                student_list.append(r.student.id)
-            students = Student.objects.filter(id__in=student_list)
-            students = students.exclude(user__in=staff_query)
-            logging.warning(students)
-            if len(students):
-                self.email.wait_list_reminder(c, students)
+            # # send email to students that are on the wait list
+            # self.email = EmailMessage()
+            # cr = c.event.registration_set.filter(pay_status__in=['waiting'])
+            # student_list = []
+            # for r in cr:
+            #     student_list.append(r.student.id)
+            # students = Student.objects.filter(id__in=student_list)
+            # students = students.exclude(user__in=staff_query)
+            # logging.warning(students)
+            # if len(students):
+            #     self.email.wait_list_reminder(c, students)
 
     def status_email(self):
         crh = ClassRegistrationHelper()

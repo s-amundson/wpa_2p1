@@ -29,7 +29,7 @@ class RegistrationForm(MyModelForm):
                        'dob': f"{student.dob}"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
         self.student_count = len(students)
-        logger.warning(self.initial)
+        # logger.warning(self.initial)
         if self.event_queryset is not None:
             self.fields['event'].queryset = self.event_queryset
         if 'event' in self.initial:

@@ -11,7 +11,6 @@
 # from .tests.tests_class_status import TestsClassStatus
 # from .tests.tests_history import TestsAttendanceHistory
 # from .tests.tests_logs import TestsLogs
-# from .tests.tests_signal import TestsSignal
 # from .tests.tests_staff_report import TestsStaffReport
 # from .tests.tests_tasks import TestsTasks
 # from .tests.tests_unregister import TestsUnregisterStudent

@@ -38,7 +38,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         if not self.request.user.is_staff:
             self.event_queryset = self.event_queryset.filter(state__in=['open', 'wait'])
         kwargs = super().get_form_kwargs()
-        logger.warning(self.kwargs)
+        # logger.warning(self.kwargs)
         if self.kwargs.get('event', None) is not None:
             kwargs['initial']['event'] = self.kwargs.get('event')
         kwargs['event_queryset'] = self.event_queryset
