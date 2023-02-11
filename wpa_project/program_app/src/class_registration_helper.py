@@ -40,21 +40,21 @@ class ClassRegistrationHelper:
         logger.warning(f'Adding beginner: {beginner}, returnee: {returnee}, instructor: {instructor}')
         wait = False
         if beginner_class.event.state in ['open', 'wait']:  # in case it changed since user got the self.form.
-            if beginner and enrolled_count['beginner'] + beginner >= beginner_class.beginner_limit:
+            if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
                 if beginner and enrolled_count['beginner'] + enrolled_count['waiting'] + beginner > \
                         beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
                     return 'full'
                 if enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
                     wait = True
 
-            if returnee and enrolled_count['returnee'] + returnee >= beginner_class.returnee_limit:
+            if returnee and enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
                 if returnee and enrolled_count['returnee'] + enrolled_count['waiting'] + returnee > \
                         beginner_class.returnee_limit + beginner_class.returnee_wait_limit:
                     return 'full'
                 if enrolled_count['returnee'] + returnee > beginner_class.returnee_limit:
                     wait = True
 
-            if instructor and enrolled_count['staff'] + instructor >= beginner_class.instructor_limit:
+            if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
                 return 'full'
             if wait:
                 return 'wait'
@@ -62,7 +62,7 @@ class ClassRegistrationHelper:
 
         elif beginner_class.event.state in ['full', 'closed']:
             if user.is_staff:
-                if instructor and enrolled_count['staff'] + instructor >= beginner_class.instructor_limit:
+                if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
                     return 'full'
                 else:
                     return 'open'
