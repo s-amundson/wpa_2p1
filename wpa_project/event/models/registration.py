@@ -15,6 +15,9 @@ class RegistrationManager(models.Manager):
     def attendance_intro(self):
         return self.get_queryset().attendance_intro()
 
+    def registered_count(self):
+        return self.get_queryset().registered_count()
+
 
 class RegistrationQuerySet(models.QuerySet):
     def attendance_intro(self):
@@ -43,6 +46,9 @@ class RegistrationQuerySet(models.QuerySet):
 
     def intro_staff_count(self):
         return self.filter(event__type='class', student__user__is_staff=True, pay_status__in=['paid', 'admin']).count()
+
+    def registered_count(self):
+        return self.filter(pay_status__in=['paid', 'admin']).count()
 
 class Registration(models.Model):
     pay_statuses = ['admin', 'canceled', 'paid', 'refund', 'refund donated', 'refunded', 'start']

@@ -63,8 +63,9 @@ class ClassRegistrationView(RegistrationSuperView):
                         return self.has_error(form, f'{s.first_name} is already enrolled')
 
                 else:
-                    reg = Registration.objects.filter(student=s).exclude(
-                        pay_status__in=['canceled', "refunded", 'refund', 'refund donated'])
+                    reg = Registration.objects.filter(student=s, event__type='class').exclude(
+                        pay_status__in=['canceled', "refunded", 'refund', 'refund donated'],
+                    )
                     if len(reg.filter(event=event)) == 0:
                         if s.safety_class is None:
                             future_reg = reg.filter(event__event_date__gt=timezone.now())
@@ -168,7 +169,7 @@ class ClassRegistrationAdminView(BoardMixin, ClassRegistrationView):
             self.request.session['payment'] = True
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
         else:
-            self.success_url = reverse_lazy('programs:class_attend_list',
+            self.success_url = reverse_lazy('events:event_attend_list',
                                             kwargs={'event': event.id})
 
         cr = Registration.objects.filter(event=event)

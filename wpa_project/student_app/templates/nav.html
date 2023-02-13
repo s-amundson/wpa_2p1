@@ -86,42 +86,44 @@
 
                 {% if user.is_staff %}
                     <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                        Staff Links
-                      </a>
-                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{% url 'programs:class_list'%}">Intro Class List</a>
-                        <a class="dropdown-item" href="{% url 'registration:search'%}">Search Students</a>
-                        {% if user.is_board %}
-                          <div class="dropdown-divider"></div>
-                          <a class="dropdown-item" href="{% url 'registration:student_list'%}">Student List</a>
-                          <a class="dropdown-item" href="{% url 'registration:send_email'%}">Send Email</a>
-                          <a class="dropdown-item" href="{% url 'minutes:minutes_form'%}">New Minutes</a>
-                          <a class="dropdown-item" href="{% url 'minutes:decision_list' %}">Decision List</a>
-                          <a class="dropdown-item" href="{% url 'programs:class_registration_admin_list' %}">Admin Registrations</a>
-                          <a class="dropdown-item" href="{% url 'programs:staff_attendance' %}">Staff Attendance</a>
-                          <a class="dropdown-item" href="{% url 'payment:report' %}">Payment Report</a>
-                          <a class="dropdown-item" href="{{ BOARD_DOCS }}">Drive Board Docs</a>
-                        {% endif %}
-                        {% if user.is_superuser %}
-                          <div class="dropdown-divider"></div>
-                        {% endif %}
-                      </div>
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                            Staff Links
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{% url 'programs:class_list'%}">Intro Class List</a>
+                            <a class="dropdown-item" href="{% url 'events:volunteer_event_list'%}">Volunteer Events List</a>
+                            <a class="dropdown-item" href="{% url 'registration:search'%}">Search Students</a>
+
+                            {% if user.is_board %}
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'registration:student_list'%}">Student List</a>
+                                <a class="dropdown-item" href="{% url 'registration:send_email'%}">Send Email</a>
+                                <a class="dropdown-item" href="{% url 'minutes:minutes_form'%}">New Minutes</a>
+                                <a class="dropdown-item" href="{% url 'minutes:decision_list' %}">Decision List</a>
+                                <a class="dropdown-item" href="{% url 'programs:class_registration_admin_list' %}">Admin Registrations</a>
+                                <a class="dropdown-item" href="{% url 'programs:staff_attendance' %}">Staff Attendance</a>
+                                <a class="dropdown-item" href="{% url 'payment:report' %}">Payment Report</a>
+                                <a class="dropdown-item" href="{{ BOARD_DOCS }}">Drive Board Docs</a>
+                            {% endif %}
+                            {% if user.is_superuser %}
+                                <div class="dropdown-divider"></div>
+                            {% endif %}
+                        </div>
                     </li>
                     <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                        JOAD
-                      </a>
-                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                          <a class="dropdown-item" href="{% url 'joad:index'%}">JOAD</a>
-                          <div class="dropdown-divider"></div>
-                          <a class="dropdown-item" href="{% url 'joad:pin_score_list'%}">Pin Scores</a>
-                          <a class="dropdown-item" href="{% url 'joad:student_list'%}">Student List</a>
-                      </div>
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                            JOAD
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{% url 'joad:index'%}">JOAD</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'joad:pin_score_list'%}">Pin Scores</a>
+                            <a class="dropdown-item" href="{% url 'joad:student_list'%}">Student List</a>
+                        </div>
                     </li>
                 {% else %}
                      <li class="nav-item">
-                        <a class="nav-link captcha-link" href="{% url 'joad:index'%}">JOAD</a>
+                         <a class="nav-link captcha-link" href="{% url 'joad:index'%}">JOAD</a>
                     </li>
                 {% endif %}
                 <li class="nav-item dropdown">

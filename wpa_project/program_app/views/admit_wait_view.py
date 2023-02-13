@@ -37,7 +37,7 @@ class AdmitWaitView(UserPassesTestMixin, FormView):
         if self.request.user.is_authenticated and self.request.user.is_staff:
             if self.kwargs.get('beginner_class'):
                 self.beginner_class = get_object_or_404(BeginnerClass, event__id=self.kwargs.get('beginner_class'))
-                self.success_url = reverse_lazy('programs:class_attend_list',
+                self.success_url = reverse_lazy('events:event_attend_list',
                                                 kwargs={'event': self.beginner_class.event.id})
             if self.kwargs.get('family_id'):
                 self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id'))

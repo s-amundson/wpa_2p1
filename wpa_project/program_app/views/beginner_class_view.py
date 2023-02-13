@@ -106,7 +106,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
                 # logging.warning(self.beginner_class.event)
                 # logging.warning(self.beginner_class.event.event_date)
                 # logging.warning(timezone.localtime(self.beginner_class.event.event_date))
-                self.success_url = reverse_lazy('programs:class_attend_list',
+                self.success_url = reverse_lazy('events:event_attend_list',
                                                 kwargs={'event': self.beginner_class.event.id})
             return self.request.user.is_board
         else:

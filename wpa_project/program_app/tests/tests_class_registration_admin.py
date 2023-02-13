@@ -54,7 +54,7 @@ class TestsClassAdminRegistration(TestCase):
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')
-        self.assertRedirects(response, reverse('programs:class_attend_list', kwargs={'event': 1}))
+        self.assertRedirects(response, reverse('events:event_attend_list', kwargs={'event': 1}))
 
     def test_add_student_to_full(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -74,7 +74,7 @@ class TestsClassAdminRegistration(TestCase):
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')
-        self.assertRedirects(response, reverse('programs:class_attend_list', kwargs={'event': 1}))
+        self.assertRedirects(response, reverse('events:event_attend_list', kwargs={'event': 1}))
 
     def test_add_student_to_closed(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -95,7 +95,7 @@ class TestsClassAdminRegistration(TestCase):
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')
-        self.assertRedirects(response, reverse('programs:class_attend_list', kwargs={'event': 1}))
+        self.assertRedirects(response, reverse('events:event_attend_list', kwargs={'event': 1}))
 
     def test_add_student_registered(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -146,7 +146,7 @@ class TestsClassAdminRegistration(TestCase):
         self.assertEqual(len(cr), 2)
         for c in cr:
             self.assertEqual(c.pay_status, 'admin')
-        self.assertRedirects(response, reverse('programs:class_attend_list', kwargs={'event': 1}))
+        self.assertRedirects(response, reverse('events:event_attend_list', kwargs={'event': 1}))
 
     def test_class_post_good_pay(self):
         self.post_dict['payment'] = 'on'

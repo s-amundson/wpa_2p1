@@ -71,8 +71,11 @@ class UnregisterForm(forms.Form):
         self.template_name = 'program_app/forms/unregister.html'
         self.refund_errors = []
         if self.family:
-            self.registrations = Registration.objects.filter(event__event_date__gte=timezone.now(),
-                                                                  student__in=self.family.student_set.all())
+            self.registrations = Registration.objects.filter(
+                event__event_date__gte=timezone.now(),
+                event__type='class',
+                student__in=self.family.student_set.all(),
+            )
             self.registrations = self.registrations.exclude(pay_status__in=['refund donated', 'refunded', 'canceled'])
             self.can_refund = False
             for reg in self.registrations:

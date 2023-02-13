@@ -18,12 +18,12 @@
                 {% for c in object_list %}
                     <tr>
                         <td>
-                            <a class="nav-link" href="{% url 'events:volunteer_event' c.id %}">
+                            <a class="nav-link" href="{% url 'events:event_attend_list' c.event.id %}">
                                 {{ c.event.event_date }}
                             </a>
                         </td>
                         <td>{{ c.event.state }}</td>
-                        <td>{{ c.volunteerregistration_set.registered_count }}/{{ c.volunteer_limit }}</td>
+                        <td>{{ c.event.registration_set.registered_count }}/{{ c.volunteer_limit }}</td>
                         <td>{{ c.description }}</td>
                     </tr>
                 {% endfor %}

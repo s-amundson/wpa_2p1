@@ -22,7 +22,7 @@ class Calendar(HTMLCalendar):
         self.events = Event.objects.filter(event_date__gte=timezone.now().date(),
                                            event_date__year=year,
                                            event_date__month=month).order_by('event_date')
-
+        logger.warning(self.events)
         self.dark = dark
         self.staff = staff
         super(Calendar, self).__init__()
@@ -85,6 +85,14 @@ class Calendar(HTMLCalendar):
                         data += f'{event.state.capitalize()}</a>'
                 else:
                     logging.error(f'event record mismatch. event: {event.id}')
+            elif event.type == 'work':
+                if event.state in ['open', 'wait', 'full', 'closed', 'canceled']:
+                    url = reverse('events:registration', kwargs={'event': event.id})
+                    data += f'<a href="{url}" role="button" class="btn btn-work m-1'
+                    if event.state not in ['open', 'wait']:
+                        data += f' disabled" disabled aria-disabled="true'
+                    data += f'"> Work Event {cd.strftime("%I:%M %p")} {event.state.capitalize()}</a>'
+
         return f"<td><span class='date'>{day}</span>{data}</td>"
 
     def formatweek(self, theweek):

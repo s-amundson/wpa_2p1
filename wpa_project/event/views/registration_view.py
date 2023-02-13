@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+import uuid
 
 from ..forms import RegistrationForm
 from ..models import Event, Registration
@@ -65,8 +66,9 @@ class RegistrationView(RegistrationSuperView):
     def form_valid(self, form):
         self.form = form
         students = []
-        volunteer_event = form.cleaned_data['volunteer_event']
-        reg = volunteer_event.volunteerregistration_set.exclude(canceled=True)
+        event = form.cleaned_data['event']
+        volunteer_event = event.volunteerevent_set.last()
+        reg = event.registration_set.exclude(pay_status='canceled')
         logger.warning(len(reg))
 
         for k, v in form.cleaned_data.items():
@@ -87,13 +89,18 @@ class RegistrationView(RegistrationSuperView):
         if len(students) == 0:
             return self.has_error(form, 'Invalid student selected')
         else:
-            if volunteer_event.volunteer_limit >= volunteer_event.volunteerregistration_set.registered_count() + len(students):
+
+            if volunteer_event.volunteer_limit >= len(reg) + len(students):
+                ik = uuid.uuid4()
                 for s in students:
                     Registration.objects.create(
-                        event=volunteer_event,
+                        event=event,
+                        idempotency_key=ik,
+                        pay_status='paid',
                         student=s,
                         user=self.request.user
                     )
+                self.success_url = reverse_lazy('registration:profile')
                 return super().form_valid(form)
             return self.has_error(form, 'view incomplete')
 

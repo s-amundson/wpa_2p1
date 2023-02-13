@@ -63,7 +63,7 @@ class WaiverForm(forms.Form):
             content_type='image/jpeg',
             size=img_io.tell,
             charset=None)
-        if self.student.safety_class is None:
+        if class_date and self.student.safety_class is None:
             self.student.safety_class = class_date
         self.student.save()
 

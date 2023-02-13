@@ -11,9 +11,15 @@
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
     {% if user.is_board %}
-        <a href="{% url 'programs:beginner_class' form.event.id %}" class="btn btn-primary" role="button">
-            Edit Class
-        </a>
+        {% if form.event.type == 'class' %}
+            <a href="{% url 'programs:beginner_class' form.event.id %}" class="btn btn-primary" role="button">
+                Edit Class
+            </a>
+        {% else %}
+            <a href="{% url 'events:volunteer_event' form.event.id %}" class="btn btn-primary" role="button">
+                Edit Event
+            </a>
+        {% endif %}
         <hr/>
     {% endif %}
 <div aria-live="polite" aria-atomic="true" class="position-relative">
@@ -75,7 +81,7 @@
                         </thead>
                         <tbody>
                             {% for cr in form.new_students %}
-                                {% include "program_app/tables/student_attend_table_row.html" %}
+                                {% include "event/tables/student_attend_table_row.html" %}
                             {% endfor %}
                             <tr>
                                 <td colspan="6">
@@ -83,7 +89,7 @@
                                 </td>
                             </tr>
                             {% for cr in form.new_students_waiting %}
-                                {% include "program_app/tables/student_attend_table_row.html" %}
+                                {% include "event/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -112,13 +118,13 @@
                         </thead>
                         <tbody>
                             {% for cr in form.return_students %}
-                                {% include "program_app/tables/student_attend_table_row.html" %}
+                                {% include "event/tables/student_attend_table_row.html" %}
                             {% endfor %}
                             <tr>
                                 <td colspan="6">Wait List</td>
                             </tr>
                             {% for cr in form.return_students_waiting %}
-                                {% include "program_app/tables/student_attend_table_row.html" %}
+                                {% include "event/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -147,7 +153,7 @@
                         </thead>
                         <tbody>
                             {% for cr in form.staff %}
-                                {% include "program_app/tables/student_attend_table_row.html" %}
+                                {% include "event/tables/student_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>
                     </table>

@@ -22,7 +22,7 @@
                 {% for c in object_list %}
                     <tr>
                         <td>
-                            <a class="nav-link" href="{% url 'programs:class_attend_list' c.event_id %}">
+                            <a class="nav-link" href="{% url 'events:event_attend_list' c.event_id %}">
                                 {{ c.event_date }}
                             </a>
                         </td>

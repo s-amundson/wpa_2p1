@@ -146,3 +146,8 @@ a {
     padding-left: 50px ;
     text-indent: -50px ;
 }
+
+.btn-work {
+    background-color: var(--bs-gray);
+    color: var(--bs-white);
+}

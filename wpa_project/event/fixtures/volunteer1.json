@@ -1,0 +1,8 @@
+[
+  {"model": "event.event", "pk": 3, "fields": {"event_date": "2024-02-05T16:00:00.000Z", "type": "work", "cost_standard": 5,
+  "cost_member": 5, "state": "open", "volunteer_points": 2}},
+  {"model": "event.event", "pk": 4, "fields": {"event_date": "2023-06-12T16:00:00.000Z", "type": "work", "cost_standard": 5,
+  "cost_member": 5, "state": "open", "volunteer_points": 2}},
+  {"model": "event.volunteerevent", "pk": 1, "fields": {"event": 3, "volunteer_limit": 2, "description": "Test volunteer event 1"}},
+  {"model": "event.volunteerevent", "pk": 2, "fields": {"event": 4, "volunteer_limit": 2, "description": "Test volunteer event 2"}}
+]

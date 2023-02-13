@@ -1,14 +1,14 @@
 from django import forms
 from django.db.models import Q
-from student_app.src import StudentHelper
 
+from student_app.src import StudentHelper
 from student_app.models import Student
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class ClassAttendanceForm(forms.Form):
+class EventAttendanceForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.event = kwargs.pop('event')
@@ -36,4 +36,3 @@ class ClassAttendanceForm(forms.Form):
         self.attend_count = {'beginner': len(self.new_students.filter(attended=True)),
                              'returnee': len(self.return_students.filter(attended=True)),
                              'staff': len(self.staff.filter(attended=True))}
-

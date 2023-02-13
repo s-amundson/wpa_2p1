@@ -17,10 +17,14 @@
             {% else %}
                 {% if cr.student.signature or cr.student.user.is_staff %}
                     <input type="checkbox" class="m-2 attend-check" id="check_{{ cr.student.id }}"
-                       attend_url="{% url 'programs:class_attend' cr.id %}"
+                       attend_url="{% url 'events:event_attend' cr.id %}"
                        {% if cr.attended %} checked="checked" {% endif %}>
                 {% endif %}
-                <a href="{% url 'programs:class_sign_in' cr.id %}">
+                {% if cr.event.type == 'class' %}
+                    <a href="{% url 'programs:class_sign_in' cr.id %}">
+                {% else %}
+                    <a href="{% url 'registration:waiver' cr.student.id %}">
+                {% endif %}
                     {% if cr.student.signature %}
                         Update Signature
                     {% else %}
