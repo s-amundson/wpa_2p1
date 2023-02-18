@@ -153,6 +153,8 @@ def reminder_email(schedule_id):
 
 @shared_task
 def update_state(beginner_class):
+    if type(beginner_class) == int:
+        beginner_class = BeginnerClass.objects.get(pk=beginner_class)
     crh.update_class_state(beginner_class)
 
 @shared_task

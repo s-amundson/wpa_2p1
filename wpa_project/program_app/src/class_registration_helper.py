@@ -76,6 +76,7 @@ class ClassRegistrationHelper:
             pay_status__in=['paid', 'admin', 'waiting']).exclude(student__user__is_staff=True)
 
     def update_class_state(self, beginner_class):
+        logging.warning(beginner_class)
         records = self.student_registrations(beginner_class)
         if beginner_class.class_type == 'beginner' and beginner_class.event.state in ['open', 'wait', 'full']:
             logger.warning(f'state: {beginner_class.event.state}, registered: {len(records)}, ' +
