@@ -18,17 +18,19 @@ class RefundHelper(SquareHelper):
         return self.refund_payment(log, amount)
 
     def refund_entire_payment(self, log):
-        return self.refund_payment(log, log.total_money)
+        return self.refund_payment(log, log.total_money + log.volunteer_points * 100)
 
     def refund_payment(self, log, amount):
         """ does either a full or partial refund. """
         refund_points = 0
         if log.volunteer_points:
+            logger.warning(f'volunteer points:{log.volunteer_points}, amount: {amount}')
             vr = VolunteerRecord.objects.filter(student=log.user.student_set.last(),
                                                 volunteer_points=0 - log.volunteer_points).last()
-            if log.volunteer_points >= amount:
-                vr.volunteer_points += amount
-                log.volunteer_points -= amount
+            logger.warning(log.volunteer_points >= amount/100)
+            if log.volunteer_points >= amount/100:
+                vr.volunteer_points += amount/100
+                log.volunteer_points -= amount/100
                 RefundLog.objects.create(amount=0,
                                          created_time=timezone.now(),
                                          location_id='volunteer_points',
@@ -43,11 +45,11 @@ class RefundHelper(SquareHelper):
                 vr.save()
                 return {'status': "SUCCESS", 'error': ''}
             else:
-                amount -= log.volunteer_points
+                amount -= log.volunteer_points * 100
                 refund_points = log.volunteer_points
                 vr.volunteer_points = 0
             vr.save()
-        # logging.warning(log.status)
+        logging.warning(log.status)
         if log.status in ['comped']:
             # payment was comped therefore no square refund,
             log.status = 'refund'

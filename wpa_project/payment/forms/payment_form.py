@@ -85,9 +85,10 @@ class PaymentForm(forms.ModelForm):
                 and self.cleaned_data['amount'] == 0:
             self.save_log(idempotency_key, note, 'comped', volunteer_points)
             return True
+        logger.warning(f'available_vounteer points: {self.available_volunteer_points}, type:{type(self.available_volunteer_points)}')
         if self.available_volunteer_points >= self.amount_initial and \
                 volunteer_points >= self.amount_initial + self.cleaned_data['donation']:
-            self.save_log(idempotency_key, note, 'volunteer_points', volunteer_points)
+            self.save_log(idempotency_key, note, 'volunteer points', volunteer_points)
             duplicate = False
             # return True
         else:
@@ -112,6 +113,8 @@ class PaymentForm(forms.ModelForm):
                     student=self.user.student_set.last(),
                     volunteer_points= 0 - volunteer_points
                 )
+                self.log.volunteer_points = volunteer_points
+                self.log.save()
             if self.cleaned_data['save_card']:
                 customer = Customer.objects.filter(user=self.user).last()
                 # logging.debug(customer)

@@ -24,7 +24,7 @@ def registration_update(sender, instance, created, **kwargs):
     # crh = ClassRegistrationHelper()
     cr = Registration.objects.filter(idempotency_key=instance.idempotency_key)
     is_intro_class = False
-    if instance.status in ["SUCCESS", "COMPLETED"]:
+    if instance.status in ["SUCCESS", "COMPLETED", 'volunteer points']:
         for c in cr:
             c.pay_status = 'paid'
             c.save()

@@ -102,7 +102,7 @@ class RegistrationView(RegistrationSuperView):
                     )
                 self.success_url = reverse_lazy('registration:profile')
                 return super().form_valid(form)
-            return self.has_error(form, 'view incomplete')
+            return self.has_error(form, 'view incomplete')  # pragma: no cover
 
 
 # class ResumeRegistrationView(LoginRequiredMixin, View):

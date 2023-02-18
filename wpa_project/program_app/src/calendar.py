@@ -8,13 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class Calendar(HTMLCalendar):
-    class Event:
-        def __init__(self, id, class_date, class_type, state, session=None):
-            self.id = id
-            self.class_date = class_date
-            self.class_type = class_type
-            self.state = state
-            self.session = session
 
     def __init__(self, year=None, month=None, dark=False, staff=False):
         self.year = year

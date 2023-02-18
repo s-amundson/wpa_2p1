@@ -93,7 +93,7 @@ class ClassRegistrationHelper:
                 else:
                     beginner_class.event.state = 'wait'
                 beginner_class.event.save()
-            logger.warning(f'state: {beginner_class.event.state}')
+            logger.warning(f'event: {beginner_class.event.id}, state: {beginner_class.event.state}')
         elif beginner_class.class_type == 'returnee' and beginner_class.event.state in ['open', 'wait', 'full']:
             if len(records) >= beginner_class.returnee_limit and beginner_class.event.state in ['open', 'wait']:
                 if len(records) >= beginner_class.returnee_limit + beginner_class.returnee_wait_limit:

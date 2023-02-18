@@ -100,17 +100,17 @@ class UnregisterForm(forms.Form):
                 yield self[field_name]
 
     def process_refund(self, user, student_family):
-        logging.warning(self.cleaned_data)
+        logger.warning(self.cleaned_data)
         class_list = []
         for k, v in self.cleaned_data.items():
             if k[:5] == 'unreg' and v:
                 # logging.debug(k.split('_'))
                 class_list.append(int(k.split('_')[1]))
-        logging.warning(class_list)
+        logger.warning(class_list)
         cr = Registration.objects.filter(
             id__in=class_list,
             student__in=student_family.student_set.all())
-        logging.warning(cr)
+        logger.warning(cr)
         if not len(cr):  # no registrations found
             return True
         not_refundable = cr.filter(
@@ -123,7 +123,7 @@ class UnregisterForm(forms.Form):
             instructor_canceled.delay(cr.last().event)
         cr = cr.filter(event__event_date__gte=timezone.now() + timezone.timedelta(hours=24),
                        event__state__in=Event.event_states[:4])
-        logging.warning(cr)
+        logger.warning(cr)
 
         refund = RefundHelper()
         error_count = 0
@@ -140,7 +140,7 @@ class UnregisterForm(forms.Form):
             elif ikey['pay_status'] == 'paid':
                 square_response = refund.refund_with_idempotency_key(ikey['idempotency_key'],
                                                                      cost * 100 * ikey['ik_count'])
-            logging.debug(square_response)
+            logger.debug(square_response)
 
             if square_response['status'] in ['PENDING', 'SUCCESS']:
                 if user.student_set.first().student_family == self.family:

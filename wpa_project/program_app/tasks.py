@@ -151,6 +151,9 @@ def reminder_email(schedule_id):
     update_programs = UpdatePrograms()
     update_programs.reminder_email(beginner_schedule.class_time)
 
+@shared_task
+def update_state(beginner_class):
+    crh.update_class_state(beginner_class)
 
 @shared_task
 def update_waiting(beginner_class):

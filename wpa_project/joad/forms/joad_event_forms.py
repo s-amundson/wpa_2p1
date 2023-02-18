@@ -4,53 +4,13 @@ from datetime import timedelta
 
 from src.model_form import MyModelForm
 from src.model_helper import choices
-from ..models import EventRegistration, JoadEvent
+from ..models import JoadEvent
 from event.models import Event
 from payment.models import CostsModel
 from program_app.src import UpdatePrograms
-from student_app.models import Student
 
 import logging
 logger = logging.getLogger(__name__)
-
-
-class EventRegistrationForm(forms.ModelForm):
-
-    class Meta(MyModelForm.Meta):
-        model = EventRegistration
-        required_fields = ['joad_event']
-        optional_fields = []
-        fields = optional_fields + required_fields
-
-    def __init__(self, user, *args, **kwargs):
-        # if "instance"
-        super().__init__(*args, **kwargs)
-        logger.warning(kwargs)
-        # logger.warning(self.initial['event'].id)
-        if user.is_board:
-            students = Student.objects.all()
-        else:
-            students = Student.objects.get(user=user).student_family.student_set.all()
-        students = students.filter(is_joad=True)
-        d = timezone.localdate(timezone.now())
-        old = d.replace(year=d.year - 21)
-        young = d.replace(year=d.year - 9)
-        students = students.filter(dob__gt=old).filter(dob__lte=young).order_by('last_name')
-
-        # students = list(students.values())
-        for student in students:
-            self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
-                attrs={'class': "m-2 student-check"}), required=False,
-                label=f'{student.first_name} {student.last_name}', initial=True)
-        logger.warning(JoadEvent.objects.filter(event__state='open').order_by('event__event_date'))
-        self.fields['joad_event'].queryset = JoadEvent.objects.filter(event__state='open').order_by('event__event_date')
-        self.fields['joad_event'].default = self.initial['joad_event']
-        self.student_count = len(students)
-
-    def get_boxes(self):
-        for field_name in self.fields:
-            if field_name.startswith('student_'):
-                yield self[field_name]
 
 
 class JoadEventForm(MyModelForm):
