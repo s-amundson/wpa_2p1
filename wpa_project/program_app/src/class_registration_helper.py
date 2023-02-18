@@ -80,6 +80,9 @@ class ClassRegistrationHelper:
         if beginner_class.class_type == 'beginner' and beginner_class.event.state in ['open', 'wait', 'full']:
             logger.warning(f'state: {beginner_class.event.state}, registered: {len(records)}, ' +
                            f'limit: {beginner_class.beginner_limit}, wait: {beginner_class.beginner_wait_limit}')
+            logging.warning(f'state: {beginner_class.event.state}, registered: {len(records)}, ' +
+                           f'limit: {beginner_class.beginner_limit}, wait: {beginner_class.beginner_wait_limit}')
+            logging.warning(len(records) >= beginner_class.beginner_limit)
             if len(records) >= beginner_class.beginner_limit and beginner_class.event.state in ['open', 'wait']:
                 if len(records) >= beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
                     beginner_class.event.state = 'full'
@@ -94,6 +97,7 @@ class ClassRegistrationHelper:
                     beginner_class.event.state = 'wait'
                 beginner_class.event.save()
             logger.warning(f'event: {beginner_class.event.id}, state: {beginner_class.event.state}')
+            logging.warning(f'event: {beginner_class.event.id}, state: {beginner_class.event.state}')
         elif beginner_class.class_type == 'returnee' and beginner_class.event.state in ['open', 'wait', 'full']:
             if len(records) >= beginner_class.returnee_limit and beginner_class.event.state in ['open', 'wait']:
                 if len(records) >= beginner_class.returnee_limit + beginner_class.returnee_wait_limit:
@@ -131,14 +135,16 @@ class ClassRegistrationHelper:
 
     def update_waiting(self, beginner_class):
         logger.warning(beginner_class)
-        logger.warning(type(beginner_class))
+        logging.warning(beginner_class)
         if type(beginner_class) == int:
             beginner_class = BeginnerClass.objects.get(pk=beginner_class)
         records = self.student_registrations(beginner_class)
         logger.warning(len(records))
+        logging.warning(len(records))
         waiting = records.filter(pay_status='waiting').order_by('modified')
         admitted = records.filter(pay_status__in=['paid', 'admin']).order_by('modified')
         logger.warning(f'class type: {beginner_class.class_type}, waiting: {len(waiting)}, admitted: {len(admitted)}')
+        logging.warning(f'class type: {beginner_class.class_type}, waiting: {len(waiting)}, admitted: {len(admitted)}')
         if not len(waiting):
             return
         if beginner_class.class_type == 'beginner':
