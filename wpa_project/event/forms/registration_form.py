@@ -1,7 +1,7 @@
 from django import forms
 
 from src.model_form import MyModelForm
-from ..models import Registration
+from ..models import Registration, VolunteerEvent
 import logging
 
 logger = logging.getLogger(__name__)
@@ -29,12 +29,16 @@ class RegistrationForm(MyModelForm):
                        'dob': f"{student.dob}"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
         self.student_count = len(students)
+        self.description = ''
         # logger.warning(self.initial)
         if self.event_queryset is not None:
             self.fields['event'].queryset = self.event_queryset
         if 'event' in self.initial:
             self.fields['event'].queryset = self.fields['event'].queryset.filter(pk=self.initial['event'])
-
+            ve = VolunteerEvent.objects.filter(event__id=self.initial['event'])
+            if len(ve):
+                logger.warning(ve.last())
+                self.description = ve.last().description
     def get_boxes(self):
         for field_name in self.fields:
             if field_name.startswith('student_'):
