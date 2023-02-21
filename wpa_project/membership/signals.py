@@ -26,7 +26,7 @@ def add_years(d, years):
 @receiver(post_save, sender=PaymentLog)
 def member_update(sender, instance, created, **kwargs):
     memberships = Membership.objects.filter(idempotency_key=instance.idempotency_key)
-    if instance.status in ["SUCCESS", 'COMPLETED']:
+    if instance.status in ["SUCCESS", 'COMPLETED', 'volunteer points', 'comped']:
         for membership in memberships:
             membership.pay_status = 'paid'
             for student in membership.students.all():
