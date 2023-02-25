@@ -94,7 +94,9 @@ class TestsMinutes(TestCase):
         bu = BusinessUpdate(business=b1, update_date='2021-09-04', update_text="test update")
         bu.save()
 
-        d = {'meeting_date': '2021-09-04', 'memberships': 5}
+        d = {'meeting_date': '2021-09-04', 'memberships': 5, 'balance': 216}
         response = self.client.post(reverse('minutes:minutes_form', kwargs={'minutes_id': m.id}), d, secure=True)
-        self.assertEqual(Minutes.objects.last().memberships, 5)
-        self.assertNotEqual(Minutes.objects.last().meeting_date, '2021-09-04 19:30')
+        mr = Minutes.objects.last()
+        self.assertEqual(mr.memberships, 5)
+        self.assertNotEqual(mr.meeting_date, '2021-09-04 19:30')
+        self.assertEqual(mr.balance, 216)
