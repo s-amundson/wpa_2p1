@@ -110,8 +110,8 @@ class ClassRegistrationView(RegistrationSuperView):
             if self.wait:
                 logger.debug(self.has_card)
                 if self.has_card:
-                    beginner_class.event.state = 'wait'
-                    beginner_class.event.save()
+                    # beginner_class.event.state = 'wait'
+                    # beginner_class.event.save()
                     pay_status = 'waiting'
                     self.success_url = reverse_lazy('programs:wait_list', kwargs={'beginner_class': beginner_class.id})
                 else:
@@ -148,7 +148,8 @@ class ClassRegistrationView(RegistrationSuperView):
                     'amount_each': 0,
                      }
                 )
-
+        if self.wait:
+            ClassRegistrationHelper().update_class_state(beginner_class)
         return HttpResponseRedirect(self.success_url)
 
 
