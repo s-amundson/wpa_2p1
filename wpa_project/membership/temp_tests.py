@@ -1,3 +1,4 @@
+# from .tests.tests_election import TestsElection
 # from .tests.tests_level import TestsLevel
 # from .tests.tests_member_list import TestsMemberList
 # from .tests.tests_membership import TestsMembership

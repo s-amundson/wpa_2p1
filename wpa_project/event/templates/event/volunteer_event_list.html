@@ -5,6 +5,11 @@
 {% block main %}
     <div class="row p-2" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
     <div class="row p-2">
+        <p>
+            Below are our currently available volunteering opportunities.
+        </p>
+    </div>
+    <div class="row p-2">
         <table class="table table-bordered table-striped">
             <thead>
                 <tr>
@@ -12,6 +17,7 @@
                     <th>State</th>
                     <th>Volunteers</th>
                     <th>Description</th>
+                    <th>Register</th>
                 </tr>
             </thead>
             <tbody>
@@ -25,6 +31,13 @@
                         <td>{{ c.event.state }}</td>
                         <td>{{ c.event.registration_set.registered_count }}/{{ c.volunteer_limit }}</td>
                         <td>{{ c.description }}</td>
+                        <td>
+                            {% if c.event.state == 'open' %}
+                                <a role="button" class="btn btn-primary m-1" href="{% url 'events:registration' c.event.id %}">
+                                    Register
+                                </a>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -35,11 +48,11 @@
         <div class="col">
             {% if past %}
                 <a class="nav-link" href="{% url 'events:volunteer_event_list' %}">
-                    View upcoming classes
+                    View upcoming events
                 </a>
             {% else %}
-                <a class="nav-link" href="{% url 'programs:class_list' 1 %}">
-                    View past classes
+                <a class="nav-link" href="{% url 'events:volunteer_event_list' 1 %}">
+                    View past events
                 </a>
             {% endif %}
         </div>

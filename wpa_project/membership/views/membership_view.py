@@ -6,16 +6,30 @@ from django.views.generic.edit import FormView
 from django.utils.datetime_safe import date
 from ..forms import MembershipForm
 from ..models import Level
-from src.mixin import StudentFamilyMixin
+from src.mixin import StudentFamilyMixin, AccessMixin
 from student_app.models import StudentFamily
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
 
-class MembershipView(StudentFamilyMixin, FormView):
+class MembershipView(AccessMixin, FormView):
     template_name = 'membership/membership.html'
     form_class = MembershipForm
     success_url = reverse_lazy('payment:make_payment')
+    student_family = None
+
+    def dispatch(self, request, *args, **kwargs):
+        logger.warning(self.request.user.is_authenticated)
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        logging.warning(request.user.student_set.last())
+        if request.user.student_set.last() is None or request.user.student_set.last().student_family is None:
+            request.session['message'] = 'Address form is required'
+            return HttpResponseRedirect(reverse('registration:profile'))
+        self.student_family = request.user.student_set.last().student_family
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

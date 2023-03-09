@@ -445,6 +445,7 @@ class TestsClassRegistration(TestCase):
         cr.save()
         bc = cr.event.beginnerclass_set.last()
         bc.beginner_wait_limit = 10
+        bc.class_type = 'beginner'
         bc.save()
 
         u = User.objects.get(pk=2)

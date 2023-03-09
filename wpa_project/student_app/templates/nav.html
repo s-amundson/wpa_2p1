@@ -36,6 +36,9 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'payment:make_payment' %}">Donate</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'events:volunteer_event_list'%}">Volunteering</a>
+            </li>
             {% if user.is_board %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
@@ -73,6 +76,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         {% if user.is_member %}
+                            <a class="dropdown-item" href="{% url 'membership:election_list' %}">Elections</a>
                             <a class="dropdown-item" href="{% url 'membership:membership' %}">Membership</a>
                             <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
                             {% if user.is_board %}
@@ -91,7 +95,6 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="{% url 'programs:class_list'%}">Intro Class List</a>
-                            <a class="dropdown-item" href="{% url 'events:volunteer_event_list'%}">Volunteer Events List</a>
                             <a class="dropdown-item" href="{% url 'registration:search'%}">Search Students</a>
 
                             {% if user.is_board %}

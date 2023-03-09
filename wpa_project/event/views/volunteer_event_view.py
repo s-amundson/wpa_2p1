@@ -15,7 +15,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class VolunteerEventListView(LoginRequiredMixin, ListView):
+class VolunteerEventListView(ListView):
     template_name = 'event/volunteer_event_list.html'
     paginate_by = 20
 
