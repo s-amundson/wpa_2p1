@@ -12,6 +12,7 @@ class Election(models.Model):
     STATES = ['scheduled', 'open', 'closed']
     election_date = models.DateField(default=timezone.now)
     state = models.CharField(max_length=20, null=True, choices=choices(STATES))
+    # description = models.CharField(max_length=150, null=True, default='General Election')
 
     def __str__(self):
         return f'{self.election_date} {self.state}'

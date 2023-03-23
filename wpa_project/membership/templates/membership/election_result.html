@@ -6,7 +6,7 @@
 {% block main %}
     <div class="row"><h3 class="text-center">Election Results</h3></div>
     <div class="row"><h5 class="text-center">Election: {{ object_list.0.election.election_date }}</h5></div>
-    <div class="row">
+    <div class="row p-2">
         <p>Thank you to all that have participated: Below are the winners.</p>
         <table class="table table-bordered">
             <thead>
@@ -23,7 +23,9 @@
                             </br> {{ president.1.candidate }}
                         {% endif %}
                     </td>
-                    <td>{{ president.1.tie }}</td>
+                    <td>
+                        {% if president.1.tie %} True {% else %} False {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <td>Vice President</td>
@@ -33,7 +35,9 @@
                             </br> {{ vice_president.1.candidate }}
                         {% endif %}
                     </td>
-                    <td>{{ vice_president.1.tie }}</td>
+                    <td>
+                        {% if vice_president.1.tie %} True {% else %} False {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <td>Secretary</td>
@@ -43,7 +47,9 @@
                             </br> {{ secretary.1.candidate }}
                         {% endif %}
                     </td>
-                    <td>{{ secretary.1.tie }}</td>
+                    <td>
+                        {% if secretary.1.tie %} True {% else %} False {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <td>Treasurer</td>
@@ -53,7 +59,9 @@
                             </br> {{ treasurer.1.candidate }}
                         {% endif %}
                     </td>
-                    <td>{{ treasurer.1.tie }}</td>
+                    <td>
+                        {% if treasurer.1.tie %} True {% else %} False {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <td>Members at Large</td>
@@ -65,8 +73,36 @@
                             <p>{{ member_at_large.3.candidate }}</p>
                         {% endif %}
                     </td>
-                    <td>{{ member_at_large.3.tie }}</td>
+                    <td>
+                        {% if member_at_large.3.tie %} True {% else %} False {% endif %}
+                    </td>
                 </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="row p-2">
+        <table class="table table-bordered">
+            <thead>
+                <th> President </th>
+                <th> Vice President </th>
+                <th> Secretary </th>
+                <th> Treasurer </th>
+                <th> Members at Large </th>
+            </thead>
+            <tbody>
+                {% for vote in object_list %}
+                    <tr>
+                        <td>{{ vote.president }}</td>
+                        <td>{{ vote.vice_president }}</td>
+                        <td>{{ vote.secretary }}</td>
+                        <td>{{ vote.treasurer }}</td>
+                        <td>
+                            {% for member in vote.member_at_large.all %}
+                            {{ member }}</br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

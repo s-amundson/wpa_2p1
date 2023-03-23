@@ -9,10 +9,10 @@ from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
 
-# import logging
-# logger = logging.getLogger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 from celery.utils.log import get_task_logger
-logger = get_task_logger(__name__)
+celery_logger = get_task_logger(__name__)
 crh = ClassRegistrationHelper()
 
 
@@ -31,7 +31,7 @@ def close_create_class(schedule_id):
 
 @shared_task
 def daily_update():
-    logger.warning('daily_update')
+    celery_logger.warning('daily_update')
     update_programs = UpdatePrograms()
     update_programs.record_classes()
     update_programs.status_email()
@@ -95,9 +95,9 @@ def instructor_canceled(event):
         student__user__is_instructor=True,
         pay_status__in=['admin', 'paid']
     )
-    logger.warning(len(reg))
+    celery_logger.warning(len(reg))
     if len(reg) < 3:
-        logger.warning('send instructors a warning')
+        celery_logger.warning('send instructors a warning')
         # TODO send instructors a warning
 
 @shared_task
@@ -105,15 +105,15 @@ def refund_class(beginner_class, message=''):
     if type(beginner_class) == int:
         beginner_class = BeginnerClass.objects.get(pk=beginner_class)
     ec = ClassRegistrationHelper().enrolled_count(beginner_class)
-    logger.warning(ec)
+    celery_logger.warning(ec)
     refund = RefundHelper()
     email_message = EmailMessage()
     # need to refund students if any
     if ec["beginner"] > 0 or ec["returnee"] > 0:
-        cr = Registration.objects.filter(event=beginner_class.event)
+        cr = Registration.objects.filter(event=beginner_class.event, pay_status__in=['paid', 'waiting', 'refund'])
         ik_list = []
         for reg in cr:
-            logger.warning(reg.id)
+            celery_logger.warning(reg.id)
             if reg.idempotency_key not in ik_list:
                 ik_list.append(reg.idempotency_key)
                 qty = len(cr.filter(idempotency_key=reg.idempotency_key).filter(pay_status='paid'))
@@ -121,12 +121,11 @@ def refund_class(beginner_class, message=''):
                     reg.idempotency_key, qty * beginner_class.event.cost_standard * 100)
                 if square_response['status'] == 'error':
                     if square_response['error'] != 'Previously refunded':  # pragma: no cover
-                        logger.error(square_response)
+                        celery_logger.error(square_response)
                 else:
                     email_sent = False
-                    for c in cr.filter(idempotency_key=reg.idempotency_key):
-                        c.pay_status = 'refund'
-                        c.save()
+                    transaction = cr.filter(idempotency_key=reg.idempotency_key)
+                    for c in transaction:
                         if c.student.user is not None:
                             email_message.refund_canceled_email(
                                 c.student.user,
@@ -134,15 +133,18 @@ def refund_class(beginner_class, message=''):
                                 message
                             )
                             email_sent = True
+                            transaction.update(pay_status='refund')
                     if not email_sent:  # if none of the students is a user find a user in the family.
-                        c = cr.filter(idempotency_key=reg.idempotency_key)[0]
-                        for s in c.student.student_family.student_set.all():
-                            if s.user is not None:
-                                email_message.refund_canceled_email(
-                                    s.user,
-                                    f'Class on {str(timezone.localtime(beginner_class.event.event_date))[:10]}',
-                                    message
-                                )
+                        c = transaction.first()
+                        if c:
+                            for s in c.student.student_family.student_set.all():
+                                if s.user is not None:
+                                    email_message.refund_canceled_email(
+                                        s.user,
+                                        f'Class on {str(timezone.localtime(beginner_class.event.event_date))[:10]}',
+                                        message
+                                    )
+                                    transaction.update(pay_status='refund')
 
 
 @shared_task

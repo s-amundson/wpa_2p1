@@ -44,6 +44,14 @@ class ElectionResultView(MemberMixin, ListView):
     template_name = 'membership/election_result.html'
     model = ElectionVote
 
+    def dispatch(self, request, *args, **kwargs):
+        dispatch = super().dispatch(request, *args, **kwargs)
+        election = get_object_or_404(Election, pk=kwargs.get('election_id'))
+        if election.state in ['scheduled', 'open']:
+            logger.warning('This election is not closed')
+            return HttpResponseRedirect(reverse_lazy('membership:election_list'))
+        return dispatch
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         positions = ['president', 'vice_president', 'secretary', 'treasurer', 'member_at_large']
