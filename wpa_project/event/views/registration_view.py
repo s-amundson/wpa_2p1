@@ -54,10 +54,10 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         messages.add_message(self.request, messages.ERROR, message)
         logger.warning(message)
         return self.form_invalid(form)
-
-    def post(self, request, *args, **kwargs):
-        logger.warning(self.request.POST)
-        return super().post(request, *args, **kwargs)
+    #
+    # def post(self, request, *args, **kwargs):
+    #     logger.warning(self.request.POST)
+    #     return super().post(request, *args, **kwargs)
 
 
 class RegistrationView(RegistrationSuperView):

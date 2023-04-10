@@ -157,7 +157,6 @@ class JoadEventListView(UserPassesTestMixin, ListView):
         if not self.request.user.is_board:
             events = events.exclude(event__state='scheduled').exclude(event__state='canceled')
         event_list = []
-        logger.debug(events)
         for event in events:
             e = model_to_dict(event)
             reg_list = []
@@ -180,10 +179,10 @@ class JoadEventListView(UserPassesTestMixin, ListView):
                         reg_status = 'not registered'
                     reg_list.append({'reg_status': reg_status, 'reg_id': reg_id, 'student_id': student.id})
             e['registrations'] = reg_list
+            e['event_id'] = event.event.id
             e['event_date'] = event.event.event_date
             e['state'] = event.event.state
             e['cost'] = event.event.cost_standard
-            logger.debug(e)
             event_list.append(e)
         return event_list
 

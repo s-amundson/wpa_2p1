@@ -22,16 +22,22 @@ class EventRegistrationView(RegistrationSuperView):
     template_name = 'joad/event_registration.html'
     event_type = 'joad event'
 
+    # def get(self, request, *args, **kwargs):
+    #     logger.debug('get')
+    #     return super().get(request, *args, **kwargs)
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         if self.request.user.is_board:
             kwargs['students'] = Student.objects.filter(is_joad=True)
         else:
             kwargs['students'] = kwargs['students'].filter(is_joad=True)
+        logger.warning(kwargs)
         return kwargs
 
     def get_initial(self):
         eid = self.kwargs.get("event_id", None)
+        logger.warning(eid)
         if eid is not None:
             event = get_object_or_404(Event, pk=eid)
             self.initial = {'event': event.id}

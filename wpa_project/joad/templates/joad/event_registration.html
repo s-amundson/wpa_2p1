@@ -6,7 +6,7 @@
     {% load static %}
     <script src="{% static 'js/joad_registration.js' %}"></script>
     <script nonce="{{request.csp_nonce}}">
-        let class_list_url = "{% url 'joad:class_list' %}";
+        let class_list_url = null;
     </script>
 {% endblock %}
 
