@@ -4,7 +4,7 @@
 
 
 {% block main %}
-    <div>
+    <div class="row">
         <table class="table table-bordered table-striped">
             <thead>
                 <th> ID </th>
@@ -33,5 +33,10 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    <div class="row">
+        {% if user.is_superuser %}
+            <div><a href="{% url 'membership:election' %}">Create New Election</a></div>
+        {% endif %}
     </div>
 {% endblock %}
