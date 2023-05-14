@@ -209,7 +209,7 @@ class TestsEventAttendance(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-    def test_class_instructor_attendance_late_no_points(self):
+    def test_class_instructor_attendance_late_little_points(self):
         # make user instructor
         u = User.objects.get(pk=1)
         u.is_instructor = True
@@ -245,8 +245,9 @@ class TestsEventAttendance(TestCase):
 
         # check points
         vr = VolunteerRecord.objects.all()
-        self.assertEqual(len(vr), 0)
-
+        self.assertEqual(len(vr), 1)
+        self.assertEqual(vr[0].student, student)
+        self.assertEqual(vr[0].volunteer_points, 0.2)
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('events:event_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)

@@ -46,6 +46,8 @@ class EventAttendView(StaffMixin, View):
                             points = cr.event.volunteer_points
                         elif cr.reg_time <= cr.event.event_date - timezone.timedelta(days=1):
                             points = cr.event.volunteer_points / 2
+                        else:
+                            points = cr.event.volunteer_points * 0.1
                     VolunteerRecord.objects.update_points(
                         cr.event,
                         cr.student,

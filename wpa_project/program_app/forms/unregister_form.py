@@ -115,8 +115,9 @@ class UnregisterForm(forms.Form):
             return True
         not_refundable = cr.filter(
             event__event_date__lt=timezone.now() + timezone.timedelta(hours=24),
-            event__state__in=Event.event_states[:5])
-        not_refundable.update(pay_status='canceled')
+            event__state__in=Event.event_states[:5]
+        )
+        logger.warning(not_refundable.update(pay_status='canceled'))
         if cr.filter(student__user__is_instructor=True,
                      event__event_date__lt=timezone.now() + timezone.timedelta(hours=24)):
             # instructor canceled, check to see if we still have enough instructors.

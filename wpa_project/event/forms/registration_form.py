@@ -18,6 +18,8 @@ class RegistrationForm(MyModelForm):
     def __init__(self, students, *args, **kwargs):
         self.cancel_form = kwargs.get('cancel', False)
         self.event_queryset = kwargs.get('event_queryset', None)
+        self.students = students
+        event_type = kwargs.get('event_type', 'class')
         for k in ['cancel', 'event_type', 'event_queryset']:
             if k in kwargs:
                 kwargs.pop(k)
@@ -28,6 +30,10 @@ class RegistrationForm(MyModelForm):
                 attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
                        'dob': f"{student.dob}"}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=True)
+            if event_type == 'work':
+                self.fields[f'volunteer_heavy_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
+                    attrs={'class': "m-2", }), required=False,
+                    label=f'can preform heavy duty tasks', initial=True)
         self.student_count = len(students)
         self.description = ''
         # logger.warning(self.initial)
@@ -39,9 +45,15 @@ class RegistrationForm(MyModelForm):
             if len(ve):
                 logger.warning(ve.last())
                 self.description = ve.last().description
+
     def get_boxes(self):
         for field_name in self.fields:
             if field_name.startswith('student_'):
+                yield self[field_name]
+
+    def get_heavy(self):
+        for field_name in self.fields:
+            if field_name.startswith('volunteer_heavy_'):
                 yield self[field_name]
 
 

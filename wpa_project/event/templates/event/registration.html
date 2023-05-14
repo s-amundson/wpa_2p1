@@ -28,18 +28,37 @@
             {% if form.student_count %}
                 <div> Student(s): </div>
             {% endif %}
-            {% for student in form.get_boxes %}
-                <div class="input-group input-group-md">
-                    {{ student }} {{ student.label }} {{ student.errors }}
+
+            <div class="d-flex flex-row">
+                <div>
+                    {% for student in form.get_boxes %}
+                        <div class="input-group input-group-md">
+                            {{ student }} {{ student.label }} {{ student.errors }}
+                        </div>
+                    {% empty %}
+                        <div>No Students registered</div>
+                        {% if form.cancel_form %}
+                            <div>No Students registered</div>
+                        {% else %}
+                            <div>No Students to register</div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
-            {% empty %}
-                <div>No Students registered</div>
-                {% if form.cancel_form %}
-                    <div>No Students registered</div>
-                {% else %}
-                    <div>No Students to register</div>
-                {% endif %}
-            {% endfor %}
+                <div>
+                    {% for student in form.get_heavy %}
+                        <div class="input-group input-group-md">
+                            {{ student }} {{ student.label }} {{ student.errors }}
+                        </div>
+                    {% empty %}
+                        <div>No Students registered</div>
+                        {% if form.cancel_form %}
+                            <div>No Students registered</div>
+                        {% else %}
+                            <div>No Students to register</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
             {% if form.student_count %}
                 <input id="session-btn" class="btn btn-primary" type="submit"
                    {% if form.cancel_form %}

@@ -39,11 +39,11 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         if not self.request.user.is_staff:
             self.event_queryset = self.event_queryset.filter(state__in=['open', 'wait'])
         kwargs = super().get_form_kwargs()
-        # logger.warning(self.kwargs)
         if self.kwargs.get('event', None) is not None:
             kwargs['initial']['event'] = self.kwargs.get('event')
         kwargs['event_queryset'] = self.event_queryset
         kwargs['students'] = self.student_family.student_set.all()
+        kwargs['event_type'] = self.event_type
         return kwargs
 
     def form_invalid(self, form):
@@ -54,10 +54,6 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         messages.add_message(self.request, messages.ERROR, message)
         logger.warning(message)
         return self.form_invalid(form)
-    #
-    # def post(self, request, *args, **kwargs):
-    #     logger.warning(self.request.POST)
-    #     return super().post(request, *args, **kwargs)
 
 
 class RegistrationView(RegistrationSuperView):
@@ -69,7 +65,6 @@ class RegistrationView(RegistrationSuperView):
         event = form.cleaned_data['event']
         volunteer_event = event.volunteerevent_set.last()
         reg = event.registration_set.exclude(pay_status='canceled')
-        logger.warning(len(reg))
 
         for k, v in form.cleaned_data.items():
             logger.debug(k)
@@ -77,10 +72,7 @@ class RegistrationView(RegistrationSuperView):
                 i = int(str(k).split('_')[-1])
                 s = Student.objects.get(pk=i)
 
-                logger.warning(s)
-                logger.warning(len(reg.filter(student__id=i)))
                 sreg = reg.filter(student=s)
-                logger.warning(len(sreg))
                 if len(sreg) == 0:
                     students.append(s)
                 else:
@@ -98,54 +90,9 @@ class RegistrationView(RegistrationSuperView):
                         idempotency_key=ik,
                         pay_status='paid',
                         student=s,
-                        user=self.request.user
+                        user=self.request.user,
+                        volunteer_heavy=form.cleaned_data[f'volunteer_heavy_{s.id}']
                     )
                 self.success_url = reverse_lazy('registration:profile')
                 return super().form_valid(form)
             return self.has_error(form, 'view incomplete')  # pragma: no cover
-
-
-# class ResumeRegistrationView(LoginRequiredMixin, View):
-#     def get(self, request, reg_id=None):
-#         registration = get_object_or_404(Registration, pk=reg_id)
-#         registrations = Registration.objects.filter(idempotency_key=registration.idempotency_key)
-#         logging.debug(registration)
-#         self.request.session['idempotency_key'] = str(registration.idempotency_key)
-#         self.request.session['line_items'] = []
-#         self.request.session['payment_category'] = 'joad'
-#
-#         for r in registrations:
-#             self.request.session['payment_description'] = f'Joad session starting {str(r.session.start_date)[:10]}'
-#             self.request.session['line_items'].append(
-#                     {'name': f'Joad session starting {str(r.session.start_date)[:10]} student id: {str(r.student.id)}',
-#                      'quantity': 1, 'amount_each': r.session.cost})
-#         return HttpResponseRedirect(reverse('payment:make_payment'))
-
-
-# class RegistrationCancelView(RegistrationSuperView):
-#     success_url = reverse_lazy('joad:index')
-
-    # def get_form_kwargs(self):
-    #     kwargs = super().get_form_kwargs()
-    #     if self.request.user.is_board:
-    #         students = Student.objects.filter(is_joad=True)
-    #     else:
-    #         students = self.request.user.student_set.last().student_family.student_set.filter(is_joad=True)
-    #     logging.debug(students)
-    #     kwargs['students'] = students.filter(registration__in=self.session.registration_set.all())
-    #     kwargs['cancel'] = True
-    #     logging.debug(kwargs)
-    #     return kwargs
-    #
-    # def form_valid(self, form):
-    #     logging.debug(form.cleaned_data)
-    #     if form.process_refund(self.request.user):
-    #         return super().form_valid(form)
-    #     else:
-    #         return self.form_invalid(form)
-    #
-    #
-    # def test_func(self):
-    #     if super().test_func():
-    #         return self.session is not None
-    #     return False

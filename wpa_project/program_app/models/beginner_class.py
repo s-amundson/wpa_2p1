@@ -36,3 +36,4 @@ class BeginnerSchedule(BeginnerCommonClass):
     future_classes = models.IntegerField(default=6)
     state = models.CharField(max_length=20, null=True, choices=choices(BeginnerCommonClass.class_states))
     cost = models.IntegerField(default=5)
+    volunteer_points = models.IntegerField(default=2)

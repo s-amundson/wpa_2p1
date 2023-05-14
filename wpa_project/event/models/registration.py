@@ -8,6 +8,7 @@ from src.model_helper import choices
 import logging
 logger = logging.getLogger(__name__)
 
+
 class RegistrationManager(models.Manager):
     def get_queryset(self):
         return RegistrationQuerySet(self.model, using=self._db)
@@ -50,6 +51,7 @@ class RegistrationQuerySet(models.QuerySet):
     def registered_count(self):
         return self.filter(pay_status__in=['paid', 'admin']).count()
 
+
 class Registration(models.Model):
     pay_statuses = ['admin', 'canceled', 'paid', 'refund', 'refund donated', 'refunded', 'start']
     event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, default=None)
@@ -61,6 +63,7 @@ class Registration(models.Model):
     attended = models.BooleanField(default=False)
     modified = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    volunteer_heavy = models.BooleanField(default=False)
 
     objects = RegistrationManager()
 

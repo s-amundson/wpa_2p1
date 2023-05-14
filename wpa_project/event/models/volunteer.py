@@ -6,6 +6,7 @@ from student_app.models import Student
 import logging
 logger = logging.getLogger(__name__)
 
+
 class VolunteerEventManager(models.Manager):
     def get_queryset(self):
         return VolunteerEventQueryset(self.model, using=self._db)
@@ -13,11 +14,13 @@ class VolunteerEventManager(models.Manager):
     # def registered_count(self):
     #     return self.get_queryset().registered_count()
 
+
 class VolunteerEventQueryset(models.QuerySet):
     def registered_count(self):
         count = self.filter(canceled=False).count()
         logger.warning(count)
         return count
+
 
 class VolunteerEvent(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, default=None)
@@ -25,6 +28,7 @@ class VolunteerEvent(models.Model):
     description = models.TextField()
 
     objects = VolunteerEventManager()
+
 
 class VolunteerRecordManager(models.Manager):
     def get_family_points(self, family):
