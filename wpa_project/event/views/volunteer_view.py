@@ -1,14 +1,14 @@
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 
-from ..forms import VolunteerEventForm
+from ..forms import VolunteerEventForm, VolunteerRecordForm
 from ..models import VolunteerEvent
 
 from event.models import Event
+from student_app.models import Student, StudentFamily
 from src.mixin import BoardMixin
 
 import logging
@@ -51,7 +51,7 @@ class VolunteerEventView(BoardMixin, FormView):
             form = self.form_class(**self.get_form_kwargs())
         return form
 
-    def form_invalid(self, form):
+    def form_invalid(self, form):  # pragma: no cover
         logger.warning(form.errors)
         return super().form_invalid(form)
 
@@ -70,4 +70,26 @@ class VolunteerEventView(BoardMixin, FormView):
             )
         v_event.save()
         logger.warning(f'v_event: {v_event.id} {v_event.description}, event: {v_event.event.id}')
+        return super().form_valid(form)
+
+
+class VolunteerRecordView(BoardMixin, FormView):
+    template_name = 'student_app/form_as_p.html'
+    form_class = VolunteerRecordForm
+    success_url = reverse_lazy('events:volunteer_event_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        logger.warning(self.request.GET)
+        if 'student' in self.request.GET:
+            logger.warning(self.request.GET['student'])
+            kwargs['student'] = get_object_or_404(Student, pk=self.request.GET['student'])
+        if 'student_family' in self.request.GET:
+            kwargs['student_family'] = get_object_or_404(StudentFamily, pk=self.request.GET['student_family'])
+        logger.warning(kwargs)
+        return kwargs
+
+    def form_valid(self, form):
+        logger.warning(form.cleaned_data)
+        form.save()
         return super().form_valid(form)

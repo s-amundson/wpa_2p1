@@ -10,4 +10,5 @@ urlpatterns = [
     path('volunteer_event/<int:event>/', VolunteerEventView.as_view(), name='volunteer_event'),
     path('volunteer_event_list/', VolunteerEventListView.as_view(), name='volunteer_event_list'),
     path('volunteer_event_list/<int:past>/', VolunteerEventListView.as_view(), name='volunteer_event_list'),
+    path('volunteer_record/', VolunteerRecordView.as_view(), name='volunteer_record'),
 ]

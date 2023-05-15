@@ -9,6 +9,7 @@ import logging
 
 from ..forms import SearchEmailForm, SearchNameForm, SearchPhoneForm
 from ..models import StudentFamily, Student
+from event.models import VolunteerRecord
 from program_app.forms import UnregisterForm
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,7 @@ class SearchResultView(UserPassesTestMixin, TemplateView):
         context['student_family'] = self.student_family
         context['students'] = self.student_family.student_set.all()
         context['form'] = UnregisterForm(family=self.student_family)
+        context['volunteer_points'] = VolunteerRecord.objects.get_family_points(self.student_family)
         return context
 
     def test_func(self):

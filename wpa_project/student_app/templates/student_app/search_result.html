@@ -91,7 +91,15 @@
                 Admin Registration
             </a>
         </div>
-
+        <div class="row pt-4">
+            <h4>Volunteer Points:</h4>
+            <div class="d-flex flex-row">
+                <div>Points: {{ volunteer_points }}</div>
+                <a class="m-2 btn btn-primary" href="{% url 'events:volunteer_record'%}?student_family={{ student_family.id }}" role="button">
+                    Modify Points
+                </a>
+            </div>
+        </div>
         <div class="row pt-4">
             <a href="{% url 'membership:membership' student_family.id %}"> Membership </a>
         </div>

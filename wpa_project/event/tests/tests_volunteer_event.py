@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 
-from ..models import Event
+from ..models import Event, VolunteerRecord
 from student_app.models import User
 
 logger = logging.getLogger(__name__)
@@ -65,3 +65,22 @@ class TestsVolunteerEvent(TestCase):
         self.assertEqual(event.type, 'work')
         self.assertEqual(event.event_date, d)
         self.assertEqual(ve.description, 'Updated description')
+
+    def test_volunteer_record_get(self):
+        response = self.client.get(reverse('events:volunteer_record'), secure=True)
+        self.assertEqual(response.status_code, 200)
+
+    def test_volunteer_record_get_student(self):
+        response = self.client.get(reverse('events:volunteer_record'), {'student': 3}, secure=True)
+        self.assertEqual(response.status_code, 200)
+
+    def test_volunteer_record_get_student_family(self):
+        response = self.client.get(reverse('events:volunteer_record'), {'student_family': 3}, secure=True)
+        self.assertEqual(response.status_code, 200)
+
+    def test_volunteer_record_post(self):
+        response = self.client.post(reverse('events:volunteer_record'),
+                                   {'student': 2, 'volunteer_points': 2}, secure=True)
+        vr = VolunteerRecord.objects.all()
+        self.assertEqual(len(vr), 1)
+        self.assertEqual(vr[0].volunteer_points, 2)
