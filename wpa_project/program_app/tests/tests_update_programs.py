@@ -110,9 +110,9 @@ class TestsUpdatePrograms(TestCase):
 
         # UpdatePrograms().beginner_class()
         UpdatePrograms().reminder_email(timezone.datetime.time(d))
-        # logging.warning(len(mail.outbox))
+        # logger.warning(mail.outbox[0].body)
         for m in mail.outbox:
-            logging.warning(m.subject)
+            logger.warning(m.subject)
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Reminder {d.strftime('%Y-%m-%d')}")
         s = 'Either you or a member of your family is signed up for a class'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
