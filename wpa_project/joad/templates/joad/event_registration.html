@@ -21,11 +21,7 @@
                 {{ form.event }}
             </div>
             <div>Students: </div>
-            {% for student in form.get_boxes %}
-                <div class="input-group input-group-md">
-                    {{ student }} {{ student.label }}
-                </div>
-            {% endfor %}
+            {% include 'event/tables/student_formset.html' %}
             {% if form.student_count %}
                 <input id="session-btn" class="btn btn-primary" type="submit" value="Submit">
             {% endif %}

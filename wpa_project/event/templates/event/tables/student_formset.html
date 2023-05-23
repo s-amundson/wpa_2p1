@@ -1,0 +1,24 @@
+{{ formset.management_form }}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Student(s)</th>
+            {% if form.event_type == 'work' %}
+                <th>Can perform heavy duty tasks</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for student_form in formset %}
+            <tr>
+                <td>
+                    {{ student_form.register }} {{ student_form.register.label }}
+                    {{ student_form.event }} {{ student_form.student }}
+                </td>
+                {% if form.event_type == 'work' %}
+                <td>{{ student_form.heavy }} {{ student_form.heavy.label }}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

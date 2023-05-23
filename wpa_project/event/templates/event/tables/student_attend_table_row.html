@@ -34,12 +34,5 @@
             {% endif %}
         {% endif %}
     </td>
-    <td>
-        {% if form.is_closed %}
-            <input type="checkbox" class="m-2 attend-check"
-               attend_url="{% url 'registration:covid_vax' cr.student.id %}"  id="covid_vax_{{ cr.student.id }}"
-            {% if cr.student.covid_vax %} checked="checked" {% endif %}>
-        {% endif %}
-    </td>
     <td>{{ cr.student.registration_set.attendance_intro.attended }}/{{ cr.student.registration_set.attendance_intro.registrations }}</td>
 </tr>

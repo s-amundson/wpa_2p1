@@ -11,7 +11,7 @@ Total   {{ total }}
 
 {{ receipt }}
 
-If for any reason you can't make it, please cancel your registration by going to http://registration/woodleyparkarchers.org/
+If for any reason you can't make it, please cancel your registration by going to https://woodleyparkarchers.org/
 
-http://woodleyparkarchers.org/
-http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079
+https://woodleyparkarchers.org/
+https://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

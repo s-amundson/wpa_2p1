@@ -32,9 +32,6 @@ class Calendar(HTMLCalendar):
             cd = timezone.localtime(event.event_date)
             data += '</br>'
             if event.type == 'joad class':
-                # logging.warning(event.id)
-                # logging.warning(event.joadclass_set)
-                # logging.warning(JoadClass.objects.filter(event=event))
                 jc = JoadClass.objects.filter(event=event).last() # should be able to do this with a reverse relation but not working
                 if jc is not None:
                     if event.state in ['open', 'wait', 'full', 'closed', 'canceled']:
@@ -48,7 +45,7 @@ class Calendar(HTMLCalendar):
 
             elif event.type == 'joad event':
                 if event.state in ['open', 'wait', 'full', 'closed', 'canceled']:
-                    url = reverse('joad:event_registration', kwargs={'event_id': event.id})
+                    url = reverse('joad:event_registration', kwargs={'event': event.id})
                     data += f'<a href="{url}" role="button" class="btn btn-warning m-1'
                     if event.state not in ['open', 'wait']:
                         data += f' disabled" disabled aria-disabled="true'

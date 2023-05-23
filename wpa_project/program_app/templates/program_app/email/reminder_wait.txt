@@ -7,5 +7,5 @@ Please plan to be at the range {{ minutes }} minutes prior to the class to allow
 {% include "program_app/covid_policy.txt" %}
 
 If for any reason you can't make it, please cancel your registration by going http://registration/woodleyparkarchers.org/
-http://woodleyparkarchers.org/">WoodleyParkArchers.org
-http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079
+https://woodleyparkarchers.org/">WoodleyParkArchers.org
+https://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

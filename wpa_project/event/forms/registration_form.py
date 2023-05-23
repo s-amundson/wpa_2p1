@@ -1,4 +1,6 @@
 from django import forms
+from django.forms import BaseInlineFormSet
+from django.utils.functional import cached_property
 
 from src.model_form import MyModelForm
 from ..models import Registration, VolunteerEvent
@@ -19,21 +21,16 @@ class RegistrationForm(MyModelForm):
         self.cancel_form = kwargs.get('cancel', False)
         self.event_queryset = kwargs.get('event_queryset', None)
         self.students = students
-        event_type = kwargs.get('event_type', 'class')
+        self.event_type = kwargs.get('event_type', 'class')
         for k in ['cancel', 'event_type', 'event_queryset']:
             if k in kwargs:
                 kwargs.pop(k)
         super().__init__(*args, **kwargs)
+        if self.event_type == 'class':
+            self.fields[f'terms'] = forms.BooleanField(widget=forms.CheckboxInput(
+                        attrs={'class': "m-2"}), required=True,
+                        label=f'I agree to the terms', initial=False)
 
-        for student in students:
-            self.fields[f'student_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
-                attrs={'class': "m-2 student-check", 'is_beginner': 'T' if student.safety_class is None else 'F',
-                       'dob': f"{student.dob}"}), required=False,
-                label=f'{student.first_name} {student.last_name}', initial=True)
-            if event_type == 'work':
-                self.fields[f'volunteer_heavy_{student.id}'] = forms.BooleanField(widget=forms.CheckboxInput(
-                    attrs={'class': "m-2", }), required=False,
-                    label=f'can preform heavy duty tasks', initial=True)
         self.student_count = len(students)
         self.description = ''
         # logger.warning(self.initial)
@@ -45,16 +42,6 @@ class RegistrationForm(MyModelForm):
             if len(ve):
                 logger.warning(ve.last())
                 self.description = ve.last().description
-
-    def get_boxes(self):
-        for field_name in self.fields:
-            if field_name.startswith('student_'):
-                yield self[field_name]
-
-    def get_heavy(self):
-        for field_name in self.fields:
-            if field_name.startswith('volunteer_heavy_'):
-                yield self[field_name]
 
 
 class RegistrationAdminForm(RegistrationForm):
@@ -68,3 +55,41 @@ class RegistrationAdminForm(RegistrationForm):
             initial=False)
         self.fields['student'] = forms.ModelChoiceField(queryset=students.filter(user__isnull=False),
                                                         label='Requesting Student')
+
+
+class RegistrationForm2(MyModelForm):
+
+    class Meta(MyModelForm.Meta):
+        model = Registration
+        required_fields = ['event', 'student']
+        optional_fields = []
+        fields = optional_fields + required_fields
+
+    def __init__(self, students, *args, **kwargs):
+        self.cancel_form = kwargs.get('cancel', False)
+        self.event_queryset = kwargs.get('event_queryset', None)
+        self.students = students
+
+        is_staff = kwargs.get('is_staff', False)
+        event_type = kwargs.get('event_type', 'class')
+        for k in ['cancel', 'is_staff', 'event_type']:
+            if k in kwargs:
+                kwargs.pop(k)
+        super().__init__(*args, **kwargs)
+        self.fields['student'].queryset = self.students
+        self.fields['student'].widget = forms.HiddenInput()
+        label = ''
+        if 'iniital' in kwargs:
+            label = kwargs['initial'].get('student', '')
+        self.fields['register'] = forms.BooleanField(
+            widget=forms.CheckboxInput(attrs={'class': "m-2", }),
+            required=False,
+            initial=True,
+            label=label)
+
+        if event_type == 'work':
+            self.fields['heavy'] = forms.BooleanField(widget=forms.CheckboxInput(
+                    attrs={'class': "m-2", }), required=False, initial=False)
+        self.empty_permitted = False
+        # if not is_staff:
+        #     self.fields['comment']

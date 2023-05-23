@@ -23,37 +23,45 @@
     </div>
     <div class="row p-2" id="registered_classes">
         <div class="col">
-            <div class="row">{% include "program_app/register.txt" %}</div>
+            <div class="row">
+                {% if admin_registration %}
+                    Upcoming Registrations:
+                {% else %}
+                    {% include "program_app/register.txt" %}
+                {% endif %}
+            </div>
             <div class="row pt-1" id="registered_table"></div>
         </div>
     </div>
-    <div class="row p-2">
-        <h5>
-            <strong>
-                Introductory class: Saturday 9:00 – 10:30 AM
-            </strong>
-        </h5>
-        <p>
-            Our ninety minute introductory course will teach you how to safely shoot a bow and arrow and the rules of
-            the range. We provide everything you need to shoot including one-on-one coaching from our certified
-            instructors. Once you have completed the introductory course, you will be able to register for the
-            returning student classes. A student can only be singed up for one beginner class.
-        </p>
-        <p>
-            Please arrive 30 minutes early to sign in. Students that arrive late will not be allowed to participate.
-        </p>
-        <h5 class="pt-2">
-            <strong>
-                Returning class: Saturday 11:00 AM – 12:00 PM, Wednesday 6:00 – 8:00 PM
-            </strong>
-        </h5>
-        <p>
-            Our returning student class provides a full hour on Saturday and two hours on Wednesday to practice
-            shooting under the continued guidance of our certified instructors. Bows and arrows are only provided
-            to registered students during class time, but you can take as many returning classes as you like.
-        </p>
-    </div>
-    <hr>
+    {% if not user.is_staff%}
+        <div class="row p-2">
+            <h5>
+                <strong>
+                    Introductory class: Saturday 9:00 – 10:30 AM
+                </strong>
+            </h5>
+            <p>
+                Our ninety minute introductory course will teach you how to safely shoot a bow and arrow and the rules of
+                the range. We provide everything you need to shoot including one-on-one coaching from our certified
+                instructors. Once you have completed the introductory course, you will be able to register for the
+                returning student classes. A student can only be singed up for one beginner class.
+            </p>
+            <p>
+                Please arrive 30 minutes early to sign in. Students that arrive late will not be allowed to participate.
+            </p>
+            <h5 class="pt-2">
+                <strong>
+                    Returning class: Saturday 11:00 AM – 12:00 PM, Wednesday 6:00 – 8:00 PM
+                </strong>
+            </h5>
+            <p>
+                Our returning student class provides a full hour on Saturday and two hours on Wednesday to practice
+                shooting under the continued guidance of our certified instructors. Bows and arrows are only provided
+                to registered students during class time, but you can take as many returning classes as you like.
+            </p>
+        </div>
+        <hr>
+    {% endif %}
     <div class="row pt-2 text-center">
             <h5>Select a Class</h5>
     </div>
@@ -72,31 +80,44 @@
                 <div id="class-description"></div>
             </div>
 
-            <div class="row p-1">
-                <div class="col-4 text-right border">
-                    Select students to enroll:
-                </div>
-                <div class="col">
-                    {% for student in form.get_boxes %}
-                        <div class="row">
-                            <div class="col input-group input-group-md border">
-                                {{ student }} {{ student.label }}
-                            </div>
-                            <div class="col border" id="is-new-student-{{ forloop.counter0 }}"></div>
-                        </div>
-                    {% endfor %}
+            <div class="row p-3">
+                <div class="d-md-inline-flex-column">
+                    <div>Select students to enroll:</div>
+                    <div>{% include 'event/tables/student_formset.html' %}</div>
                 </div>
             </div>
+            {% if admin_registration %}
+                <div class="row ps-3">
+                    <div class="d-md-inline-flex">
+                        <div class="m-2">{{ form.student.label }}</div>
+                        <div class="m-2">{{ form.student }}</div>
+                    </div>
+                </div>
+                <div class="row ps-3">
+                    <div class="d-md-inline-flex">
+                        <div class="m-2">{{ form.payment.label }}</div>
+                        <div class="m-2">{{ form.payment }}</div>
+                    </div>
+                </div>
+                <div class="row ps-3">
+                    <div class="d-md-inline-flex-column">
+                        <div class="m-2">{{ form.notes.label }}</div>
+                        <div class="m-2">{{ form.notes }}</div>
+                    </div>
+                </div>
+            {% endif %}
             <div class="row pt-5">
                 <div class="col">
-                    <div class="row"><h4>ACCIDENT WAIVER AND RELEASE OF LIABILITY (AWRL)</h4></div>
+                    {% if not user.is_staff %}
+                        <div class="row"><h4>ACCIDENT WAIVER AND RELEASE OF LIABILITY (AWRL)</h4></div>
 
-                    <div class="row p-1 pl-3"> {% include "program_app/awrl.txt" %} </div>
-                    <div class="row pt-3"><h4>COVID-19 Policy</h4></div>
-                    <div class="row p-1 pl-3"> {% include "program_app/covid_policy.txt" %} </div>
+                        <div class="row p-1 pl-3"> {% include "program_app/awrl.txt" %} </div>
+                        <div class="row pt-3"><h4>COVID-19 Policy</h4></div>
+                        <div class="row p-1 pl-3"> {% include "program_app/covid_policy.txt" %} </div>
 
-                    <div class="row pt-3"><h4>Cancellation Policy</h4></div>
-                    <div class="row p-1 pl-3"> {% include "program_app/cancellation_policy.txt" %} </div>
+                        <div class="row pt-3"><h4>Cancellation Policy</h4></div>
+                        <div class="row p-1 pl-3"> {% include "program_app/cancellation_policy.txt" %} </div>
+                    {% endif %}
                     <div class="row pt-3"><h5>{{ form.terms }} {{ form.terms.label }}</h5></div>
                 </div>
             </div>

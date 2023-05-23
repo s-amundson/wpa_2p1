@@ -18,13 +18,24 @@ class TestsJoadEventRegistration(TestCase):
     def setUp(self):
         # Every test needs a client.
         self.client = Client()
+        self.event = Event.objects.get(pk=8)
+        self.post_dict = {
+            'event': self.event.id,
+            'registration_set-TOTAL_FORMS': 1,
+            'registration_set-INITIAL_FORMS': 0,
+            'registration_set-MIN_NUM_FORMS': 0,
+            'registration_set-MAX_NUM_FORMS': 1000,
+            'registration_set-0-register': True,
+            'registration_set-0-student': 5,
+            'registration_set-0-event': self.event.id,
+            }
 
     def set_event(self, event_id):
-        event = Event.objects.get(pk=event_id)
+        self.event = Event.objects.get(pk=event_id)
         d = timezone.now() + timezone.timedelta(days=7)
-        event.event_date = event.event_date.replace(year=d.year, month=d.month, day=d.day)
-        event.save()
-        return event
+        self.event.event_date = self.event.event_date.replace(year=d.year, month=d.month, day=d.day)
+        self.event.save()
+        return self.event
 
     def set_joad_age(self, student, age=None):
         if age is None:
@@ -32,6 +43,7 @@ class TestsJoadEventRegistration(TestCase):
         dob = student.dob
         birth = timezone.now().date()
         student.dob = birth.replace(year=birth.year - age, month=dob.month, day=dob.day)
+        student.is_joad = True
         student.save()
 
     def test_user_normal_no_auth(self):
@@ -46,11 +58,13 @@ class TestsJoadEventRegistration(TestCase):
     def test_board_user_get(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
+        logger.warning(Student.objects.filter(is_joad=True).count())
         # allow user to access
         response = self.client.get(reverse('joad:event_registration'), secure=True)
         self.assertTemplateUsed(response, 'joad/event_registration.html')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['form'].fields), 5)
+        self.assertContains(response,
+            '<input type="hidden" name="registration_set-TOTAL_FORMS" value="4" id="id_registration_set-TOTAL_FORMS">')
 
     def test_student_get(self):
         self.test_user = User.objects.get(pk=3)
@@ -65,9 +79,9 @@ class TestsJoadEventRegistration(TestCase):
         self.client.force_login(self.test_user)
         self.set_joad_age(Student.objects.get(pk=5))
         event = self.set_event(8)
-
-        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 8}),
-                                    {'event': 8, 'student_5': 'on'}, secure=True)
+        logger.warning(Registration.objects.all().count())
+        response = self.client.post(reverse('joad:event_registration', kwargs={"event": 8}),
+                                    self.post_dict, secure=True)
         # self.assertEqual(response.status_code, 200)
         reg = Registration.objects.all()
         self.assertEqual(len(reg), 2)
@@ -80,13 +94,14 @@ class TestsJoadEventRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
         self.set_event(8)
+        self.set_joad_age(Student.objects.get(pk=5), 25)
 
-        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 8}),
-                                    {'event': 8, 'student_5': 'on'}, secure=True)
+        response = self.client.post(reverse('joad:event_registration', kwargs={"event": 8}),
+                                    self.post_dict, secure=True)
         # self.assertEqual(response.status_code, 200)
         events = Registration.objects.all()
         self.assertEqual(len(events), 1)
-        self.assertContains(response, 'Student is to old.')
+        self.assertContains(response, 'Student must be less then 21 years old to participate')
 
     def test_student_post_young(self):
         self.set_joad_age(Student.objects.get(pk=5), 5)
@@ -94,11 +109,11 @@ class TestsJoadEventRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
 
-        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 8}),
-                                    {'event': 8, 'student_5': 'on'}, secure=True)
+        response = self.client.post(reverse('joad:event_registration', kwargs={"event": 8}),
+                                    self.post_dict, secure=True)
         events = Registration.objects.all()
         self.assertEqual(len(events), 1)
-        self.assertContains(response, 'Student is to young.')
+        self.assertContains(response, 'Student must be at least 8 years old to participate')
 
     def test_student_post_reregister(self):
         self.set_joad_age(Student.objects.get(pk=5), 10)
@@ -111,12 +126,12 @@ class TestsJoadEventRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
 
-        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 8}),
-                                    {'event': 8, 'student_5': 'on'}, secure=True)
+        response = self.client.post(reverse('joad:event_registration', kwargs={"event": 8}),
+                                    self.post_dict, secure=True)
         # self.assertEqual(response.status_code, 200)
         events = Registration.objects.all()
         self.assertEqual(len(events), 2)
-        self.assertRedirects(response, reverse('joad:index'))
+        self.assertContains(response, 'Student is already enrolled')
 
     def test_student_post_invalid(self):
         self.set_joad_age(Student.objects.get(pk=5), 10)
@@ -129,12 +144,13 @@ class TestsJoadEventRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
 
-        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 8}),
+        response = self.client.post(reverse('joad:event_registration', kwargs={"event": 8}),
                                     {'event': 8}, secure=True)
-
+        # response = self.client.post(reverse('joad:event_registration', kwargs={"event": 8}),
+        #                             self.post_dict, secure=True)
         events = Registration.objects.all()
         self.assertEqual(len(events), 2)
-        self.assertContains(response, 'Invalid student selected')
+        self.assertContains(response, 'Error with form')
 
     def test_student_post_full(self):
         self.set_joad_age(Student.objects.get(pk=5), 10)
@@ -147,8 +163,8 @@ class TestsJoadEventRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
 
-        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 8}),
-                                    {'event': 8, 'student_5': 'on'}, secure=True)
+        response = self.client.post(reverse('joad:event_registration', kwargs={"event": 8}),
+                                    self.post_dict, secure=True)
         events = Registration.objects.all()
         self.assertEqual(len(events), 1)
         self.assertContains(response, 'Class is full')
@@ -163,8 +179,8 @@ class TestsJoadEventRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
 
-        response = self.client.post(reverse('joad:event_registration', kwargs={"event_id": 8}),
-                                    {'event': 8, 'student_5': 'on'}, secure=True)
+        response = self.client.post(reverse('joad:event_registration', kwargs={"event": 8}),
+                                    self.post_dict, secure=True)
         events = Registration.objects.all()
         self.assertEqual(len(events), 1)
 

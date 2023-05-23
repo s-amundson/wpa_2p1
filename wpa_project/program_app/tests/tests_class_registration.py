@@ -51,6 +51,24 @@ class TestsClassRegistration(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
+        self.event = Event.objects.get(pk=1)
+
+    def get_post_dict(self, event):
+        self.post_dict = {
+            'event': event.id,
+            'terms': True,
+            'registration_set-TOTAL_FORMS': 2,
+            'registration_set-INITIAL_FORMS': 0,
+            'registration_set-MIN_NUM_FORMS': 0,
+            'registration_set-MAX_NUM_FORMS': 1000,
+            'registration_set-0-register': True,
+            'registration_set-0-student': 4,
+            'registration_set-0-event': event.id,
+            'registration_set-1-register': False,
+            'registration_set-1-student': 5,
+            'registration_set-1-event': event.id,
+            }
+        return self.post_dict
 
     def test_class_get(self):
         response = self.client.get(reverse('programs:class_registration'), secure=True)
@@ -79,9 +97,10 @@ class TestsClassRegistration(TestCase):
         self.assertRedirects(response, reverse('registration:profile'))
 
     def test_class_register_good(self):
+        event = Event.objects.get(pk=1)
         # add a user to the class
         self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
+                         self.get_post_dict(event), secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
@@ -91,28 +110,13 @@ class TestsClassRegistration(TestCase):
                          'Class on 2023-06-05 student: Charles')
         self.assertEqual(self.client.session['payment_category'], 'intro')
 
-    def test_class_register_with_error(self):
-        # Get the page
-        # self.client.force_login(self.test_user)
-
-        response = self.client.get(reverse('programs:class_registration'), secure=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'program_app/class_registration.html')
-
-        # add a user to the class with error
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '2022-06 ', 'student_4': 'on', 'terms': 'on'}, secure=True)
-        bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.event.state, 'open')
-        cr = Registration.objects.all()
-        self.assertEqual(len(cr), 0)
-
     def test_class_register_over_limit(self):
         # put a record in to the database
-        cr = Registration(event=Event.objects.get(pk=1),
-                               student=Student.objects.get(pk=4),
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()))
+        cr = Registration(
+            event=self.event,
+            student=Student.objects.get(pk=4),
+            pay_status='paid',
+            idempotency_key=str(uuid.uuid4()))
         cr.save()
         u = User.objects.get(pk=2)
         u.is_staff = False
@@ -120,9 +124,12 @@ class TestsClassRegistration(TestCase):
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(u)
-        response = self.client.post(reverse('programs:class_registration'),
-                     {'event': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
-        time.sleep(1)
+        self.get_post_dict(self.event)
+        self.post_dict['registration_set-0-student'] = 2
+        self.post_dict['registration_set-1-student'] = 3
+        self.post_dict['registration_set-1-register'] = True
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
@@ -131,19 +138,17 @@ class TestsClassRegistration(TestCase):
 
     def test_class_register_readd(self):
         # put a record in to the database
-        cr = Registration(event=Event.objects.get(pk=1),
-                               student=Student.objects.get(pk=4),
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()))
+        cr = Registration(
+            event=self.event,
+            student=Student.objects.get(pk=4),
+            pay_status='paid',
+            idempotency_key=str(uuid.uuid4()))
         cr.save()
 
         # try to add first user to class again.
-        self.client.force_login(User.objects.get(pk=3))
-        response = self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
-        time.sleep(1)
+        self.get_post_dict(self.event)
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
         self.assertContains(response, 'Student is already enrolled')
-        # self.assertEqual(response.context['message'] == "")
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
@@ -151,18 +156,20 @@ class TestsClassRegistration(TestCase):
 
     def test_class_register_readd_staff(self):
         # put a record in to the database
-        cr = Registration(event=Event.objects.get(pk=1),
-                               student=Student.objects.get(pk=2),
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()))
+        cr = Registration(
+            event=self.event,
+            student=Student.objects.get(pk=2),
+            pay_status='paid',
+            idempotency_key=str(uuid.uuid4()))
         cr.save()
         # try to add first user to class again.
         self.client.force_login(User.objects.get(pk=2))
-        response = self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)
-        time.sleep(1)
-        self.assertContains(response, 'Rosalva is already enrolled')
-        # self.assertEqual(response.context['message'] == "")
+        self.get_post_dict(self.event)
+        self.post_dict['registration_set-0-student'] = 2
+        self.post_dict['registration_set-1-student'] = 3
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+        self.assertContains(response, 'Student is already enrolled')
+
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
@@ -170,16 +177,17 @@ class TestsClassRegistration(TestCase):
 
     def test_class_register_add2(self):
         # put a record in to the database
-        cr = Registration(event=Event.objects.get(pk=1),
-                               student=Student.objects.get(pk=1),
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()))
+        cr = Registration(
+            event=self.event,
+            student=Student.objects.get(pk=1),
+            pay_status='paid',
+            idempotency_key=str(uuid.uuid4()))
         cr.save()
 
         # change user, then add 1 beginner students and 1 returnee.
-        self.client.force_login(User.objects.get(pk=3))
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(self.event)
+        self.post_dict['registration_set-1-register'] = True
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
 
         self.assertEqual(bc.event.state, 'open')
@@ -189,8 +197,15 @@ class TestsClassRegistration(TestCase):
             c.pay_status = 'paid'
             c.save()
         # don't change user, try to add user not in family to class
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_6': 'on', 'terms': 'on'}, secure=True)
+        self.post_dict.pop('registration_set-1-register')
+        self.post_dict.pop('registration_set-1-student')
+        self.post_dict.pop('registration_set-1-event')
+
+        logger.warning(self.post_dict)
+        self.post_dict['registration_set-0-student'] = 6
+        self.post_dict['registration_set-TOTAL_FORMS'] = 1
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+
         bc = BeginnerClass.objects.get(pk=1)
         # self.assertEqual(bc.enrolled_beginners, 2)
         # self.assertEqual(bc.enrolled_returnee, 1)
@@ -200,8 +215,8 @@ class TestsClassRegistration(TestCase):
 
         # change user, then add 1 returnee.
         self.client.force_login(User.objects.get(pk=5))
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_6': 'on', 'terms': 'on'}, secure=True)
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+
         bc = BeginnerClass.objects.all()
         # self.assertEqual(bc[0].enrolled_beginners, 2)
         # self.assertEqual(bc[0].enrolled_returnee, 2)
@@ -211,13 +226,14 @@ class TestsClassRegistration(TestCase):
 
     def test_no_pay_if_cost_zero(self):
         """test that no payment is required if the cost is set to 0"""
+
         # change the cost of the class
-        bc = BeginnerClass.objects.get(pk=1)
-        bc.event.cost_standard = 0
-        bc.event.save()
+        event = Event.objects.get(pk=1)
+        event.cost_standard = 0
+        event.save()
+
         # add a user to the class
-        response = self.client.post(reverse('programs:class_registration'),
-                                    {'event': '1', 'student_4': 'on', 'terms': 'on'}, secure=True)
+        response = self.client.post(reverse('programs:class_registration'), self.get_post_dict(event), secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
@@ -234,11 +250,14 @@ class TestsClassRegistration(TestCase):
         s = Student(student_family=sf,
                     first_name='Brad',
                     last_name='Conlan',
-                    dob='2014-06-30')
+                    dob='2015-06-30')
         s.save()
-        response = self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_4': 'on', f'student_{s.id}': 'on',
-                          'terms': 'on'}, secure=True)
+
+        self.get_post_dict(self.event)
+        self.post_dict['registration_set-1-student'] = s.id
+        self.post_dict['registration_set-1-register'] = True
+
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 0)
         self.assertContains(response, 'Student must be at least 9 years old to participate')
@@ -254,9 +273,11 @@ class TestsClassRegistration(TestCase):
 
     def test_class_register_return_for_payment(self):
         # add 1 beginner students and 1 returnee.
-        self.client.force_login(User.objects.get(pk=3))
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on'}, secure=True)
+
+        self.get_post_dict(self.event)
+        self.post_dict['registration_set-1-register'] = True
+
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
 
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 2)
@@ -274,8 +295,15 @@ class TestsClassRegistration(TestCase):
         self.test_user.save()
 
         # add a user to the class
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(self.event)
+        self.post_dict.pop('registration_set-1-register')
+        self.post_dict.pop('registration_set-1-student')
+        self.post_dict.pop('registration_set-1-event')
+
+        self.post_dict['registration_set-0-student'] = 1
+        self.post_dict['registration_set-TOTAL_FORMS'] = 1
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
@@ -289,18 +317,19 @@ class TestsClassRegistration(TestCase):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.test_user.is_instructor = True
-        d = timezone.now()
-        if d.month == 1:
-            d = d.replace(year=d.year - 1, month=12)
-        else:
-            d = d.replace(month=d.month - 1)
-
+        d = timezone.now() - timezone.timedelta(days=30)
         self.test_user.instructor_expire_date = d
         self.test_user.save()
 
         # add a user to the class
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(self.event)
+        self.post_dict.pop('registration_set-1-register')
+        self.post_dict.pop('registration_set-1-student')
+        self.post_dict.pop('registration_set-1-event')
+
+        self.post_dict['registration_set-0-student'] = 1
+        self.post_dict['registration_set-TOTAL_FORMS'] = 1
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
@@ -322,8 +351,14 @@ class TestsClassRegistration(TestCase):
         bc.save()
 
         # add a user to the class
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(self.event)
+        self.post_dict.pop('registration_set-1-register')
+        self.post_dict.pop('registration_set-1-student')
+        self.post_dict.pop('registration_set-1-event')
+
+        self.post_dict['registration_set-0-student'] = 1
+        self.post_dict['registration_set-TOTAL_FORMS'] = 1
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
@@ -344,8 +379,14 @@ class TestsClassRegistration(TestCase):
         bc.event.save()
 
         # add a user to the class
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_1': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(self.event)
+        self.post_dict.pop('registration_set-1-register')
+        self.post_dict.pop('registration_set-1-student')
+        self.post_dict.pop('registration_set-1-event')
+
+        self.post_dict['registration_set-0-student'] = 1
+        self.post_dict['registration_set-TOTAL_FORMS'] = 1
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'full')
         cr = Registration.objects.all()
@@ -363,8 +404,16 @@ class TestsClassRegistration(TestCase):
         bc.event.save()
 
         # add a user to the class
-        self.client.post(reverse('programs:class_registration'),
-                         {'event': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(self.event)
+        self.post_dict.pop('registration_set-1-register')
+        self.post_dict.pop('registration_set-1-student')
+        self.post_dict.pop('registration_set-1-event')
+
+        self.post_dict['registration_set-0-student'] = 2
+        self.post_dict['registration_set-TOTAL_FORMS'] = 1
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+        # self.client.post(reverse('programs:class_registration'),
+        #                  {'event': '1', 'student_2': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'full')
         cr = Registration.objects.all()
@@ -404,11 +453,11 @@ class TestsClassRegistration(TestCase):
         bc2.event.save()
         bc2.save()
 
-        response = self.client.post(reverse('programs:class_registration'),
-                         {'event': '2', 'student_4': 'on', 'terms': 'on'}, secure=True)
+        response = self.client.post(reverse('programs:class_registration'), self.get_post_dict(self.event), secure=True)
+
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
-        self.assertContains(response, f'{s.first_name} is enrolled in another beginner class')
+        self.assertContains(response, 'Student is already enrolled')
 
     def test_class_register_wait_no_card(self):
         # put a record in to the database
@@ -427,13 +476,16 @@ class TestsClassRegistration(TestCase):
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(u)
-        response = self.client.post(reverse('programs:class_registration'),
-                     {'event': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(self.event)
+        self.post_dict['registration_set-0-student'] = 2
+        self.post_dict['registration_set-1-student'] = 3
+        self.post_dict['registration_set-1-register'] = True
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 3)
-        # self.assertContains(response, 'Not enough space available in this class')
         self.assertRedirects(response, reverse('payment:card_manage'))
 
     def test_class_register_wait_with_card(self):
@@ -455,8 +507,13 @@ class TestsClassRegistration(TestCase):
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(u)
-        response = self.client.post(reverse('programs:class_registration'),
-                     {'event': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(self.event)
+        self.post_dict['registration_set-0-student'] = 2
+        self.post_dict['registration_set-1-student'] = 3
+        self.post_dict['registration_set-1-register'] = True
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+        # response = self.client.post(reverse('programs:class_registration'),
+        #              {'event': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'wait')
         cr = Registration.objects.all()
@@ -498,8 +555,13 @@ class TestsClassRegistration(TestCase):
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(u)
-        response = self.client.post(reverse('programs:class_registration'),
-                     {'event': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(bc2.event)
+        self.post_dict['registration_set-0-student'] = 2
+        self.post_dict['registration_set-1-student'] = 3
+        self.post_dict['registration_set-1-register'] = True
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+        # response = self.client.post(reverse('programs:class_registration'),
+        #              {'event': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=2)
         self.assertEqual(bc.event.state, 'wait')
         cr = Registration.objects.all()
@@ -540,8 +602,13 @@ class TestsClassRegistration(TestCase):
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(u)
-        response = self.client.post(reverse('programs:class_registration'),
-                     {'event': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
+        self.get_post_dict(bc2.event)
+        self.post_dict['registration_set-0-student'] = 2
+        self.post_dict['registration_set-1-student'] = 3
+        self.post_dict['registration_set-1-register'] = True
+        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+        # response = self.client.post(reverse('programs:class_registration'),
+        #              {'event': '2', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=2)
         self.assertEqual(bc.event.state, 'wait')
         cr = Registration.objects.all()

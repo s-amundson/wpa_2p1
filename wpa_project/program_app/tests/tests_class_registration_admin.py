@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from ..models import BeginnerClass
-from event.models import Registration
+from event.models import Event, Registration
 from student_app.models import Student, User
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,23 @@ class TestsClassAdminRegistration(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.post_dict = {'event': '1', 'student_4': 'on', 'student_5': 'on', 'terms': 'on', 'student': 4}
+        self.event = Event.objects.get(pk=1)
+        self.post_dict = {
+            'event': self.event.id,
+            'terms': True,
+            'student': 4,
+            'registration_set-TOTAL_FORMS': 2,
+            'registration_set-INITIAL_FORMS': 0,
+            'registration_set-MIN_NUM_FORMS': 0,
+            'registration_set-MAX_NUM_FORMS': 1000,
+            'registration_set-0-register': True,
+            'registration_set-0-student': 4,
+            'registration_set-0-event': self.event.id,
+            'registration_set-1-register': True,
+            'registration_set-1-student': 5,
+            'registration_set-1-event': self.event.id,
+            }
+        return self.post_dict
 
     def test_class_get_no_auth(self):
         # Check that staff cannot access
@@ -42,7 +58,7 @@ class TestsClassAdminRegistration(TestCase):
         # Check that board can access
         response = self.client.get(reverse('programs:class_registration_admin', kwargs={'family_id': 4}), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'student_app/form_as_p.html')
+        self.assertTemplateUsed(response, 'program_app/class_registration.html')
 
     def test_class_post_good(self):
         self.post_dict['student'] = 4
@@ -112,7 +128,7 @@ class TestsClassAdminRegistration(TestCase):
                                     self.post_dict, secure=True)
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
-        self.assertContains(response, f'{s.first_name} {s.last_name} already registered')
+        self.assertContains(response, 'Student is already enrolled')
 
     def test_add_student_registered_admin(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -129,7 +145,7 @@ class TestsClassAdminRegistration(TestCase):
                                     self.post_dict, secure=True)
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
-        self.assertContains(response, f'{s.first_name} {s.last_name} already registered by admin')
+        self.assertContains(response, 'Student is already enrolled')
 
     def test_class_add_student_after_class(self):
         bc = BeginnerClass.objects.get(pk=1)
