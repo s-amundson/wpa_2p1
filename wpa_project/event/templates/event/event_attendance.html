@@ -51,6 +51,7 @@
             <form id="attendance_form" class="col" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="form" value="on">
+
                 <div class="row">
                     <div class="col"> New Students </div>
                     <div class="col"> Attending: {{ form.attend_count.beginner }} </div>
@@ -61,7 +62,11 @@
 
                             <th> First Name </th>
                             <th> Last Name </th>
-                            <th> Date of Birth </th>
+                            {% if form.event.type == 'work' %}
+                                <th> Comment </th>
+                            {% else %}
+                                <th> Date of Birth </th>
+                            {% endif %}
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -71,7 +76,11 @@
                         </thead>
                         <tbody>
                             {% for cr in form.new_students %}
-                                {% include "event/tables/student_attend_table_row.html" %}
+                                {% if form.event.type == 'work' %}
+                                    {% include "event/tables/volunteer_attend_table_row.html" %}
+                                {% else %}
+                                    {% include "event/tables/student_attend_table_row.html" %}
+                                {% endif %}
                             {% endfor %}
                             <tr>
                                 <td colspan="6">
@@ -84,36 +93,38 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="row pt-2">
-                    <div class="col"> Returning Students </div>
-                    <div class="col"> Attending: {{ form.attend_count.returnee }} </div>
-                </div>
-                <div class="row">
-                    <table class="table table-bordered table-striped">
-                        <thead>
-                            <th> First Name </th>
-                            <th> Last Name </th>
-                            <th> Date of Birth </th>
-                            <th>
-                                {% if form.is_closed %}
-                                    Attending
-                                {% endif %}
-                            </th>
-                            <th> Attended/</br>Registered</th>
-                        </thead>
-                        <tbody>
-                            {% for cr in form.return_students %}
-                                {% include "event/tables/student_attend_table_row.html" %}
-                            {% endfor %}
-                            <tr>
-                                <td colspan="6">Wait List</td>
-                            </tr>
-                            {% for cr in form.return_students_waiting %}
-                                {% include "event/tables/student_attend_table_row.html" %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                {% if form.event.type != 'work' %}
+                    <div class="row pt-2">
+                        <div class="col"> Returning Students </div>
+                        <div class="col"> Attending: {{ form.attend_count.returnee }} </div>
+                    </div>
+                    <div class="row">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <th> First Name </th>
+                                <th> Last Name </th>
+                                <th> Date of Birth </th>
+                                <th>
+                                    {% if form.is_closed %}
+                                        Attending
+                                    {% endif %}
+                                </th>
+                                <th> Attended/</br>Registered</th>
+                            </thead>
+                            <tbody>
+                                {% for cr in form.return_students %}
+                                    {% include "event/tables/student_attend_table_row.html" %}
+                                {% endfor %}
+                                <tr>
+                                    <td colspan="6">Wait List</td>
+                                </tr>
+                                {% for cr in form.return_students_waiting %}
+                                    {% include "event/tables/student_attend_table_row.html" %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
                 <div class="row pt-2">
                     <div class="col"> Instructors/Staff </div>
                     <div class="col"> Attending: {{ form.attend_count.staff }} </div>

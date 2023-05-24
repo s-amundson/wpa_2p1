@@ -24,9 +24,13 @@
                 {% for c in object_list %}
                     <tr>
                         <td>
-                            <a class="nav-link" href="{% url 'events:event_attend_list' c.event.id %}">
+                            {% if user.is_staff %}
+                                <a class="nav-link" href="{% url 'events:event_attend_list' c.event.id %}">
+                                    {{ c.event.event_date }}
+                                </a>
+                            {% else %}
                                 {{ c.event.event_date }}
-                            </a>
+                            {% endif %}
                         </td>
                         <td>{{ c.event.state }}</td>
                         <td>{{ c.event.registration_set.registered_count }}/{{ c.volunteer_limit }}</td>

@@ -21,12 +21,13 @@ class EventAttendanceForm(forms.Form):
         self.class_date = self.event.event_date
 
         self.adult_dob = self.class_date.date().replace(year=self.class_date.year - 18)
-
-        self.new_students = registrations.filter(
-            Q(student__safety_class__isnull=True) | Q(student__safety_class__gte=self.class_date.date())).exclude(
-            student__in=staff)
+        self.new_students = registrations.exclude(student__in=staff)
         self.new_students_waiting = self.new_students.filter(pay_status='waiting')
-        self.new_students = self.new_students.exclude(pay_status='waiting')
+        if self.event.type != 'work':
+            self.new_students = self.new_students.filter(
+                Q(student__safety_class__isnull=True) | Q(student__safety_class__gte=self.class_date.date()))
+            self.new_students_waiting = self.new_students.filter(pay_status='waiting')
+            self.new_students = self.new_students.exclude(pay_status='waiting')
         self.staff = registrations.filter(student__in=staff)
         self.return_students = registrations.exclude(student__in=staff).filter(
             student__safety_class__lt=self.class_date.date())
