@@ -3,7 +3,7 @@ $.ajaxSetup({traditional: true});
 var started_status = false;
 $(document).ready(function(){
     $(".student-check").each(show_new_student);
-    $("#id_beginner_class").click(get_class_status);
+    $("#id_event").click(get_class_status);
     get_class_status();
 
     $("#myModal").modal("show");
@@ -43,7 +43,7 @@ async function get_calendar() {
 
 async function get_class_status() {
     // get the class status from the server. tells us how many openings there are in the class.
-    let d = $("#id_beginner_class").val();
+    let d = $("#id_event").val();
     console.log(d)
     let msg = ""
 

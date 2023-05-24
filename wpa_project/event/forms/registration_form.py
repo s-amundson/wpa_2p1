@@ -1,6 +1,4 @@
 from django import forms
-from django.forms import BaseInlineFormSet
-from django.utils.functional import cached_property
 
 from src.model_form import MyModelForm
 from ..models import Registration, VolunteerEvent
@@ -58,11 +56,11 @@ class RegistrationAdminForm(RegistrationForm):
 
 
 class RegistrationForm2(MyModelForm):
-
+    # this is used in formsets
     class Meta(MyModelForm.Meta):
         model = Registration
-        required_fields = ['event', 'student']
-        optional_fields = []
+        required_fields = ['student']
+        optional_fields = ['comment']
         fields = optional_fields + required_fields
 
     def __init__(self, students, *args, **kwargs):
@@ -70,7 +68,7 @@ class RegistrationForm2(MyModelForm):
         self.event_queryset = kwargs.get('event_queryset', None)
         self.students = students
 
-        is_staff = kwargs.get('is_staff', False)
+        self.is_staff = kwargs.get('is_staff', False)
         event_type = kwargs.get('event_type', 'class')
         for k in ['cancel', 'is_staff', 'event_type']:
             if k in kwargs:
@@ -78,11 +76,19 @@ class RegistrationForm2(MyModelForm):
         super().__init__(*args, **kwargs)
         self.fields['student'].queryset = self.students
         self.fields['student'].widget = forms.HiddenInput()
+        self.initial_student = None
+
         label = ''
-        if 'iniital' in kwargs:
+        is_beginner = 'F'
+        if 'initial' in kwargs:
             label = kwargs['initial'].get('student', '')
+            self.initial_student = kwargs['initial'].get('student', None)
+            is_beginner = 'T' if self.initial_student.safety_class is None else 'F'
+
+        # the student-check class and the is_beginner attribute is for class_registration.js to uncheck students
+        # based on class type
         self.fields['register'] = forms.BooleanField(
-            widget=forms.CheckboxInput(attrs={'class': "m-2", }),
+            widget=forms.CheckboxInput(attrs={'class': "m-2 student-check", 'is_beginner': is_beginner}),
             required=False,
             initial=True,
             label=label)
@@ -91,5 +97,3 @@ class RegistrationForm2(MyModelForm):
             self.fields['heavy'] = forms.BooleanField(widget=forms.CheckboxInput(
                     attrs={'class': "m-2", }), required=False, initial=False)
         self.empty_permitted = False
-        # if not is_staff:
-        #     self.fields['comment']

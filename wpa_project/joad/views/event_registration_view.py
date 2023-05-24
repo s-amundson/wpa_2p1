@@ -1,8 +1,7 @@
-from django.views.generic.edit import FormView
 from django.views.generic.base import View
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib import messages
+
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -65,29 +64,6 @@ class EventRegistrationView(RegistrationSuperView):
         registrations = self.event.registration_set.all()
         if len(registrations.filter(pay_status='paid')) + len(self.students) > self.event.joadevent_set.last().student_limit:
             return self.has_error(form, 'Class is full')
-        # logger.warning(registrations)
-        # for k, v in dict(self.request.POST).items():
-        #     logger.debug(k)
-        #     if str(k).startswith('student_') and v:
-        #         i = int(str(k).split('_')[-1])
-        #         s = Student.objects.get(pk=i)
-        #         age = StudentHelper().calculate_age(s.dob, event.event_date)
-        #         logger.debug(age)
-        #         if age < 9:
-        #             return self.has_error(form, 'Student is to young.')
-        #         if age > 20:
-        #             logger.debug(age)
-        #             return self.has_error(form, 'Student is to old.')
-        #
-        #         logger.warning(s)
-        #         sreg = registrations.filter(student=s)
-        #         logger.warning(len(sreg))
-        #         if len(sreg) == 0:
-        #             students.append(s)
-        #         else:
-        #             messages.add_message(self.request, messages.ERROR, 'Student is already enrolled')
-        #             return HttpResponseRedirect(reverse('joad:index'))
-
 
         with transaction.atomic():
             uid = str(uuid.uuid4())
@@ -104,7 +80,6 @@ class EventRegistrationView(RegistrationSuperView):
                                                            'amount_each': self.event.cost_standard})
                 logger.warning(cr)
         return HttpResponseRedirect(reverse('payment:make_payment'))
-        # return self.form_invalid(form)
 
 
 class ResumeEventRegistrationView(LoginRequiredMixin, View):

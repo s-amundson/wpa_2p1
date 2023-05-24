@@ -1,5 +1,5 @@
 from django.apps import apps
-from django.forms import inlineformset_factory
+from django.forms import modelformset_factory
 from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -45,10 +45,6 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         context['formset'] = self.formset
         return context
 
-    # def get_form(self):
-    #
-    #     return super().get_form()
-
     def get_form_kwargs(self):
         if self.request.user.is_board and 'family_id' in self.kwargs:
             self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id', None))
@@ -57,6 +53,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         kwargs = super().get_form_kwargs()
         if self.kwargs.get('event', None) is not None:
             kwargs['initial']['event'] = self.kwargs.get('event')
+            self.event = get_object_or_404(Event, pk=self.kwargs.get('event'))
         kwargs['event_queryset'] = self.event_queryset
         kwargs['students'] = self.formset_students = self.student_family.student_set.all()
         kwargs['event_type'] = self.event_type
@@ -65,9 +62,12 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
 
     def get_formset(self, **kwargs):
         logger.warning('get_formset')
-        self.formset = inlineformset_factory(Event, Registration, form=RegistrationForm2, can_delete=False,
-                                             extra=len(self.formset_students)
-                                             )
+        logger.warning(len(self.formset_students))
+        # self.formset = inlineformset_factory(Event, Registration, form=RegistrationForm2, can_delete=False,
+        #                                      extra=len(self.formset_students))
+        self.formset = modelformset_factory(Registration, form=RegistrationForm2, can_delete=False,
+                                            extra=len(self.formset_students))
+        logger.warning(kwargs)
         event = None
         if 'event' in kwargs:
             event = kwargs.pop('event')
@@ -76,7 +76,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
 
         initial = []
         for student in self.formset_students:
-            initial.append({'student': student, 'event': event})
+            initial.append({'student': student, 'event': event, 'comment': None})
         logger.warning(initial)
         data = None
         if self.request.method.lower() == 'post':
@@ -87,7 +87,8 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
                 'is_staff': self.request.user.is_staff,
                 'event_type': self.event_type
             },
-            initial=initial, data=data, instance=event, **kwargs
+            queryset=Registration.objects.none(),
+            initial=initial, data=data, **kwargs
             )
 
     def form_invalid(self, form):
@@ -114,10 +115,12 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
                     return {'success': False, 'error': 'Student is already enrolled'}
                 if f.cleaned_data['register']:
                     self.students.append(f.cleaned_data['student'].id)
+            # make self.students a queryset.
             self.students = self.student_family.student_set.filter(id__in=self.students)
             return {'success': True, 'error': ''}
         else:
             logger.warning(self.formset.errors)
+            logger.warning(self.formset.non_form_errors())
         return {'success': False, 'error': 'Error with form'}
 
 

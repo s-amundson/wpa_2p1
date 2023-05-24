@@ -3,8 +3,12 @@
     <thead>
         <tr>
             <th>Student(s)</th>
+            <th>Beginner/Returning</th>
             {% if form.event_type == 'work' %}
                 <th>Can perform heavy duty tasks</th>
+            {% endif %}
+            {% if form.event_type == 'work' or user.is_staff %}
+                <th>Comment</th>
             {% endif %}
         </tr>
     </thead>
@@ -13,10 +17,20 @@
             <tr>
                 <td>
                     {{ student_form.register }} {{ student_form.register.label }}
-                    {{ student_form.event }} {{ student_form.student }}
+                    {{ student_form.student }}
+                </td>
+                <td>
+                    {% if student_form.initial_student.safety_class %}
+                        Returnee
+                    {% else %}
+                        Beginner
+                    {% endif %}
                 </td>
                 {% if form.event_type == 'work' %}
                 <td>{{ student_form.heavy }} {{ student_form.heavy.label }}</td>
+                {% endif %}
+                {% if form.event_type == 'work' or student_form.is_staff %}
+                    <th>{{ student_form.comment }}</th>
                 {% endif %}
             </tr>
         {% endfor %}

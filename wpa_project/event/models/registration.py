@@ -64,6 +64,7 @@ class Registration(models.Model):
     modified = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     volunteer_heavy = models.BooleanField(default=False)
+    comment = models.CharField(max_length=255, default=None, null=True)
 
     objects = RegistrationManager()
 

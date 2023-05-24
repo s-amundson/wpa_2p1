@@ -21,13 +21,13 @@ class TestsJoadEventRegistration(TestCase):
         self.event = Event.objects.get(pk=8)
         self.post_dict = {
             'event': self.event.id,
-            'registration_set-TOTAL_FORMS': 1,
-            'registration_set-INITIAL_FORMS': 0,
-            'registration_set-MIN_NUM_FORMS': 0,
-            'registration_set-MAX_NUM_FORMS': 1000,
-            'registration_set-0-register': True,
-            'registration_set-0-student': 5,
-            'registration_set-0-event': self.event.id,
+            'form-TOTAL_FORMS': 1,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+            'form-0-register': True,
+            'form-0-student': 5,
+            'form-0-event': self.event.id,
             }
 
     def set_event(self, event_id):
@@ -64,7 +64,7 @@ class TestsJoadEventRegistration(TestCase):
         self.assertTemplateUsed(response, 'joad/event_registration.html')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response,
-            '<input type="hidden" name="registration_set-TOTAL_FORMS" value="4" id="id_registration_set-TOTAL_FORMS">')
+            '<input type="hidden" name="form-TOTAL_FORMS" value="4" id="id_form-TOTAL_FORMS">')
 
     def test_student_get(self):
         self.test_user = User.objects.get(pk=3)

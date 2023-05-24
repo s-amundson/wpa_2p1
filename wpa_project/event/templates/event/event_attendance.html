@@ -123,7 +123,7 @@
                         <thead>
                             <th> First Name </th>
                             <th> Last Name </th>
-                            <th> Date of Birth </th>
+                            <th> Comment </th>
                             <th>
                                 {% if form.is_closed %}
                                     Attending
@@ -133,7 +133,7 @@
                         </thead>
                         <tbody>
                             {% for cr in form.staff %}
-                                {% include "event/tables/student_attend_table_row.html" %}
+                                {% include "event/tables/volunteer_attend_table_row.html" %}
                             {% endfor %}
                         </tbody>
                     </table>

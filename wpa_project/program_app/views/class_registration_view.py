@@ -36,7 +36,7 @@ class ClassRegistrationView(RegistrationSuperView):
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])
 
-        beginners = self.students.filter(safety_class=None)
+        beginners = self.students.filter(safety_class=None).exclude(user__is_staff=True)
         returnee = self.students.exclude(safety_class=None).exclude(user__is_staff=True)
         staff = self.students.filter(user__is_staff=True)
 
@@ -105,27 +105,28 @@ class ClassRegistrationView(RegistrationSuperView):
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
-            # logger.debug(students)
-            for s in self.students.exclude(user__is_staff=True):
+            for f in self.formset:
+                if f.cleaned_data['register']:
+                    new_reg = f.save(commit=False)
+                    new_reg.event = self.event
+                    new_reg.idempotency_key = uid
+                    if new_reg.student.user and new_reg.student.user.is_staff:
+                        new_reg.pay_status = 'paid'
+                        self.request.session['line_items'].append({
+                            'name': f"Class on {str(class_date)[:10]} staff: {new_reg.student.first_name}",
+                            'quantity': 1,
+                            'amount_each': 0,
+                        })
+                    else:
+                        new_reg.pay_status = pay_status
+                        self.request.session['line_items'].append({
+                            'name': f'Class on {str(class_date)[:10]} student: {new_reg.student.first_name}',
+                            'quantity': 1,
+                            'amount_each': self.event.cost_standard,
+                        })
+                    new_reg.user__id = self.request.user.id,
+                    new_reg.save()
 
-                cr = Registration.objects.create(event=self.event, student=s,
-                                       pay_status=pay_status, idempotency_key=uid, user=self.request.user)
-                self.request.session['line_items'].append({
-                    'name': f'Class on {str(class_date)[:10]} student: {s.first_name}',
-                    'quantity': 1,
-                    'amount_each': self.event.cost_standard,
-                     }
-                )
-                # logger.debug(cr)
-            for i in self.students.filter(user__is_staff=True):
-                cr = Registration.objects.create(event=beginner_class.event, student=i,
-                                       pay_status='paid', idempotency_key=uid, user=self.request.user)
-                self.request.session['line_items'].append({
-                    'name': f"Class on {str(class_date)[:10]} staff: {i.first_name}",
-                    'quantity': 1,
-                    'amount_each': 0,
-                     }
-                )
         if self.wait:
             ClassRegistrationHelper().update_class_state(beginner_class)
         return HttpResponseRedirect(self.success_url)

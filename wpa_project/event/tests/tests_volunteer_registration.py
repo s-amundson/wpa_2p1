@@ -23,18 +23,18 @@ class TestsVolunteerRegistration(TestCase):
     def get_post_dict(self, event):
         self.post_dict = {
             'event': event.id,
-            'registration_set-TOTAL_FORMS': 2,
-            'registration_set-INITIAL_FORMS': 0,
-            'registration_set-MIN_NUM_FORMS': 0,
-            'registration_set-MAX_NUM_FORMS': 1000,
-            'registration_set-0-register': True,
-            'registration_set-0-student': 4,
-            'registration_set-0-heavy': True,
-            'registration_set-0-event': event.id,
-            'registration_set-1-register': False,
-            'registration_set-1-student': 5,
-            'registration_set-1-heavy': False,
-            'registration_set-1-event': event.id,
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+            'form-0-register': True,
+            'form-0-student': 4,
+            'form-0-heavy': True,
+            'form-0-event': event.id,
+            'form-1-register': False,
+            'form-1-student': 5,
+            'form-1-heavy': False,
+            'form-1-event': event.id,
             }
         return self.post_dict
 
@@ -112,7 +112,7 @@ class TestsVolunteerRegistration(TestCase):
         event.event_date = d
         event.save()
         self.get_post_dict(event)
-        self.post_dict['registration_set-0-student'] = 1
+        self.post_dict['form-0-student'] = 1
         response = self.client.post(
             reverse('events:registration', kwargs={'event': 3}),
             self.post_dict,
