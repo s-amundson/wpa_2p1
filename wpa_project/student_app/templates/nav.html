@@ -110,6 +110,8 @@
                             {% endif %}
                             {% if user.is_superuser %}
                                 <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'information:announcement_list'%}">Announcements</a>
+                                <a class="dropdown-item" href="{% url 'information:staff_list'%}">Staff List</a>
                             {% endif %}
                         </div>
                     </li>

@@ -69,80 +69,80 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
                            'state': 'scheduled',
                            'cost': 5}
 
-    # def test_user_normal_user_not_authorized(self):
-    #     self.test_user = User.objects.get(pk=3)
-    #     self.client.force_login(self.test_user)
-    #
-    #     response = self.client.get(reverse('programs:beginner_class'), secure=True)
-    #     self.assertEqual(response.status_code, 403)
-    #     # Post the page user is forbidden
-    #     response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
-    #     self.assertEqual(response.status_code, 403)
-    #
-    # def test_board_user_is_authorized(self):
-    #     # allow user to access
-    #     response = self.client.get(reverse('programs:beginner_class'), secure=True)
-    #     self.assertEqual(response.context['form'].initial['beginner_limit'], 20)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed(response, 'program_app/beginner_class.html')
-    #     self.assertEqual(response.context['form'].initial['class_date'].day, date(2022, 6, 19).day)
-    #     self.assertEqual(response.context['form'].initial['class_date'].month, date(2022, 6, 19).month)
-    #
-    # def test_add_class(self):
-    #     # Add a class
-    #     response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
-    #     bc = BeginnerClass.objects.all()
-    #     self.assertEquals(len(bc), 3)
-    #
-    # def test_get_class_list(self):
-    #     # Check the list
-    #     response = self.client.get(reverse('programs:class_list'), secure=True)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed('program_app/class_list.html')
-    #
-    # def test_update_class(self):
-    #     # Update the class
-    #     self.class_dict['state'] = 'open'
-    #     self.class_dict['class_date'] = '2022-05-30'
-    #     response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
-    #                                 self.class_dict, secure=True)
-    #
-    #     self.assertTemplateUsed('student_app/index.html')
-    #     bc = BeginnerClass.objects.all()
-    #     self.assertEquals(len(bc), 2)
-    #     bc = BeginnerClass.objects.get(pk=1)
-    #
-    #     self.assertEqual(bc.event.event_date.year, date(2022, 5, 30).year)
-    #     self.assertEqual(bc.event.state, 'open')
-    #
-    # def test_2nd_class_error(self):
-    #     bc = BeginnerClass.objects.get(pk=1)
-    #     # New class same day
-    #     self.class_dict['class_date'] = '2023-06-05 09:00'
-    #     response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed('student_app/class_list.html')
-    #     bc = BeginnerClass.objects.all()
-    #     self.assertEquals(len(bc), 2)
-    #
-    # def test_2nd_class_good(self):
-    #     bc = BeginnerClass.objects.get(pk=1)
-    #     # New class same day
-    #     self.class_dict['class_date'] = "2022-06-05 07:00"
-    #     response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
-    #     self.assertRedirects(response, reverse('programs:class_list'))
-    #     bc = BeginnerClass.objects.all()
-    #     self.assertEquals(len(bc), 3)
-    #
-    # def test_add_class_invalid(self):
-    #     # New class different day invalid
-    #     response = self.client.post(reverse('programs:beginner_class'),
-    #                     {'beginner_limit': 2, 'returnee_limit': 2,
-    #                      'state': 'scheduled', 'cost': 5}, secure=True)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed('student_app/class_list.html')
-    #     bc = BeginnerClass.objects.all()
-    #     self.assertEquals(len(bc), 2)
+    def test_user_normal_user_not_authorized(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+
+        response = self.client.get(reverse('programs:beginner_class'), secure=True)
+        self.assertEqual(response.status_code, 403)
+        # Post the page user is forbidden
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
+        self.assertEqual(response.status_code, 403)
+
+    def test_board_user_is_authorized(self):
+        # allow user to access
+        response = self.client.get(reverse('programs:beginner_class'), secure=True)
+        self.assertEqual(response.context['form'].initial['beginner_limit'], 20)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'program_app/beginner_class.html')
+        self.assertEqual(response.context['form'].initial['class_date'].day, date(2022, 6, 19).day)
+        self.assertEqual(response.context['form'].initial['class_date'].month, date(2022, 6, 19).month)
+
+    def test_add_class(self):
+        # Add a class
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 3)
+
+    def test_get_class_list(self):
+        # Check the list
+        response = self.client.get(reverse('programs:class_list'), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('program_app/class_list.html')
+
+    def test_update_class(self):
+        # Update the class
+        self.class_dict['state'] = 'open'
+        self.class_dict['class_date'] = '2022-05-30'
+        response = self.client.post(reverse('programs:beginner_class', kwargs={'beginner_class': 1}),
+                                    self.class_dict, secure=True)
+
+        self.assertTemplateUsed('student_app/index.html')
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 2)
+        bc = BeginnerClass.objects.get(pk=1)
+
+        self.assertEqual(bc.event.event_date.year, date(2022, 5, 30).year)
+        self.assertEqual(bc.event.state, 'open')
+
+    def test_2nd_class_error(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        # New class same day
+        self.class_dict['class_date'] = '2023-06-05 09:00'
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('student_app/class_list.html')
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 2)
+
+    def test_2nd_class_good(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        # New class same day
+        self.class_dict['class_date'] = "2022-06-05 07:00"
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
+        self.assertRedirects(response, reverse('programs:class_list'))
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 3)
+
+    def test_add_class_invalid(self):
+        # New class different day invalid
+        response = self.client.post(reverse('programs:beginner_class'),
+                        {'beginner_limit': 2, 'returnee_limit': 2,
+                         'state': 'scheduled', 'cost': 5}, secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('student_app/class_list.html')
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 2)
 
     @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
     def test_refund_success_class(self, refund):
@@ -191,20 +191,20 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.assertEqual(len(mail.outbox), 2)
         logger.warning(mail.outbox[0].body)
 
-    # def test_beginner_class_with_returnee(self):
-    #     self.class_dict['class_type'] = 'beginner'
-    #     response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
-    #     bc = BeginnerClass.objects.all()
-    #     self.assertEquals(len(bc), 3)
-    #     self.assertEqual(bc[2].returnee_limit, 0)
-    #
-    # def test_returnee_class_with_beginner(self):
-    #     self.class_dict['class_type'] = 'returnee'
-    #     response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
-    #     bc = BeginnerClass.objects.all()
-    #     self.assertEquals(len(bc), 3)
-    #     # self.assertEqual(self.client.session['message'], "returning class can't have a beginner limit greater then 0")
-    #     self.assertEqual(bc[2].beginner_limit, 0)
+    def test_beginner_class_with_returnee(self):
+        self.class_dict['class_type'] = 'beginner'
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 3)
+        self.assertEqual(bc[2].returnee_limit, 0)
+
+    def test_returnee_class_with_beginner(self):
+        self.class_dict['class_type'] = 'returnee'
+        response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
+        bc = BeginnerClass.objects.all()
+        self.assertEquals(len(bc), 3)
+        # self.assertEqual(self.client.session['message'], "returning class can't have a beginner limit greater then 0")
+        self.assertEqual(bc[2].beginner_limit, 0)
 
 
 class TestsBeginnerClass2(TestCase):

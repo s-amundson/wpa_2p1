@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ title }}{% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form method="post" {% if form.multipart %} enctype="multipart/form-data" {% endif %}>{% csrf_token %}
+        <p>
+            {{ form.recipients.label }}
+            {{ form.recipients }}
+            {{ form.recipients.errors }}
+        </p>
+        <p class="ps-2">
+            {{ form.returning }}
+            {{ form.returning.label }}
+        </p>
+        <p> Only show students that have attended in the past {{ form.include_days }} days</p>
+        <p>
+            {{ form.subject.label }}
+            {{ form.subject }}
+            {{ form.subject.errors }}
+        </p>
+        <p>
+            {{ form.message.label }}
+            {{ form.message}}
+            {{ form.message.errors }}
+        </p>
+        <button class="btn btn-primary m-2" type="submit" name="button">Submit</button>
+    </form>
+
+{% endblock %}

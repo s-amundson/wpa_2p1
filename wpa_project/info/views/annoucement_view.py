@@ -14,8 +14,13 @@ logger = logging.getLogger(__name__)
 class AnnouncementFormView(UserPassesTestMixin, FormView):
     model = Announcement
     form_class = AnnouncementForm
-    template_name = 'info/announcement_form.html'
+    template_name = 'info/preview_form.html'
     success_url = reverse_lazy('info:announcement_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Announcement Form'
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

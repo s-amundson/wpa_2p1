@@ -227,6 +227,7 @@ class TestsUnregisterStudent(MockSideEffects, TestCase):
         self.assertEqual(cr[0].pay_status, 'canceled')
         task_instructor_canceled.assert_called_with(bc.event)
 
+
 class TestsUnregisterStudent2(TestCase):
     fixtures = ['f1', 'f2']
 

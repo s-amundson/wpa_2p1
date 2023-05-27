@@ -1,23 +1,24 @@
 {% extends 'base.html' %}
 
-{% block title %} Announcement Form {% endblock %}
+{% block title %} {{ title }}{% endblock %}
 
 {% load static %}
 {% block script %}
-    <script src="{% static 'js/announcement.js' %}"></script>
+    <script src="{% static 'js/info_preview.js' %}"></script>
 {% endblock %}
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
 
-    <form method="post">{% csrf_token %}
+    <form method="post" {% if form.multipart %} enctype="multipart/form-data" {% endif %}>
+        {% csrf_token %}
         {{ form.as_p }}
-        <button class="btn btn-primary m-2" type="button" id="btn-announcement-preview">Preview</button>
+        <button class="btn btn-primary m-2" type="button" id="btn-info-preview">Preview</button>
         <button class="btn btn-primary m-2" type="submit" name="button">Submit</button>
     </form>
     Preview:
     <div class="row border">
 
-        <div class="container" id="announcement-container"></div>
+        <div class="container" id="info-preview-container"></div>
     </div>
 {% endblock %}

@@ -1,0 +1,17 @@
+{% extends "student_app/email/email_layout.html" %}
+{% block main %}
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Hi,
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        One of our instructors has cannot make it to the event on {{ event.event_date }} and we now have
+        {{ num_instructors }} singed up.
+    </p>
+
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="https://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="https://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+    </p>
+{% endblock %}

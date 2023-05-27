@@ -6,7 +6,7 @@
 {% load static %}
 {% block left %}
     {% if user.is_board %}
-        <a href="{% url 'info:announcement_form' %}" role="button" class="btn btn-primary m-1"> Add Announcement</a>
+        <a href="{% url 'info:announcement_form' %}" role="button" class="btn btn-primary btn-sm m-1"> Add Announcement</a>
     {% endif %}
 {% endblock %}
 

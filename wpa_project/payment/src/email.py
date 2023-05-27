@@ -1,12 +1,12 @@
 from django.template.loader import get_template
 
-from student_app.src import EmailMessage
+from student_app.src import EmailMessage as StudentEmailMessage
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class EmailMessage(EmailMessage):
+class EmailMessage(StudentEmailMessage):
     def line_items(self, line_items):
         for line in line_items:
             line['cost'] = int(line['quantity']) * line['amount_each']

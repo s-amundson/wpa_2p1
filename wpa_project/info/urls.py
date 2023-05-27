@@ -14,4 +14,7 @@ urlpatterns = [
     path('info/<str:info>/', InfoView.as_view(), name='info'),
     path('edit/', FaqFormView.as_view(), name='edit'),
     path('edit/<int:faq_id>/', FaqFormView.as_view(), name='edit'),
+    path('staff_list/', StaffList.as_view(), name='staff_list'),
+    path('staff_profile_form/', StaffProfileFormView.as_view(), name='staff_profile_form'),
+    path('staff_profile_form/<int:pk>/', StaffProfileFormView.as_view(), name='staff_profile_form'),
 ]

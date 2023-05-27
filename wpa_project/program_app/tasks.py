@@ -4,7 +4,7 @@ from django.utils import timezone
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from django.conf import settings
 
-from .src import ClassRegistrationHelper, UpdatePrograms
+from .src import ClassRegistrationHelper, UpdatePrograms, EmailMessage as ProgramEmailMessage
 from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
@@ -88,6 +88,7 @@ def init_class():  # pragma: no cover
             defaults={'name': f'Beginner Schedule {c.id} close create class'}
         )
 
+
 @shared_task
 def instructor_canceled(event):
     reg = Registration.objects.filter(
@@ -96,9 +97,11 @@ def instructor_canceled(event):
         pay_status__in=['admin', 'paid']
     )
     celery_logger.warning(len(reg))
-    if len(reg) < 3:
+    if len(reg) < 4:
         celery_logger.warning('send instructors a warning')
-        # TODO send instructors a warning
+        email_message = ProgramEmailMessage()
+        email_message.instructor_canceled_email(event, len(reg))
+
 
 @shared_task
 def refund_class(beginner_class, message=''):
