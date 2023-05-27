@@ -66,6 +66,7 @@ class TestsVolunteerRegistration(TestCase):
         self.assertRedirects(response, reverse('registration:profile'))
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
+        self.assertEqual(cr[0].pay_status, 'paid')
 
     def tests_registration_post_good_id(self):
         d = timezone.now().replace(hour=14, minute=0, second=0, microsecond=0) + timezone.timedelta(days=4)

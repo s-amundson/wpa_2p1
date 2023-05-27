@@ -1,4 +1,3 @@
-from django.apps import apps
 from django.forms import modelformset_factory
 from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
@@ -10,8 +9,7 @@ import uuid
 from ..forms import RegistrationForm, RegistrationForm2
 from ..models import Event, Registration
 from src.mixin import StudentFamilyMixin
-from student_app.models import Student
-StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamily')
+from student_app.models import StudentFamily
 
 import logging
 logger = logging.getLogger(__name__)
@@ -61,13 +59,9 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         return kwargs
 
     def get_formset(self, **kwargs):
-        logger.warning('get_formset')
-        logger.warning(len(self.formset_students))
-        # self.formset = inlineformset_factory(Event, Registration, form=RegistrationForm2, can_delete=False,
-        #                                      extra=len(self.formset_students))
         self.formset = modelformset_factory(Registration, form=RegistrationForm2, can_delete=False,
                                             extra=len(self.formset_students))
-        logger.warning(kwargs)
+
         event = None
         if 'event' in kwargs:
             event = kwargs.pop('event')
@@ -77,7 +71,6 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         initial = []
         for student in self.formset_students:
             initial.append({'student': student, 'event': event, 'comment': None})
-        logger.warning(initial)
         data = None
         if self.request.method.lower() == 'post':
             data = self.request.POST
@@ -104,14 +97,11 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         self.get_formset(event=self.form.cleaned_data['event'])
         self.event = self.form.cleaned_data['event']
         reg = self.event.registration_set.exclude(pay_status__in=['canceled', "refunded", 'refund', 'refund donated'])
-        logger.warning(self.form.cleaned_data)
-        logger.warning(reg)
 
         if self.formset.is_valid():
             for f in self.formset:
                 logger.warning(f.cleaned_data)
                 if reg.filter(student=f.cleaned_data['student']):
-                    logging.warning('Student is already enrolled')
                     return {'success': False, 'error': 'Student is already enrolled'}
                 if f.cleaned_data['register']:
                     self.students.append(f.cleaned_data['student'].id)
@@ -132,14 +122,14 @@ class RegistrationView(RegistrationSuperView):
         processed_formset = self.process_formset()
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])
-        # volunteer_event = event.volunteerevent_set.last()
+
         ik = uuid.uuid4()
         for f in self.formset:
             if f.cleaned_data['register']:
                 new_reg = f.save(commit=False)
                 new_reg.event = self.event
                 new_reg.idempotency_key = ik
-                new_reg.pay_status = 'paid',
+                new_reg.pay_status = 'paid'
                 new_reg.user__id = self.request.user.id,
                 new_reg.save()
 
