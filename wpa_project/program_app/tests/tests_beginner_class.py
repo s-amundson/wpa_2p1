@@ -144,20 +144,16 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 2)
 
-    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    @patch('program_app.views.beginner_class_view.refund_class.delay')
     def test_refund_success_class(self, refund):
-        refund.side_effect = self.refund_side_effect
-
         self.test_user = User.objects.get(pk=2)
         self.test_user.is_staff = False
         self.test_user.save()
-        # self.client.force_login(self.test_user)
 
         self.create_payment([Student.objects.get(pk=2), Student.objects.get(pk=3)], 1000)
 
         #  Change user and make another payment
         self.test_user = User.objects.get(pk=3)
-        # self.client.force_login(self.test_user)
         s = Student.objects.get(pk=5)
         s.user = None
         s.save()
@@ -173,23 +169,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         bc = BeginnerClass.objects.get(pk=1)
         cr = Registration.objects.all()
         beginner_class = BeginnerClass.objects.get(pk=1)
-        logger.warning(Registration.objects.filter(event=beginner_class.event , pay_status__in=['paid', 'waiting']))
-        for c in cr:
-            # self.assertEqual(c.pay_status, 'refund')
-            logger.warning(c.pay_status)
-        refund_class(bc, 'due to extreme bytes') # this is typically called by celery
-        cr = Registration.objects.all()
-        self.assertEqual(len(cr), 3)
-        for c in cr:
-            self.assertEqual(c.pay_status, 'refund')
-
-        self.assertEqual(bc.event.state, 'canceled')
-        pl = PaymentLog.objects.filter(Q(idempotency_key=cr[0].idempotency_key) | Q(idempotency_key=cr[2].idempotency_key))
-        self.assertEqual(len(pl), 2)
-        for l in pl:
-            self.assertEqual(l.status, 'refund')
-        self.assertEqual(len(mail.outbox), 2)
-        logger.warning(mail.outbox[0].body)
+        refund.assert_called_with(bc.id, 'due to extreme bytes')
 
     def test_beginner_class_with_returnee(self):
         self.class_dict['class_type'] = 'beginner'
@@ -203,7 +183,6 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 3)
-        # self.assertEqual(self.client.session['message'], "returning class can't have a beginner limit greater then 0")
         self.assertEqual(bc[2].beginner_limit, 0)
 
 

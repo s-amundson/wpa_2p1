@@ -1,6 +1,6 @@
 import uuid
 from django.apps import apps
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404
@@ -141,6 +141,8 @@ class ClassRegistrationAdminView(BoardMixin, ClassRegistrationView):
 
     def form_valid(self, form):
         self.form = form
+        if self.request.user.is_board:
+            self.student_family = get_object_or_404(StudentFamily, pk=form.cleaned_data['student_family'])
         processed_formset = self.process_formset()
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])

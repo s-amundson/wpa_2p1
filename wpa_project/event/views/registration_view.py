@@ -9,7 +9,7 @@ import uuid
 from ..forms import RegistrationForm, RegistrationForm2
 from ..models import Event, Registration
 from src.mixin import StudentFamilyMixin
-from student_app.models import StudentFamily
+from student_app.models import Student, StudentFamily
 
 import logging
 logger = logging.getLogger(__name__)
@@ -44,11 +44,12 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         return context
 
     def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
         if self.request.user.is_board and 'family_id' in self.kwargs:
             self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id', None))
         if not self.request.user.is_staff:
             self.event_queryset = self.event_queryset.filter(state__in=['open', 'wait'])
-        kwargs = super().get_form_kwargs()
+
         if self.kwargs.get('event', None) is not None:
             kwargs['initial']['event'] = self.kwargs.get('event')
             self.event = get_object_or_404(Event, pk=self.kwargs.get('event'))
@@ -59,6 +60,11 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         return kwargs
 
     def get_formset(self, **kwargs):
+        data = None
+        if self.request.method.lower() == 'post':
+            data = self.request.POST
+            if self.request.user.is_board:
+                self.formset_students = Student.objects.all()
         self.formset = modelformset_factory(Registration, form=RegistrationForm2, can_delete=False,
                                             extra=len(self.formset_students))
 
@@ -71,9 +77,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         initial = []
         for student in self.formset_students:
             initial.append({'student': student, 'event': event, 'comment': None})
-        data = None
-        if self.request.method.lower() == 'post':
-            data = self.request.POST
+
         self.formset = self.formset(
             form_kwargs={
                 'students': self.formset_students,
@@ -101,9 +105,9 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         if self.formset.is_valid():
             for f in self.formset:
                 logger.warning(f.cleaned_data)
-                if reg.filter(student=f.cleaned_data['student']):
-                    return {'success': False, 'error': 'Student is already enrolled'}
                 if f.cleaned_data['register']:
+                    if reg.filter(student=f.cleaned_data['student']):
+                        return {'success': False, 'error': 'Student is already enrolled'}
                     self.students.append(f.cleaned_data['student'].id)
             # make self.students a queryset.
             self.students = self.student_family.student_set.filter(id__in=self.students)
@@ -119,6 +123,9 @@ class RegistrationView(RegistrationSuperView):
 
     def form_valid(self, form):
         self.form = form
+        logger.warning(form.cleaned_data)
+        if self.request.user.is_board:
+            self.student_family = form.cleaned_data['student_family']
         processed_formset = self.process_formset()
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])

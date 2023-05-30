@@ -12,7 +12,7 @@
         let add_student_url = "{% url 'registration:add_student' %}"
         let url_student_family_api = "{% url 'registration:student_family' %}"
         let url_instructor_update = "{% url 'registration:instructor_update' %}"
-        let url_class_registered_table = "{% url 'programs:unregister_table' %}"
+        let url_class_registered_table = "{% url 'events:cancel' %}"
         {% if student_family %} let family = true {% else %} let family = false {% endif %}
     </script>
 {% endblock %}

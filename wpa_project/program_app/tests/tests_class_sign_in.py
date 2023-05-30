@@ -1,3 +1,5 @@
+import uuid
+
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -51,16 +53,15 @@ class TestsClassSignIn(MockSideEffects, TestCase):
         cr = Registration.objects.get(pk=1)
         self.assertFalse(cr.student.signature)
 
-    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    @patch('program_app.views.class_sign_in_view.RefundHelper.refund_with_idempotency_key')
     def test_sign_in_unregister(self, refund):
-        refund.side_effect = self.refund_side_effect
-
+        ik = uuid.uuid4()
         bc2 = BeginnerClass.objects.get(pk=2)
         reg2 = Registration.objects.create(
             event=bc2.event,
             student=Student.objects.get(pk=2),
             pay_status="paid",
-            idempotency_key='3239ed71-6740-4540-86f3-86fff79898a0',
+            idempotency_key=ik,
             reg_time="2021-06-09",
             attended=False
         )
@@ -69,7 +70,7 @@ class TestsClassSignIn(MockSideEffects, TestCase):
             checkout_created_time=timezone.now(),
             description='programs_test',  # database set to 255 characters
             donation=0,  # storing pennies in the database
-            idempotency_key='3239ed71-6740-4540-86f3-86fff79898a0',
+            idempotency_key=ik,
             location_id='',
             order_id='',
             payment_id='test_payment',
@@ -106,7 +107,6 @@ class TestsClassSignIn(MockSideEffects, TestCase):
         cr = Registration.objects.get(pk=1)
         self.assertTrue(cr.student.signature)
         self.assertEqual(cr.student.safety_class, timezone.datetime(year=2023, month=6, day=5).date())
-        cr2 = Registration.objects.get(pk=reg2.id)
-        self.assertEqual(cr2.pay_status, 'refunded')
         cr3 = Registration.objects.get(pk=reg3.id)
         self.assertEqual(cr3.pay_status, 'canceled')
+        refund.assert_called_with(ik, 500)

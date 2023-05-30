@@ -19,9 +19,10 @@ def payment_error(old_idempotency_key, new_idempotency_key, **kwargs):
     reg.update(idempotency_key=new_idempotency_key)
 
 
-@receiver(post_save, sender=PaymentLog)
+@receiver(post_save, sender=PaymentLog, dispatch_uid='registration_update')
 def registration_update(sender, instance, created, **kwargs):
     # crh = ClassRegistrationHelper()
+    logger.warning('registration_update')
     cr = Registration.objects.filter(idempotency_key=instance.idempotency_key)
     is_intro_class = False
     if instance.status in ["SUCCESS", "COMPLETED", 'volunteer points']:

@@ -7,10 +7,12 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/search.js' %}"></script>
+    <script src="{% static 'js/class_cancel.js' %}"></script>
     <script nonce="{{request.csp_nonce}}">
         let student_table_url = "{% url 'registration:student_table' %}"
         let add_student_url = "{% url 'registration:add_student' %}"
         let url_student_family_api = "{% url 'registration:student_family' %}"
+        let url_class_registered_table = "{% url 'events:cancel' student_family.id %}"
     </script>
 {% endblock %}
 
@@ -83,8 +85,8 @@
         </div>
         <div class="row p-4">
                 Upcoming registrations:
-                {% include "program_app/forms/unregister.html" %}
         </div>
+        <div class="row pt-1" id="registered_table"></div>
         <div class="row p-4">
             <div class="col">Registration date: {{ student_family.registration_date}} </div>
             <a class="col m-2 btn btn-primary" href="{% url 'programs:class_registration_admin' student_family.id %}" role="button">

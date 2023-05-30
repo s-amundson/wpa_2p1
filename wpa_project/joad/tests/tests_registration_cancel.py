@@ -90,7 +90,7 @@ class TestsJoadRegistrationCancel(MockSideEffects, TestCase):
         self.assertTemplateUsed(response, 'joad/registration.html')
         self.assertEqual(response.status_code, 200)
 
-    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    @patch('payment.src.RefundHelper.refund_payment')
     def test_staff_post(self, refund):
         refund.side_effect = self.refund_side_effect
 
@@ -114,7 +114,7 @@ class TestsJoadRegistrationCancel(MockSideEffects, TestCase):
         self.assertEqual(len(reg), 1)
         self.assertEqual(reg[0].pay_status, 'refunded')
 
-    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    @patch('payment.src.RefundHelper.refund_payment')
     def test_user_post_good(self, refund):
         refund.side_effect = self.refund_side_effect
 
@@ -136,7 +136,7 @@ class TestsJoadRegistrationCancel(MockSideEffects, TestCase):
         self.assertEqual(len(reg), 1)
         self.assertEqual(reg[0].pay_status, 'refunded')
 
-    @patch('program_app.forms.unregister_form.RefundHelper.refund_payment')
+    @patch('payment.src.RefundHelper.refund_payment')
     def test_user_post_bad(self, refund):
         refund.side_effect = self.refund_side_effect
 

@@ -1,11 +1,14 @@
 import logging
 import base64
+import uuid
 from django.core import mail
 from django.test import TestCase, Client
 from django.urls import reverse
 from reportlab.pdfgen.canvas import Canvas
 from django.core.files.base import File
+from django.utils import timezone
 
+from event.models import Event, Registration
 from ..models import Student, User
 from ..src import EmailMessage
 
@@ -103,6 +106,24 @@ class TestsEmail(TestCase):
     def test_send_email_students(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
+        event = Event.objects.create(
+            event_date=timezone.now() - timezone.timedelta(days=20),
+            type="work",
+            cost_standard=0,
+            cost_member=0,
+            state="open",
+            volunteer_points=2
+        )
+        ik = uuid.uuid4()
+        for student in Student.objects.all():
+            Registration.objects.create(
+                event=event,
+                student=student,
+                pay_status='paid',
+                idempotency_key=ik,
+                reg_time="2021-06-09",
+                attended=True
+            )
         self.send_dict['recipients'] = 'students'
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
         self.assertEqual(len(mail.outbox), 1)

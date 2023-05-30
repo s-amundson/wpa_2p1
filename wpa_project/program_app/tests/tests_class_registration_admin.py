@@ -27,6 +27,7 @@ class TestsClassAdminRegistration(TestCase):
             'event': self.event.id,
             'terms': True,
             'student': 4,
+            'student_family': 3,
             'form-TOTAL_FORMS': 2,
             'form-INITIAL_FORMS': 0,
             'form-MIN_NUM_FORMS': 0,

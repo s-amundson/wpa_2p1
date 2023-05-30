@@ -1,5 +1,4 @@
 from django import forms
-
 from src.model_form import MyModelForm
 from ..models import Registration, VolunteerEvent
 import logging
@@ -20,7 +19,9 @@ class RegistrationForm(MyModelForm):
         self.event_queryset = kwargs.get('event_queryset', None)
         self.students = students
         self.event_type = kwargs.get('event_type', 'class')
-        for k in ['cancel', 'event_type', 'event_queryset']:
+
+        self.url = kwargs.get('url', '')
+        for k in ['cancel', 'event_type', 'event_queryset', 'url']:
             if k in kwargs:
                 kwargs.pop(k)
         super().__init__(*args, **kwargs)
@@ -40,6 +41,9 @@ class RegistrationForm(MyModelForm):
             if len(ve):
                 logger.warning(ve.last())
                 self.description = ve.last().description
+        if self.students:
+            self.fields['student_family'] = forms.IntegerField(initial=self.students[0].student_family.id, required=False)
+            self.fields['student_family'].widget.attrs.update({'class': 'form-control m-2', 'style': 'display:none'})
 
 
 class RegistrationAdminForm(RegistrationForm):

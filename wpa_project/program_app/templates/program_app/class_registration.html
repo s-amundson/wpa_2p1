@@ -7,7 +7,7 @@
     <script src="{% static 'js/class_registration.js' %}"></script>
     <script src="{% static 'js/class_cancel.js' %}"></script>
     <script nonce="{{request.csp_nonce}}">
-        let url_class_registered_table = "{% url 'programs:unregister_table' %}"
+        let url_class_registered_table = "{% url 'events:cancel' %}"
         let url_class_status = "{% url 'programs:class_status' %}"
         {% if form.needs_covid %} let needs_covid = true; {% else %} let needs_covid = false; {% endif %}
 
@@ -21,7 +21,7 @@
             <h4>Class Registration</h4>
         </div>
     </div>
-    <div class="row p-2" id="registered_classes">
+    <div class="row p-2 border-bottom" id="registered_classes">
         <div class="col">
             <div class="row">
                 {% if admin_registration %}
@@ -66,7 +66,7 @@
             <h5>Select a Class</h5>
     </div>
     <div class="row p-2">
-        <form id="beginner-class-form" class="col form" method="post" action="{% url 'programs:class_registration' %}" autocomplete="off">
+        <form id="beginner-class-form" class="col form" method="post" autocomplete="off">
             {% csrf_token %}
             <input type="hidden" id="is_instructor" value="{{ user.is_instructor }}">
             <div class="row p-3">
@@ -90,7 +90,7 @@
                 <div class="row ps-3">
                     <div class="d-md-inline-flex">
                         <div class="m-2">{{ form.student.label }}</div>
-                        <div class="m-2">{{ form.student }}</div>
+                        <div class="m-2">{{ form.student }} {{ form.student_family }}</div>
                     </div>
                 </div>
                 <div class="row ps-3">
