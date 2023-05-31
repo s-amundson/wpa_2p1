@@ -69,14 +69,6 @@ def check_spam(message):
     return True
 
 
-def is_it_real(address):  # pragma no cover
-    response = requests.get(
-        "https://isitarealemail.com/api/email/validate",
-        params={'email': address},
-        headers={'Authorization': "Bearer " + settings.ISITAREALEMAIL_API})
-    return response.json()['status']
-
-
 def naive_bayes(message):
     qs = Message.objects.exclude(spam_category='undetermined')
     if qs:
