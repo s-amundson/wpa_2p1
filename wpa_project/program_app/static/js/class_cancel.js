@@ -2,9 +2,7 @@
 $.ajaxSetup({traditional: true});
 
 $(document).ready(function(){
-    if (family) {
     get_reg_table();
-    }
 });
 
 async function get_reg_table() {

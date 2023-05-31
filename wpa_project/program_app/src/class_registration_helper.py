@@ -1,22 +1,21 @@
 import logging
-from django.db.models import Count, Q
+from django.db.models import Count
 
 from .email import EmailMessage
-from ..models import BeginnerClass, ClassRegistration
-from student_app.models import Student
+from ..models import BeginnerClass
+from event.models import Registration
 from payment.src import PaymentHelper
 
-from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
 class ClassRegistrationHelper:
     def charge_group(self, queryset):
         for ikey in queryset.values('idempotency_key').annotate(ik_count=Count('idempotency_key')).order_by():
-            logging.warning(ikey)
+            logger.warning(ikey)
             icr = queryset.filter(idempotency_key=str(ikey['idempotency_key']))
-            cost = icr[0].beginner_class.cost
-            note = f'Class on {str(icr[0].beginner_class.class_date)[:10]}, Students: '
+            cost = icr[0].event.cost_standard
+            note = f'Class on {str(icr[0].event.event_date)[:10]}, Students: '
             for cr in icr:
                 note += f'{cr.student.first_name}, '
             payment = None
@@ -29,32 +28,18 @@ class ClassRegistrationHelper:
                 icr.update(pay_status='start')
 
     def enrolled_count(self, beginner_class):
-        beginner = 0
-        staff_count = 0
-        returnee = 0
-        records = ClassRegistration.objects.filter(beginner_class=beginner_class)
-        pay_statuses = ['paid', 'admin']
-        for record in records:
-            if record.pay_status in pay_statuses:
-                try:
-                    is_staff = record.student.user.is_staff
-                except (record.student.DoesNotExist, AttributeError):
-                    is_staff = False
-
-                if is_staff:
-                    staff_count += 1
-                elif record.student.safety_class is None \
-                        or record.student.safety_class >= beginner_class.class_date.date():
-                    beginner += 1
-                else:
-                    returnee += 1
-        return {'beginner': beginner, 'staff': staff_count, 'returnee': returnee,
-                'waiting': records.filter(pay_status='waiting').count()}
+        event = Registration.objects.filter(event=beginner_class.event)
+        return {'beginner': event.filter(event=beginner_class.event).intro_beginner_count(beginner_class.event.event_date.date()),
+                'staff': event.filter(event=beginner_class.event).intro_staff_count(),
+                'returnee': event.filter(event=beginner_class.event).intro_returnee_count(beginner_class.event.event_date.date()),
+                'waiting': event.filter(pay_status='waiting').count()}
 
     def has_space(self, user, beginner_class, beginner, instructor, returnee):
         enrolled_count = self.enrolled_count(beginner_class)
+        logger.warning(enrolled_count)
+        logger.warning(f'Adding beginner: {beginner}, returnee: {returnee}, instructor: {instructor}')
         wait = False
-        if beginner_class.state in ['open', 'wait']:  # in case it changed since user got the self.form.
+        if beginner_class.event.state in ['open', 'wait']:  # in case it changed since user got the self.form.
             if beginner and enrolled_count['beginner'] + beginner > beginner_class.beginner_limit:
                 if beginner and enrolled_count['beginner'] + enrolled_count['waiting'] + beginner > \
                         beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
@@ -75,94 +60,108 @@ class ClassRegistrationHelper:
                 return 'wait'
             return 'open'
 
-        elif beginner_class.state in ['full', 'closed'] and user.is_staff:
-            if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
-                return 'full'
+        elif beginner_class.event.state in ['full', 'closed']:
+            if user.is_staff:
+                if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
+                    return 'full'
+                else:
+                    return 'open'
             else:
-                return 'open'
+                return 'closed'
+        return 'closed'  #  Shouldn't get here
 
     def student_registrations(self, beginner_class):
-        return ClassRegistration.objects.filter(
-            beginner_class=beginner_class,pay_status__in=['paid', 'admin', 'waiting']).exclude(
-            student__user__is_staff=True)
+        return Registration.objects.filter(
+            event=beginner_class.event,
+            pay_status__in=['paid', 'admin', 'waiting']).exclude(student__user__is_staff=True)
 
     def update_class_state(self, beginner_class):
+        logger.warning(beginner_class)
         records = self.student_registrations(beginner_class)
-        if beginner_class.class_type == 'beginner' and beginner_class.state in ['open', 'wait', 'full']:
-            if len(records) >= beginner_class.beginner_limit and beginner_class.state in ['open', 'wait']:
+        if beginner_class.class_type == 'beginner' and beginner_class.event.state in ['open', 'wait', 'full']:
+            logger.warning(f'state: {beginner_class.event.state}, registered: {len(records)}, ' +
+                           f'limit: {beginner_class.beginner_limit}, wait: {beginner_class.beginner_wait_limit}')
+            # logging.warning(f'state: {beginner_class.event.state}, registered: {len(records)}, ' +
+            #                f'limit: {beginner_class.beginner_limit}, wait: {beginner_class.beginner_wait_limit}')
+            logger.warning(len(records) >= beginner_class.beginner_limit)
+            if len(records) >= beginner_class.beginner_limit and beginner_class.event.state in ['open', 'wait']:
                 if len(records) >= beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
-                    beginner_class.state = 'full'
+                    beginner_class.event.state = 'full'
                 else:
-                    beginner_class.state = 'wait'
-                beginner_class.save()
+                    beginner_class.event.state = 'wait'
+                beginner_class.event.save()
             elif len(records) < beginner_class.beginner_limit + beginner_class.beginner_wait_limit and \
-                    beginner_class.state in ['wait', 'full']:
+                    beginner_class.event.state in ['wait', 'full']:
                 if len(records) < beginner_class.beginner_limit:
-                    beginner_class.state = 'open'
+                    beginner_class.event.state = 'open'
                 else:
-                    beginner_class.state = 'wait'
-                beginner_class.save()
-        elif beginner_class.class_type == 'returnee' and beginner_class.state in ['open', 'wait', 'full']:
-            if len(records) >= beginner_class.returnee_limit and beginner_class.state in ['open', 'wait']:
+                    beginner_class.event.state = 'wait'
+                beginner_class.event.save()
+            logger.warning(f'event: {beginner_class.event.id}, state: {beginner_class.event.state}')
+            # logging.warning(f'event: {beginner_class.event.id}, state: {beginner_class.event.state}')
+        elif beginner_class.class_type == 'returnee' and beginner_class.event.state in ['open', 'wait', 'full']:
+            if len(records) >= beginner_class.returnee_limit and beginner_class.event.state in ['open', 'wait']:
                 if len(records) >= beginner_class.returnee_limit + beginner_class.returnee_wait_limit:
-                    beginner_class.state = 'full'
+                    beginner_class.event.state = 'full'
                 else:
-                    beginner_class.state = 'wait'
-                beginner_class.save()
+                    beginner_class.event.state = 'wait'
+                beginner_class.event.save()
             elif len(records) < beginner_class.returnee_limit + beginner_class.returnee_wait_limit and \
-                    beginner_class.state in ['wait', 'full']:
+                    beginner_class.event.state in ['wait', 'full']:
                 if len(records) < beginner_class.returnee_limit:
-                    beginner_class.state = 'open'
+                    beginner_class.event.state = 'open'
                 else:
-                    beginner_class.state = 'wait'
-                beginner_class.save()
-        elif beginner_class.state in ['open', 'wait', 'full']:
+                    beginner_class.event.state = 'wait'
+                beginner_class.event.save()
+        elif beginner_class.event.state in ['open', 'wait', 'full']:
             beginners = len(records.filter(student__safety_class__isnull=True))
             returnees = len(records.filter(student__safety_class__isnull=False))
             if beginners >= beginner_class.beginner_limit and returnees >= beginner_class.returnee_limit and \
-                    beginner_class.state in ['open', 'wait']:
+                    beginner_class.event.state in ['open', 'wait']:
                 if beginners >= beginner_class.beginner_limit + beginner_class.beginner_wait_limit and \
                         returnees >= beginner_class.returnee_limit + beginner_class.returnee_wait_limit:
-                    beginner_class.state = 'full'
+                    beginner_class.event.state = 'full'
                 else:
-                    beginner_class.state = 'wait'
-                beginner_class.save()
+                    beginner_class.event.state = 'wait'
+                beginner_class.event.save()
             elif beginners < beginner_class.beginner_limit + beginner_class.beginner_wait_limit and \
                     returnees < beginner_class.returnee_limit + beginner_class.returnee_wait_limit and \
-                    beginner_class.state in ['wait', 'full']:
+                    beginner_class.event.state in ['wait', 'full']:
                 if beginners < beginner_class.beginner_limit and returnees < beginner_class.returnee_limit:
-                    beginner_class.state = 'open'
+                    beginner_class.event.state = 'open'
                 else:
-                    beginner_class.state = 'wait'
-                beginner_class.save()
-        # logging.warning(beginner_class.state)
+                    beginner_class.event.state = 'wait'
+                beginner_class.event.save()
+        # logger.warning(beginner_class.event.state)
 
     def update_waiting(self, beginner_class):
+        logger.warning(beginner_class)
         logging.warning(beginner_class)
-        logging.warning(type(beginner_class))
         if type(beginner_class) == int:
             beginner_class = BeginnerClass.objects.get(pk=beginner_class)
         records = self.student_registrations(beginner_class)
-        logging.warning(records)
+        logger.warning(len(records))
+        logging.warning(len(records))
         waiting = records.filter(pay_status='waiting').order_by('modified')
         admitted = records.filter(pay_status__in=['paid', 'admin']).order_by('modified')
-        logging.warning(waiting)
+        logger.warning(f'class type: {beginner_class.class_type}, waiting: {len(waiting)}, admitted: {len(admitted)}')
+        logging.warning(f'class type: {beginner_class.class_type}, waiting: {len(waiting)}, admitted: {len(admitted)}')
         if not len(waiting):
             return
         if beginner_class.class_type == 'beginner':
             if len(admitted) < beginner_class.beginner_limit:
-                logging.warning(f'space available {beginner_class.beginner_limit - len(admitted)}')
+                logger.warning(f'space available {beginner_class.beginner_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
-                logging.warning(f'next group {len(next_group)}')
+                logger.warning(f'next group {len(next_group)}')
                 if beginner_class.beginner_limit - len(admitted) >= len(next_group):
                     self.charge_group(next_group)
                     EmailMessage().wait_list_off(next_group)
                     # self.update_waiting(beginner_class)
         elif beginner_class.class_type == 'returnee':
             if len(admitted) < beginner_class.returnee_limit:
-                logging.warning(f'space available {beginner_class.returnee_limit - len(admitted)}')
+                logger.warning(f'space available {beginner_class.returnee_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
-                logging.warning(f'next group {len(next_group)}')
+                logger.warning(f'next group {len(next_group)}')
                 if beginner_class.returnee_limit - len(admitted) >= len(next_group):
                     self.charge_group(next_group)
                     EmailMessage().wait_list_off(next_group)

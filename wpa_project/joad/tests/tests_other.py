@@ -2,13 +2,10 @@ import logging
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.utils import timezone
-
-from student_app.models import Student
-from ..models import JoadEvent, EventRegistration, PinAttendance
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
+from ..models import JoadEvent
 
 
 class TestsJoadOther(TestCase):
@@ -42,3 +39,8 @@ class TestsJoadOther(TestCase):
         self.test_dict['last_event'] = True
         self.assertEqual(len(response.context['object_list']), 4)
         self.assertEqual(response.status_code, 200)
+
+    def test_event_string(self):
+        je = JoadEvent.objects.get(pk=1)
+        logger.warning(je)
+        self.assertEqual(str(je), '16 Feb, 2022 08:00 AM Cost: $15 Pin Cost: $5')

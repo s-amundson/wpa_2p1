@@ -67,12 +67,16 @@ hr {
 #block-main.browser-theme {
     background-color: var(--bs-white);
     --bs-text-opacity: 1;
+    --text-color: var(--bs-dark-rgb);
+    --table-background-color: var(--bs-white);
     color: rgba(var(--bs-dark-rgb),var(--bs-text-opacity)) !important;
 }
 
 #block-main.dark-theme {
     background-color: var(--bs-dark);
     --bs-text-opacity: 1;
+    --text-color: var(--bs-light);
+    --table-background-color: var(--bs-dark);
     color: var(--bs-light) !important;
 }
 
@@ -80,6 +84,7 @@ hr {
     background-color: var(--bs-white);
     --bs-text-opacity: 1;
     --text-color: var(--bs-dark-rgb);
+    --table-background-color: var(--bs-white);
     color: rgba(var(--bs-dark-rgb),var(--bs-text-opacity)) !important;
 }
 
@@ -88,12 +93,14 @@ hr {
         background-color: var(--bs-dark);
         --bs-text-opacity: 1;
         --text-color: var(--bs-light);
+        --table-background-color: var(--bs-dark);
         color: var(--bs-light) !important;
     }
 
 }
 .table {
     color: var(--text-color);
+    background-color: var(--table-background-color);
 }
 .calendar {
   width: 98%;
@@ -138,4 +145,9 @@ a {
 .hangingindent {
     padding-left: 50px ;
     text-indent: -50px ;
+}
+
+.btn-work {
+    background-color: var(--bs-gray);
+    color: var(--bs-white);
 }

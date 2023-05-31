@@ -5,10 +5,8 @@ from django.apps import apps
 from django.core import mail
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.utils import timezone
 
-from ..src import EmailMessage
-from ..models import BeginnerClass, ClassRegistration
+from event.models import Event, Registration
 from student_app.models import Student
 
 logger = logging.getLogger(__name__)
@@ -16,7 +14,7 @@ User = apps.get_model('student_app', 'User')
 
 
 class TestsClassSendEmail(TestCase):
-    fixtures = ['f1', 'f3']
+    fixtures = ['f1']
 
     def setUp(self):
         # Every test needs a client.
@@ -35,11 +33,10 @@ class TestsClassSendEmail(TestCase):
         self.assertTemplateUsed(response, 'student_app/form_as_p.html')
 
     def test_post_send_email_good(self):
-        cr = ClassRegistration(beginner_class=BeginnerClass.objects.get(pk=1),
-                               student=Student.objects.get(pk=4),
-                               new_student=True,
-                               pay_status='paid',
-                               idempotency_key=str(uuid.uuid4()))
+        cr = Registration(event=Event.objects.get(pk=1),
+                          student=Student.objects.get(pk=4),
+                          pay_status='paid',
+                          idempotency_key=str(uuid.uuid4()))
         cr.save()
         response = self.client.post(reverse('programs:send_email', kwargs={'beginner_class': 1}), self.test_dict,
                                     secure=True)

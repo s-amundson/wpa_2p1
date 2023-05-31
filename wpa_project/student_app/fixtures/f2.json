@@ -1,11 +1,10 @@
 [
   {
-    "model": "program_app.classregistration",
+    "model": "event.registration",
     "pk": 1,
     "fields": {
-      "beginner_class": 1,
+      "event": 1,
       "student": 2,
-      "new_student": true,
       "pay_status": "start",
       "idempotency_key": "7b16fadf-4851-4206-8dc6-81a92b70e52f",
       "reg_time": "2021-06-09T16:00:00.000Z",
@@ -15,12 +14,11 @@
     }
   },
   {
-    "model": "program_app.classregistration",
+    "model": "event.registration",
     "pk": 2,
     "fields": {
-      "beginner_class": 1,
+      "event": 1,
       "student": 3,
-      "new_student": true,
       "pay_status": "start",
       "idempotency_key": "7b16fadf-4851-4206-8dc6-81a92b70e52f",
       "reg_time": "2021-06-09T16:00:00.000Z",

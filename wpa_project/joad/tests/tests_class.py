@@ -42,7 +42,7 @@ class TestsJoadClass(TestCase):
         response = self.client.post(reverse('joad:joad_class', kwargs={'session_id': 1}), self.class_dict, secure=True)
         # {'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True}
         content = json.loads(response.content)
-        logging.debug(content)
+        logger.debug(content)
         self.assertEqual(content['id'], 6)
         self.assertEqual(content['class_date'], "2022-04-01T00:00:00-07:00")
         self.assertEqual(content['state'], 'scheduled')
@@ -58,16 +58,13 @@ class TestsJoadClass(TestCase):
                                     self.class_dict, secure=True)
         # {'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True}
         content = json.loads(response.content)
-        logging.debug(content)
+        logger.debug(content)
         self.assertEqual(content['id'], 1)
         self.assertEqual(content['class_date'], "2022-04-04T18:00:00-07:00")
         self.assertEqual(content['state'], 'scheduled')
         self.assertTrue(content['success'])
         jc = JoadClass.objects.get(pk=1)
-        self.assertEqual(jc.class_date, datetime(2022, 4, 5, 1, 0, tzinfo=timezone.utc))
-
-    def test_get_states(self):
-        self.assertEqual(JoadClass().get_states(), ['scheduled', 'past', 'canceled'])
+        self.assertEqual(jc.event.event_date, datetime(2022, 4, 5, 1, 0, tzinfo=timezone.utc))
 
 
 class TestsJoadClassList(TestCase):

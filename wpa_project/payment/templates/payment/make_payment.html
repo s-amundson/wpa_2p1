@@ -83,8 +83,16 @@
           </table>
 
           <div class="row p-3">
-            Payments are processed with Square.
+              Payments are processed with Square.
           </div>
+
+          {% if form.available_volunteer_points %}
+              <div class="row p-3">
+                  You have ${{ form.available_volunteer_points }} available in volunteer points.  To use these points
+                  enter the amount you wish to use.
+                  {{ form.volunteer_points }}
+              </div>
+          {% endif %}
 
           <div class="d-flex flex-row p-3">
               <div class="pt-2">{{ form.card }}</div>

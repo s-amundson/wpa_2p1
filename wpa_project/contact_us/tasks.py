@@ -5,7 +5,7 @@ from django import forms
 from django.conf import settings
 from django.utils import timezone
 from django_pandas.io import read_frame
-from ipware import get_client_ip
+# from ipware import get_client_ip
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 
@@ -139,21 +139,19 @@ def validate_email(address, client_ip, default_state=True):
             raise forms.ValidationError("Email cannot be checked at this time.")
 
         record = Email.objects.create(email=address)
-        status = is_it_real(address)
-        # status = 'valid'
-        logging.warning(str(status))
-        if status == "valid":
-            logging.warning(f'{address} is valid')
-            record.is_valid = True
-        elif status == "invalid":
-            logging.warning(f'{address} is invalid')
-            record.is_valid = False
-            raise forms.ValidationError("Email validation error")
-        else:
-            logging.warning(f'{address} is unknown')
-            record.is_valid = default_state
-            if not default_state:
-                raise forms.ValidationError("Email validation error")
+        # status = is_it_real(address)
+        # # status = 'valid'
+        # if status == "valid":
+        #     record.is_valid = True
+        # elif status == "invalid":
+        #     logging.warning(f'{address} is invalid')
+        #     record.is_valid = False
+        #     raise forms.ValidationError("Email validation error")
+        # else:
+        #     logging.warning(f'{address} is unknown')
+        #     record.is_valid = default_state
+        #     if not default_state:
+        #         raise forms.ValidationError("Email validation error")
         record.ip = client_ip
         record.save()
     return record.is_valid

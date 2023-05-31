@@ -22,8 +22,8 @@ class SessionFormView(UserPassesTestMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        logging.debug(kwargs)
-        logging.debug(self.session)
+        logger.debug(kwargs)
+        logger.debug(self.session)
         if self.session is not None:
             kwargs['instance'] = self.session
         return kwargs
@@ -37,12 +37,15 @@ class SessionFormView(UserPassesTestMixin, FormView):
         return context
 
     def form_valid(self, form):
-        logging.debug('here')
         f = form.save()
+        if 'state' in form.initial:
+            for c in f.joadclass_set.filter(event__state=form.initial['state'], event__event_date__gte=timezone.now()):
+                c.event.state = f.state
+                c.event.save()
         if self.session:
             return JsonResponse({'session_id': f.id, 'success': True})
         else:
-            logging.debug(form.cleaned_data)
+            logger.debug(form.cleaned_data)
             self.success_url = reverse_lazy('joad:session', kwargs={'session_id': f.id})
             return super().form_valid(form)
 
@@ -67,7 +70,7 @@ class SessionListView(LoginRequiredMixin, ListView):
 
 class SessionStatusView(LoginRequiredMixin, View):
     def get(self, request, session_id):
-        logging.debug(session_id)
+        logger.debug(session_id)
         session = get_object_or_404(Session, pk=session_id)
         registrations = session.registration_set.all()
         student_count = 0
@@ -75,8 +78,8 @@ class SessionStatusView(LoginRequiredMixin, View):
             if r.pay_status in ['paid', 'admin']:
                 student_count += 1
 
-        logging.debug(student_count)
+        logger.debug(student_count)
         context = {'openings': session.student_limit - student_count, 'limit': session.student_limit,
                    'cost': session.cost, 'status': session.state}
-        logging.debug(context)
+        logger.debug(context)
         return render(request, 'joad/session_status.html', context)

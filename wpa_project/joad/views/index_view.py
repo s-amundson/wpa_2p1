@@ -1,9 +1,7 @@
-from django.views.generic.list import ListView
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
 from django.forms import model_to_dict
 
-from ..models import JoadEvent, Session
+from ..models import Session
 from .joad_event_view import JoadEventListView
 import logging
 logger = logging.getLogger(__name__)
@@ -45,18 +43,18 @@ class IndexView(JoadEventListView):
                 for student in self.students:
                     reg_id = None
                     reg_status = 'not registered'
-                    logging.debug(student)
+                    # logger.debug(student)
                     if student.is_joad:
                         self.has_joad = True
                         reg = session.registration_set.filter(student=student)#  .order_by('id')
-                        logging.debug(reg)
+                        # logger.debug(reg)
                         if len(reg.filter(pay_status='paid')) > 0:
                             reg_status = 'registered'
-                            logging.debug(reg)
+                            # logger.debug(reg)
                         elif len(reg.filter(pay_status='start')) > 0:
                             reg_status = 'start'
                             reg_id = reg.filter(pay_status='start').last().id
                     reg_list.append({'is_joad': student.is_joad, 'reg_status': reg_status, 'reg_id': reg_id})
             s['registrations'] = reg_list
-            logging.debug(s)
+            # logger.debug(s)
             self.session_list.append(s)

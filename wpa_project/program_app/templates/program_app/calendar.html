@@ -8,9 +8,9 @@
     <div class="p-2">
         <p>
             {% if beginner_class %}
-                The next available class for beginner students is {{ beginner_class.class_date }}
+                The next available class for beginner students is {{ beginner_class.event.event_date }}
                 {% if beginner_wait %}
-                    The next wait list opening is {{ beginner_wait.class_date }}.
+                    The next wait list opening is {{ beginner_wait.event.event_date }}.
                 {% endif %}
             {% else %}
                 There are no classes available for beginner students at this time.
@@ -18,9 +18,9 @@
         </p>
         <p>
             {% if returnee_class %}
-                The next available class for returning students is {{ returnee_class.class_date }}
+                The next available class for returning students is {{ returnee_class.event.event_date }}
                 {% if returnee_wait %}
-                    The next wait list opening is {{ returnee_wait.class_date }}.
+                    The next wait list opening is {{ returnee_wait.event.event_date }}.
                 {% endif %}
             {% else %}
                 There are no classes available for returning students at this time.

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %} Beginner Class {% endblock %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/beginner_class.js' %}"></script>
+    <script src="{% static 'js/class_attendance.js' %}"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    {% if user.is_board %}
+        {% if form.event.type == 'class' %}
+            <a href="{% url 'programs:beginner_class' form.event.id %}" class="btn btn-primary" role="button">
+                Edit Class
+            </a>
+        {% else %}
+            <a href="{% url 'events:volunteer_event' form.event.id %}" class="btn btn-primary" role="button">
+                Edit Event
+            </a>
+        {% endif %}
+        <hr/>
+    {% endif %}
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+  <!-- Position it: -->
+  <!-- - `.toast-container` for spacing between toasts -->
+  <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
+  <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+  <div class="toast-container position-absolute top-0 end-0 p-3">
+
+    <!-- Then put toasts within -->
+    <div class="toast text-white bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-body"></div>
+    </div>
+
+  </div>
+</div>
+    <h4>Instructions:</h4>
+    <div class="row m-2 pl-4"><div>
+        <ol>
+            <li>Verify student and accompanying members have masks.</li>
+            <li>Check ID</li>
+            <li>
+                Get signatures for every student attending.
+            </li>
+        </ol>
+    </div></div>
+    <div class="row p-2">
+        {% if form %}
+            <form id="attendance_form" class="col" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form" value="on">
+
+                <div class="row">
+                    <div class="col"> New Students </div>
+                    <div class="col"> Attending: {{ form.attend_count.beginner }} </div>
+                </div>
+                <div class="row">
+                    <table class="table table-bordered table-striped table-responsive-sm col">
+                        <thead>
+
+                            <th> First Name </th>
+                            <th> Last Name </th>
+                            {% if form.event.type == 'work' %}
+                                <th> Comment </th>
+                            {% else %}
+                                <th> Date of Birth </th>
+                            {% endif %}
+                            <th>
+                                {% if form.is_closed %}
+                                    Attending
+                                {% endif %}
+                            </th>
+                            <th> Attended/</br>Registered</th>
+                        </thead>
+                        <tbody>
+                            {% for cr in form.new_students %}
+                                {% if form.event.type == 'work' %}
+                                    {% include "event/tables/volunteer_attend_table_row.html" %}
+                                {% else %}
+                                    {% include "event/tables/student_attend_table_row.html" %}
+                                {% endif %}
+                            {% endfor %}
+                            <tr>
+                                <td colspan="6">
+                                    <a class="nav-link" href="{% url 'programs:admit_wait' form.event.id %}">Wait List</a>
+                                </td>
+                            </tr>
+                            {% for cr in form.new_students_waiting %}
+                                {% include "event/tables/student_attend_table_row.html" %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if form.event.type != 'work' %}
+                    <div class="row pt-2">
+                        <div class="col"> Returning Students </div>
+                        <div class="col"> Attending: {{ form.attend_count.returnee }} </div>
+                    </div>
+                    <div class="row">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <th> First Name </th>
+                                <th> Last Name </th>
+                                <th> Date of Birth </th>
+                                <th>
+                                    {% if form.is_closed %}
+                                        Attending
+                                    {% endif %}
+                                </th>
+                                <th> Attended/</br>Registered</th>
+                            </thead>
+                            <tbody>
+                                {% for cr in form.return_students %}
+                                    {% include "event/tables/student_attend_table_row.html" %}
+                                {% endfor %}
+                                <tr>
+                                    <td colspan="6">Wait List</td>
+                                </tr>
+                                {% for cr in form.return_students_waiting %}
+                                    {% include "event/tables/student_attend_table_row.html" %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+                <div class="row pt-2">
+                    <div class="col"> Instructors/Staff </div>
+                    <div class="col"> Attending: {{ form.attend_count.staff }} </div>
+                </div>
+                <div class="row">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <th> First Name </th>
+                            <th> Last Name </th>
+                            <th> Comment </th>
+                            <th>
+                                {% if form.is_closed %}
+                                    Attending
+                                {% endif %}
+                            </th>
+                            <th> Attended/</br>Registered</th>
+                        </thead>
+                        <tbody>
+                            {% for cr in form.staff %}
+                                {% include "event/tables/volunteer_attend_table_row.html" %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

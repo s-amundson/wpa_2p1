@@ -26,6 +26,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('admin/', admin.site.urls),
     path('contact_us/', include('contact_us.urls', namespace='contact_us')),
+    path('events/', include('event.urls', namespace='events')),
     path('facebook/', include('facebook.urls', namespace='facebook')),
     path('information/', include('info.urls', namespace='information')),
     path('joad/', include('joad.urls', namespace='joad')),

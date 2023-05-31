@@ -73,7 +73,7 @@ class TestsJoadRegistration(TestCase):
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:registration'), self.student_dict, secure=True)
-        logging.debug(self.client.session['line_items'][0]['name'])
+        logger.debug(self.client.session['line_items'][0]['name'])
         self.assertEqual(self.client.session['line_items'][0]['name'], 'Joad session starting 2022-02-01 student id: 8')
         self.assertEqual(self.client.session['payment_description'], 'Joad session starting 2022-02-01')
         self.assertEqual(self.client.session['payment_category'], 'joad')
@@ -83,7 +83,7 @@ class TestsJoadRegistration(TestCase):
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:registration'), self.student_dict, secure=True)
-        logging.debug(self.client.session['line_items'][0]['name'])
+        logger.debug(self.client.session['line_items'][0]['name'])
         self.assertEqual(self.client.session['line_items'][0]['name'], 'Joad session starting 2022-02-01 student id: 8')
         self.assertEqual(self.client.session['payment_description'], 'Joad session starting 2022-02-01')
         self.assertEqual(self.client.session['payment_category'], 'joad')
@@ -181,6 +181,6 @@ class TestsJoadRegistration(TestCase):
 
         response = self.client.get(reverse('joad:resume_registration', kwargs={'reg_id': registration.id}),
                                     self.student_dict, secure=True)
-        logging.debug(self.client.session['line_items'][0]['name'])
+        logger.debug(self.client.session['line_items'][0]['name'])
         self.assertEqual(self.client.session['payment_description'], 'Joad session starting 2022-02-01')
         self.assertEqual(self.client.session['payment_category'], 'joad')

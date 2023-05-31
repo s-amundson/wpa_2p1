@@ -11,6 +11,7 @@
                     <th>Date</th>
                     <th>Beginners</th>
                     <th>Returnees</th>
+                    <th>Waiting</th>
                     {% if user.is_staff or user.is_instructor %}
                         <th>Instructors</th>
                     {% endif %}
@@ -21,18 +22,19 @@
                 {% for c in object_list %}
                     <tr>
                         <td>
-                            <a class="nav-link" href="{% url 'programs:class_attend_list' c.id %}">
-                                {{ c.class_date }}
+                            <a class="nav-link" href="{% url 'events:event_attend_list' c.event_id %}">
+                                {{ c.event_date }}
                             </a>
                         </td>
                         <td>{{ c.beginner }}/{{ c.beginner_limit }}</td>
                         <td>{{ c.returnee }}/{{ c.returnee_limit }}</td>
+                        <td>{{ c.waiting }}/{{ c.beginner_wait_limit|add:c.returnee_wait_limit }}</td>
                         <td>
                             {% if user.is_staff or user.is_instructor %}
                                 {{ c.staff }}/{{ c.instructor_limit }}
                             {% endif %}
                         </td>
-                        <td>{{ c.state }}</td>
+                        <td>{{ c.event_state }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

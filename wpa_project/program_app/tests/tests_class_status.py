@@ -4,7 +4,7 @@ import json
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from ..models import BeginnerClass, ClassRegistration
+from event.models import Event, Registration
 from student_app.models import Student, User
 
 logger = logging.getLogger(__name__)
@@ -32,19 +32,17 @@ class TestsClassStatus(TestCase):
         self.assertEqual(content['returnee'], 2)
 
         # add 1 beginner students and 1 returnee.
-        cr = ClassRegistration(
-            beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration(
+            event=Event.objects.get(pk=1),
             student=Student.objects.get(pk=4),
-            new_student=True,
             pay_status="paid",
             idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
             reg_time='2021-06-09',
             attended=False)
         cr.save()
-        cr = ClassRegistration(
-            beginner_class=BeginnerClass.objects.get(pk=1),
+        cr = Registration(
+            event=Event.objects.get(pk=1),
             student=Student.objects.get(pk=5),
-            new_student=False,
             pay_status="paid",
             idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
             reg_time='2021-06-09',

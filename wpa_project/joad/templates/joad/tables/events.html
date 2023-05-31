@@ -39,7 +39,7 @@
                         {% elif row.reg_status == 'closed' %}
                             Closed
                         {% else %}
-                            <a href="{% url 'joad:event_registration' event.id %}" class="btn btn-primary" role="button">
+                            <a href="{% url 'joad:event_registration' event.event_id %}" class="btn btn-primary" role="button">
                                 Register
                             </a>
                         {% endif %}

@@ -63,7 +63,8 @@ class WaiverForm(forms.Form):
             content_type='image/jpeg',
             size=img_io.tell,
             charset=None)
-        self.student.safety_class = class_date
+        if class_date and self.student.safety_class is None:
+            self.student.safety_class = class_date
         self.student.save()
 
         return True
@@ -78,8 +79,6 @@ class WaiverForm(forms.Form):
             return img
         except:  # pragma: no cover
             return None
-
-
 
     def send_pdf(self):
         # send email to user with the waiver attached

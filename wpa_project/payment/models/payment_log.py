@@ -22,3 +22,4 @@ class PaymentLog(models.Model):
     status = models.CharField(max_length=20, null=True)
     total_money = models.IntegerField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    volunteer_points = models.FloatField(default=0)

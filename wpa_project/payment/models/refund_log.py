@@ -10,3 +10,4 @@ class RefundLog(models.Model):
     processing_fee = models.IntegerField(default=None, null=True)
     refund_id = models.CharField(max_length=255)
     status = models.CharField(max_length=50)
+    volunteer_points = models.FloatField(default=0)

@@ -6,7 +6,8 @@ from django.core import mail
 from django.test import TestCase, Client
 
 from ..src import ClassRegistrationHelper
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
+from event.models import Registration
 from ..tasks import update_waiting
 from student_app.models import Student, User
 from payment.tests import MockSideEffects
@@ -37,15 +38,14 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 1)
             s.safety_class = None
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
-                                   student=s,
-                                   new_student=True,
-                                   pay_status='paid',
-                                   idempotency_key=str(uuid.uuid4()))
+            cr = Registration(event=bc.event,
+                              student=s,
+                              pay_status='paid',
+                              idempotency_key=str(uuid.uuid4()))
             cr.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
+        self.assertEqual(bc.event.state, 'full')
 
     def test_update_status_beginner_full_then_open(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -57,24 +57,23 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 1)
             s.safety_class = None
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status='paid',
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
+        self.assertEqual(bc.event.state, 'full')
 
         #  remove student
-        cr = ClassRegistration.objects.last()
+        cr = Registration.objects.last()
         cr.pay_status = 'refund'
         cr.save()
 
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
 
     def test_update_status_beginner_open(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -86,15 +85,14 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 3)
             s.safety_class = None
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status='paid',
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
 
     def test_update_status_returnee_full(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -106,15 +104,14 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 3)
             s.safety_class = "2021-05-31"
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status='paid',
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
+        self.assertEqual(bc.event.state, 'full')
 
     def test_update_status_returnee_full_then_open(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -126,24 +123,23 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 3)
             s.safety_class = "2021-05-31"
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status='paid',
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
+        self.assertEqual(bc.event.state, 'full')
 
         #  remove student
-        cr = ClassRegistration.objects.last()
+        cr = Registration.objects.last()
         cr.pay_status = 'refund'
         cr.save()
 
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
 
     def test_update_status_returnee_open(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -155,15 +151,14 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 3)
             s.safety_class = "2021-05-31"
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status='paid',
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'open')
+        self.assertEqual(bc.event.state, 'open')
 
     @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
     def test_update_status_beginner_waiting(self, mock_payment):
@@ -184,9 +179,8 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 2)
             s.safety_class = None
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status=ps[i],
                                    idempotency_key=str(uuid.uuid4()),
                                    user=user)
@@ -200,17 +194,16 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 5)
             s.safety_class = None
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status='waiting',
                                    idempotency_key=ik,
                                    user=user)
             cr.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'wait')
-        registrations = ClassRegistration.objects.filter(beginner_class=bc)
+        self.assertEqual(bc.event.state, 'wait')
+        registrations = Registration.objects.filter(event=bc.event)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 3)
 
         # change wait  limit to 2 so that the class is full.
@@ -218,14 +211,14 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         bc.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
+        self.assertEqual(bc.event.state, 'full')
 
 
         # chang the beginnner limit so that one waiting can change to paid.
         bc.beginner_limit = 3
         bc.save()
         update_waiting(bc.id)
-        registrations = ClassRegistration.objects.filter(beginner_class=bc)
+        registrations = Registration.objects.filter(event=bc.event)
         self.assertEqual(len(registrations), 5)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 2)
         self.assertEqual(len(mail.outbox), 1)
@@ -234,7 +227,7 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         bc.beginner_limit = 6
         bc.save()
         update_waiting(bc.id)
-        registrations = ClassRegistration.objects.filter(beginner_class=bc)
+        registrations = Registration.objects.filter(event=bc.event)
         self.assertEqual(len(registrations), 5)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
         self.assertEqual(len(mail.outbox), 2)
@@ -258,9 +251,8 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 2)
             s.safety_class = None
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status=ps[i],
                                    idempotency_key=str(uuid.uuid4()),
                                    user=user)
@@ -268,8 +260,8 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
 
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'wait')
-        registrations = ClassRegistration.objects.filter(beginner_class=bc)
+        self.assertEqual(bc.event.state, 'wait')
+        registrations = Registration.objects.filter(event=bc.event)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 1)
         self.assertEqual(len(registrations.filter(pay_status='start')), 0)
 
@@ -277,7 +269,7 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         bc.beginner_limit = 3
         bc.save()
         update_waiting(bc.id)
-        registrations = ClassRegistration.objects.filter(beginner_class=bc)
+        registrations = Registration.objects.filter(event=bc.event)
         self.assertEqual(len(registrations), 3)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
         self.assertEqual(len(registrations.filter(pay_status='start')), 1)
@@ -302,9 +294,8 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 2)
             s.safety_class = "2023-06-05"
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=False,
                                    pay_status=ps[i],
                                    idempotency_key=str(uuid.uuid4()),
                                    user=user)
@@ -318,17 +309,16 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 5)
             s.safety_class = "2023-06-05"
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=False,
                                    pay_status='waiting',
                                    idempotency_key=ik,
                                    user=user)
             cr.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'wait')
-        registrations = ClassRegistration.objects.filter(beginner_class=bc)
+        self.assertEqual(bc.event.state, 'wait')
+        registrations = Registration.objects.filter(event=bc.event)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 3)
 
         # change wait  limit to 2 so that the class is full.
@@ -336,13 +326,13 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         bc.save()
         self.crh.update_class_state(bc)
         bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.state, 'full')
+        self.assertEqual(bc.event.state, 'full')
 
         # chang the beginnner limit so that one waiting can change to paid.
         bc.returnee_limit = 3
         bc.save()
         update_waiting(bc.id)
-        registrations = ClassRegistration.objects.filter(beginner_class=bc)
+        registrations = Registration.objects.filter(event=bc.event)
         self.assertEqual(len(registrations), 5)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 2)
 
@@ -350,7 +340,7 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         bc.returnee_limit = 6
         bc.save()
         update_waiting(bc.id)
-        registrations = ClassRegistration.objects.filter(beginner_class=bc)
+        registrations = Registration.objects.filter(event=bc.event)
         self.assertEqual(len(registrations), 5)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
 
@@ -364,9 +354,8 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 3)
             s.safety_class = None
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status='paid',
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
@@ -386,9 +375,8 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
             s = Student.objects.get(pk=i + 3)
             s.safety_class = "2021-05-31"
             s.save()
-            cr = ClassRegistration(beginner_class=bc,
+            cr = Registration(event=bc.event,
                                    student=s,
-                                   new_student=True,
                                    pay_status='paid',
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()

@@ -20,7 +20,6 @@ class UnregisterView(UserPassesTestMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        # logging.debug(form.cleaned_data)
         if form.process_refund(self.request.user, self.student_family):
             return super().form_valid(form)
         return self.form_invalid(form)
@@ -28,8 +27,6 @@ class UnregisterView(UserPassesTestMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['family'] = self.student_family
-        # if self.request.user.is_board:
-        #     kwargs['user'] = self.request.user
         return kwargs
 
     def test_func(self):

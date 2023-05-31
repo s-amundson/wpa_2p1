@@ -1,13 +1,13 @@
 import logging
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic.base import TemplateView
-from ..models import ClassRegistration
+from event.models import Registration
 
 logger = logging.getLogger(__name__)
 
 
 class HistoryView(UserPassesTestMixin, TemplateView):
-    model = ClassRegistration
+    model = Registration
     paginate_by = 100  # if pagination is desired
     student_family = None
     template_name = 'program_app/history.html'

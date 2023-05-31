@@ -49,9 +49,12 @@ class MessageView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # self.request.session.pop('recaptcha_score')
-        score = self.request.session.get('recaptcha_score', 0)
-        logging.warning(score)
-        context['probably_human'] = score > 0.5
+        if self.request.user.is_authenticated:
+            context['probably_human'] = True
+        else:
+            score = self.request.session.get('recaptcha_score', 0)
+            logging.warning(score)
+            context['probably_human'] = score > 0.5
         context['email'] = settings.DEFAULT_FROM_EMAIL
         return context
 

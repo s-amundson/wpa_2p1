@@ -21,11 +21,16 @@ class WaiverView(UserPassesTestMixin, FormView):
     success_url = reverse_lazy('registration:profile')
     form = None
     student = None
-    class_date = timezone.localtime(timezone.now()).date()
+    class_date = None
 
     @method_decorator(csp_update(STYLE_SRC="https://ajax.googleapis.com", SCRIPT_SRC="https://ajax.googleapis.com"))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['student'] = self.student
+        return context
 
     def get_form(self):
         return self.form_class(self.student, **self.get_form_kwargs())

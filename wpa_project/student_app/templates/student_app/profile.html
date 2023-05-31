@@ -4,7 +4,9 @@
 {% block script %}
     {% load static %}
     <script src="{% static 'js/profile.js' %}"></script>
-    <script src="{% static 'js/class_cancel.js' %}"></script>
+    {% if student_family %}
+        <script src="{% static 'js/class_cancel.js' %}"></script>
+    {% endif %}
     <script nonce="{{request.csp_nonce}}">
         let student_table_url = "{% url 'registration:student_table' %}"
         let add_student_url = "{% url 'registration:add_student' %}"

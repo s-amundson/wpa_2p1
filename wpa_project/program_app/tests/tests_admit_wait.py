@@ -6,7 +6,8 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from payment.tests import MockSideEffects
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
+from event.models import Registration
 Student = apps.get_model('student_app', 'Student')
 User = apps.get_model('student_app', 'User')
 logger = logging.getLogger(__name__)
@@ -39,10 +40,9 @@ class TestsAdmitWait(MockSideEffects, TestCase):
         students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
         self.add_card(self.test_user)
         for s in students:
-            cr = ClassRegistration(
-                beginner_class=self.beginner_class,
+            cr = Registration(
+                event=self.beginner_class.event,
                 student=s,
-                new_student=True,
                 pay_status="waiting",
                 idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
                 reg_time='2021-06-09',
@@ -51,10 +51,9 @@ class TestsAdmitWait(MockSideEffects, TestCase):
             cr.save()
         students = [Student.objects.get(pk=4), Student.objects.get(pk=5)]
         for s in students:
-            cr = ClassRegistration(
-                beginner_class=self.beginner_class,
+            cr = Registration(
+                event=self.beginner_class.event,
                 student=s,
-                new_student=True,
                 # safety_class="2021-05-31",
                 pay_status="waiting",
                 idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e522",
@@ -82,6 +81,6 @@ class TestsAdmitWait(MockSideEffects, TestCase):
         mock_payment.side_effect = self.payment_side_effect
         d = {'admit_1': True, 'admit_2': True, 'admit_3': False, 'admit_4': False}
         response = self.client.post(reverse('programs:admit_wait', kwargs={'beginner_class': 1}), d, secure=True)
-        self.assertRedirects(response, reverse('programs:class_attend_list', kwargs={'beginner_class': 1}))
+        self.assertRedirects(response, reverse('events:event_attend_list', kwargs={'event': 1}))
         chg_group.assert_called_with([2, 1])
 

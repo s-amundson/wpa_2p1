@@ -36,12 +36,12 @@ class CalendarView(TemplateView):
         ly, lm = self.coerce_month(year, month - 1)
         context['previous'] = {'year': ly, 'month': lm}
         context['this_month'] = d.year == year and d.month == month
-        beginner_class = BeginnerClass.objects.filter(class_date__gt=timezone.now())
+        beginner_class = BeginnerClass.objects.filter(event__event_date__gt=timezone.now())
             # class_date__gt=timezone.now(), state='open').order_by('class_date')
-        beginner_wait = beginner_class.filter(class_type='beginner', state='wait').order_by('class_date')
-        returnee_class = beginner_class.filter(class_type='returnee', state='open').order_by('class_date')
-        returnee_wait = beginner_class.filter(class_type='returnee', state='wait').order_by('class_date')
-        beginner_class = beginner_class.filter(class_type='beginner', state='open').order_by('class_date')
+        beginner_wait = beginner_class.filter(class_type='beginner', event__state='wait').order_by('event__event_date')
+        returnee_class = beginner_class.filter(class_type='returnee', event__state='open').order_by('event__event_date')
+        returnee_wait = beginner_class.filter(class_type='returnee', event__state='wait').order_by('event__event_date')
+        beginner_class = beginner_class.filter(class_type='beginner', event__state='open').order_by('event__event_date')
         if beginner_class:
             context['beginner_class'] = beginner_class.first()
         else:

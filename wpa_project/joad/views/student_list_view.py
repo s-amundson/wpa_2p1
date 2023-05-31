@@ -1,5 +1,4 @@
 from student_app.views import StudentList
-from student_app.models import Student
 from ..forms import SearchColumnsForm
 
 import logging
@@ -22,5 +21,3 @@ class StudentListView(StudentList):
         if self.form.is_valid():
             self.last_event = self.form.cleaned_data['last_event']
         return queryset
-
-

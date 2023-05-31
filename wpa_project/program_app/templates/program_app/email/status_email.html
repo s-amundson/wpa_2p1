@@ -5,7 +5,7 @@
     </p>
     {% for c in class_list %}
         <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
-            {{ c.class.class_type|capfirst }} class on {{ c.class.class_date }} has
+            {{ c.class.class_type|capfirst }} class on {{ c.class.event.event_date }} has
             {{ c.count.beginner|add:c.count.returnee }} students signed up and {{ c.count.staff }} volunteers
             signed up. The following volunteers are signed up:
         </p>
@@ -51,9 +51,9 @@
         </table>
     {% endfor %}
     <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
-        <a href="http://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+        <a href="https://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
     </p>
     <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
-        <a href="http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+        <a href="https://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
     </p>
 {% endblock %}

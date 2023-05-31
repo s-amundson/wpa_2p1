@@ -10,8 +10,6 @@ from django.views.generic.detail import DetailView
 from ..forms import PaymentForm
 from ..models import Card, PaymentLog
 from ..signals import payment_error_signal
-from django.utils.decorators import method_decorator
-from csp.decorators import csp
 
 import logging
 logger = logging.getLogger(__name__)
@@ -29,9 +27,6 @@ class CreatePaymentView(FormView):
     else:  # pragma: no cover
         pay_url = "https://sandbox.web.squarecdn.com/v1/square.js"
 
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
     def form_invalid(self, form):
         logging.warning(form.errors)
         return super().form_invalid(form)
@@ -47,7 +42,6 @@ class CreatePaymentView(FormView):
                         self.request.session.pop(k)
             return super().form_valid(form)
         else:
-            # logging.debug(form.errors)
             # replace idempotency_key
             new_ik = str(uuid.uuid4())
             self.request.session['idempotency_key'] = new_ik
@@ -62,10 +56,6 @@ class CreatePaymentView(FormView):
         context['app_id'] = settings.SQUARE_CONFIG['application_id']
         context['location_id'] = settings.SQUARE_CONFIG['location_id']
         context['action_url'] = self.request.session.get('action_url', reverse_lazy('payment:make_payment'))
-        if self.request.user.is_authenticated:
-            context['cards'] = Card.objects.filter(customer__user=self.request.user)
-        else:
-            context['cards'] = []
         context['url_remove_card'] = reverse_lazy('payment:card_remove')
         return context
 

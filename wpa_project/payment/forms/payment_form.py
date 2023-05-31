@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from ..models import Card, Customer, PaymentLog
 from ..src import CardHelper, CustomerHelper, EmailMessage, PaymentHelper
+from event.models import VolunteerRecord
 
 import logging
 logger = logging.getLogger(__name__)
@@ -18,7 +19,8 @@ class PaymentForm(forms.ModelForm):
 
     class Meta:
         model = PaymentLog
-        fields = ('amount', 'card', 'category', 'default_card', 'donation', 'donation_note', 'save_card', 'source_id')
+        fields = ('amount', 'card', 'category', 'default_card', 'donation', 'donation_note', 'save_card', 'source_id',
+                  'volunteer_points')
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
@@ -39,6 +41,11 @@ class PaymentForm(forms.ModelForm):
         self.donation_note = ''
         self.log = None
         self.user = user
+        self.available_volunteer_points = 0
+        if self.user and self.user.student_set.last() and self.user.student_set.last().student_family:
+            self.available_volunteer_points = VolunteerRecord.objects.get_family_points(
+                self.user.student_set.last().student_family)
+        self.fields['volunteer_points'] = forms.FloatField(max_value=self.available_volunteer_points, required=False)
         self.fields['card'].choices = self.card_choices()
         self.fields['category'].widget = forms.HiddenInput()
         self.fields['donation_note'].widget.attrs.update({'cols': 30, 'rows': 3, 'class': 'form-control'})
@@ -58,43 +65,56 @@ class PaymentForm(forms.ModelForm):
         for card in saved_cards:
             card_choices.append((card.id, str(card)))
         card_choices.append((0, "New Card"))
-        # logging.debug(card_choices)
         return card_choices
 
-    def process_payment(self, idempotency_key, autocomplete=True):
+    def process_payment(self, idempotency_key):
         note = self.description
         if self.cleaned_data['donation'] > 0:
             note = note + f", Donation of {self.cleaned_data['donation']}"
-        # logging.debug(self.cleaned_data)
-        # logging.debug(self.line_items)
+            self.line_items.append({
+                'name': 'Donation',
+                'quantity': 1,
+                'amount_each': self.cleaned_data['donation'],
+                'total': self.cleaned_data['donation']
+            })
+        volunteer_points = self.cleaned_data.get('volunteer_points', 0)
+        if volunteer_points is None:
+            volunteer_points = 0
+        logger.warning(self.cleaned_data)
         if self.cleaned_data['source_id'] == 'no-payment' and self.amount_initial == 0 \
                 and self.cleaned_data['amount'] == 0:
-            self.log = self.save(commit=False)
-            self.log.user = self.user
-            self.log.idempotency_key = idempotency_key
-            self.log.checkout_created_time = timezone.now()
-            self.log.total_money = 0
-            self.log.receipt = 'None'
-            self.log.description = note[:250]
-            self.log.status = 'comped'
-            self.log.save()
+            self.save_log(idempotency_key, note, 'comped', volunteer_points)
             return True
-        payment_helper = PaymentHelper(self.user)
-        self.log, duplicate = payment_helper.create_payment(
-            amount=self.cleaned_data['amount'],
-            category=self.cleaned_data['category'],
-            donation=self.cleaned_data['donation'],
-            idempotency_key=idempotency_key,
-            note=note,
-            source_id=self.cleaned_data['source_id'],
-            saved_card_id=int(self.cleaned_data['card'])
-        )
+        logger.warning(f'available_vounteer points: {self.available_volunteer_points}, type:{type(self.available_volunteer_points)}')
+        if volunteer_points and self.available_volunteer_points >= self.amount_initial and \
+                volunteer_points >= self.amount_initial + self.cleaned_data['donation']:
+            self.save_log(idempotency_key, note, 'volunteer points', volunteer_points)
+            duplicate = False
+            # return True
+        else:
+            payment_helper = PaymentHelper(self.user)
+            self.log, duplicate = payment_helper.create_payment(
+                amount=self.cleaned_data['amount'] - volunteer_points,
+                category=self.cleaned_data['category'],
+                donation=self.cleaned_data['donation'],
+                idempotency_key=idempotency_key,
+                note=note,
+                source_id=self.cleaned_data['source_id'],
+                saved_card_id=int(self.cleaned_data['card'])
+            )
 
         if self.log is not None:
-            pay_dict = {'line_items': self.line_items, 'total': self.cleaned_data['amount'],
+            pay_dict = {'line_items': self.line_items, 'total': self.cleaned_data['amount'] + volunteer_points,
                         'receipt': self.log.receipt}
             if self.user is not None and not duplicate:
                 EmailMessage().payment_email_user(self.user, pay_dict)
+            if volunteer_points:
+                vr = VolunteerRecord.objects.create(
+                    student=self.user.student_set.last(),
+                    volunteer_points= 0 - volunteer_points
+                )
+                self.log.volunteer_points = volunteer_points
+                self.log.save()
             if self.cleaned_data['save_card']:
                 customer = Customer.objects.filter(user=self.user).last()
                 # logging.debug(customer)
@@ -109,6 +129,18 @@ class PaymentForm(forms.ModelForm):
         else:
             for error in payment_helper.errors:
                 self.payment_errors.append(error)
-                logging.debug(error)
-
+                logging.warning(error)
         return False
+
+    def save_log(self, idempotency_key, note, status, volunteer_points=0):
+        logging.warning('save_log')
+        self.log = self.save(commit=False)
+        self.log.user = self.user
+        self.log.idempotency_key = idempotency_key
+        self.log.checkout_created_time = timezone.now()
+        self.log.total_money = 0
+        self.log.receipt = 'None'
+        self.log.description = note[:250]
+        self.log.status = status
+        self.log.volunteer_points = volunteer_points
+        self.log.save()

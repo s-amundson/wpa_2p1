@@ -1,20 +1,16 @@
 import logging
-import uuid
-import json
 
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.utils import timezone
 
-from ..models import BeginnerClass, ClassRegistration
 Student = apps.get_model('student_app', 'Student')
 User = apps.get_model('student_app', 'User')
 logger = logging.getLogger(__name__)
 
 
 class TestsAttendanceHistory(TestCase):
-    fixtures = ['f1', 'f3']
+    fixtures = ['f1']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

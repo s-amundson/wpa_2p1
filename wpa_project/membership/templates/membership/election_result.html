@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %} Election Result {% endblock %}
+
+
+{% block main %}
+    <div class="row"><h3 class="text-center">Election Results</h3></div>
+    <div class="row"><h5 class="text-center">Election: {{ object_list.0.election.election_date }}</h5></div>
+    <div class="row p-2">
+        <p>Thank you to all that have participated: Below are the winners.</p>
+        <table class="table table-bordered">
+            <thead>
+                <th> Position </th>
+                <th> Winner </th>
+                <th> Tie </th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>President</td>
+                    <td>
+                        {{ president.0.candidate }}
+                        {% if president.1.tie %}
+                            </br> {{ president.1.candidate }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if president.1.tie %} True {% else %} False {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Vice President</td>
+                    <td>
+                        {{ vice_president.0.candidate }}
+                        {% if vice_president.1.tie %}
+                            </br> {{ vice_president.1.candidate }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if vice_president.1.tie %} True {% else %} False {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Secretary</td>
+                    <td>
+                        {{ secretary.0.candidate }}
+                        {% if secretary.1.tie %}
+                            </br> {{ secretary.1.candidate }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if secretary.1.tie %} True {% else %} False {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Treasurer</td>
+                    <td>
+                        {{ treasurer.0.candidate }}
+                        {% if treasurer.1.tie %}
+                            </br> {{ treasurer.1.candidate }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if treasurer.1.tie %} True {% else %} False {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Members at Large</td>
+                    <td>
+                        <p>{{ member_at_large.0.candidate }}</p>
+                        <p>{{ member_at_large.1.candidate }}</p>
+                        <p>{{ member_at_large.2.candidate }}</p>
+                        {% if member_at_large.3.tie %}
+                            <p>{{ member_at_large.3.candidate }}</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if member_at_large.3.tie %} True {% else %} False {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="row p-2">
+        <p>Below are the individual votes.</p>
+        <table class="table table-bordered">
+            <thead>
+                <th> President </th>
+                <th> Vice President </th>
+                <th> Secretary </th>
+                <th> Treasurer </th>
+                <th> Members at Large </th>
+            </thead>
+            <tbody>
+                {% for vote in object_list %}
+                    <tr>
+                        <td>{{ vote.president }}</td>
+                        <td>{{ vote.vice_president }}</td>
+                        <td>{{ vote.secretary }}</td>
+                        <td>{{ vote.treasurer }}</td>
+                        <td>
+                            {% for member in vote.member_at_large.all %}
+                            {{ member }}</br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

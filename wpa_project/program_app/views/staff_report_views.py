@@ -1,19 +1,18 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.views.generic import ListView
+from django.db.models import Sum
 from django.views.generic import FormView
-from django.utils import timezone
 from django.urls import reverse_lazy
 from django.forms import model_to_dict
 
 from ..forms import StaffReportForm
-from ..models import BeginnerClass, ClassRegistration
+from event.models import Registration, VolunteerRecord
+from src.mixin import BoardMixin
 from student_app.models import Student, User
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class StaffReportView(UserPassesTestMixin, FormView):
+class StaffReportView(BoardMixin, FormView):
     template_name = 'program_app/staff_attend_report.html'
     form_class = StaffReportForm
     success_url = reverse_lazy('registration:index')
@@ -26,18 +25,19 @@ class StaffReportView(UserPassesTestMixin, FormView):
         staff_students = Student.objects.filter(user__in=staff_users).order_by('last_name')
         context['staff_list'] = []
         for i in staff_students:
-            cr = ClassRegistration.objects.filter(student=i, pay_status__in=['paid', 'admin'])
-            bc = BeginnerClass.objects.all()
+            cr = Registration.objects.filter(student=i, pay_status__in=['paid', 'admin'])
+            vr = VolunteerRecord.objects.filter(student=i, volunteer_points__gt=0)
             if self.start_date is not None:
-                bc = bc.filter(class_date__gte=self.start_date)
+                cr = cr.filter(event__event_date__gte=self.start_date)
+                vr = vr.filter(event__event_date__gte=self.start_date)
             if self.end_date is not None:
-                bc = bc.filter(class_date__lte=self.end_date)
-            cr = cr.filter(beginner_class__in=bc)
+                cr = cr.filter(event__event_date__lte=self.end_date)
+                vr = vr.filter(event__event_date__lte=self.end_date)
             i_dict = model_to_dict(i)
-            # logging.debug(i_dict)
             i_dict['registrations'] = len(cr)
             i_dict['attended'] = len(cr.filter(attended=True))
             i_dict['user'] = model_to_dict(i.user)
+            i_dict['points'] = vr.aggregate(Sum('volunteer_points'))['volunteer_points__sum']
             context['staff_list'].append(i_dict)
         return context
 
@@ -45,6 +45,3 @@ class StaffReportView(UserPassesTestMixin, FormView):
         self.start_date = form.cleaned_data.get('start_date', None)
         self.end_date = form.cleaned_data.get('end_date', None)
         return self.form_invalid(form)
-
-    def test_func(self):
-        return self.request.user.is_board

@@ -75,6 +75,7 @@ class TestsCard(TestCase):
         self.assertEqual(len(cl), 2)
         self.assertTrue(cl[1].default)
         self.assertRedirects(response, reverse('payment:card_manage'))
+        self.assertEqual(len(Card.objects.enabled()), 1)
 
     def test_post_manage_card_good_not_default(self):
         old_card = Card.objects.get(pk=1)

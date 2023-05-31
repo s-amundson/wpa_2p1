@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.apps import apps
 from django.utils import timezone
 
-from ..models import EventRegistration, JoadEvent, Registration, PinAttendance, Session
+from ..models import JoadEvent, Registration, PinAttendance, Session
 
 from payment.models import PaymentLog
 from student_app.models import Student
@@ -23,33 +23,6 @@ class TestsSignal(TestCase):
         self.client = Client()
         self.test_user = self.User.objects.get(pk=2)
         self.client.force_login(self.test_user)
-
-    def test_event_registration_signal_good_new(self):
-        uid = '7b16fadf-4851-4206-8dc6-81a92b70e52f'
-        event = EventRegistration.objects.create(event=JoadEvent.objects.get(pk=1),
-                                                 student=Student.objects.get(pk=5),
-                                                 pay_status='started',
-                                                 idempotency_key=uid)
-
-        log = PaymentLog.objects.create(user=self.test_user,
-                                        # student_family=Student.objects.get(user=self.test_user).student_family,
-                                        checkout_created_time=timezone.now(),
-                                        # db_model='EventRegistration',
-                                        description="square_response",
-                                        location_id='location_id',
-                                        idempotency_key=uid,
-                                        order_id='order_id',
-                                        payment_id='id',
-                                        receipt='receipt_url',
-                                        source_type='source_type',
-                                        status='SUCCESS',
-                                        total_money=500,
-                                        )
-
-        er = EventRegistration.objects.all()
-        self.assertEqual(len(er), 2)
-        er = EventRegistration.objects.get(pk=event.id)
-        self.assertEqual(er.pay_status, "paid")
 
     def test_registration_signal_good_new(self):
         uid = '7b16fadf-4851-4206-8dc6-81a92b70e52f'

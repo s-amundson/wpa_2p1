@@ -3,14 +3,14 @@ import logging
 from django.apps import apps
 from django.test import TestCase, Client
 from django.urls import reverse
-from ..models import ClassRegistration
+from event.models import Registration
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
 class TestsStaffReport(TestCase):
-    fixtures = ['f1', 'f2', 'f3']
+    fixtures = ['f1', 'f2']
 
     def setUp(self):
         # Every test needs a client.
@@ -24,7 +24,7 @@ class TestsStaffReport(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_get_sign_in_page_good(self):
-        cr = ClassRegistration.objects.get(pk=1)
+        cr = Registration.objects.get(pk=1)
         cr.pay_status = 'paid'
         cr.save()
 

@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from django.db import models
 
 from django.utils import timezone
@@ -18,5 +17,3 @@ class StudentFamily(models.Model):
 
     # hidden fields
     registration_date = models.DateField(default=timezone.now)
-
-

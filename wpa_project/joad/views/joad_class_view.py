@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
@@ -7,11 +7,13 @@ from django.urls import reverse_lazy
 
 from ..models import JoadClass, Session
 from ..forms import ClassForm
+from event.models import Event
+from src.mixin import BoardMixin
 import logging
 logger = logging.getLogger(__name__)
 
 
-class JoadClassView(UserPassesTestMixin, FormView):
+class JoadClassView(BoardMixin, FormView):
     template_name = 'joad/forms/class_form.html'
     form_class = ClassForm
     success_url = reverse_lazy('joad:session')
@@ -29,14 +31,36 @@ class JoadClassView(UserPassesTestMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
+        # don't add a class on a date that already has a class.
+        if self.joad_class is None:
+            event = Event.objects.create(
+                event_date=form.cleaned_data['class_date'],
+                # cost_standard=form.cleaned_data['cost'],
+                # cost_member=form.cleaned_data['cost'],
+                state=form.cleaned_data['state'],
+                type='joad class'
+            )
+        else:
+            event = self.joad_class.event
+            event.event_date = form.cleaned_data['class_date']
+            # event.cost_standard = form.cleaned_data['cost']
+            # event.cost_member = form.cleaned_data['cost']
+            event.state = form.cleaned_data['state']
+            event.save()
+
         f = form.save()
-        return JsonResponse({'id': f.id, 'class_date': f.class_date, 'state': f.state, 'success': True})
+        f.event = event
+        f.save()
+
+        return JsonResponse({'id': f.id, 'class_date': f.event.event_date, 'state': f.event.state, 'success': True})
 
     def test_func(self):
-        self.session = get_object_or_404(Session, pk=self.kwargs['session_id'])
-        if self.kwargs.get('class_id', None) is not None:
-            self.joad_class = get_object_or_404(JoadClass, pk=self.kwargs['class_id'])
-        return self.request.user.is_board
+        is_board = super().test_func()
+        if is_board:
+            self.session = get_object_or_404(Session, pk=self.kwargs['session_id'])
+            if self.kwargs.get('class_id', None) is not None:
+                self.joad_class = get_object_or_404(JoadClass, pk=self.kwargs['class_id'])
+        return is_board
 
 
 class ClassListView(LoginRequiredMixin, ListView):
@@ -45,11 +69,11 @@ class ClassListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         sid = self.kwargs.get("session_id", None)
-        logging.debug(sid)
+        logger.debug(sid)
         if sid == 0:
             object_list = self.model.objects.filter(session__state="open")
         elif sid is not None:
-            object_list = self.model.objects.filter(session_id=sid).order_by('class_date')
+            object_list = self.model.objects.filter(session_id=sid).order_by('event__event_date')
         else:
             object_list = []
 

@@ -166,6 +166,7 @@ FACEBOOK_USER = get_secret('FACEBOOK_USER')
 
 # Application definition
 INSTALLED_APPS = [
+    'event',
     'student_app',
     'payment',
     'program_app',
@@ -199,17 +200,25 @@ INSTALLED_APPS = [
 
 ISITAREALEMAIL_API = get_secret('ISITAREALEMAIL_API')
 LOGIN_REDIRECT_URL = 'registration:profile'
-
+logger_default = {
+        'handlers': ['console'],
+        'level': get_secret("DEBUG_LEVEL"),
+        'propagate': False,
+    }
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
+        'django1': {
+            'format': '{levelname} {asctime} {name} {message}',
+            'style': '{',
+        },
         'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'format': 'root: {levelname} {asctime} {pathname}.{funcName} line:{lineno} {message}',
             'style': '{',
         },
         'verbose2': {
-            'format': '{levelname} {asctime} {module}.{funcName} line:{lineno} {message}',
+            'format': '{levelname} {asctime} {name}.{funcName} line:{lineno} {message}',
             'style': '{',
         },
         'simple': {
@@ -227,12 +236,39 @@ LOGGING = {
             'formatter': 'verbose2',
             'level': 'INFO',
         },
+        'django console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'django1'
+        },
+        'root_console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose2'
+        },
+    },
+    'loggers': {
+        '': {'handelers': ['console'], 'level': 'CRITICAL'},
+        'event': logger_default,
+        'student_app': logger_default,
+        'payment': logger_default,
+        'program_app': logger_default,
+        'membership': logger_default,
+        'minutes': logger_default,
+        'joad': logger_default,
+        'contact_us': logger_default,
+        'info': logger_default,
+        'facebook': logger_default,
+        'django': {
+            'handlers': ['django console'],
+            'level': get_secret('DJANGO_LOG_LEVEL'),
+            'propagate': False,
+        },
     },
     'root': {
-        'handlers': ['console'],
-        'level': get_secret("DEBUG_LEVEL"),
+        'handlers': ['root_console'],
+        'level': 'CRITICAL',
     },
 }
+
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'student_app', 'media')
 MEDIA_URL = '/media/'

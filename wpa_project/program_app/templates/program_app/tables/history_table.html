@@ -10,8 +10,8 @@
     {% for student in students %}
         <tr>
             <td> {{ student.first_name }} {{ student.last_name }}</td>
-            <td> {{ student.classregistration_set.attendance.registrations }} </td>
-            <td> {{ student.classregistration_set.attendance.attended }} </td>
+            <td> {{ student.registration_set.attendance_intro.registrations }} </td>
+            <td> {{ student.registration_set.attendance_intro.attended }} </td>
         </tr>
     {% endfor %}
     </tbody>

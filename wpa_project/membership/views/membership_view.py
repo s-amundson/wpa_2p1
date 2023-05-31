@@ -1,21 +1,35 @@
 import logging
 import uuid
 
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 from django.utils.datetime_safe import date
 from ..forms import MembershipForm
 from ..models import Level
+from src.mixin import StudentFamilyMixin, AccessMixin
+from student_app.models import StudentFamily
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
 
-class MembershipView(UserPassesTestMixin, FormView):
+class MembershipView(AccessMixin, FormView):
     template_name = 'membership/membership.html'
     form_class = MembershipForm
-    students = None
     success_url = reverse_lazy('payment:make_payment')
+    student_family = None
+
+    def dispatch(self, request, *args, **kwargs):
+        logger.warning(self.request.user.is_authenticated)
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        logging.warning(request.user.student_set.last())
+        if request.user.student_set.last() is None or request.user.student_set.last().student_family is None:
+            request.session['message'] = 'Address form is required'
+            return HttpResponseRedirect(reverse('registration:profile'))
+        self.student_family = request.user.student_set.last().student_family
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -24,7 +38,9 @@ class MembershipView(UserPassesTestMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['students'] = self.students
+        if 'sf_id' in self.kwargs and self.request.user.is_board:
+            self.student_family = StudentFamily.objects.get(pk=self.kwargs.get('sf_id'))
+        kwargs['students'] = self.student_family.student_set.all()
         return kwargs
 
     def form_invalid(self, form):
@@ -34,7 +50,7 @@ class MembershipView(UserPassesTestMixin, FormView):
     def form_valid(self, form):
         logging.warning(form.cleaned_data)
         members = []
-        for s in self.students:
+        for s in self.student_family.student_set.all():
             if form.cleaned_data.get(f'student_{s.id}', False):
                 members.append(s)
         level = form.cleaned_data.get('level', None)
@@ -77,17 +93,11 @@ class MembershipView(UserPassesTestMixin, FormView):
                 form.add_error(None, 'Incorrect membership selected')
                 return self.form_invalid(form)
             else:
-                self.transact(form, members, level.cost)
+                if 'sf_id' in self.kwargs and self.request.user.is_board:
+                    self.transact(form, members, 0)
+                else:
+                    self.transact(form, members, level.cost)
         return super().form_valid(form)
-
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            student = self.request.user.student_set.last()
-            if student:
-                if student.student_family is not None:
-                    self.students = student.student_family.student_set.all()
-                return student.student_family is not None
-        return False
 
     def transact(self, form, members, cost):
         uid = str(uuid.uuid4())

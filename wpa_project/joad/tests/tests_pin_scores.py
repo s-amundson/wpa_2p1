@@ -27,7 +27,7 @@ class TestsPinScores(TestCase):
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('joad:pin_score_list'), secure=True)
         self.assertEqual(response.status_code, 200)
-        logging.debug(len(response.context['object_list']))
+        logger.debug(len(response.context['object_list']))
         self.assertEqual(len(response.context['object_list']), self.pin_score_count)
         # context = self.client.request.
 

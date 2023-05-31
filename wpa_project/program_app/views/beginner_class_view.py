@@ -9,9 +9,10 @@ from django.contrib import messages
 from django.forms import model_to_dict
 
 from ..forms import BeginnerClassForm, SendClassEmailForm
-from ..models import BeginnerClass, ClassRegistration
+from ..models import BeginnerClass
 from ..src import ClassRegistrationHelper
 from ..tasks import refund_class
+from event.models import Event
 from payment.models import CostsModel
 
 logger = logging.getLogger(__name__)
@@ -34,11 +35,10 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
             kwargs['instance'] = self.beginner_class
         else:
             try:
-                c = BeginnerClass.objects.latest('class_date').class_date
+                c = BeginnerClass.objects.latest('event__event_date').event.event_date
                 c = c + timedelta(days=7)
-            except BeginnerClass.DoesNotExist:  # pragma: no cover
+            except (BeginnerClass.DoesNotExist, AttributeError):  # pragma: no cover
                 c = timezone.now()
-                # logging.debug('class does not exist')
             try:
                 cost = CostsModel.objects.filter(name='Beginner Class', enabled=True)[:1] #[0].standard_cost
                 costs = cost[0].standard_cost
@@ -57,13 +57,31 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
     def form_valid(self, form):
         # don't add a class on a date that already has a class.
         # logging.warning(form.cleaned_data)
-        if len(BeginnerClass.objects.filter(class_date=form.cleaned_data['class_date'])) > 0 \
+        if len(BeginnerClass.objects.filter(event__event_date=form.cleaned_data['class_date'])) > 0 \
                 and self.beginner_class is None:
             # logging.debug('Class Exists')
             messages.add_message(self.request, messages.ERROR, 'A class at this time already exists')
             return self.form_invalid(form)
-
+        if self.beginner_class:
+            self.beginner_class.event.event_date = form.cleaned_data['class_date']
+            self.beginner_class.event.cost_standard = form.cleaned_data['cost']
+            self.beginner_class.event.cost_member = form.cleaned_data['cost']
+            self.beginner_class.event.state = form.cleaned_data['state']
+            self.beginner_class.event.type = 'class'
+            self.beginner_class.event.save()
+            event = self.beginner_class.event
+        else:
+            event = Event.objects.create(
+                event_date=form.cleaned_data['class_date'],
+                cost_standard=form.cleaned_data['cost'],
+                cost_member=form.cleaned_data['cost'],
+                state=form.cleaned_data['state'],
+                type='class'
+            )
         bc = form.save()
+        bc.event = event
+        bc.save()
+
         # logging.debug(bc.class_type)
         if bc.class_type == 'beginner' and bc.returnee_limit > 0:
             messages.add_message(self.request, messages.WARNING,
@@ -75,7 +93,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
                                  "returning class can't have a beginner limit greater then 0")
             bc.beginner_limit = 0
             bc.save()
-        if bc.state == 'canceled':
+        if bc.event.state == 'canceled':
             refund_class.delay(bc.id, form.cleaned_data['cancel_message'])
         return super().form_valid(form)
 
@@ -83,10 +101,13 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
         if self.request.user.is_authenticated:
             bid = self.kwargs.get('beginner_class', None)
             if bid is not None:
-                self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
-                logging.warning(self.beginner_class.class_date)
-                logging.warning(timezone.localtime(self.beginner_class.class_date))
-                self.success_url = reverse_lazy('programs:class_attend_list', kwargs={'beginner_class': bid})
+                event = get_object_or_404(Event, pk=bid)
+                self.beginner_class = event.beginnerclass_set.last()
+                # logging.warning(self.beginner_class.event)
+                # logging.warning(self.beginner_class.event.event_date)
+                # logging.warning(timezone.localtime(self.beginner_class.event.event_date))
+                self.success_url = reverse_lazy('events:event_attend_list',
+                                                kwargs={'event': self.beginner_class.event.id})
             return self.request.user.is_board
         else:
             return False
@@ -103,16 +124,23 @@ class BeginnerClassListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         crh = ClassRegistrationHelper()
+        # queryset = Event.objects.filter(type='class')
         if self.kwargs.get('past', False):
             bc = BeginnerClass.objects.filter(
-                class_date__lte=timezone.localtime(timezone.now()).date()).order_by('-class_date')
+                event__event_date__lte=timezone.localtime(timezone.now()).date()).order_by('-event__event_date')
+            # queryset = queryset.filter(event_date__lte=timezone.localtime(timezone.now()).date()).order_by('-event__event_date')
         else:
             bc = BeginnerClass.objects.filter(
-                class_date__gte=timezone.localtime(timezone.now()).date()).order_by('class_date')
+                event__event_date__gte=timezone.localtime(timezone.now()).date()).order_by('event__event_date')
+            # queryset = queryset.filter(event_date__gte=timezone.localtime(timezone.now()).date())
         queryset = []
         for c in bc:
             d = model_to_dict(c)
+            d['event_id'] = c.event.id
+            d['event_date'] = c.event.event_date
+            d['event_state'] = c.event.state
             d = {**d, **crh.enrolled_count(c)}
             queryset.append(d)
-        # logging.debug(len(queryset))
+        logging.debug(len(queryset))
+
         return queryset

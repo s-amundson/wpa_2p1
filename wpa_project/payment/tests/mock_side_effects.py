@@ -56,7 +56,7 @@ class MockSideEffects:
             total_money=response['approved_money']['amount'],
             user=User.objects.get(pk=3)
         )
-        return payment
+        return payment, False
 
     def refund_side_effect(self, log, amount):
         log.status = 'refund'

@@ -9,14 +9,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RecaptchaView(FormView):
+class RecaptchaView(FormView): # pragma: no cover
     template_name = 'student_app/form_as_p.html'
     form_class = RecaptchaForm
     success_url = reverse_lazy('registration:profile')
 
     def form_invalid(self, form):
-        logging.warning(self.request.POST)
-        logging.warning(form.errors)
+        logger.warning(self.request.POST)
+        logger.warning(form.errors)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
             return JsonResponse({'status': 'error'})
         return super().form_invalid(form)
@@ -27,7 +27,7 @@ class RecaptchaView(FormView):
         if score is not None:
             self.request.session['recaptcha_score'] = score
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
-            logging.warning('json response')
+            # logging.warning('json response')
             return JsonResponse({'status': 'success'})
         self.success_url = form.cleaned_data['url']
         return super().form_valid(form)

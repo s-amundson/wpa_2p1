@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %} Volunteer Registration {% endblock %}
+
+{% block script %}
+    {% load static %}
+
+{% endblock %}
+
+{% block main %}
+    <div class="row p-3" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-3">
+        <h3>Volunteer Registration {% if form.cancel_form %} Cancellation {% endif %} </h3>
+    </div>
+    <div class="row p-3">
+        <form id="registration-form" method="post">
+            {% csrf_token %}
+            <div class="fieldWrapper">
+                {{ form.event.errors }}
+                {{ form.event.label_tag }}
+                {{ form.event }}
+                {{ form.event.id }}
+            </div>
+            <p>Description:</p>
+            <p class="ps-3">{{ form.description }}</p>
+
+            <div id="status-div"></div>
+            {% if form.student_count %}
+                <div> Student(s): </div>
+            {% endif %}
+
+            {% include 'event/tables/student_formset.html' %}
+
+
+            {% if form.student_count %}
+                <input id="session-btn" class="btn btn-primary" type="submit"
+                   {% if form.cancel_form %}
+                       value="Cancel Registration(s)"
+                    {% else %}
+                        value="Submit"
+                {% endif %}>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}

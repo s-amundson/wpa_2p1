@@ -44,13 +44,13 @@ class TestsMinutes(TestCase):
             balance=0, discussion='', end_time=None,
         )
         m.save()
-        logging.debug(m)
+        logger.debug(m)
 
         r = Report(report='Test Report', minutes=m, owner='president')
         r.save()
         b1 = Business(minutes=None, added_date='2021-08-04T13:20:30+03:00', business='Some old test business')
         b1.save()
-        logging.debug(b1.added_date)
+        logger.debug(b1.added_date)
         b2 = Business(minutes=m, added_date='2021-09-04T19:25:30+03:00', business='new test business')
         b2.save()
         bu = BusinessUpdate(business=b1, update_date='2021-09-04T19:30:30+03:00', update_text="test update")
@@ -94,7 +94,9 @@ class TestsMinutes(TestCase):
         bu = BusinessUpdate(business=b1, update_date='2021-09-04', update_text="test update")
         bu.save()
 
-        d = {'meeting_date': '2021-09-04', 'memberships': 5}
+        d = {'meeting_date': '2021-09-04', 'memberships': 5, 'balance': 216}
         response = self.client.post(reverse('minutes:minutes_form', kwargs={'minutes_id': m.id}), d, secure=True)
-        self.assertEqual(Minutes.objects.last().memberships, 5)
-        self.assertNotEqual(Minutes.objects.last().meeting_date, '2021-09-04 19:30')
+        mr = Minutes.objects.last()
+        self.assertEqual(mr.memberships, 5)
+        self.assertNotEqual(mr.meeting_date, '2021-09-04 19:30')
+        self.assertEqual(mr.balance, 216)

@@ -34,6 +34,5 @@ def email_confirmed_(request, email_address, **kwargs):
 
 @receiver(user_logged_in)
 def user_logged_in(request, user, **kwargs):
-    logging.warning(user.theme)
     request.session['theme'] = user.theme
 

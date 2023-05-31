@@ -12,8 +12,8 @@
     <tbody id="class-list-body">
         {% for row in object_list %}
             <tr>
-                <td>{{ row.class_date }}</td>
-                <td>{{ row.state }}</td>
+                <td>{{ row.event.event_date }}</td>
+                <td>{{ row.event.state }}</td>
                 {% if user.is_staff %}
                     <td>
                         <button class="btn btn-primary edit-class" type="button" class_id="{{row.id}}">

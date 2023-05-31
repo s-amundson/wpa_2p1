@@ -4,28 +4,26 @@
         Hi,
     </p>
     <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
-        Either you or a member of your family is on the wait-list for a class on {{ beginner_class.class_date }} You
+        Either you or a member of your family is on the wait-list for a class on {{ beginner_class.event.event_date }} You
         may show up at the range and if there is space we can let you in. Space is not guaranteed, but you will most
         likely get in.
     </p>
     <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
         Please plan to be at the range {{ minutes }} minutes prior to the class to allow us to sign you in.
-        {% if beginner_class.class_type == 'beginner' %} Students that arrive past {{ beginner_class.class_date|time }}
-        will not be allowed to participate. Be sure to bring proof of vaccination or proof of a negative PCR Covid-19
-        test within the previous 48 hours for yourself and all the members of your party. {% endif %}
-
+        {% if beginner_class.class_type == 'beginner' %} Students that arrive past {{ beginner_class.event.event_date|time }}
+        will not be allowed to participate.{% endif %}
     </p>
     <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
-        <img src="https://registration.woodleyparkarchers.org/static/images/park_entrance_closure.jpg" alt="Closure Map, North entrance closed use South entrance">
+        {% include "program_app/covid_policy.txt" %}
     </p>
     <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
         If for any reason you can't make it, please cancel your registration by going
-        <a href="http://registration/woodleyparkarchers.org/">here</a>.
+        <a href="https://woodleyparkarchers.org/">here</a>.
     </p>
     <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
-        <a href="http://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+        <a href="https://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
     </p>
     <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
-        <a href="http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+        <a href="https://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
     </p>
 {% endblock %}
