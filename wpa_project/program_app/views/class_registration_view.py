@@ -124,7 +124,7 @@ class ClassRegistrationView(RegistrationSuperView):
                             'quantity': 1,
                             'amount_each': self.event.cost_standard,
                         })
-                    new_reg.user__id = self.request.user.id,
+                    new_reg.user = self.request.user
                     new_reg.save()
 
         if self.wait:

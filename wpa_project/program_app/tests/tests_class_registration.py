@@ -109,6 +109,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          'Class on 2023-06-05 student: Charles')
         self.assertEqual(self.client.session['payment_category'], 'intro')
+        self.assertEqual(cr[0].user, self.test_user)
 
     def test_class_register_over_limit(self):
         # put a record in to the database
@@ -244,6 +245,7 @@ class TestsClassRegistration(TestCase):
                          'Class on 2023-06-05 student: Charles')
         self.assertEqual(self.client.session['line_items'][0]['amount_each'], 0)
         self.assertEqual(self.client.session['payment_category'], 'intro')
+        self.assertEqual(cr[0].user, self.test_user)
 
     def test_underage_student(self):
         sf = StudentFamily.objects.get(pk=3)
@@ -313,6 +315,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(cr[0].comment, 'flying kites today')
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          'Class on 2023-06-05 staff: Emily')
+        self.assertEqual(cr[0].user, self.test_user)
 
     def test_class_register_instructor_overdue(self):
         # make user instructor

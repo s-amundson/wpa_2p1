@@ -137,7 +137,7 @@ class RegistrationView(RegistrationSuperView):
                 new_reg.event = self.event
                 new_reg.idempotency_key = ik
                 new_reg.pay_status = 'paid'
-                new_reg.user__id = self.request.user.id,
+                new_reg.user = self.request.user
                 new_reg.save()
 
             self.success_url = reverse_lazy('registration:profile')

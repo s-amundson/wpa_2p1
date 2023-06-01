@@ -67,6 +67,7 @@ class TestsVolunteerRegistration(TestCase):
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].pay_status, 'paid')
+        self.assertEqual(cr[0].user, self.test_user)
 
     def tests_registration_post_good_id(self):
         d = timezone.now().replace(hour=14, minute=0, second=0, microsecond=0) + timezone.timedelta(days=4)

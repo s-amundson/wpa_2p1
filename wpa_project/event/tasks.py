@@ -97,8 +97,13 @@ def cancel_pending(reg_list, donated):
             square_response = refund.refund_with_idempotency_key(ikey['idempotency_key'],
                                                                  cost * 100 * ikey['ik_count'])
         logger.warning(square_response)
+        celery_logger.warning(square_response)
         if square_response['status'] in ['PENDING', 'SUCCESS']:
-            EmailMessage().refund_email(icr[0].user, donated)
+            if icr[0].user:
+                EmailMessage().refund_email(icr[0].user, donated)
+            else:  # since records are missing user.
+                user = icr[0].student.student_family.student_set.filter(user__isnull=False).first().user
+                EmailMessage().refund_email(user, donated)
 
             crh = ClassRegistrationHelper()
             for r in icr:
