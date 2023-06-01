@@ -57,6 +57,4 @@ class StaffList(ListView):
             Q(registration__attended=True)) | Q(user__is_board=True)
         )
 
-        logger.warning(object_list)
         return object_list.distinct().order_by('-user__is_board', '-user__is_instructor')
-

@@ -11,31 +11,9 @@
 {% endblock %}
 
 {% block main %}
-    <div class="row justify-content-center">
-        <div class="text-center">
-            <h2> Announcements </h2>
-        </div>
+    <div class="container">
+        {% include 'info/announcement_insert.html' %}
     </div>
-
-    {% for announcement in announcements %}
-        <div class="row">
-            <div class="container">
-                {{ announcement.announcement|safe }}
-            </div>
-        </div>
-        {% if user.is_board %}
-            <div class="row">
-                <div class="d-flex flex-column">
-                    <div><a href="{% url 'info:announcement_form' announcement.id %}">{{ announcement.id }}</a></div>
-                    <div>Starts: {{ announcement.begin_date }}</div>
-                    <div>Ends: {{ announcement.end_date }}</div>
-                    <div>Status: {{announcement.status }}</div>
-                </div>
-
-            </div>
-        {% endif %}
-        <hr>
-    {% endfor %}
 
     {% include 'student_app/paginate.html' %}
 {% endblock %}
