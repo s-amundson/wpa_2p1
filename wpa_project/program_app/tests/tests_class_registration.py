@@ -503,7 +503,8 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 3)
         self.assertRedirects(response, reverse('payment:card_manage'))
 
-    def test_class_register_wait_with_card(self):
+    @patch('program_app.tasks.wait_list_email.delay')
+    def test_class_register_wait_with_card(self, wait_list_email):
         # put a record in to the database
         cr = Registration(event=Event.objects.get(pk=1),
                                student=Student.objects.get(pk=4),
@@ -527,14 +528,13 @@ class TestsClassRegistration(TestCase):
         self.post_dict['form-1-student'] = 3
         self.post_dict['form-1-register'] = True
         response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
-        # response = self.client.post(reverse('programs:class_registration'),
-        #              {'event': '1', 'student_2': 'on', 'student_3': 'on', 'terms': 'on'}, secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'wait')
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 3)
         # self.assertContains(response, 'Not enough space available in this class')
         self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
+        wait_list_email.assert_called_with([cr[1].id, cr[2].id])
 
     def test_class_register_wait_twice(self):
         bc1 = BeginnerClass.objects.get(pk=1)

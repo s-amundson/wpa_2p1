@@ -77,3 +77,15 @@ class EmailMessage(StudentEmailMessage):
         self.attach_alternative(get_template('program_app/email/wait_list_off.html').render(d),
                                 'text/html')
         self.send()
+
+    def wait_list_on(self, registrations):
+        """Send mail students that they have been put on the wait list."""
+        if registrations:
+            self.get_email_address(registrations[0].user)
+            self.subject = f'WPA wait list confirmation for class on {registrations[0].event.event_date.date()}'
+            self.body = get_template('program_app/email/wait_list_on.txt').render(
+                {'registrations': registrations, 'event': registrations[0].event})
+            self.attach_alternative(get_template('program_app/email/wait_list_on.html').render(
+                {'registrations': registrations, 'event': registrations[0].event}),
+                                    'text/html')
+            self.send()

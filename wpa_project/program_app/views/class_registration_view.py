@@ -14,6 +14,7 @@ from event.forms import RegistrationAdminForm
 from event.models import Registration, RegistrationAdmin
 from event.views.registration_view import RegistrationSuperView
 from ..src import ClassRegistrationHelper
+from ..tasks import wait_list_email
 from src.mixin import BoardMixin
 from payment.models.card import Card
 
@@ -86,11 +87,10 @@ class ClassRegistrationView(RegistrationSuperView):
         else:
             self.wait = space == 'wait'
 
+        reg_list = []
         with transaction.atomic():
             pay_status = 'start'
-            logger.debug(self.wait)
             if self.wait:
-                logger.debug(self.has_card)
                 if self.has_card:
                     # beginner_class.event.state = 'wait'
                     # beginner_class.event.save()
@@ -106,6 +106,7 @@ class ClassRegistrationView(RegistrationSuperView):
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
+
             for f in self.formset:
                 if f.cleaned_data['register']:
                     new_reg = f.save(commit=False)
@@ -127,7 +128,10 @@ class ClassRegistrationView(RegistrationSuperView):
                         })
                     new_reg.user = self.request.user
                     new_reg.save()
-
+                    reg_list.append(new_reg.id)
+        if self.wait and self.has_card:
+            # send email to student(s) confirming they are on the wait list.
+            wait_list_email.delay(reg_list)
         crh.update_class_state(beginner_class)
         return HttpResponseRedirect(self.success_url)
 
