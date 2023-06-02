@@ -35,7 +35,7 @@ class ClassRegistrationView(RegistrationSuperView):
         processed_formset = self.process_formset()
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])
-
+        crh = ClassRegistrationHelper()
         beginners = self.students.filter(safety_class=None).exclude(user__is_staff=True)
         returnee = self.students.exclude(safety_class=None).exclude(user__is_staff=True)
         staff = self.students.filter(user__is_staff=True)
@@ -75,10 +75,11 @@ class ClassRegistrationView(RegistrationSuperView):
                     return self.has_error(form, f'{s.first_name} is on wait list for another beginner class')
 
         # check if class is full
-        space = ClassRegistrationHelper().has_space(
+        space = crh.has_space(
             self.request.user, beginner_class, beginners.count(), staff.count(), returnee.count())
         logger.warning(space)
         if space == 'full':
+            crh.update_class_state(beginner_class)
             return self.has_error(form, 'Not enough space available in this class')
         elif space == 'closed':
             return self.has_error(form, 'This class is closed')
@@ -127,8 +128,7 @@ class ClassRegistrationView(RegistrationSuperView):
                     new_reg.user = self.request.user
                     new_reg.save()
 
-        if self.wait:
-            ClassRegistrationHelper().update_class_state(beginner_class)
+        crh.update_class_state(beginner_class)
         return HttpResponseRedirect(self.success_url)
 
 

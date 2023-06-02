@@ -2,6 +2,7 @@ import datetime
 import logging
 import time
 import uuid
+from unittest.mock import patch
 
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -340,8 +341,10 @@ class TestsClassRegistration(TestCase):
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 0)
 
-    def test_class_register_instructor_full(self):
+    @patch('program_app.src.class_registration_helper.ClassRegistrationHelper.update_class_state')
+    def test_class_register_instructor_full(self, update_class_state):
         # Don't add an instructor when instructors are at limit.
+        # use the patch so that we don't open the class back up.
 
         # make user instructor
         self.test_user = User.objects.get(pk=1)
@@ -368,9 +371,12 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 0)
+        update_class_state.assert_called_with(bc)
 
-    def test_class_register_instructor_full2(self):
+    @patch('program_app.src.class_registration_helper.ClassRegistrationHelper.update_class_state')
+    def test_class_register_instructor_full2(self, update_class_state):
         # Add instructor when the class is full of students but open instructor positions.
+        # use the patch so that we don't open the class back up.
         # make user instructor
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
@@ -396,9 +402,12 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(bc.event.state, 'full')
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
+        update_class_state.assert_called_with(bc)
 
-    def test_class_register_staff_full(self):
+    @patch('program_app.src.class_registration_helper.ClassRegistrationHelper.update_class_state')
+    def test_class_register_staff_full(self, update_class_state):
         # Add instructor when the class is full of students but open instructor positions.
+        # use the patch so that we don't open the class back up.
         # make user instructor
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
@@ -423,6 +432,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(bc.event.state, 'full')
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
+        update_class_state.assert_called_with(bc)
 
     def test_resume_registration_no_wait(self):
         cr = Registration(event=Event.objects.get(pk=1),
