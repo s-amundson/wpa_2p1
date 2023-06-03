@@ -24,5 +24,5 @@ urlpatterns = [
     path('send_email/', SendEmailView.as_view(), name='send_email'),
     path('send_email/<int:beginner_class>/', SendEmailView.as_view(), name='send_email'),
     path('staff_attendance/', StaffReportView.as_view(), name='staff_attendance'),
-    path('wait_list/<int:beginner_class>/', WaitListView.as_view(), name='wait_list'),
+    path('wait_list/<int:event>/', WaitListView.as_view(), name='wait_list'),
 ]

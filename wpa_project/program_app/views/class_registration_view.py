@@ -95,7 +95,7 @@ class ClassRegistrationView(RegistrationSuperView):
                     # beginner_class.event.state = 'wait'
                     # beginner_class.event.save()
                     pay_status = 'waiting'
-                    self.success_url = reverse_lazy('programs:wait_list', kwargs={'beginner_class': beginner_class.id})
+                    self.success_url = reverse_lazy('programs:wait_list', kwargs={'event': self.event.id})
                 else:
                     self.success_url = reverse_lazy('payment:card_manage')
                     messages.add_message(self.request, messages.INFO,
@@ -217,7 +217,7 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
                 if Card.objects.filter(customer__user=self.request.user, enabled=True):
                     registrations.update(pay_status='waiting')
                     return HttpResponseRedirect(reverse('programs:wait_list',
-                                                        kwargs={'beginner_class': cr.event.beginnerclass_set.last().id}))
+                                                        kwargs={'event': cr.event.id}))
                 else:
                     return HttpResponseRedirect(reverse('payment:card_manage'))
 

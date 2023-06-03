@@ -37,7 +37,7 @@ class WaitListView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         if self.request.user.is_authenticated:
-            bid = self.kwargs.get('beginner_class', None)
+            bid = self.kwargs.get('event', None)
             if bid is None:
                 return False
             self.beginner_class = get_object_or_404(BeginnerClass, event__id=bid)

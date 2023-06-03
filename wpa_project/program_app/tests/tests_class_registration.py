@@ -533,7 +533,7 @@ class TestsClassRegistration(TestCase):
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 3)
         # self.assertContains(response, 'Not enough space available in this class')
-        self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
+        self.assertRedirects(response, reverse('programs:wait_list', kwargs={'event': bc.event.id}))
         wait_list_email.assert_called_with([cr[1].id, cr[2].id])
 
     def test_class_register_wait_twice(self):
@@ -628,7 +628,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(bc.event.state, 'wait')
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 4)
-        self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
+        self.assertRedirects(response, reverse('programs:wait_list', kwargs={'event': bc.event.id}))
 
     def test_resume_registration_wait_with_card(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -649,7 +649,7 @@ class TestsClassRegistration(TestCase):
         card = self.add_card(self.test_user)
 
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
-        self.assertRedirects(response, reverse('programs:wait_list', kwargs={'beginner_class': bc.id}))
+        self.assertRedirects(response, reverse('programs:wait_list', kwargs={'event': bc.event.id}))
 
     def test_resume_registration_wait_no_card(self):
         bc = BeginnerClass.objects.get(pk=1)
