@@ -6,9 +6,10 @@ from django.urls import reverse_lazy
 from django.views.generic.base import View
 from django.views.generic import FormView
 
-from ..forms import StudentForm
+from ..forms import StudentDeleteForm, StudentForm
 from ..models import Student
 from ..src import EmailMessage, StudentHelper
+from src.mixin import StudentFamilyMixin
 logger = logging.getLogger(__name__)
 
 
@@ -101,6 +102,35 @@ class AddStudentView(UserPassesTestMixin, FormView):
 
     def test_func(self):
         return self.request.user.is_authenticated
+
+
+class StudentDeleteView(StudentFamilyMixin, FormView):
+    template_name = 'student_app/delete.html'
+    form_class = StudentDeleteForm
+    success_url = reverse_lazy('registration:profile')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = "Delete Student"
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = get_object_or_404(Student, pk=self.kwargs.get('pk'))
+        if self.request.user.is_superuser or self.student_family == kwargs['instance'].student_family:
+            return kwargs
+        return self.handle_no_permission()
+
+    def form_invalid(self, form):
+        logger.warning(form.errors)
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        logger.warning(form.cleaned_data)
+        if form.cleaned_data['delete'].lower() == 'delete':
+            student = Student.objects.get(pk=self.kwargs.get('pk'))
+            student.delete()
+        return super().form_valid(form)
 
 
 class StudentIsJoadView(UserPassesTestMixin, View):

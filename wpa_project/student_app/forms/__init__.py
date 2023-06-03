@@ -2,7 +2,7 @@ from .instructor_form import InstructorForm
 from .recaptcha_form import RecaptchaForm
 from .send_email_form import SendEmailForm
 from .signup_form import SignUpForm
-from .student_form import StudentForm
+from .student_form import StudentDeleteForm, StudentForm
 from .student_family_registration_form import StudentFamilyRegistrationForm
 from .student_search_forms import SearchColumnsForm, SearchEmailForm, SearchNameForm, SearchPhoneForm
 from .theme_form import ThemeForm

@@ -93,7 +93,10 @@
     {% endif %}
 
     <div class="flex-row m-2">
-            <button id="btn-student-form-add" class="btn btn-primary" type="submit">Add</button>
-            <button id="btn-student-form-close" class="btn btn-primary">Close</button>
+        <button id="btn-student-form-add" class="btn btn-primary" type="submit">Add</button>
+        <button id="btn-student-form-close" class="btn btn-primary">Close</button>
+        {% if student.id %}
+            <a class="btn btn-danger" href="{% url 'registration:delete_student' student.id%}">Delete</a>
+        {% endif %}
     </div>
 </form>

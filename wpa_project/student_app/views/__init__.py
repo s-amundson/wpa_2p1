@@ -11,7 +11,7 @@ from .signup_view import SignupView
 from .student_family_view import StudentFamilyView
 from .student_list_view import StudentList
 from .student_table_view import StudentTableView
-from .student_view import AddStudentView, StudentIsJoadView
+from .student_view import AddStudentView, StudentDeleteView, StudentIsJoadView
 from .theme_view import ThemeView
 from .user_view import UserView
 from .waiver_view import WaiverView, WaiverRecreateView

@@ -20,5 +20,4 @@ class IndexView(PostList):
             end_date__gte=timezone.now(),
             begin_date__lte=timezone.now()
         )
-        logger.warning(context['announcements'])
         return context

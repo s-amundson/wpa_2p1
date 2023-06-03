@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from ..models import Student, User
+from event.models import Event, Registration
 
 logger = logging.getLogger(__name__)
 
@@ -214,3 +215,90 @@ class TestsStudent(TestCase):
         content = json.loads(response.content)
         self.assertTrue(content['error'])
         self.assertEqual(content['message'], 'Student to old')
+
+    def test_get_delete_student_superuser(self):
+        response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 3}), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'student_app/delete.html')
+
+    def test_get_delete_student_valid(self):
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 3}), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'student_app/delete.html')
+
+    def test_get_delete_student_invalid(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 3}), secure=True)
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_delete_student_superuser(self):
+        response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
+                                    {'delete': 'delete', 'pk': 3}, secure=True)
+        self.assertRedirects(response, reverse('registration:profile'))
+        students = Student.objects.all()
+        self.assertEqual(len(students), 5)
+        self.assertEqual(len(students.filter(pk=3)), 0)
+
+    def test_post_delete_student_family(self):
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
+                                    {'delete': 'delete', 'pk': 3}, secure=True)
+        self.assertRedirects(response, reverse('registration:profile'))
+        students = Student.objects.all()
+        self.assertEqual(len(students), 5)
+        self.assertEqual(len(students.filter(pk=3)), 0)
+
+    def test_post_delete_invalid(self):
+
+        response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
+                                    {'delete': 'delete', 'pk': 10}, secure=True)
+        self.assertContains(response, 'Form Error - Invalid Student')
+        students = Student.objects.all()
+        self.assertEqual(len(students), 6)
+        self.assertEqual(len(students.filter(pk=3)), 1)
+
+    def test_post_delete_student_family_with_registration_invalid(self):
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        cr = Registration.objects.create(
+            event=Event.objects.create(
+                event_date=timezone.now(),
+                state='open',
+                type='class',
+            ),
+            student=Student.objects.get(pk=3),
+            pay_status="paid",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
+                                    {'delete': 'delete', 'pk': 3}, secure=True)
+        logger.warning(response.context)
+        # self.assertContains(response, 'Student has registrations')
+        students = Student.objects.all()
+        self.assertEqual(len(students), 6)
+        self.assertEqual(len(students.filter(pk=3)), 1)
+
+    def test_post_delete_student_family_with_registration_valid(self):
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        cr = Registration.objects.create(
+            event=Event.objects.create(
+                event_date=timezone.now(),
+                state='open',
+                type='class',
+            ),
+            student=Student.objects.get(pk=3),
+            pay_status="refunded",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
+                                    {'delete': 'delete', 'pk': 3}, secure=True)
+        students = Student.objects.all()
+        self.assertEqual(len(students), 5)
+        self.assertEqual(len(students.filter(pk=3)), 0)
