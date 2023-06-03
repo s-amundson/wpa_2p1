@@ -11,6 +11,7 @@ from django.utils import timezone
 from event.models import Event, Registration
 from ..models import Student, User
 from ..src import EmailMessage
+from .helper import remove_signatures
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,10 @@ class TestsEmail(TestCase):
         # Every test needs a client.
         self.client = Client()
         self.send_dict = {'recipients': 'board', 'subject': 'Test Subject', 'message': 'Hi\n Test Message'}
+
+    def tearDown(self):
+        # remove any files we made.
+        remove_signatures()
 
     def test_awrl_email(self):
         self.test_user = User.objects.get(pk=2)

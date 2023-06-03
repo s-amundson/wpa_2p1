@@ -266,7 +266,7 @@ class TestsStudent(TestCase):
         self.client.force_login(self.test_user)
         cr = Registration.objects.create(
             event=Event.objects.create(
-                event_date=timezone.now(),
+                event_date=timezone.now() + timezone.timedelta(days=4),
                 state='open',
                 type='class',
             ),
@@ -288,7 +288,7 @@ class TestsStudent(TestCase):
         self.client.force_login(self.test_user)
         cr = Registration.objects.create(
             event=Event.objects.create(
-                event_date=timezone.now(),
+                event_date=timezone.now() + timezone.timedelta(days=4),
                 state='open',
                 type='class',
             ),
