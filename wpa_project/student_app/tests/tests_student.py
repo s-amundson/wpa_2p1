@@ -4,6 +4,7 @@ from django.core import mail
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
+from allauth.account.models import EmailAddress
 
 from ..models import Student, User
 from event.models import Event, Registration
@@ -217,14 +218,14 @@ class TestsStudent(TestCase):
         self.assertEqual(content['message'], 'Student to old')
 
     def test_get_delete_student_superuser(self):
-        response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 3}), secure=True)
+        response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 4}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'student_app/delete.html')
 
     def test_get_delete_student_valid(self):
-        self.test_user = User.objects.get(pk=2)
+        self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
-        response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 3}), secure=True)
+        response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 5}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'student_app/delete.html')
 
@@ -234,6 +235,12 @@ class TestsStudent(TestCase):
         response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 3}), secure=True)
         self.assertEqual(response.status_code, 403)
 
+    def test_get_delete_student_redirect(self):
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 2}), secure=True)
+        self.assertRedirects(response, reverse('registration:delete_student_family', kwargs={'pk': 2}))
+
     def test_post_delete_student_superuser(self):
         response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
                                     {'delete': 'delete', 'pk': 3}, secure=True)
@@ -242,7 +249,7 @@ class TestsStudent(TestCase):
         self.assertEqual(len(students), 5)
         self.assertEqual(len(students.filter(pk=3)), 0)
 
-    def test_post_delete_student_family(self):
+    def test_post_delete_student(self):
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
@@ -251,6 +258,35 @@ class TestsStudent(TestCase):
         students = Student.objects.all()
         self.assertEqual(len(students), 5)
         self.assertEqual(len(students.filter(pk=3)), 0)
+
+    def test_post_delete_student_with_user(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 5}),
+                                    {'delete': 'delete', 'removal_choice': 'delete', 'pk': 5}, secure=True)
+        self.assertRedirects(response, reverse('registration:profile'))
+        students = Student.objects.all()
+        self.assertEqual(len(students), 5)
+        self.assertEqual(len(students.filter(pk=5)), 0)
+        users = User.objects.all()
+        self.assertEqual(len(users), 4)
+        self.assertEqual(len(users.filter(pk=4)), 0)
+        self.assertEqual(len(EmailAddress.objects.filter(email='RicardoRHoyt@jourrapide.com')), 0)
+
+    def test_post_remove_student_with_user(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 5}),
+                                    {'delete': 'delete', 'removal_choice': 'remove', 'pk': 5}, secure=True)
+        self.assertRedirects(response, reverse('registration:profile'))
+        students = Student.objects.all()
+        self.assertEqual(len(students), 6)
+        self.assertEqual(len(students.filter(pk=5)), 1)
+        users = User.objects.all()
+        self.assertEqual(len(users), 5)
+        self.assertEqual(len(users.filter(pk=4)), 1)
+        self.assertEqual(len(EmailAddress.objects.filter(email='RicardoRHoyt@jourrapide.com')), 1)
+        self.assertIsNone(Student.objects.get(pk=5).student_family)
 
     def test_post_delete_invalid(self):
 
@@ -261,7 +297,7 @@ class TestsStudent(TestCase):
         self.assertEqual(len(students), 6)
         self.assertEqual(len(students.filter(pk=3)), 1)
 
-    def test_post_delete_student_family_with_registration_invalid(self):
+    def test_post_delete_student_with_registration_invalid(self):
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         cr = Registration.objects.create(
@@ -283,7 +319,7 @@ class TestsStudent(TestCase):
         self.assertEqual(len(students), 6)
         self.assertEqual(len(students.filter(pk=3)), 1)
 
-    def test_post_delete_student_family_with_registration_valid(self):
+    def test_post_delete_student_with_registration_valid(self):
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         cr = Registration.objects.create(

@@ -1,25 +1,64 @@
 {% extends 'base.html' %}
 
 {% block title %} {{title}} {% endblock %}
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/delete.js' %}"></script>
+{% endblock %}
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-    <p>
-        {% if form.can_delete %}
-            This will permanently delete {{ form.instance.first_name }} {{ form.instance.last_name}} from our system. This
-            action cannot be undone.
-            {% if form.instance.safety_class %}
-            If {{ form.instance.first_name }} wishes to return {{ form.instance.first_name }} will have to retake the
-            introductory class.
-            {% endif %}
+
+    {% if not form.can_delete %}
+        {% if form.delete_family %}
+            <p>
+                Students in this account are registered for upcoming classes and cannot be removed at this time.
+                Please cancel the classes and try again.
+            </p>
         {% else %}
-            {{ form.instance.first_name }} is registered for upcoming classes and cannot be removed at this time. Please
-            cancel the classes and try again.
+            <p>
+                {{ form.instance.first_name }} is registered for upcoming classes and cannot be removed at this time. Please
+                cancel the classes and try again.
+            </p>
         {% endif %}
-    </p>
+    {% endif %}
+
+
     {% if form.can_delete %}
         <form method="post" {% if form.multipart %} enctype="multipart/form-data" {% endif %}>{% csrf_token %}
             {{ form.as_p }}
+            {% if form.delete_family %}
+                <p>This will permanently delete your account from our system. This action cannot be undone.</p>
+                This will delete the following students:
+                <ul>
+                    {% for student in form.instance.student_set.all %}
+                        <li>
+                            {{ student.first_name }} {{student.last_name }}{% if student.user %}, {{ student.first_name }}
+                            will no longer be able to login to the site.{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div id="delete-student">
+                    <p>
+                        This will permanently delete {{ form.instance.first_name }} {{ form.instance.last_name}} from our system.
+                        This action cannot be undone.
+                        {% if form.instance.safety_class %}
+                            If {{ form.instance.first_name }} wishes to return {{ form.instance.first_name }} will have to retake the
+                            introductory class.
+                        {% endif %}
+                        {% if form.instance.user %}
+                            {{ form.instance.first_name }} will no longer be able to login to the website.
+                        {% endif %}
+                    </p>
+                </div>
+                <div id="remove-student">
+                    <p>
+                        This will remove {{ form.instance.first_name }} {{ form.instance.last_name}} from your account.
+                        {{ form.instance.first_name }} will be able to login to the website.
+                    </p>
+                </div>
+            {% endif %}
             <button class="btn btn-danger m-2" type="submit" name="button">Delete Student</button>
         </form>
     {% else %}

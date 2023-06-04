@@ -95,7 +95,7 @@
     <div class="flex-row m-2">
         <button id="btn-student-form-add" class="btn btn-primary" type="submit">Add</button>
         <button id="btn-student-form-close" class="btn btn-primary">Close</button>
-        {% if student.id %}
+        {% if student.id and not student.this_user %}
             <a class="btn btn-danger" href="{% url 'registration:delete_student' student.id%}">Delete</a>
         {% endif %}
     </div>

@@ -6,6 +6,7 @@ from django.apps import apps
 from reportlab.pdfgen.canvas import Canvas
 from django.core.files.base import File
 from ..models import Student
+from .helper import remove_signatures
 logger = logging.getLogger(__name__)
 
 
@@ -30,6 +31,10 @@ class TestsPdf(TestCase):
         c = Canvas('mydoc.pdf')
         # f = Frame(inch / 2, inch, 7 * inch, 9 * inch, showBoundary=1)
         c.save()
+
+    def tearDown(self):
+        # remove any files we made.
+        remove_signatures()
 
     def test_get_pdf_auth(self):
         self.test_user = self.User.objects.get(pk=2)

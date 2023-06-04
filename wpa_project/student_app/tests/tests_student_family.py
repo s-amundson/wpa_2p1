@@ -2,7 +2,10 @@ import logging
 import json
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.contrib import auth
+from django.utils import timezone
 
+from event.models import Event, Registration
 from ..models import Student, StudentFamily,  User
 
 logger = logging.getLogger(__name__)
@@ -163,3 +166,71 @@ class TestsStudentFamily(TestCase):
         sf = StudentFamily.objects.get(pk=2)
         pf = PhoneField()
         self.assertIsNone(pf.to_python(None))
+
+    def test_student_family_delete_get_super(self):
+        response = self.client.get(reverse('registration:delete_student_family', kwargs={'pk': 3}), secure=True)
+        self.assertTemplateUsed('student_app/delete.html')
+        self.assertEqual(response.status_code, 200)
+
+    def test_student_family_delete_get_valid(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('registration:delete_student_family', kwargs={'pk': 3}), secure=True)
+        self.assertTemplateUsed('student_app/delete.html')
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_delete_student_family(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        response = self.client.post(reverse('registration:delete_student_family', kwargs={'pk': 3}),
+                                    {'delete': 'delete', 'pk': 3}, secure=True)
+        self.assertRedirects(response, reverse('registration:index'))
+        students = Student.objects.all()
+        self.assertEqual(len(students), 4)
+        self.assertEqual(len(students.filter(pk=4)), 0)
+        self.assertEqual(len(students.filter(pk=5)), 0)
+        sf = StudentFamily.objects.all()
+        self.assertEqual(len(sf), 3)
+        self.assertEqual(len(sf.filter(pk=3)), 0)
+        users = User.objects.all()
+        self.assertEqual(len(users), 3)
+        self.assertEqual(len(users.filter(pk=3)), 0)
+        assert not auth.get_user(self.client).is_authenticated
+
+    def test_post_delete_student_family_invalid(self):
+        self.test_user = User.objects.get(pk=3)
+        self.client.force_login(self.test_user)
+        response = self.client.post(reverse('registration:delete_student_family', kwargs={'pk': 2}),
+                                    {'delete': 'delete', 'pk': 2}, secure=True)
+        students = Student.objects.all()
+        self.assertEqual(len(students), 6)
+        sf = StudentFamily.objects.all()
+        self.assertEqual(len(sf), 4)
+        users = User.objects.all()
+        self.assertEqual(len(users), 5)
+        assert auth.get_user(self.client).is_authenticated
+
+    def test_post_delete_student_family_registrations(self):
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        cr = Registration.objects.create(
+            event=Event.objects.create(
+                event_date=timezone.now() + timezone.timedelta(days=4),
+                state='open',
+                type='class',
+            ),
+            student=Student.objects.get(pk=3),
+            pay_status="paid",
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+
+        response = self.client.post(reverse('registration:delete_student_family', kwargs={'pk': 2}),
+                                    {'delete': 'delete', 'pk': 2}, secure=True)
+        students = Student.objects.all()
+        self.assertEqual(len(students), 6)
+        sf = StudentFamily.objects.all()
+        self.assertEqual(len(sf), 4)
+        users = User.objects.all()
+        self.assertEqual(len(users), 5)
+        assert auth.get_user(self.client).is_authenticated

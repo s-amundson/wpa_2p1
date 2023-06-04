@@ -1,15 +1,15 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 import logging
-from django.http import JsonResponse
-from django.urls import reverse_lazy
+from django.http import JsonResponse, HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from django.views.generic.base import View
 from django.views.generic import FormView
 
 from ..forms import StudentDeleteForm, StudentForm
 from ..models import Student
 from ..src import EmailMessage, StudentHelper
-from src.mixin import StudentFamilyMixin
+from src.mixin import StaffMixin, StudentFamilyMixin
 logger = logging.getLogger(__name__)
 
 
@@ -108,6 +108,27 @@ class StudentDeleteView(StudentFamilyMixin, FormView):
     template_name = 'student_app/delete.html'
     form_class = StudentDeleteForm
     success_url = reverse_lazy('registration:profile')
+    student = None
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:  # pragma: no cover
+            return self.handle_no_permission()
+        if request.user.student_set.last() is None or request.user.student_set.last().student_family is None:  # pragma: no cover
+            request.session['message'] = 'Address form is required'
+            return HttpResponseRedirect(reverse('registration:profile'))
+        self.student_family = request.user.student_set.last().student_family
+        self.student = get_object_or_404(Student, pk=self.kwargs.get('pk'))
+        if self.request.user.is_superuser or self.student_family == self.student.student_family:
+            if self.request.user.is_superuser:
+                self.student_family = self.student.student_family
+            logger.warning(self.student_family.student_set.filter(user__isnull=False).count())
+            # prevent dangling students
+            if self.student_family.student_set.filter(user__isnull=False).count() > 1 or not self.student.user:
+                return super().dispatch(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect(reverse('registration:delete_student_family',
+                                                    kwargs={'pk': self.student_family.id}))
+        return self.handle_no_permission()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -116,10 +137,8 @@ class StudentDeleteView(StudentFamilyMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['instance'] = get_object_or_404(Student, pk=self.kwargs.get('pk'))
-        if self.request.user.is_superuser or self.student_family == kwargs['instance'].student_family:
-            return kwargs
-        return self.handle_no_permission()
+        kwargs['instance'] = self.student
+        return kwargs
 
     def form_invalid(self, form):
         logger.warning(form.errors)
@@ -127,13 +146,20 @@ class StudentDeleteView(StudentFamilyMixin, FormView):
 
     def form_valid(self, form):
         logger.warning(form.cleaned_data)
-        if form.cleaned_data['delete'].lower() == 'delete':
-            student = Student.objects.get(pk=self.kwargs.get('pk'))
+        student = Student.objects.get(pk=self.kwargs.get('pk'))
+        if student.user:
+            if form.cleaned_data['removal_choice'] == 'delete':
+                student.user.delete()
+                student.delete()
+            else:
+                student.student_family = None
+                student.save()
+        else:
             student.delete()
         return super().form_valid(form)
 
 
-class StudentIsJoadView(UserPassesTestMixin, View):
+class StudentIsJoadView(StaffMixin, View):
     def post(self, request, student_id):
         # logging.debug(request.POST)
         student = Student.objects.get(pk=student_id)
@@ -147,10 +173,4 @@ class StudentIsJoadView(UserPassesTestMixin, View):
             student.is_joad = request.POST[f'joad_check_{student.id}'].lower() in ['true', 'on']
             student.save()
             return JsonResponse({'error': False, 'message': ''})
-        return JsonResponse({'error': True, 'message': ''})
-
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            return self.request.user.is_staff
-        else:
-            return False
+        return JsonResponse({'error': True, 'message': ''})  # pragma: no cover
