@@ -23,6 +23,8 @@ class TestsClassAdminRegistration(TestCase):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.event = Event.objects.get(pk=1)
+        self.event.event_date = timezone.now() + timezone.timedelta(days=5)
+        self.event.save()
         self.post_dict = {
             'event': self.event.id,
             'terms': True,
@@ -150,7 +152,7 @@ class TestsClassAdminRegistration(TestCase):
 
     def test_class_add_student_after_class(self):
         bc = BeginnerClass.objects.get(pk=1)
-        bc.class_date = timezone.now() - timezone.timedelta(hours=3)
+        # bc.class_date = timezone.now() - timezone.timedelta(hours=3)
         bc.event.state = 'closed'
         bc.event.save()
         bc.save()

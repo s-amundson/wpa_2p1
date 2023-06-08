@@ -1,6 +1,5 @@
 import datetime
 import logging
-import time
 import uuid
 from unittest.mock import patch
 
@@ -53,6 +52,8 @@ class TestsClassRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
         self.event = Event.objects.get(pk=1)
+        self.event.event_date = timezone.now() + timezone.timedelta(days=5)
+        self.event.save()
 
     def get_post_dict(self, event):
         self.post_dict = {
@@ -98,17 +99,17 @@ class TestsClassRegistration(TestCase):
         self.assertRedirects(response, reverse('registration:profile'))
 
     def test_class_register_good(self):
-        event = Event.objects.get(pk=1)
+
         # add a user to the class
         self.client.post(reverse('programs:class_registration'),
-                         self.get_post_dict(event), secure=True)
+                         self.get_post_dict(self.event), secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
         self.assertEqual(cr[0].event, bc.event)
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Class on 2023-06-05 student: Charles')
+                         f'Class on {str(self.event.event_date)[:10]} student: Charles')
         self.assertEqual(self.client.session['payment_category'], 'intro')
         self.assertEqual(cr[0].user, self.test_user)
 
@@ -209,8 +210,6 @@ class TestsClassRegistration(TestCase):
         response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
 
         bc = BeginnerClass.objects.get(pk=1)
-        # self.assertEqual(bc.enrolled_beginners, 2)
-        # self.assertEqual(bc.enrolled_returnee, 1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 3)
@@ -219,10 +218,6 @@ class TestsClassRegistration(TestCase):
         self.client.force_login(User.objects.get(pk=5))
         response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
 
-        bc = BeginnerClass.objects.all()
-        # self.assertEqual(bc[0].enrolled_beginners, 2)
-        # self.assertEqual(bc[0].enrolled_returnee, 2)
-        # self.assertEqual(bc[0].state, 'full')
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 4)
 
@@ -230,12 +225,12 @@ class TestsClassRegistration(TestCase):
         """test that no payment is required if the cost is set to 0"""
 
         # change the cost of the class
-        event = Event.objects.get(pk=1)
-        event.cost_standard = 0
-        event.save()
+        # event = Event.objects.get(pk=1)
+        self.event.cost_standard = 0
+        self.event.save()
 
         # add a user to the class
-        response = self.client.post(reverse('programs:class_registration'), self.get_post_dict(event), secure=True)
+        response = self.client.post(reverse('programs:class_registration'), self.get_post_dict(self.event), secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
         cr = Registration.objects.all()
@@ -243,7 +238,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(cr[0].event, bc.event)
 
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Class on 2023-06-05 student: Charles')
+                         f'Class on {str(self.event.event_date)[:10]} student: Charles')
         self.assertEqual(self.client.session['line_items'][0]['amount_each'], 0)
         self.assertEqual(self.client.session['payment_category'], 'intro')
         self.assertEqual(cr[0].user, self.test_user)
@@ -315,7 +310,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(cr[0].event, bc.event)
         self.assertEqual(cr[0].comment, 'flying kites today')
         self.assertEqual(self.client.session['line_items'][0]['name'],
-                         'Class on 2023-06-05 staff: Emily')
+                         f'Class on {str(self.event.event_date)[:10]} staff: Emily')
         self.assertEqual(cr[0].user, self.test_user)
 
     def test_class_register_instructor_overdue(self):
@@ -385,9 +380,9 @@ class TestsClassRegistration(TestCase):
         self.test_user.instructor_expire_date = d + timezone.timedelta(days=30)
         self.test_user.save()
 
-        bc = BeginnerClass.objects.get(pk=1)
-        bc.event.state = 'full'
-        bc.event.save()
+        # bc = BeginnerClass.objects.get(pk=1)
+        self.event.state = 'full'
+        self.event.save()
 
         # add a user to the class
         self.get_post_dict(self.event)
@@ -413,9 +408,8 @@ class TestsClassRegistration(TestCase):
         self.client.force_login(self.test_user)
         d = timezone.now()
 
-        bc = BeginnerClass.objects.get(pk=1)
-        bc.event.state = 'full'
-        bc.event.save()
+        self.event.state = 'full'
+        self.event.save()
 
         # add a user to the class
         self.get_post_dict(self.event)
@@ -435,7 +429,7 @@ class TestsClassRegistration(TestCase):
         update_class_state.assert_called_with(bc)
 
     def test_resume_registration_no_wait(self):
-        cr = Registration(event=Event.objects.get(pk=1),
+        cr = Registration(event=self.event,
                           student=Student.objects.get(pk=4),
                           pay_status='start',
                           idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
@@ -476,7 +470,7 @@ class TestsClassRegistration(TestCase):
 
     def test_class_register_wait_no_card(self):
         # put a record in to the database
-        cr = Registration(event=Event.objects.get(pk=1),
+        cr = Registration(event=self.event,
                           student=Student.objects.get(pk=4),
                           pay_status='paid',
                           idempotency_key=str(uuid.uuid4()))
@@ -506,7 +500,7 @@ class TestsClassRegistration(TestCase):
     @patch('program_app.tasks.wait_list_email.delay')
     def test_class_register_wait_with_card(self, wait_list_email):
         # put a record in to the database
-        cr = Registration(event=Event.objects.get(pk=1),
+        cr = Registration(event=self.event,
                                student=Student.objects.get(pk=4),
                                pay_status='paid',
                                idempotency_key=str(uuid.uuid4()))
