@@ -154,6 +154,15 @@ class TestsStudent(TestCase):
         self.assertEqual(student.email, 'test@example.com')
         self.assertEqual(len(mail.outbox), 0)
 
+    def test_new_user_new_student_existing_email(self):
+        self.test_user = User.objects.get(pk=4)
+        self.client.force_login(self.test_user)
+        d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03", "email": "RicardoRHoyt@Ricardo.com"}
+        response = self.client.post(reverse('registration:add_student'), d, secure=True)
+        self.assertContains(response, 'Email in use')
+        self.assertEqual(len(Student.objects.all()), 6)
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_new_user_existing_student(self):
         self.test_user = User.objects.get(pk=5)
         self.client.force_login(self.test_user)

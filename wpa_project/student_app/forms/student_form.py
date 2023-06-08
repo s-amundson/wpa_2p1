@@ -3,6 +3,7 @@ from django import forms
 from django.utils.datetime_safe import date
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from allauth.account.models import EmailAddress
 
 from ..models import Student, StudentFamily
 from event.models import Registration
@@ -94,3 +95,15 @@ class StudentForm(MyModelForm):
             self.fields['email'].widget.attrs.update({'disabled': 'disabled'})
         else:
             self.fields['email'].widget.attrs.update({'placeholder': 'Email (optional)'})
+
+    def clean_email(self):
+        data = self.cleaned_data["email"]
+        logger.warning(data)
+        if data is not None:
+            logger.warning(EmailAddress.objects.filter(email=data))
+            if EmailAddress.objects.filter(email=data).count():
+                raise ValidationError("Email in use")
+
+        # Always return a value to use as the new cleaned data, even if
+        # this method didn't change it.
+        return data

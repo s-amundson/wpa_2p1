@@ -20,9 +20,9 @@ class AddStudentView(UserPassesTestMixin, FormView):
     student = None
 
     def form_invalid(self, form):
-        logging.warning(form.errors)
+        logger.warning(form.errors)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
-            logging.debug('json error response')
+            logger.debug('json error response')
             d = {'error': {}}
             for k,v in form.errors.items():
                 d['error'][k] = v
@@ -30,19 +30,19 @@ class AddStudentView(UserPassesTestMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        logging.warning(form.cleaned_data)
+        # logger.warning(form.cleaned_data)
         if self.request.user.is_board:
             f = form.save()
         else:
             f = form.save(commit=False)
 
-            # student can't update thier own safety class. Fixes safety class date set to None student update.
+            # student can't update their own safety class. Fixes safety class date set to None student update.
             f.safety_class = form.initial.get('safety_class', None)
 
             if self.student:
                 s = self.request.user.student_set.last()
                 if s is None:  # pragma: no cover
-                    logging.warning('Address required')
+                    logger.warning('Address required')
                     form.add_error(None, 'Address required')
                     return self.form_invalid(form)
                 else:
