@@ -149,7 +149,8 @@ class UpdatePrograms:
             for c in classes:
                 instructors = []
                 staff = []
-                cr = Registration.objects.filter(event=c.event, student__in=staff_students)
+                cr = Registration.objects.filter(event=c.event, student__in=staff_students,
+                                                 pay_status__in=['paid', 'admin'])
                 for r in cr:
                     if r.student.user.is_instructor:
                         instructors.append(r.student)

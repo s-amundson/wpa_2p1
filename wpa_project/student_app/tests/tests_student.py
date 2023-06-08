@@ -131,7 +131,6 @@ class TestsStudent(TestCase):
         logging.warning(content)
         self.assertNotEqual(content['error'], {})
 
-
     def test_post_student_errors(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)

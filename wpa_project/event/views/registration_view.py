@@ -104,7 +104,6 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
 
         if self.formset.is_valid():
             for f in self.formset:
-                logger.warning(f.cleaned_data)
                 if f.cleaned_data['register']:
                     if reg.filter(student=f.cleaned_data['student']):
                         return {'success': False, 'error': 'Student is already enrolled'}

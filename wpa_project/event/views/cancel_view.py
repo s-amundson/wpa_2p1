@@ -1,19 +1,15 @@
 from django.apps import apps
 from django.forms import modelformset_factory
 from django.http import HttpResponseRedirect
-from django.views.generic.base import TemplateView
-from django.views.generic.edit import FormView, View
+from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
-from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-import uuid
 
 from ..forms import CancelForm, CancelSetForm
-from ..models import Event, Registration
+from ..models import Registration
 from ..tasks import cancel_pending
 from src.mixin import StudentFamilyMixin
-from student_app.models import Student
 StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamily')
 
 import logging
@@ -55,12 +51,10 @@ class CancelView(StudentFamilyMixin, FormView):
         return form
 
     def form_valid(self, form):
-        logger.warning(self.request.POST)
         formset = self.get_formset()
         if formset.is_valid():
             cancel_list = []
             for f in formset:
-                logger.warning(f.cleaned_data)
                 if f.cleaned_data['cancel']:
                     r = f.save(commit=False)
                     if r.pay_status in ['start', 'waiting']:

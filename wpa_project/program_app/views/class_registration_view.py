@@ -46,7 +46,6 @@ class ClassRegistrationView(RegistrationSuperView):
 
         # check for underage students
         of_age_date = self.event.event_date.date().replace(year=self.event.event_date.date().year - 9)
-        logger.warning(of_age_date)
         if self.students.filter(dob__gt=of_age_date).count():
             return self.has_error(form, 'Student must be at least 9 years old to participate')
 

@@ -64,6 +64,35 @@ class TestsUpdatePrograms(TestCase):
         s = 'has 2 students signed up and 3 volunteers signed up. The following volunteers are signed up:'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
 
+    def test_email_staff_notice_instructor_canceled(self):
+        d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
+        d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
+        d = timezone.make_aware(d, timezone.get_current_timezone())
+        bc1 = create_beginner_class(d, 'open', 'beginner')
+        bc2 = create_beginner_class(timezone.datetime(year=d.year, month=d.month, day=d.day, hour=11), 'open', 'returnee')
+        u = User.objects.get(pk=3)
+        u.is_staff = True
+        u.is_instructor = True
+        u.save()
+
+        for i in range(5):
+            cr = Registration(
+                event=bc1.event,
+                student=Student.objects.get(pk=i + 1),
+                pay_status='paid',
+                idempotency_key=str(uuid.uuid4()))
+            cr.save()
+
+        reg = Registration.objects.filter(event=bc1.event, student__user=u).last()
+        reg.pay_status = 'canceled'
+        reg.save()
+
+        UpdatePrograms().status_email()
+        self.assertEqual(mail.outbox[0].subject, f"WPA Class Status {d.strftime('%Y-%m-%d')}")
+        # logging.warning(mail.outbox[0].body)
+        s = 'has 2 students signed up and 2 volunteers signed up. The following volunteers are signed up:'
+        self.assertTrue(mail.outbox[0].body.find(s) > 0)
+
     def test_email_staff_notice_no_class(self):
         # set up the class on a different day.
         d = timezone.localtime(timezone.now()).date() + timedelta(days=1)
