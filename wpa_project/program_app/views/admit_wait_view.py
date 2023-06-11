@@ -4,14 +4,14 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 
 from ..forms import AdmitWaitForm
-from ..models import BeginnerClass
+from event.models import Event
 from student_app.models import StudentFamily
 import logging
 logger = logging.getLogger(__name__)
 
 
 class AdmitWaitView(UserPassesTestMixin, FormView):
-    beginner_class = None
+    event = None
     template_name = 'program_app/admit_wait.html'
     form_class = AdmitWaitForm
     success_url = reverse_lazy('programs:class_list')
@@ -29,16 +29,16 @@ class AdmitWaitView(UserPassesTestMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['beginner_class'] = self.beginner_class
+        kwargs['event'] = self.event
         kwargs['family'] = self.student_family
         return kwargs
 
     def test_func(self):
         if self.request.user.is_authenticated and self.request.user.is_staff:
-            if self.kwargs.get('beginner_class'):
-                self.beginner_class = get_object_or_404(BeginnerClass, event__id=self.kwargs.get('beginner_class'))
+            if self.kwargs.get('event'):
+                self.event = get_object_or_404(Event, pk=self.kwargs.get('event'))
                 self.success_url = reverse_lazy('events:event_attend_list',
-                                                kwargs={'event': self.beginner_class.event.id})
+                                                kwargs={'event': self.event.id})
             if self.kwargs.get('family_id'):
                 self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id'))
-        return self.beginner_class is not None
+        return self.event is not None

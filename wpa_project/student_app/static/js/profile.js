@@ -54,12 +54,16 @@ function load_instructor_form() {
 
 
 function load_student_table() {
-    $.get(student_table_url, function(data, status){
+    console.log('load student table')
+    var jqxhr = $.get(student_table_url, function() {
+
+    })
+    .done(function(data) {
         $("#student-table-div").html(data);
 
         if($(".student_row").length == 0) {
             //  no students therefore we need to load the student form
-            load_student_form($("#student_add_div"));
+//            load_student_form($("#student_add_div"));
             $("#can-register").hide()
         }
         else {
@@ -70,7 +74,29 @@ function load_student_table() {
                 $("#can-register").show()
             }
         }
-    });
+    })
+    .fail(function() {
+        console.log('load student table get error')
+    })
+
+//    $.get(student_table_url, function(data, status){
+//        console.log(status)
+//        $("#student-table-div").html(data);
+//
+//        if($(".student_row").length == 0) {
+//            //  no students therefore we need to load the student form
+////            load_student_form($("#student_add_div"));
+//            $("#can-register").hide()
+//        }
+//        else {
+//            $("[id^=btn-edit]").click(function(){
+//                load_student_form($("#student_add_div"), $(this).attr("student-id"));
+//            });
+//            if (new_family){
+//                $("#can-register").show()
+//            }
+//        }
+//    });
 }
 
 async function update_instructor() {

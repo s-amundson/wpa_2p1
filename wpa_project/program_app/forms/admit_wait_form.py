@@ -10,18 +10,18 @@ logger = logging.getLogger(__name__)
 class AdmitWaitForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
-        if 'beginner_class' in kwargs:
-            self.beginner_class = kwargs.pop('beginner_class')
+        if 'event' in kwargs:
+            self.event = kwargs.pop('event')
         else:
-            self.beginner_class = None
+            self.event = None
         if 'family' in kwargs:
             self.family = kwargs.pop('family')
         else:
             self.family = None
         super().__init__(*args, **kwargs)
         self.refund_errors = []
-        if self.beginner_class:
-            self.registrations = Registration.objects.filter(event=self.beginner_class.event, pay_status='waiting')
+        if self.event:
+            self.registrations = Registration.objects.filter(event=self.event, pay_status='waiting')
             if self.family:
                 self.registrations = self.registrations.filter(student__in=self.family.student_set.all())
             for reg in self.registrations.order_by('student__last_name', 'student__first_name'):
@@ -42,6 +42,6 @@ class AdmitWaitForm(forms.Form):
             if k[:6] == 'admit_' and v:
                 reg_list.append(int(k.split('_')[1]))
         # logger.debug(self.registrations.filter(id__in=reg_list))
-        logger.debug(reg_list)
+        logger.warning(reg_list)
         charge_group.delay(reg_list)
         return True

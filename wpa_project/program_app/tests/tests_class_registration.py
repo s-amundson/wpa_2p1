@@ -52,7 +52,7 @@ class TestsClassRegistration(TestCase):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
         self.event = Event.objects.get(pk=1)
-        self.event.event_date = timezone.now() + timezone.timedelta(days=5)
+        self.event.event_date = (timezone.now() + timezone.timedelta(days=5)).replace(hour=9, minute=0, second=0)
         self.event.save()
 
     def get_post_dict(self, event):

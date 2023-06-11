@@ -21,5 +21,3 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         if context['student_family'] is not None:
             context['students'] = context['student_family'].student_set.all()
         return context
-
-
