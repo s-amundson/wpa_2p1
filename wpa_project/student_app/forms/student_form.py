@@ -96,14 +96,14 @@ class StudentForm(MyModelForm):
         else:
             self.fields['email'].widget.attrs.update({'placeholder': 'Email (optional)'})
 
-    def clean_email(self):
-        data = self.cleaned_data["email"]
-        logger.warning(data)
-        if data is not None:
-            logger.warning(EmailAddress.objects.filter(email=data))
-            if EmailAddress.objects.filter(email=data).count():
-                raise ValidationError("Email in use")
-
-        # Always return a value to use as the new cleaned data, even if
-        # this method didn't change it.
-        return data
+    # def clean_email(self):
+    #     data = self.cleaned_data["email"]
+    #     logger.warning(data)
+    #     if data is not None:
+    #         logger.warning(EmailAddress.objects.filter(email=data))
+    #         if EmailAddress.objects.filter(email=data).count():
+    #             raise ValidationError("Email in use")
+    #
+    #     # Always return a value to use as the new cleaned data, even if
+    #     # this method didn't change it.
+    #     return data
