@@ -26,7 +26,7 @@ class TestsClassAdminRegistration(TestCase):
         self.event.event_date = timezone.now() + timezone.timedelta(days=5)
         self.event.save()
         self.post_dict = {
-            'event': self.event.id,
+            'event': [self.event.id],
             'terms': True,
             'student': 4,
             'student_family': 3,
@@ -36,10 +36,8 @@ class TestsClassAdminRegistration(TestCase):
             'form-MAX_NUM_FORMS': 1000,
             'form-0-register': True,
             'form-0-student': 4,
-            'form-0-event': self.event.id,
             'form-1-register': True,
             'form-1-student': 5,
-            'form-1-event': self.event.id,
             }
         return self.post_dict
 

@@ -61,7 +61,10 @@ class TestsClassSignIn(MockSideEffects, TestCase):
     @patch('program_app.views.class_sign_in_view.RefundHelper.refund_with_idempotency_key')
     def test_sign_in_unregister(self, refund):
         ik = uuid.uuid4()
+        d = timezone.now() + timezone.timedelta(days=2)
         bc2 = BeginnerClass.objects.get(pk=2)
+        bc2.event.event_date = d
+        bc2.event.save()
         reg2 = Registration.objects.create(
             event=bc2.event,
             student=Student.objects.get(pk=2),
@@ -92,7 +95,7 @@ class TestsClassSignIn(MockSideEffects, TestCase):
             returnee_limit=0,
             returnee_wait_limit=0,
             event=Event.objects.create(
-                event_date="2023-06-05T16:00:00.000Z",
+                event_date=d + timezone.timedelta(days=2),
                 cost_standard=5,
                 cost_member=5,
                 state="wait",

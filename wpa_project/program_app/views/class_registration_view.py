@@ -45,46 +45,51 @@ class ClassRegistrationView(RegistrationSuperView):
             return self.has_error(form, 'No students selected')
 
         # check for underage students
-        of_age_date = self.event.event_date.date().replace(year=self.event.event_date.date().year - 9)
+        of_age_date = self.events[0].event_date.date().replace(year=self.events[0].event_date.date().year - 9)
         if self.students.filter(dob__gt=of_age_date).count():
             return self.has_error(form, 'Student must be at least 9 years old to participate')
 
         # check for overdue instructors
-        if staff.filter(user__is_instructor=True, user__instructor_expire_date__lt=self.event.event_date).count():
+        if staff.filter(user__is_instructor=True, user__instructor_expire_date__lt=self.events[0].event_date).count():
             return self.has_error(form, 'Please update your instructor certification')
 
-        # check if student signing up for incorrect class
-        beginner_class = self.event.beginnerclass_set.last()
-        if beginner_class.class_type == 'returnee' and beginners.count():
-            return self.has_error(form, 'First time students cannot enroll in this class')
-        elif beginner_class.class_type == 'beginner' and returnee.count():
-            return self.has_error(form, 'Returning students cannot enroll in this class')
+        # check for multiple events for non staff:
+        if self.events.count() > 1 and not self.request.user.is_staff:
+            return self.has_error(form, 'Must only select one class at a time.')
 
-        # check if beginning student on waitlist for another class
-        if self.event.state == 'wait':
-            for s in beginners:
-                reg = Registration.objects.filter(
-                    student=s,
-                    event__type='class',
-                    event__event_date__gt=timezone.now(),
-                    pay_status='waiting'
-                ).exclude(
-                    pay_status__in=['canceled', "refunded", 'refund', 'refund donated'],
-                )
-                if reg.count():
-                    return self.has_error(form, f'{s.first_name} is on wait list for another beginner class')
+        for event in self.events:
+            # check if student signing up for incorrect class
+            beginner_class = event.beginnerclass_set.last()
+            if beginner_class.class_type == 'returnee' and beginners.count():
+                return self.has_error(form, 'First time students cannot enroll in this class')
+            elif beginner_class.class_type == 'beginner' and returnee.count():
+                return self.has_error(form, 'Returning students cannot enroll in this class')
 
-        # check if class is full
-        space = crh.has_space(
-            self.request.user, beginner_class, beginners.count(), staff.count(), returnee.count())
-        logger.warning(space)
-        if space == 'full':
-            crh.update_class_state(beginner_class)
-            return self.has_error(form, 'Not enough space available in this class')
-        elif space == 'closed':
-            return self.has_error(form, 'This class is closed')
-        else:
-            self.wait = space == 'wait'
+            # check if beginning student on waitlist for another class
+            if event.state == 'wait':
+                for s in beginners:
+                    reg = Registration.objects.filter(
+                        student=s,
+                        event__type='class',
+                        event__event_date__gt=timezone.now(),
+                        pay_status='waiting'
+                    ).exclude(
+                        pay_status__in=['canceled', "refunded", 'refund', 'refund donated'],
+                    )
+                    if reg.count():
+                        return self.has_error(form, f'{s.first_name} is on wait list for another beginner class')
+
+            # check if class is full
+            space = crh.has_space(
+                self.request.user, beginner_class, beginners.count(), staff.count(), returnee.count())
+            logger.warning(space)
+            if space == 'full':
+                crh.update_class_state(beginner_class)
+                return self.has_error(form, 'Not enough space available in this class')
+            elif space == 'closed':
+                return self.has_error(form, 'This class is closed')
+            else:
+                self.wait = space == 'wait'
 
         reg_list = []
         with transaction.atomic():
@@ -94,44 +99,49 @@ class ClassRegistrationView(RegistrationSuperView):
                     # beginner_class.event.state = 'wait'
                     # beginner_class.event.save()
                     pay_status = 'waiting'
-                    self.success_url = reverse_lazy('programs:wait_list', kwargs={'event': self.event.id})
+                    self.success_url = reverse_lazy('programs:wait_list', kwargs={'event': self.events[0].id})
                 else:
                     self.success_url = reverse_lazy('payment:card_manage')
                     messages.add_message(self.request, messages.INFO,
                                          "To be placed on the wait list you need to have a card on file")
             uid = str(uuid.uuid4())
-            class_date = timezone.localtime(self.event.event_date)
+            class_date = timezone.localtime(self.events[0].event_date)
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
-
-            for f in self.formset:
-                if f.cleaned_data['register']:
-                    new_reg = f.save(commit=False)
-                    new_reg.event = self.event
-                    new_reg.idempotency_key = uid
-                    if new_reg.student.user and new_reg.student.user.is_staff:
-                        new_reg.pay_status = 'paid'
-                        self.request.session['line_items'].append({
-                            'name': f"Class on {str(class_date)[:10]} staff: {new_reg.student.first_name}",
-                            'quantity': 1,
-                            'amount_each': 0,
-                        })
-                    else:
-                        new_reg.pay_status = pay_status
-                        self.request.session['line_items'].append({
-                            'name': f'Class on {str(class_date)[:10]} student: {new_reg.student.first_name}',
-                            'quantity': 1,
-                            'amount_each': self.event.cost_standard,
-                        })
-                    new_reg.user = self.request.user
-                    new_reg.save()
-                    reg_list.append(new_reg.id)
+            for event in self.events:
+                for f in self.formset:
+                    if f.cleaned_data['register']:
+                        # calling f.save() doesn't work with multiple events.
+                        new_reg = Registration.objects.create(
+                            event=event,
+                            student=f.cleaned_data['student'],
+                            pay_status=pay_status,
+                            idempotency_key=uid,
+                            user=self.request.user,
+                            comment=f.cleaned_data.get('comment', None)
+                        )
+                        if new_reg.student.user and new_reg.student.user.is_staff:
+                            new_reg.pay_status = 'paid'
+                            self.request.session['line_items'].append({
+                                'name': f"Class on {str(class_date)[:10]} staff: {new_reg.student.first_name}",
+                                'quantity': 1,
+                                'amount_each': 0,
+                            })
+                            new_reg.save()
+                        else:
+                            self.request.session['line_items'].append({
+                                'name': f'Class on {str(class_date)[:10]} student: {new_reg.student.first_name}',
+                                'quantity': 1,
+                                'amount_each': event.cost_standard,
+                            })
+                        reg_list.append(new_reg.id)
+                crh.update_class_state(event.beginnerclass_set.last())
         if self.wait and self.has_card:
             # send email to student(s) confirming they are on the wait list.
             wait_list_email.delay(reg_list)
-        crh.update_class_state(beginner_class)
+
         return HttpResponseRedirect(self.success_url)
 
 
@@ -149,10 +159,10 @@ class ClassRegistrationAdminView(BoardMixin, ClassRegistrationView):
         processed_formset = self.process_formset()
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])
-        event = form.cleaned_data['event']
+        events = form.cleaned_data['event']
 
         uid = str(uuid.uuid4())
-        class_date = timezone.localtime(event.event_date)
+        class_date = timezone.localtime(events[0].event_date)
         if form.cleaned_data['payment']:
             self.request.session['idempotency_key'] = uid
             self.request.session['line_items'] = []
@@ -161,28 +171,29 @@ class ClassRegistrationAdminView(BoardMixin, ClassRegistrationView):
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
         else:
             self.success_url = reverse_lazy('events:event_attend_list',
-                                            kwargs={'event': event.id})
+                                            kwargs={'event': events[0].id})
 
         pay_status = 'admin'
-        for s in self.students:
-            if form.cleaned_data['payment']:
-                pay_status = 'start'
-                self.request.session['line_items'].append({
-                    'name': f'Class on {str(class_date)[:10]} student: {s.first_name}',
-                    'quantity': 1,
-                    'amount_each': event.cost_standard,
-                    }
-                )
-            ncr = Registration.objects.create(
-                event=event,
-                student=s,
-                pay_status=pay_status,
-                idempotency_key=uid,
-                user=form.cleaned_data['student'].user,
-                reg_time=timezone.now())
+        for event in events:
+            for s in self.students:
+                if form.cleaned_data['payment']:
+                    pay_status = 'start'
+                    self.request.session['line_items'].append({
+                        'name': f'Class on {str(class_date)[:10]} student: {s.first_name}',
+                        'quantity': 1,
+                        'amount_each': event.cost_standard,
+                        }
+                    )
+                ncr = Registration.objects.create(
+                    event=event,
+                    student=s,
+                    pay_status=pay_status,
+                    idempotency_key=uid,
+                    user=form.cleaned_data['student'].user,
+                    reg_time=timezone.now())
 
-            note = form.cleaned_data['notes']
-            RegistrationAdmin.objects.create(class_registration=ncr, staff=self.request.user, note=note)
+                note = form.cleaned_data['notes']
+                RegistrationAdmin.objects.create(class_registration=ncr, staff=self.request.user, note=note)
 
         return HttpResponseRedirect(self.success_url)
 

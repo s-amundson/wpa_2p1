@@ -20,14 +20,13 @@ class TestsJoadEventRegistration(TestCase):
         self.client = Client()
         self.event = Event.objects.get(pk=8)
         self.post_dict = {
-            'event': self.event.id,
+            'event': [self.event.id],
             'form-TOTAL_FORMS': 1,
             'form-INITIAL_FORMS': 0,
             'form-MIN_NUM_FORMS': 0,
             'form-MAX_NUM_FORMS': 1000,
             'form-0-register': True,
             'form-0-student': 5,
-            'form-0-event': self.event.id,
             }
 
     def set_event(self, event_id):

@@ -44,41 +44,41 @@ class EventRegistrationView(RegistrationSuperView):
         processed_formset = self.process_formset()
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])
+        for event in self.events:
+            if event.state != "open": # pragma: no cover
+                return self.has_error(form, 'Event in wrong state')
 
-        if self.event.state != "open": # pragma: no cover
-            return self.has_error(form, 'Event in wrong state')
+            # check for underage students
+            of_age_date = event.event_date.date().replace(year=event.event_date.date().year - 8)
+            if self.students.filter(dob__gte=of_age_date).count():
+                return self.has_error(form, 'Student must be at least 8 years old to participate')
 
-        # check for underage students
-        of_age_date = self.event.event_date.date().replace(year=self.event.event_date.date().year - 8)
-        if self.students.filter(dob__gte=of_age_date).count():
-            return self.has_error(form, 'Student must be at least 8 years old to participate')
+            # check for overage students
+            of_age_date = event.event_date.date().replace(year=event.event_date.date().year - 21)
+            if self.students.filter(dob__lt=of_age_date).count():
+                return self.has_error(form, 'Student must be less then 21 years old to participate')
 
-        # check for overage students
-        of_age_date = self.event.event_date.date().replace(year=self.event.event_date.date().year - 21)
-        if self.students.filter(dob__lt=of_age_date).count():
-            return self.has_error(form, 'Student must be less then 21 years old to participate')
+            if len(self.students) == 0:
+                return self.has_error(form, 'Invalid student selected')
 
-        if len(self.students) == 0:
-            return self.has_error(form, 'Invalid student selected')
+            registrations = event.registration_set.all()
+            if len(registrations.filter(pay_status='paid')) + len(self.students) > event.joadevent_set.last().student_limit:
+                return self.has_error(form, 'Class is full')
 
-        registrations = self.event.registration_set.all()
-        if len(registrations.filter(pay_status='paid')) + len(self.students) > self.event.joadevent_set.last().student_limit:
-            return self.has_error(form, 'Class is full')
-
-        with transaction.atomic():
-            uid = str(uuid.uuid4())
-            self.request.session['idempotency_key'] = uid
-            self.request.session['line_items'] = []
-            self.request.session['payment_category'] = 'joad'
-            self.request.session['payment_description'] = f'Joad event on {str(self.event.event_date)[:10]}'
-            logger.warning(self.students)
-            description = f"Joad event on {str(self.event.event_date)[:10]} student: "
-            for s in self.students:
-                cr = self.model.objects.create(event=self.event, student=s,
-                                            pay_status='start', idempotency_key=uid, user=self.request.user)
-                self.request.session['line_items'].append({'name': description + f'{s.first_name}', 'quantity': 1,
-                                                           'amount_each': self.event.cost_standard})
-                logger.warning(cr)
+            with transaction.atomic():
+                uid = str(uuid.uuid4())
+                self.request.session['idempotency_key'] = uid
+                self.request.session['line_items'] = []
+                self.request.session['payment_category'] = 'joad'
+                self.request.session['payment_description'] = f'Joad event on {str(event.event_date)[:10]}'
+                logger.warning(self.students)
+                description = f"Joad event on {str(event.event_date)[:10]} student: "
+                for s in self.students:
+                    cr = self.model.objects.create(event=event, student=s,
+                                                pay_status='start', idempotency_key=uid, user=self.request.user)
+                    self.request.session['line_items'].append({'name': description + f'{s.first_name}', 'quantity': 1,
+                                                               'amount_each': event.cost_standard})
+                    logger.warning(cr)
         return HttpResponseRedirect(reverse('payment:make_payment'))
 
 

@@ -33,7 +33,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
             ).order_by('event_date')
         self.formset = None
         self.formset_students = []
-        self.event = None
+        self.events = Event.objects.none()
         self.students = []
         self.admin_registration = False
 
@@ -47,12 +47,20 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         kwargs = super().get_form_kwargs()
         if self.request.user.is_board and 'family_id' in self.kwargs:
             self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id', None))
+        logger.warning(self.event_queryset)
         if not self.request.user.is_staff:
             self.event_queryset = self.event_queryset.filter(state__in=['open', 'wait'])
 
         if self.kwargs.get('event', None) is not None:
             kwargs['initial']['event'] = self.kwargs.get('event')
-            self.event = get_object_or_404(Event, pk=self.kwargs.get('event'))
+            # self.event = get_object_or_404(Event, pk=self.kwargs.get('event'))
+            self.events = self.event_queryset.filter(pk=self.kwargs.get('event'))
+            if not self.request.user.is_staff:
+                self.event_queryset = self.events
+        logger.warning(self.kwargs.get('event'))
+        logger.warning(self.event_queryset)
+        for e in self.event_queryset:
+            logger.warning(e.id)
         kwargs['event_queryset'] = self.event_queryset
         kwargs['students'] = self.formset_students = self.student_family.student_set.all()
         kwargs['event_type'] = self.event_type
@@ -89,6 +97,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
             )
 
     def form_invalid(self, form):
+        logger.warning(self.request.POST)
         logger.warning(form.errors)
         return super().form_invalid(form)
 
@@ -99,17 +108,24 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
 
     def process_formset(self):
         self.get_formset(event=self.form.cleaned_data['event'])
-        self.event = self.form.cleaned_data['event']
-        reg = self.event.registration_set.exclude(pay_status__in=['canceled', "refunded", 'refund', 'refund donated'])
-
+        self.events = self.form.cleaned_data['event']
+        logger.warning(self.form.cleaned_data['event'])
+        # reg = self.event.registration_set.exclude(pay_status__in=['canceled', "refunded", 'refund', 'refund donated'])
+        reg = Registration.objects.filter(event__in=self.form.cleaned_data['event']).exclude(
+            pay_status__in=['canceled', "refunded", 'refund', 'refund donated'])
         if self.formset.is_valid():
-            for f in self.formset:
-                if f.cleaned_data['register']:
-                    if reg.filter(student=f.cleaned_data['student']):
-                        return {'success': False, 'error': 'Student is already enrolled'}
-                    self.students.append(f.cleaned_data['student'].id)
-            # make self.students a queryset.
-            self.students = self.student_family.student_set.filter(id__in=self.students)
+            try:
+                for event in self.events:
+                    for f in self.formset:
+                        if f.cleaned_data['register']:
+                            if reg.filter(student=f.cleaned_data['student']):
+                                # return {'success': False, 'error': 'Student is already enrolled'}
+                                raise Exception('Student is already enrolled')
+                            self.students.append(f.cleaned_data['student'].id)
+                    # make self.students a queryset.
+                self.students = self.student_family.student_set.filter(id__in=self.students)
+            except Exception as e:
+                return {'success': False, 'error': e}
             return {'success': True, 'error': ''}
         else:
             logger.warning(self.formset.errors)
@@ -131,16 +147,24 @@ class RegistrationView(RegistrationSuperView):
 
         ik = uuid.uuid4()
         for f in self.formset:
-            if f.cleaned_data['register']:
-                new_reg = f.save(commit=False)
-                new_reg.event = self.event
-                new_reg.idempotency_key = ik
-                new_reg.pay_status = 'paid'
-                new_reg.user = self.request.user
-                new_reg.save()
+            for event in self.events:
+                logger.warning(event)
+                if f.cleaned_data['register']:
+                    logger.warning(f.instance)
+                    # f.instance = None
+                    new_reg = Registration.objects.create(
+                        event=event,
+                        student=None,
+                        pay_status='paid',
+                        idempotency_key=ik,
+                        user=self.request.user,
+                        comment=f.cleaned_data.get('comment', None)
+                    )
+
+                    logger.warning(new_reg)
 
             self.success_url = reverse_lazy('registration:profile')
-            return super().form_valid(form)
-        else:
-            logger.warning(self.formset.errors)
-        return self.has_error(form, 'Error with form')  # pragma: no cover
+        return super().form_valid(form)
+        # else:
+        #     logger.warning(self.formset.errors)
+        # return self.has_error(form, 'Error with form')  # pragma: no cover
