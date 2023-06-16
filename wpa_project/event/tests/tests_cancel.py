@@ -119,6 +119,26 @@ class TestsCancel(MockSideEffects, TestCase):
         self.assertEqual(registrations[1].pay_status, 'cancel_pending')
         task_cancel_pending.assert_called_with([reg[1].id], False)
 
+    @patch('event.views.cancel_view.cancel_pending.delay')
+    def test_post_cancel_admin(self, task_cancel_pending):
+        reg = self.create_register_class()
+        self.test_user = User.objects.get(pk=1)
+        self.test_url = reverse('events:cancel', kwargs={'student_family': 2})
+        self.client.force_login(self.test_user)
+        self.post_dict['form-0-id'] = reg[0].id
+        self.post_dict['form-0-cancel'] = False
+        self.post_dict['form-1-id'] = reg[1].id
+        self.post_dict['form-1-cancel'] = True
+
+        response = self.client.post(self.test_url, self.post_dict, secure=True)
+
+        registrations = Registration.objects.filter(event=reg[0].event)
+        self.assertEqual(len(registrations), 2)
+        self.assertEqual(registrations[0].pay_status, 'paid')
+        self.assertEqual(registrations[1].pay_status, 'cancel_pending')
+        task_cancel_pending.assert_called_with([reg[1].id], False)
+        self.assertRedirects(response, self.test_url)
+
     def test_post_cancel_within_24_hours(self):
         reg = self.create_register_class()
         reg[0].event.event_date = timezone.now() + timedelta(hours=12)

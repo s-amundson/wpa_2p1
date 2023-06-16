@@ -29,7 +29,7 @@ class CancelSetForm(MyModelForm):
         self.fields['student'].widget = forms.HiddenInput()
 
         cancel_attrs = {'class': "m-2 cancel-check"}
-        if self.instance.pay_status == 'cancel_pending':
+        if self.instance.pay_status in ['cancel_pending', 'refunded']:
             cancel_attrs['disabled'] = 'disabled'
         self.fields['cancel'] = forms.BooleanField(
             widget=forms.CheckboxInput(attrs=cancel_attrs),
