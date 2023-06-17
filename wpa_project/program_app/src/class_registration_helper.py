@@ -24,6 +24,7 @@ class ClassRegistrationHelper:
                 payment = PaymentHelper(cr.user).create_payment(cost * ikey['ik_count'], 'intro', 0,
                                                                 str(ikey['idempotency_key']), note, '',
                                                                 saved_card_id=card.id)
+            logger.warning(payment)
             if payment is None:  # a payment error happened
                 icr.update(pay_status='start')
 
@@ -165,4 +166,3 @@ class ClassRegistrationHelper:
                 if beginner_class.returnee_limit - len(admitted) >= len(next_group):
                     self.charge_group(next_group)
                     EmailMessage().wait_list_off(next_group)
-

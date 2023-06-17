@@ -47,7 +47,6 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         kwargs = super().get_form_kwargs()
         if self.request.user.is_board and 'family_id' in self.kwargs:
             self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id', None))
-        logger.warning(self.event_queryset)
         if not self.request.user.is_staff:
             self.event_queryset = self.event_queryset.filter(state__in=['open', 'wait'])
 
@@ -57,10 +56,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
             self.events = self.event_queryset.filter(pk=self.kwargs.get('event'))
             if not self.request.user.is_staff:
                 self.event_queryset = self.events
-        logger.warning(self.kwargs.get('event'))
-        logger.warning(self.event_queryset)
-        for e in self.event_queryset:
-            logger.warning(e.id)
+
         kwargs['event_queryset'] = self.event_queryset
         kwargs['students'] = self.formset_students = self.student_family.student_set.all()
         kwargs['event_type'] = self.event_type
