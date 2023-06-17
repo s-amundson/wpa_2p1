@@ -34,6 +34,7 @@ class ClassSignInView(WaiverView):
         cr = Registration.objects.filter(
             event__event_date__gt=timezone.now().replace(hour=23, minute=59, second=59),
             student=self.student)
+        logger.warning(cr)
         waiting = cr.filter(pay_status='waiting')
         waiting.update(pay_status='canceled')
         for r in cr.filter(pay_status='paid'):

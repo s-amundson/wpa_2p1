@@ -31,8 +31,7 @@ class SignUpForm(SignupForm):
             private_key=settings.RECAPTCHA_PRIVATE_KEY,
         )
 
-
-    def clean_email(self):
+    def clean_email(self):  # pragma: no cover
         address = super().clean_email()
         try:
             record = Email.objects.get(email=address)

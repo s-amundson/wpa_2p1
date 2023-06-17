@@ -1,5 +1,5 @@
 from django import forms
-
+from django.utils import timezone
 from ..models import Student, User
 from ..src import EmailMessage
 
@@ -18,7 +18,12 @@ class SendEmailForm(forms.Form):
         choices = [('board', 'Board'), ('staff', 'Staff'), ('current members', 'Current Members'), ('joad', 'JOAD')]
         if is_super:
             # choices.append(('all members', 'All Members'))
-            choices.append(('students', 'All Students'))
+            choices.append(('students', 'Students that have attended'))
+        # self.fields['returning'] = forms.BooleanField(
+        #     widget=forms.CheckboxInput(attrs={'class': "m-2"}),
+        #     label='Returning Students Only',
+        #     required=False)
+        self.fields['include_days'] = forms.IntegerField(max_value=90, min_value=0, initial=90, required=False)
         self.fields['recipients'] = forms.ChoiceField(choices=choices, widget=forms.RadioSelect())
         self.fields['subject'] = forms.CharField(initial='Message from Woodley Park Archers')
         self.fields['subject'].widget.attrs.update({'class': 'form-control m-2'})
@@ -41,7 +46,13 @@ class SendEmailForm(forms.Form):
         # elif self.cleaned_data['recipients'] == 'all members':
         #     em.bcc_from_users(users.filter(is_staff=True))
         elif self.cleaned_data['recipients'] == 'students':
-            em.bcc_from_users(users)
+            days = self.cleaned_data.get('include_days', 0)
+            if days is None:
+                days = 90
+            d = timezone.now() - timezone.timedelta(days=days)
+            students = Student.objects.filter(registration__event__event_date__gte=d, registration__attended=True)
+            logger.warning(students)
+            em.bcc_from_students(students)
         else:  # pragma no cover
             logging.debug('return')
             return

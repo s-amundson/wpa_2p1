@@ -12,7 +12,7 @@
         let add_student_url = "{% url 'registration:add_student' %}"
         let url_student_family_api = "{% url 'registration:student_family' %}"
         let url_instructor_update = "{% url 'registration:instructor_update' %}"
-        let url_class_registered_table = "{% url 'programs:unregister_table' %}"
+        let url_class_registered_table = "{% url 'events:cancel' %}"
         {% if student_family %} let family = true {% else %} let family = false {% endif %}
     </script>
 {% endblock %}
@@ -40,29 +40,9 @@
     {% if this_student is None %}
         <div class="row px-2" id="this-student-div"></div>
     {% endif %}
-    <div class="row px-3 align-items-center mx-auto">
-        <div class="col-12">
-            <h3> Address </h3>
-        </div>
-    </div>
-    <div id="student-family-form" class="row px-3"></div>
-    <div id="student-family-address" class="row px-3">
-        <div class="col-1"></div>
-        <div class="col px-3">
-            <div id="address1" class="row">{{ student_family.street }} </div>
-            <div id="address2" class="row">
-                {{ student_family.city }} {{ student_family.state }} {{ student_family.post_code }}
-            </div>
-            <div id="phone" class="row">{{ student_family.phone }}</div>
-            <div class="flex-row m-2">
-                <button id="btn-address-edit" class="btn btn-primary" type="button" name="button"
-                        family_id="{{ student_family.id }}">
-                    Edit Address
-                </button>
-            </div>
-        </div>
-    </div>
-
+    {% if not student_family.id %}
+        {% include 'student_app/student_family_insert.html' %}
+    {% endif %}
     <div class="row px-3 pt-3 align-items-center mx-auto">
         <div class="col-12">
             <h3> Students </h3>
@@ -153,6 +133,16 @@
             <div class="col-1"></div>
         </div>
         <div class="row p-3 mx-auto" id="instructor-form-div">
+        </div>
+    {% endif %}
+    {% if student_family.id %}
+    {% include 'student_app/student_family_insert.html' %}
+        <div class="row px-3">
+            <div>
+                <a class="btn btn-danger" href="{% url 'registration:delete_student_family' student_family.id%}">
+                    Delete Account
+                </a>
+            </div>
         </div>
     {% endif %}
 {% endblock %}

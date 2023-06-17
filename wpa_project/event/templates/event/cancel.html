@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %} Cancel Registration {% endblock %}
+
+{% block script %}
+    {% load static %}
+
+{% endblock %}
+
+{% block main %}
+    <div class="row p-3" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-3">
+        <h3>Cancel Registration</h3>
+    </div>
+    <div class="row p-3">
+        {% include 'event/cancel_form.html' %}
+    </div>
+{% endblock %}

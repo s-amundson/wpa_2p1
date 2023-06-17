@@ -20,9 +20,9 @@ class TestsVolunteerRegistration(TestCase):
         self.client.force_login(self.test_user)
         self.post_dict = {}
 
-    def get_post_dict(self, event):
+    def get_post_dict(self, events):
         self.post_dict = {
-            'event': event.id,
+            'event': events,
             'form-TOTAL_FORMS': 2,
             'form-INITIAL_FORMS': 0,
             'form-MIN_NUM_FORMS': 0,
@@ -30,11 +30,9 @@ class TestsVolunteerRegistration(TestCase):
             'form-0-register': True,
             'form-0-student': 4,
             'form-0-heavy': True,
-            'form-0-event': event.id,
             'form-1-register': False,
             'form-1-student': 5,
             'form-1-heavy': False,
-            'form-1-event': event.id,
             }
         return self.post_dict
 
@@ -60,12 +58,32 @@ class TestsVolunteerRegistration(TestCase):
         event.save()
 
         response = self.client.post(
-            reverse('events:registration'), self.get_post_dict(event),
+            reverse('events:registration'), self.get_post_dict([event.id]),
             secure=True)
 
         self.assertRedirects(response, reverse('registration:profile'))
         cr = Registration.objects.all()
         self.assertEqual(len(cr), 1)
+        self.assertEqual(cr[0].pay_status, 'paid')
+        self.assertEqual(cr[0].user, self.test_user)
+
+    def tests_registration_post_good_multiple(self):
+        d = timezone.now().replace(hour=14, minute=0, second=0, microsecond=0) + timezone.timedelta(days=4)
+        event = Event.objects.get(pk=3)
+        event.event_date = d
+        event.save()
+        event = Event.objects.get(pk=4)
+        event.event_date = d.replace(hour=15)
+        event.save()
+        response = self.client.post(
+            reverse('events:registration'), self.get_post_dict([3, 4]),
+            secure=True)
+
+        self.assertRedirects(response, reverse('registration:profile'))
+        cr = Registration.objects.all()
+        self.assertEqual(len(cr), 2)
+        self.assertEqual(cr[0].pay_status, 'paid')
+        self.assertEqual(cr[0].user, self.test_user)
 
     def tests_registration_post_good_id(self):
         d = timezone.now().replace(hour=14, minute=0, second=0, microsecond=0) + timezone.timedelta(days=4)
@@ -74,7 +92,7 @@ class TestsVolunteerRegistration(TestCase):
         event.save()
 
         response = self.client.post(
-            reverse('events:registration', kwargs={'event': event.id}), self.get_post_dict(event),
+            reverse('events:registration', kwargs={'event': event.id}), self.get_post_dict([event.id]),
             secure=True)
 
         self.assertRedirects(response, reverse('registration:profile'))
@@ -98,7 +116,7 @@ class TestsVolunteerRegistration(TestCase):
 
         response = self.client.post(
             reverse('events:registration', kwargs={'event': 3}),
-            self.get_post_dict(event),
+            self.get_post_dict([event.id]),
             secure=True)
         self.assertEqual(response.status_code, 200)
         # self.assertRedirects(response, reverse('registration:profile'))
@@ -111,7 +129,7 @@ class TestsVolunteerRegistration(TestCase):
         event = Event.objects.get(pk=3)
         event.event_date = d
         event.save()
-        self.get_post_dict(event)
+        self.get_post_dict([event.id])
         self.post_dict['form-0-student'] = 1
         response = self.client.post(
             reverse('events:registration', kwargs={'event': 3}),

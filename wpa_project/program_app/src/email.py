@@ -1,22 +1,33 @@
 from django.template.loader import get_template
 from django.utils import timezone
 
-from student_app.src import EmailMessage
+from student_app.src import EmailMessage as StudentEmailMessage
+from student_app.models import Student
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class EmailMessage(EmailMessage):
+class EmailMessage(StudentEmailMessage):
     def beginner_reminder(self, beginner_class, students):
         self.bcc_from_students(students)
         self.subject = f'WPA Class Reminder {timezone.localtime(beginner_class.event.event_date).date()}'
         if beginner_class.class_type == 'beginner':
             d = {'beginner_class': beginner_class, 'minutes': 30}
-        elif  beginner_class.class_type == 'returnee':
+        elif beginner_class.class_type == 'returnee':
             d = {'beginner_class': beginner_class, 'minutes': 15}
         self.body = get_template('program_app/email/reminder_beginner.txt').render(d)
         self.attach_alternative(get_template('program_app/email/reminder_beginner.html').render(d), 'text/html')
+        self.send()
+
+    def instructor_canceled_email(self, event, num_instructors):
+        students = Student.objects.filter(user__is_instructor=True)
+        logger.warning(students)
+        self.bcc_from_students(students)
+        logger.warning(self.bcc)
+        self.subject = 'Woodley Park Archers Instructor Cancellation'
+        self.body = get_template('program_app/email/instructor_cancel_email.html').render(
+            {'event': event, 'num_instructors': num_instructors})
         self.send()
 
     def status_email(self, class_list, staff):
@@ -66,3 +77,15 @@ class EmailMessage(EmailMessage):
         self.attach_alternative(get_template('program_app/email/wait_list_off.html').render(d),
                                 'text/html')
         self.send()
+
+    def wait_list_on(self, registrations):
+        """Send mail students that they have been put on the wait list."""
+        if registrations:
+            self.get_email_address(registrations[0].user)
+            self.subject = f'WPA wait list confirmation for class on {registrations[0].event.event_date.date()}'
+            self.body = get_template('program_app/email/wait_list_on.txt').render(
+                {'registrations': registrations, 'event': registrations[0].event})
+            self.attach_alternative(get_template('program_app/email/wait_list_on.html').render(
+                {'registrations': registrations, 'event': registrations[0].event}),
+                                    'text/html')
+            self.send()

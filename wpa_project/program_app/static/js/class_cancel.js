@@ -10,66 +10,53 @@ async function get_reg_table() {
     let data = await $.get(url_class_registered_table, function(data, status){
         $("#registered_table").html(data);
 
-        $("#unreg_form").submit(function(e){
+        $("#cancel_form").submit(function(e){
             e.preventDefault();
-            post_unregister()
+            post_cancel()
         });
     });
 
 }
 
-async function post_unregister() {
-    // to unregister student(s) from a class.
+async function post_cancel() {
+    // to cancel a student(s) registration for a class.
     let refund = 0;
-    let incomplete = 0;
-    let waiting = 0
-    let unreg_list = [];
+    let cancel_list = [];
     let getConfirm = false;
-    let class_id = "";
-    $(".unreg").each(function(i, obj) {
-        class_id = $(this).attr("class_id");
-        console.log($(this).parents("tr").find(".pay_status").find("a").length)
+//    let class_id = "";
+    $(".cancel-check").each(function(i, obj) {
         if($(this).prop('checked') == true) {
-            if($(this).prop("class").search("start")) {
-                incomplete = incomplete + 1;
-                console.log(incomplete)
-            }
-            else if($(this).prop("class").search("waiting")) {
-                waiting = waiting + 1;
-            }
-            else {
-                refund += parseInt($(this).parent().find(".unreg_cost").val());
-            }
-            unreg_list.push(class_id);
+            cancel_list.push(1);
+            refund += parseInt($(this).parent().find(".cancel-amount").val());
         }
     });
-    if(unreg_list.length == 0){
-        alert_notice("Notice", "Please select a class to unregister")
+    if(cancel_list.length == 0){
+        alert_notice("Notice", "Please select a class to cancel.")
     }
     if ('confirm' in window) {
-        if(unreg_list.length == 1){
-            if (unreg_list.length == incomplete | unreg_list.length == waiting) {
-                getConfirm = confirm("Please confirm that you wish to unregister for this class.");
+        if(cancel_list.length == 1){
+            if (refund == 0) {
+                getConfirm = confirm("Please confirm that you wish to cancel your registration for this class.");
                 }
-            else if ($("#id_donation").prop('checked') == true) {
-                getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be donating " +
+            else if ($("#id_donate").prop('checked') == true) {
+                getConfirm = confirm("Please confirm that you wish to cancel your registration for this class.\n You will be donating " +
                 refund + " to the club");
                 }
             else {
-                getConfirm = confirm("Please confirm that you wish to unregister for this class.\n You will be refunded " +
+                getConfirm = confirm("Please confirm that you wish to cancel your registration for this class.\n You will be refunded $" +
                 refund + " to your card in 5 to 10 business days");
                 }
             }
-        else if (unreg_list.length > 1) {
-            if (unreg_list.length == incomplete | unreg_list.length == waiting) {
-                    getConfirm = confirm("Please confirm that you wish to unregister for this class.");
+        else if (cancel_list.length > 1) {
+            if (refund == 0) {
+                    getConfirm = confirm("Please confirm that you wish to cancel your registration for these classes.");
                 }
             else if ($("#id_donation").prop('checked') == true) {
-                getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be donating " +
+                getConfirm = confirm("Please confirm that you wish to cancel your registration for these classes.\n You will be donating " +
                 refund + " to the club");
                 }
             else {
-                getConfirm = confirm("Please confirm that you wish to unregister for these classes.\n You will be refunded " +
+                getConfirm = confirm("Please confirm that you wish to cancel your registration for these classes.\n You will be refunded $" +
                 refund + " to your card(s) in 5 to 10 business days");
                 }
             }
@@ -79,9 +66,14 @@ async function post_unregister() {
         getConfirm = true;
     }
     if (getConfirm) {
-        $("#unreg_form").unbind();
-        $("#unreg_form").submit();
+        let data = await $.post(url_class_registered_table, $("#cancel_form").serializeArray(), function(data, status){
+            $("#registered_table").html(data);
 
+            $("#cancel_form").submit(function(e){
+                e.preventDefault();
+                post_cancel()
+            });
+        });
     }
     else {
         console.log('canceled');

@@ -3,7 +3,7 @@ from django.views.generic.edit import FormView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-
+from django.utils import timezone
 from ..models import Announcement
 from ..forms import AnnouncementForm
 
@@ -14,8 +14,13 @@ logger = logging.getLogger(__name__)
 class AnnouncementFormView(UserPassesTestMixin, FormView):
     model = Announcement
     form_class = AnnouncementForm
-    template_name = 'info/announcement_form.html'
+    template_name = 'info/preview_form.html'
     success_url = reverse_lazy('info:announcement_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Announcement Form'
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -48,5 +53,14 @@ class AnnouncementList(ListView):
         return context
 
     def get_queryset(self):
-        object_list = self.model.objects.filter(status=1)
+        object_list = self.model.objects.filter(
+            end_date__gte=timezone.now(),
+            begin_date__lte=timezone.now(),
+            status=1,
+        )
+        if self.request.user.is_authenticated and self.request.user.is_board:
+            object_list = self.model.objects.filter(
+                end_date__gte=timezone.now() - timezone.timedelta(days=30),
+                begin_date__lte=timezone.now(),
+            )
         return object_list.order_by('-created_at')

@@ -1,20 +1,20 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import FormView
 from django.urls import reverse_lazy
-from django.views.generic.base import View
-from django.shortcuts import render, get_object_or_404
-from django.http import Http404
-import logging
 
 from ..forms import SendEmailForm
-from ..models import User
 
 
 class SendEmailView(UserPassesTestMixin, FormView):
-    template_name = 'student_app/form_as_p.html'
+    template_name = 'student_app/send_email.html'
     form_class = SendEmailForm
     success_url = reverse_lazy('registration:index')
     is_super = False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Send Email'
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

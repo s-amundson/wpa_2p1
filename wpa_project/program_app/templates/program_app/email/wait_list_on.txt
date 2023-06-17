@@ -1,0 +1,11 @@
+Hi,
+
+The following students have been added to the wait list for a class on {{ event.event_date }}. If{% if registrations.count == 1 %} a spot opens{% else %} {{ registrations.count }} spots open{% endif %} up you will get an email notification of the update in status and any charges that incur.
+
+{% for registration in registrations %}{{ registration.student.first_name }} {{ registration.student.last_name }}
+{% endfor %}
+
+If for any reason you can't make it, please cancel your registration by going to https://woodleyparkarchers.org/
+
+https://woodleyparkarchers.org/
+https://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

@@ -1,14 +1,19 @@
 import logging
-from unittest.mock import patch
+import uuid
+from unittest.mock import patch, call
 from django.test import TestCase, Client
+from django.core import mail
 
-from ..tasks import close_create_class, daily_update, reminder_email
+from ..models import BeginnerClass
+from ..tasks import close_create_class, daily_update, reminder_email, wait_list_email, refund_class
+from event.models import Registration, Event
 from payment.tests import MockSideEffects
+from student_app.models import Student
 logger = logging.getLogger(__name__)
 
 
 class TestsTasks(MockSideEffects, TestCase):
-    fixtures = ['beginner_schedule']
+    fixtures = ['f1', 'beginner_schedule']
 
     def setUp(self):
         # Every test needs a client.
@@ -32,3 +37,84 @@ class TestsTasks(MockSideEffects, TestCase):
     def test_reminder_email(self, up_reminder_email):
         reminder_email(1)
         up_reminder_email.assert_called()
+
+    def test_wait_list_email_one(self):
+        # put a record in to the database
+        student = Student.objects.get(pk=4)
+        ik = uuid.uuid4()
+        cr = Registration.objects.create(
+            event=Event.objects.get(pk=1),
+            student=student,
+            pay_status='paid',
+            idempotency_key=ik,
+            user=student.user,
+        )
+        wait_list_email([cr.id])
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(str(mail.outbox[0].message()).count('If a spot opens up') == 2)
+        self.assertTrue(str(mail.outbox[0].message()).count('Charles Wells') == 2)
+        self.assertTrue(str(mail.outbox[0].message()).count('Gary Wells') == 0)
+
+    def test_wait_list_email_multiple(self):
+        # put a record in to the database
+        student = Student.objects.get(pk=4)
+        ik = uuid.uuid4()
+        cr1 = Registration.objects.create(
+            event=Event.objects.get(pk=1),
+            student=student,
+            pay_status='paid',
+            idempotency_key=ik,
+            user=student.user,
+        )
+        cr2 = Registration.objects.create(
+            event=Event.objects.get(pk=1),
+            student=Student.objects.get(pk=5),
+            pay_status='paid',
+            idempotency_key=ik,
+            user=student.user,
+        )
+        wait_list_email([cr1.id, cr2.id])
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(str(mail.outbox[0].message()).count('If 2 spots open up') == 2)
+        self.assertTrue(str(mail.outbox[0].message()).count('Charles Wells') == 2)
+        self.assertTrue(str(mail.outbox[0].message()).count('Gary Wells') == 2)
+
+    @patch('program_app.tasks.RefundHelper.refund_with_idempotency_key')
+    def test_refund_class(self, refund_ik):
+
+        # put a record in to the database
+        student = Student.objects.get(pk=4)
+        event = Event.objects.get(pk=1)
+        ik = uuid.uuid4()
+        cr1 = Registration.objects.create(
+            event=event,
+            student=student,
+            pay_status='paid',
+            idempotency_key=ik,
+            user=student.user,
+        )
+        cr2 = Registration.objects.create(
+            event=event,
+            student=Student.objects.get(pk=5),
+            pay_status='paid',
+            idempotency_key=ik,
+            user=student.user,
+        )
+
+        ik2 = uuid.uuid4()
+        cr3 = Registration.objects.create(
+            event=event,
+            student=Student.objects.get(pk=3),
+            pay_status='paid',
+            idempotency_key=ik2,
+            user=Student.objects.get(pk=2).user,
+        )
+
+        refund_class(BeginnerClass.objects.get(pk=1), 'due to extreme bytes')
+        self.assertEqual(len(mail.outbox), 3)
+        # refund_ik.assert_called_with(ik, 2 * event.cost_standard * 100)
+        refund_ik.assert_called_with(ik2, 1 * event.cost_standard * 100)
+        # refund_ik.assert_has_calls([
+        #     call(ik, 2 * event.cost_standard * 100),
+        #     call(ik2, 1 * event.cost_standard * 100)])
+        self.assertEqual(refund_ik.call_count, 2)

@@ -2,9 +2,7 @@ import logging
 
 from django.dispatch import receiver
 from allauth.account.signals import email_changed, email_confirmed, user_logged_in, user_signed_up
-from ipware import get_client_ip
 from .models import Student, User
-from contact_us.models import Email
 
 logger = logging.getLogger(__name__)
 

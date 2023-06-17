@@ -1,0 +1,22 @@
+<div class="row px-3 align-items-center mx-auto">
+    <div class="col-12">
+        <h3> Address </h3>
+    </div>
+</div>
+<div id="student-family-form" class="row px-3"></div>
+<div id="student-family-address" class="row px-3">
+    <div class="col-1"></div>
+    <div class="col px-3">
+        <div id="address1" class="row">{{ student_family.street }} </div>
+        <div id="address2" class="row">
+            {{ student_family.city }} {{ student_family.state }} {{ student_family.post_code }}
+        </div>
+        <div id="phone" class="row">{{ student_family.phone }}</div>
+        <div class="flex-row m-2">
+            <button id="btn-address-edit" class="btn btn-primary" type="button" name="button"
+                    family_id="{{ student_family.id }}">
+                Edit Address
+            </button>
+        </div>
+    </div>
+</div>

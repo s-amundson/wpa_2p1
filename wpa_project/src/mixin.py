@@ -23,13 +23,10 @@ class StaffMixin(UserPassesTestMixin):
 class StudentFamilyMixin(AccessMixin):
     def __init__(self):
         self.student_family = None
-        logger.warning(self.student_family)
 
     def dispatch(self, request, *args, **kwargs):
-        logger.warning(request.user.is_authenticated)
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        logging.warning(request.user.student_set.last())
         if request.user.student_set.last() is None or request.user.student_set.last().student_family is None:
             request.session['message'] = 'Address form is required'
             return HttpResponseRedirect(reverse('registration:profile'))

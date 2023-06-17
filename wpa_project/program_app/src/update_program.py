@@ -136,19 +136,21 @@ class UpdatePrograms:
 
     def status_email(self):
         crh = ClassRegistrationHelper()
-        email_date = self.today + timedelta(days=2)
-        # logging.debug(email_date)
+        email_date = self.today + timezone.timedelta(days=2)
+        # logger.warning(email_date)
         staff_query = User.objects.filter(is_staff=True, is_active=True)
         staff_students = Student.objects.filter(user__in=staff_query)
         # staff_students = Student.objects.filter(user__is_staff=True)
         classes = BeginnerClass.objects.filter(
             event__event_date__date=email_date, event__state__in=self.states[:self.states.index('closed')])
+        # logger.warning(classes)
         if len(classes):
             class_list = []
             for c in classes:
                 instructors = []
                 staff = []
-                cr = Registration.objects.filter(event=c.event, student__in=staff_students)
+                cr = Registration.objects.filter(event=c.event, student__in=staff_students,
+                                                 pay_status__in=['paid', 'admin'])
                 for r in cr:
                     if r.student.user.is_instructor:
                         instructors.append(r.student)
@@ -156,6 +158,6 @@ class UpdatePrograms:
                         staff.append(r.student)
                 class_list.append({'class': c, 'instructors': instructors, 'staff': staff,
                                    'count': crh.enrolled_count(c)})
-            logging.warning(class_list)
+            # logger.warning(class_list)
             self.email.status_email(class_list, staff_query)
             # logging.debug('emailed')

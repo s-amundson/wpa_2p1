@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %} Staff List {% endblock %}
+
+
+{% load static %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="text-center">
+            <h2> Active Volunteer Staff List </h2>
+        </div>
+    </div>
+
+    {% for staff in object_list %}
+        <div class="row border m-2">
+            <div class="d-flex flex-row justify-content-between">
+                <h4>{{ staff.first_name }}</h4>
+                <div>
+                    {% if user.is_superuser %}
+                        {% if staff.staffprofile_set.last %}
+                            <a href="{% url 'info:staff_profile_form' staff.staffprofile_set.last.id %}" role="button"
+                               class="btn btn-primary btn-sm m-1"> Edit Profile</a>
+                        {% else %}
+                            <a href="{% url 'info:staff_profile_form' %}" role="button"
+                               class="btn btn-primary btn-sm m-1"> Add Profile</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="d-flex flex-row">
+                    {% if staff.user.is_board and staff.user.is_instructor%}
+                        <p>Board Member and Instructor</p>
+                    {% elif staff.user.is_board %}
+                        <p>Board Member</p>
+                    {% elif staff.user.is_instructor %}
+                        <p>Instructor</p>
+                    {% else %}
+                        <p>Staff</p>
+                    {% endif %}
+            </div>
+                {% if staff.staffprofile_set.last %}
+                    <div class="d-flex flex-row">
+                        <h5>Profile:</h5>
+                    </div>
+                    <div class="d-flex flex-row">
+                        <div class="offset-1">
+                            {% if staff.staffprofile_set.last.image %}
+                                <img class="img-max-300" src="{{ staff.staffprofile_set.last.image.url }}">
+                            {% endif %}
+                        </div>
+                        <div class="container">
+                            {{ staff.staffprofile_set.last.bio|safe }}
+                        </div>
+                    </div>
+                {% endif %}
+
+        </div>
+    {% endfor %}
+
+{% endblock %}

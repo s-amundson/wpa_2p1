@@ -1,6 +1,6 @@
 <tr>
     <td>
-        {% if user.is_board %}
+        {% if user.is_board and cr.student %}
             <a href="{% url 'registration:search_result' cr.student.student_family.id %}">
                 {{ cr.student.first_name }}
             </a>

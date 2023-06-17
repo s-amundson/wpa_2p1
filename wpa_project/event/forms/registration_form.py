@@ -1,26 +1,27 @@
 from django import forms
-
 from src.model_form import MyModelForm
-from ..models import Registration, VolunteerEvent
+from ..models import Event, Registration, VolunteerEvent
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class RegistrationForm(MyModelForm):
+class RegistrationForm(forms.Form):
 
-    class Meta(MyModelForm.Meta):
-        model = Registration
-        required_fields = ['event']
-        optional_fields = []
-        fields = optional_fields + required_fields
+    # class Meta(MyModelForm.Meta):
+    #     model = Registration
+    #     required_fields = ['event']
+    #     optional_fields = []
+    #     fields = optional_fields + required_fields
 
     def __init__(self, students, *args, **kwargs):
         self.cancel_form = kwargs.get('cancel', False)
         self.event_queryset = kwargs.get('event_queryset', None)
         self.students = students
         self.event_type = kwargs.get('event_type', 'class')
-        for k in ['cancel', 'event_type', 'event_queryset']:
+
+        self.url = kwargs.get('url', '')
+        for k in ['cancel', 'event_type', 'event_queryset', 'url']:
             if k in kwargs:
                 kwargs.pop(k)
         super().__init__(*args, **kwargs)
@@ -32,14 +33,29 @@ class RegistrationForm(MyModelForm):
         self.student_count = len(students)
         self.description = ''
         # logger.warning(self.initial)
+        self.fields['event'] = forms.ModelMultipleChoiceField(self.event_queryset)
+        # if self.students.filter(user__is_staff=True).count():
+            # self.fields['event'] = forms.ChoiceField(widget=forms.SelectMultiple(c))
+            # self.fields['event'] = forms.ModelMultipleChoiceField(self.event_queryset)
+            # logger.warning('select multiple')
         if self.event_queryset is not None:
             self.fields['event'].queryset = self.event_queryset
         if 'event' in self.initial:
-            self.fields['event'].queryset = self.fields['event'].queryset.filter(pk=self.initial['event'])
+            event = Event.objects.get(pk=self.initial['event'])
+            logger.warning(event.event_date.date())
+            if self.students.filter(user__is_staff=True).count():
+                self.fields['event'].queryset = self.fields['event'].queryset.filter(
+                    event_date__date=event.event_date.date()
+                )
+                logger.warning(self.fields['event'].queryset)
+                # self.fields['event'].queryset = self.fields['event'].queryset.filter(pk=self.initial['event'])
             ve = VolunteerEvent.objects.filter(event__id=self.initial['event'])
             if len(ve):
                 logger.warning(ve.last())
                 self.description = ve.last().description
+        if self.students:
+            self.fields['student_family'] = forms.IntegerField(initial=self.students[0].student_family.id, required=False)
+            self.fields['student_family'].widget.attrs.update({'class': 'form-control m-2', 'style': 'display:none'})
 
 
 class RegistrationAdminForm(RegistrationForm):

@@ -23,20 +23,21 @@ class TestsClassAdminRegistration(TestCase):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.event = Event.objects.get(pk=1)
+        self.event.event_date = timezone.now() + timezone.timedelta(days=5)
+        self.event.save()
         self.post_dict = {
-            'event': self.event.id,
+            'event': [self.event.id],
             'terms': True,
             'student': 4,
+            'student_family': 3,
             'form-TOTAL_FORMS': 2,
             'form-INITIAL_FORMS': 0,
             'form-MIN_NUM_FORMS': 0,
             'form-MAX_NUM_FORMS': 1000,
             'form-0-register': True,
             'form-0-student': 4,
-            'form-0-event': self.event.id,
             'form-1-register': True,
             'form-1-student': 5,
-            'form-1-event': self.event.id,
             }
         return self.post_dict
 
@@ -149,7 +150,7 @@ class TestsClassAdminRegistration(TestCase):
 
     def test_class_add_student_after_class(self):
         bc = BeginnerClass.objects.get(pk=1)
-        bc.class_date = timezone.now() - timezone.timedelta(hours=3)
+        # bc.class_date = timezone.now() - timezone.timedelta(hours=3)
         bc.event.state = 'closed'
         bc.event.save()
         bc.save()

@@ -64,13 +64,13 @@ class TestsAdmitWait(MockSideEffects, TestCase):
 
     def test_get_wait_list(self):
         # Get the page
-        response = self.client.get(reverse('programs:admit_wait', kwargs={'beginner_class': 1}), secure=True)
+        response = self.client.get(reverse('programs:admit_wait', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/admit_wait.html')
         self.assertEqual(len(response.context['form'].fields), 4)
 
         # get same thing with student_family
-        response = self.client.get(reverse('programs:admit_wait', kwargs={'beginner_class': 1, 'family_id': 2}), secure=True)
+        response = self.client.get(reverse('programs:admit_wait', kwargs={'event': 1, 'family_id': 2}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/admit_wait.html')
         self.assertEqual(len(response.context['form'].fields), 2)
@@ -80,7 +80,7 @@ class TestsAdmitWait(MockSideEffects, TestCase):
     def test_post_wait_list(self, chg_group, mock_payment):
         mock_payment.side_effect = self.payment_side_effect
         d = {'admit_1': True, 'admit_2': True, 'admit_3': False, 'admit_4': False}
-        response = self.client.post(reverse('programs:admit_wait', kwargs={'beginner_class': 1}), d, secure=True)
+        response = self.client.post(reverse('programs:admit_wait', kwargs={'event': 1}), d, secure=True)
         self.assertRedirects(response, reverse('events:event_attend_list', kwargs={'event': 1}))
         chg_group.assert_called_with([2, 1])
 

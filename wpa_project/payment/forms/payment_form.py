@@ -80,12 +80,12 @@ class PaymentForm(forms.ModelForm):
         volunteer_points = self.cleaned_data.get('volunteer_points', 0)
         if volunteer_points is None:
             volunteer_points = 0
-        logger.warning(self.cleaned_data)
+        # logger.warning(self.cleaned_data)
         if self.cleaned_data['source_id'] == 'no-payment' and self.amount_initial == 0 \
                 and self.cleaned_data['amount'] == 0:
             self.save_log(idempotency_key, note, 'comped', volunteer_points)
             return True
-        logger.warning(f'available_vounteer points: {self.available_volunteer_points}, type:{type(self.available_volunteer_points)}')
+        # logger.warning(f'available_vounteer points: {self.available_volunteer_points}, type:{type(self.available_volunteer_points)}')
         if volunteer_points and self.available_volunteer_points >= self.amount_initial and \
                 volunteer_points >= self.amount_initial + self.cleaned_data['donation']:
             self.save_log(idempotency_key, note, 'volunteer points', volunteer_points)
