@@ -7,23 +7,6 @@ $(document).ready(function(){
     get_class_status();
 
     $("#myModal").modal("show");
-
-    $("#beginner-class-form").submit(function(e) {
-	    e.preventDefault();
-	    console.log('submit')
-	    let getConfirm = false;
-	    if (needs_covid && 'confirm' in window) {
-	        getConfirm = confirm($("#confirm-covid").html());
-	        console.log(getConfirm)
-	    }
-        else {
-            getConfirm = true;
-        }
-        if (getConfirm) {
-            $("#beginner-class-form").unbind();
-            $("#beginner-class-form").submit();
-        }
-    });
 });
 
 async function get_calendar() {
@@ -44,7 +27,6 @@ async function get_calendar() {
 async function get_class_status() {
     // get the class status from the server. tells us how many openings there are in the class.
     let d = $("#id_event").val();
-    console.log(d)
     let msg = ""
 
     if(d == "" | d == 'null') {
@@ -55,7 +37,7 @@ async function get_class_status() {
             msg = "Class openings:</br> &nbsp;&nbsp; ";
             msg += "New Students: " +  data['beginner'];
             msg += "</br> &nbsp;&nbsp; Returning: " + data['returnee'];
-            if($("#is_instructor").val() == "True") {
+            if(is_staff) {
                 msg += "</br> &nbsp;&nbsp; Instructors: " + data['instructor'];
             }
             else {
@@ -65,6 +47,11 @@ async function get_class_status() {
                         console.log($(this).attr("is_beginner") != "T")
                         if ($(this).attr("is_beginner") != "T") {
                             $(this).attr('checked', false);
+                            if(!is_staff) {
+                                $(this).prop("disabled", true);
+                            }
+                        } else {
+                            $(this).prop("disabled", false);
                         }
                     });
                     $("#class-description").html("This class is reserved for new students. Student's may only register for one upcoming beginner class.")
@@ -73,6 +60,11 @@ async function get_class_status() {
                     $(".student-check").each(function(e) {
                         if ($(this).attr("is_beginner") == "T") {
                             $(this).attr('checked', false);
+                            if(!is_staff) {
+                                $(this).prop("disabled", true);
+                            }
+                        } else {
+                            $(this).prop("disabled", false);
                         }
                     });
                     $("#class-description").html("This class is reserved for students that have been to at least one of our classes before.")

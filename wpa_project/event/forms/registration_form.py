@@ -32,23 +32,15 @@ class RegistrationForm(forms.Form):
 
         self.student_count = len(students)
         self.description = ''
-        # logger.warning(self.initial)
         self.fields['event'] = forms.ModelMultipleChoiceField(self.event_queryset)
-        # if self.students.filter(user__is_staff=True).count():
-            # self.fields['event'] = forms.ChoiceField(widget=forms.SelectMultiple(c))
-            # self.fields['event'] = forms.ModelMultipleChoiceField(self.event_queryset)
-            # logger.warning('select multiple')
-        if self.event_queryset is not None:
-            self.fields['event'].queryset = self.event_queryset
+
         if 'event' in self.initial:
             event = Event.objects.get(pk=self.initial['event'])
             logger.warning(event.event_date.date())
             if self.students.filter(user__is_staff=True).count():
                 self.fields['event'].queryset = self.fields['event'].queryset.filter(
-                    event_date__date=event.event_date.date()
+                    event_date__date=event.event_date
                 )
-                logger.warning(self.fields['event'].queryset)
-                # self.fields['event'].queryset = self.fields['event'].queryset.filter(pk=self.initial['event'])
             ve = VolunteerEvent.objects.filter(event__id=self.initial['event'])
             if len(ve):
                 logger.warning(ve.last())

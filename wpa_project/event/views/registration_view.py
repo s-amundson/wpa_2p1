@@ -56,7 +56,10 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
             self.events = self.event_queryset.filter(pk=self.kwargs.get('event'))
             if not self.request.user.is_staff:
                 self.event_queryset = self.events
-
+            else:
+                self.event_queryset = self.event_queryset.filter(
+                    event_date__date=self.events.last().event_date
+                )
         kwargs['event_queryset'] = self.event_queryset
         kwargs['students'] = self.formset_students = self.student_family.student_set.all()
         kwargs['event_type'] = self.event_type

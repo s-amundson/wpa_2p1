@@ -9,7 +9,7 @@
     <script nonce="{{request.csp_nonce}}">
         let url_class_registered_table = "{% url 'events:cancel' %}"
         let url_class_status = "{% url 'programs:class_status' %}"
-        {% if form.needs_covid %} let needs_covid = true; {% else %} let needs_covid = false; {% endif %}
+        let is_staff = {{ user.is_staff|lower }};
 
     </script>
 {% endblock %}
@@ -57,7 +57,7 @@
             <p>
                 Our returning student class provides a full hour on Saturday and two hours on Wednesday to practice
                 shooting under the continued guidance of our certified instructors. Bows and arrows are only provided
-                to registered students during class time, but you can take as many returning classes as you like.
+                to registered students during class time. You can take as many returning classes as you like.
             </p>
         </div>
         <hr>
@@ -68,7 +68,7 @@
     <div class="row p-2">
         <form id="beginner-class-form" class="col form" method="post" autocomplete="off">
             {% csrf_token %}
-            <input type="hidden" id="is_instructor" value="{{ user.is_instructor }}">
+            <input type="hidden" id="is_staff" value="{{ user.is_staff }}">
             <div class="row p-3">
                 <div class="d-md-inline-flex">
                     <div class="text-right">Select a class date:</div>
@@ -128,10 +128,6 @@
     </div>
     <div id="wait-list-warning" hidden >
 This class has a wait list if you register your credit card may be charged in the future when a space becomes available.
-    </div>
-    <div id="confirm-covid" hidden >
-Covid-19 Policy:
-Please confirm that you agree to bring proof of vaccination or proof of a negative PCR Covid-19 test within the previous 48 hours for yourself and all the members of your party.
     </div>
 
     {% include "program_app/registration_dialogs.html" %}
