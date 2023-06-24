@@ -37,3 +37,4 @@ class BeginnerSchedule(BeginnerCommonClass):
     state = models.CharField(max_length=20, null=True, choices=choices(BeginnerCommonClass.class_states))
     cost = models.IntegerField(default=5)
     volunteer_points = models.IntegerField(default=2)
+    week = models.IntegerField(default=None, null=True)

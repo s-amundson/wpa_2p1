@@ -27,49 +27,45 @@ class UpdatePrograms:
     def add_weekly(self):
         scheduled_classes = BeginnerSchedule.objects.all()
         for c in scheduled_classes:
-            next_class = self.next_class_day(c.day_of_week)
-            for i in range(c.future_classes):
-                class_day = next_class + timedelta(days=(7 * i))
-                class_day = timezone.datetime.combine(class_day, c.class_time)
-                class_day = timezone.make_aware(class_day, timezone.get_current_timezone())
-                classes = BeginnerClass.objects.filter(event__event_date=class_day)
-                if len(classes) == 0:
-                    bc = BeginnerClass(
-                        class_type=c.class_type,
-                        beginner_limit=c.beginner_limit,
-                        returnee_limit=c.returnee_limit,
-                        event= Event.objects.create(
-                            event_date=class_day,
-                            cost_standard=5,
-                            cost_member=5,
-                            state=c.state,
-                            type='class'
-                        )
-                    )
-                    bc.save()
+            self.create_class(c)
 
     def create_class(self, beginner_schedule):
-        class_date = timezone.datetime.combine(
-            self.today + timedelta(days=(7 * beginner_schedule.frequency * beginner_schedule.future_classes) + 1),
-            beginner_schedule.class_time)
-        bc, created = BeginnerClass.objects.get_or_create(
-            event__event_date=class_date,
-            class_type=beginner_schedule.class_type,
-            defaults={
-                'beginner_limit': beginner_schedule.beginner_limit,
-                'beginner_wait_limit': beginner_schedule.beginner_wait_limit,
-                'returnee_limit': beginner_schedule.returnee_limit,
-                'returnee_wait_limit': beginner_schedule.returnee_wait_limit,
-                'event': Event.objects.create(
-                        event_date=class_date,
-                        cost_standard=beginner_schedule.cost,
-                        cost_member=beginner_schedule.cost,
-                        state=beginner_schedule.state,
-                        type='class',
-                        volunteer_points=beginner_schedule.volunteer_points,
-                    )
-            }
-        )
+        def create():
+            bc, created = BeginnerClass.objects.get_or_create(
+                event__event_date=class_date,
+                class_type=beginner_schedule.class_type,
+                defaults={
+                    'beginner_limit': beginner_schedule.beginner_limit,
+                    'beginner_wait_limit': beginner_schedule.beginner_wait_limit,
+                    'returnee_limit': beginner_schedule.returnee_limit,
+                    'returnee_wait_limit': beginner_schedule.returnee_wait_limit,
+                    'event': Event.objects.create(
+                            event_date=class_date,
+                            cost_standard=beginner_schedule.cost,
+                            cost_member=beginner_schedule.cost,
+                            state=beginner_schedule.state,
+                            type='class',
+                            volunteer_points=beginner_schedule.volunteer_points,
+                        )
+                }
+            )
+
+        if beginner_schedule.day_of_week < self.today.weekday():
+            delta_days = timezone.timedelta(days=7 - self.today.weekday() + beginner_schedule.day_of_week)
+        else:
+            delta_days = timezone.timedelta(days=beginner_schedule.day_of_week - self.today.weekday())
+        class_date = timezone.datetime.combine(self.today + delta_days, beginner_schedule.class_time,
+                                               timezone.get_current_timezone())
+        class_dates = []
+        while beginner_schedule.future_classes > len(class_dates):
+            if beginner_schedule.week is not None:
+                if 1 + (beginner_schedule.week-1) * 7 <= class_date.day < 7 + (beginner_schedule.week-1) * 7:
+                    class_dates.append(class_date)
+                    create()
+            else:
+                class_dates.append(class_date)
+                create()
+            class_date += timezone.timedelta(days=7)
 
     def close_class(self, class_time):
         class_date = timezone.datetime.combine(self.today + timedelta(days=1), class_time)
@@ -158,6 +154,4 @@ class UpdatePrograms:
                         staff.append(r.student)
                 class_list.append({'class': c, 'instructors': instructors, 'staff': staff,
                                    'count': crh.enrolled_count(c)})
-            # logger.warning(class_list)
             self.email.status_email(class_list, staff_query)
-            # logging.debug('emailed')
