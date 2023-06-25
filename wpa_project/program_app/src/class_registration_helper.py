@@ -1,4 +1,5 @@
 import logging
+import uuid
 from django.db.models import Count
 
 from .email import EmailMessage
@@ -14,6 +15,16 @@ class ClassRegistrationHelper:
         for ikey in queryset.values('idempotency_key').annotate(ik_count=Count('idempotency_key')).order_by():
             logger.warning(ikey)
             icr = queryset.filter(idempotency_key=str(ikey['idempotency_key']))
+
+            # change the idempotency key of any registrations that are not
+            exclude_reg = Registration.objects.filter(idempotency_key=str(ikey['idempotency_key'])).exclude(
+                id__in=icr.values_list('id', flat=True)
+            )
+            new_ik = uuid.uuid4()
+            for reg in exclude_reg:
+                reg.idempotency_key = new_ik
+                reg.save()
+
             cost = icr[0].event.cost_standard
             note = f'Class on {str(icr[0].event.event_date)[:10]}, Students: '
             for cr in icr:
@@ -27,6 +38,8 @@ class ClassRegistrationHelper:
             logger.warning(payment)
             if payment is None:  # a payment error happened
                 icr.update(pay_status='start')
+            else:
+                EmailMessage().wait_list_off(queryset)
 
     def enrolled_count(self, beginner_class):
         event = Registration.objects.filter(event=beginner_class.event)
@@ -156,7 +169,7 @@ class ClassRegistrationHelper:
                 logger.warning(f'next group {len(next_group)}')
                 if beginner_class.beginner_limit - len(admitted) >= len(next_group):
                     self.charge_group(next_group)
-                    EmailMessage().wait_list_off(next_group)
+                    # EmailMessage().wait_list_off(next_group)
                     # self.update_waiting(beginner_class)
         elif beginner_class.class_type == 'returnee':
             if len(admitted) < beginner_class.returnee_limit:
@@ -165,4 +178,4 @@ class ClassRegistrationHelper:
                 logger.warning(f'next group {len(next_group)}')
                 if beginner_class.returnee_limit - len(admitted) >= len(next_group):
                     self.charge_group(next_group)
-                    EmailMessage().wait_list_off(next_group)
+                    # EmailMessage().wait_list_off(next_group)
