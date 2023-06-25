@@ -7,7 +7,7 @@ services:
     image: postgres:latest
     restart: unless-stopped #always
     env_file:
-      - project.env
+      - ../wpa_project/wpa_project.env
     ports:
       - 5432:5432
     volumes:

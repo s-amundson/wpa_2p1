@@ -3,6 +3,17 @@ docker_deploy/project.env
     POSTGRES_PASSWORD=password
     POSTGRES_DB=database
 
+    CELERY_BROKER=amqp://user:password@rabbitmq_dev:5672
+    FLOWER_BROKER=amqp://user:password@rabbitmq_dev:5672
+
+    DATABASE_NAME=database
+    DATABASE_USER=user
+    DATABASE_PASSWORD=password
+    DATABASE_HOST=db
+    DATABASE_PORT=5432
+
+    RABBITMQ_DEFAULT_USER=user
+    RABBITMQ_DEFAULT_PASS=password
 
 wpa_project/wpa_project/secrets.json
     {
