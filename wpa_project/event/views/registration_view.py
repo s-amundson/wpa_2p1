@@ -153,7 +153,7 @@ class RegistrationView(RegistrationSuperView):
                     # f.instance = None
                     new_reg = Registration.objects.create(
                         event=event,
-                        student=None,
+                        student=f.cleaned_data['student'],
                         pay_status='paid',
                         idempotency_key=ik,
                         user=self.request.user,
