@@ -139,7 +139,7 @@ class RegistrationView(RegistrationSuperView):
         self.form = form
         logger.warning(form.cleaned_data)
         if self.request.user.is_board:
-            self.student_family = form.cleaned_data['student_family']
+            self.student_family = get_object_or_404(StudentFamily, pk=form.cleaned_data['student_family'])
         processed_formset = self.process_formset()
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])
