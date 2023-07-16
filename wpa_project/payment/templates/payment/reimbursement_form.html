@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block script %}
+{% load static %}
+{% endblock %}
+
+{% block title %} Reimbursement {% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-4 text-center"><h2> Reimbursement Form </h2></div>
+    <p>A form to get reimbursed for purchases made.</p>
+    <p>If more lines are needed submit the form then edit it again. Once done alert the board for review.</p>
+</div>
+
+<form class="form m-2" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.student }}
+    <div class="d-flex flex-row">
+        <div class="m-2">{{ form.title.label }}</div>
+        <div class="m-2">{{ form.title }}{{ form.title.errors }}</div>
+        {% if form.status %}
+            <div class="m-2">{{ form.status.label }}</div>
+            <div class="m-2">{{ form.status }}{{ form.status.errors }}</div>
+        {% endif %}
+    </div>
+
+    {{ formset.management_form }}
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Attachment</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line_form in formset %}
+                <tr>
+                    {{ line_form.reimbursement }}
+                    {{ line_form.id }}
+                    <td>
+                        {{ line_form.description }} {{ line_form.description.label }}
+                        {{ line_form.description.errors }}
+                    </td>
+                    <td>
+                        {{ line_form.amount }} {{ line_form.amount.label }}
+                        {{ line_form.amount.errors }}
+                    </td>
+                    <td>
+                        {{ line_form.attachment }} {{ line_form.attachment.label }}
+                        {{ line_form.attachment.errors }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button class="btn btn-primary m-2" type="submit"> Submit</button>
+</form>
+
+{% endblock %}
+

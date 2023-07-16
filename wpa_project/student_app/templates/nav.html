@@ -84,6 +84,7 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="{% url 'programs:class_list'%}">Intro Class List</a>
                             <a class="dropdown-item" href="{% url 'registration:search'%}">Search Students</a>
+                            <a class="dropdown-item" href="{% url 'payment:reimbursement_list'%}">Reimbursement List</a>
 
                             {% if user.is_board %}
                                 <div class="dropdown-divider"></div>

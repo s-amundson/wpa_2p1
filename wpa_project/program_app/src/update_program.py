@@ -31,15 +31,14 @@ class UpdatePrograms:
 
     def create_class(self, beginner_schedule):
         def create():
-            bc, created = BeginnerClass.objects.get_or_create(
-                event__event_date=class_date,
-                class_type=beginner_schedule.class_type,
-                defaults={
-                    'beginner_limit': beginner_schedule.beginner_limit,
-                    'beginner_wait_limit': beginner_schedule.beginner_wait_limit,
-                    'returnee_limit': beginner_schedule.returnee_limit,
-                    'returnee_wait_limit': beginner_schedule.returnee_wait_limit,
-                    'event': Event.objects.create(
+            if not BeginnerClass.objects.filter(event__event_date=class_date, class_type=beginner_schedule.class_type):
+                bc = BeginnerClass.objects.create(
+                    class_type=beginner_schedule.class_type,
+                    beginner_limit= beginner_schedule.beginner_limit,
+                    beginner_wait_limit=beginner_schedule.beginner_wait_limit,
+                    returnee_limit=beginner_schedule.returnee_limit,
+                    returnee_wait_limit=beginner_schedule.returnee_wait_limit,
+                    event=Event.objects.create(
                             event_date=class_date,
                             cost_standard=beginner_schedule.cost,
                             cost_member=beginner_schedule.cost,
@@ -47,8 +46,7 @@ class UpdatePrograms:
                             type='class',
                             volunteer_points=beginner_schedule.volunteer_points,
                         )
-                }
-            )
+                )
 
         if beginner_schedule.day_of_week < self.today.weekday():
             delta_days = timezone.timedelta(days=7 - self.today.weekday() + beginner_schedule.day_of_week)

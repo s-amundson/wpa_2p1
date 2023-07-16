@@ -196,7 +196,18 @@ class TestsUpdatePrograms2(TestCase):
         sch = BeginnerSchedule.objects.get(pk=1)
         UpdatePrograms().create_class(sch)
         bc = BeginnerClass.objects.all()
+        events = Event.objects.all()
         self.assertEqual(bc.count(), 6)
+        self.assertEqual(events.count(), 6)
+        self.assertEqual(bc[0].class_type, 'beginner')
+        self.assertEqual(timezone.localtime(bc[0].event.event_date).time(), sch.class_time)
+
+        # do it again and don't create classes
+        UpdatePrograms().create_class(sch)
+        bc = BeginnerClass.objects.all()
+        events = Event.objects.all()
+        self.assertEqual(bc.count(), 6)
+        self.assertEqual(events.count(), 6)
         self.assertEqual(bc[0].class_type, 'beginner')
         self.assertEqual(timezone.localtime(bc[0].event.event_date).time(), sch.class_time)
 
