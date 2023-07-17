@@ -28,6 +28,7 @@ class Reimbursement(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=100)
+    note = models.TextField(null=True, default=None)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(default=timezone.now)
 

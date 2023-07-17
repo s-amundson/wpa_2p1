@@ -11,6 +11,7 @@
             <tr>
                 <th>Created Date</th>
                 <th>Title</th>
+                <th>Requestor</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -20,6 +21,7 @@
                 <tr>
                     <td>{{ object.created }}</td>
                     <td>{{ object.title }}</td>
+                    <td>{{ object.student.first_name }}</td>
                     <td>{{ object.status|capfirst }}</td>
                     <td>
                         {% if object.status in edit_status %}

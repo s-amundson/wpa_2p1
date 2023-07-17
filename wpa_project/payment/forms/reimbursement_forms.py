@@ -11,12 +11,18 @@ logger = logging.getLogger(__name__)
 class ReimbursementForm(forms.ModelForm):
     class Meta:
         model = Reimbursement
-        fields = ('student', 'title', 'status')
+        fields = ('student', 'title', 'status', 'note')
 
     def __init__(self, *args, **kwargs):
+        if 'board_student' in kwargs:
+            self.board_student = kwargs.pop('board_student')
+        else:
+            self.board_student = None
         super().__init__(*args, **kwargs)
         logging.debug(self.initial)
         self.fields['student'].widget = forms.HiddenInput()
+        self.fields['note'].widget.attrs.update({'cols': 80, 'rows': 3})
+        self.fields['note'].required = False
         if not (self.instance and self.instance.status == 'approved'):
             self.fields.pop('status')
         else:

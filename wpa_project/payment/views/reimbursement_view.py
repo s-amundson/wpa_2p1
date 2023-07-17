@@ -2,6 +2,7 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView
 from django.forms import modelformset_factory, inlineformset_factory
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from ..forms import ReimbursementForm, ReimbursementItemForm, ReimbursementVoteForm
 from ..models import Reimbursement, ReimbursementItem, ReimbursementVote
@@ -30,6 +31,16 @@ class ReimbursementFormView(StudentFamilyMixin, FormView):
             logger.warning(self.instance.id)
             formset = self.get_formset()
             formset.save()
+            if self.request.user.is_board and self.instance.student == self.request.user.student_set.last() \
+                    and self.instance.status in ['pending', 'denied']:
+                v, created = ReimbursementVote.objects.get_or_create(
+                    reimbursement=self.instance,
+                    student=self.instance.student,
+                    defaults={'approve': True}
+                )
+                if not created:
+                    v.timestamp = timezone.now()
+                    v.save()
             return super().form_valid(form)
         else:
             logger.warning(formset.errors)
@@ -45,8 +56,10 @@ class ReimbursementFormView(StudentFamilyMixin, FormView):
         kwargs = super().get_form_kwargs()
         if 'pk' in self.kwargs:
             self.instance = get_object_or_404(Reimbursement, pk=self.kwargs.get('pk'))
+            kwargs['board_student'] = self.instance.student == self.request.user.student_set.last() and self.request.user.is_board
         else:
             kwargs['initial']['student'] = self.request.user.student_set.last()
+            kwargs['board_student'] = self.request.user.is_board
         kwargs['instance'] = self.instance
         return kwargs
 
@@ -123,7 +136,7 @@ class ReimbursementVoteView(BoardMixin, FormView):
         if super().test_func():
             self.reimbursement = get_object_or_404(Reimbursement, pk=self.kwargs.get('pk'))
             self.student = self.request.user.student_set.last()
-            if self.reimbursement.student == self.student:
-                return False
+            # if self.reimbursement.student == self.student:
+            #     return False
             return True
         return False

@@ -91,6 +91,7 @@ class TestsReimbursement(TestCase):
         post_dict = {
             'student': 4,
             'title': 'Test Reimbursement',
+            'note': 'test note',
             'reimbursementitem_set-TOTAL_FORMS': 5,
             'reimbursementitem_set-INITIAL_FORMS': 0,
             'reimbursementitem_set-MIN_NUM_FORMS': 0,
@@ -104,6 +105,39 @@ class TestsReimbursement(TestCase):
         reimbursements = Reimbursement.objects.all()
         self.assertEqual(reimbursements.count(), 1)
         self.assertEqual(reimbursements[0].reimbursementitem_set.count(), 1)
+        self.assertEqual(reimbursements[0].note, 'test note')
+        votes = ReimbursementVote.objects.all()
+        self.assertEqual(votes.count(), 0)
+
+        vote_count = ReimbursementVote.objects.get_vote_count(reimbursements[0])
+        self.assertEqual(vote_count, {'yes': 0, 'no': 0})
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_post_reimbursement_form_board(self):
+        attach_file = SimpleUploadedFile("file.mp4", b"file_content", content_type="text/plain")
+        post_dict = {
+            'student': 1,
+            'title': 'Test Reimbursement',
+            'note': 'test note',
+            'reimbursementitem_set-TOTAL_FORMS': 5,
+            'reimbursementitem_set-INITIAL_FORMS': 0,
+            'reimbursementitem_set-MIN_NUM_FORMS': 0,
+            'reimbursementitem_set-MAX_NUM_FORMS': 1000,
+            'reimbursementitem_set-0-description': 'item 1',
+            'reimbursementitem_set-0-amount': 12.3,
+            'reimbursementitem_set-0-attachment': attach_file
+        }
+        response = self.client.post(reverse('payment:reimbursement_form'), post_dict, secure=True)
+        self.assertRedirects(response, reverse('payment:reimbursement_list'))
+        reimbursements = Reimbursement.objects.all()
+        self.assertEqual(reimbursements.count(), 1)
+        self.assertEqual(reimbursements[0].reimbursementitem_set.count(), 1)
+        self.assertEqual(reimbursements[0].note, 'test note')
+        votes = ReimbursementVote.objects.all()
+        self.assertEqual(votes.count(), 1)
+
+        vote_count = ReimbursementVote.objects.get_vote_count(reimbursements[0])
+        self.assertEqual(vote_count, {'yes': 1, 'no': 0})
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_ammend_reimbursement_form(self):
@@ -178,10 +212,11 @@ class TestsReimbursement(TestCase):
             'approve': False
         }
         response = self.client.post(reverse('payment:reimbursement_vote', kwargs={'pk': r.id}), post_dict, secure=True)
-        self.assertEqual(response.status_code, 403)
+        self.assertRedirects(response, reverse('payment:reimbursement_list'))
+        # self.assertEqual(response.status_code, 403)
         votes = ReimbursementVote.objects.all()
         r2 = Reimbursement.objects.get(pk=r.id)
-        self.assertEqual(votes.count(), 0)
+        self.assertEqual(votes.count(), 1)
         self.assertEqual(r2.status, 'pending')
         self.assertEqual(r.modified, r2.modified)
 
@@ -200,6 +235,7 @@ class TestsReimbursement(TestCase):
             'approve': False
         }
         response = self.client.post(reverse('payment:reimbursement_vote', kwargs={'pk': r.id}), post_dict, secure=True)
+        self.assertRedirects(response, reverse('payment:reimbursement_list'))
 
         votes = ReimbursementVote.objects.all()
         r2 = Reimbursement.objects.get(pk=r.id)
