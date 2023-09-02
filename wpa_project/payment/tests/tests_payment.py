@@ -1,5 +1,5 @@
 import logging
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core import mail
@@ -35,7 +35,11 @@ class TestsPayment(TestCase):
         response = self.client.get(self.url, secure=True)
         self.assertTemplateUsed(response, 'payment/make_payment.html')
 
+    # @tag('temp')
     def test_payment_success(self):
+        session = self.client.session
+        session['instructions'] = "be 30 minutes early"
+        session.save()
         # process a good payment
         response = self.client.post(self.url, self.pay_dict, secure=True)
         pl = PaymentLog.objects.all()
@@ -45,6 +49,7 @@ class TestsPayment(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Payment Confirmation')
         self.assertTrue(mail.outbox[0].body.find('Class on None student: test_user') >= 0)
+        self.assertTrue(mail.outbox[0].body.find('be 30 minutes early') >= 0)
 
     def test_payment_success_donation(self):
         # process a good payment

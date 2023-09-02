@@ -33,11 +33,11 @@ class CreatePaymentView(FormView):
 
     def form_valid(self, form):
         idempotency_key = self.request.session.get('idempotency_key', str(uuid.uuid4()))
-        if form.process_payment(idempotency_key):
+        if form.process_payment(idempotency_key, self.request.session.get('instructions', None)):
             if self.request.user.is_authenticated:
                 self.success_url = reverse_lazy('payment:view_payment', args=[form.log.id])
 
-                for k in ['description', 'line_items', 'idempotency_key', 'payment_category']:
+                for k in ['description', 'line_items', 'idempotency_key', 'payment_category', 'instruction']:
                     if k in self.request.session:
                         self.request.session.pop(k)
             return super().form_valid(form)

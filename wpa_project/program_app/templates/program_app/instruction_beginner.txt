@@ -1,0 +1,1 @@
+Please plan to be at the range {% if beginner_class.class_type == 'beginner' %}30{% else %}15{% endif %} minutes prior to the class to allow us to sign you in. {% if beginner_class.class_type == 'beginner' %} Students that arrive past {{ beginner_class.event.event_date|time }} will not be allowed to participate.{% endif %}

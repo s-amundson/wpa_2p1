@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic.base import View
@@ -57,9 +58,12 @@ class ClassRegistrationView(RegistrationSuperView):
         if self.events.count() > 1 and not self.request.user.is_staff:
             return self.has_error(form, 'Must only select one class at a time.')
 
+        event_list = []
+        instructions = ''
         for event in self.events:
             # check if student signing up for incorrect class
             beginner_class = event.beginnerclass_set.last()
+            event_list.append(event.id)
             if beginner_class.class_type == 'returnee' and beginners.count():
                 return self.has_error(form, 'First time students cannot enroll in this class')
             elif beginner_class.class_type == 'beginner' and returnee.count():
@@ -90,6 +94,10 @@ class ClassRegistrationView(RegistrationSuperView):
                 return self.has_error(form, 'This class is closed')
             else:
                 self.wait = space == 'wait'
+            # add instructions for the confirmation email
+            instructions += get_template('program_app/instruction_beginner.txt').render(
+                {'event': event, 'beginner_class': beginner_class}
+            )
 
         reg_list = []
         with transaction.atomic():
@@ -110,6 +118,9 @@ class ClassRegistrationView(RegistrationSuperView):
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
+            self.request.session['instructions'] = instructions
+            logger.warning(instructions)
+
             for event in self.events:
                 for f in self.formset:
                     if f.cleaned_data['register']:
@@ -235,6 +246,8 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             request.session['line_items'] = []
             request.session['payment_category'] = 'intro'
             request.session['payment_description'] = f'Class on {str(cr.event.event_date)[:10]}'
+            request.session['instructions'] = get_template('program_app/instruction_beginner.txt').render(
+                {'event': cr.event, 'beginner_class': cr.event.beginnerclass_set.last()})
             beginner = 0
             returnee = 0
 

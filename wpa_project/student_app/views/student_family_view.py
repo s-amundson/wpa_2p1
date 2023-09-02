@@ -69,7 +69,10 @@ class StudentFamilyDeleteView(StudentFamilyMixin, FormView):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = get_object_or_404(StudentFamily, pk=self.kwargs.get('pk'))
         kwargs['delete_family'] = True
-        if self.request.user.is_superuser or self.student_family == kwargs['instance']:
+        if self.request.user.is_superuser:
+            self.student_family = kwargs['instance']
+            return kwargs
+        if self.student_family == kwargs['instance']:
             return kwargs
         return self.handle_no_permission()
 
@@ -79,6 +82,7 @@ class StudentFamilyDeleteView(StudentFamilyMixin, FormView):
 
     def form_valid(self, form):
         logger.warning(form.cleaned_data)
+        logger.warning(self.student_family)
         for student in self.student_family.student_set.filter(user__isnull=False):
             student.user.delete()
         self.student_family.student_set.all().delete()

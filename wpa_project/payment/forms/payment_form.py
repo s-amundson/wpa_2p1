@@ -67,7 +67,7 @@ class PaymentForm(forms.ModelForm):
         card_choices.append((0, "New Card"))
         return card_choices
 
-    def process_payment(self, idempotency_key):
+    def process_payment(self, idempotency_key, instructions=None):
         note = self.description
         if self.cleaned_data['donation'] > 0:
             note = note + f", Donation of {self.cleaned_data['donation']}"
@@ -104,8 +104,10 @@ class PaymentForm(forms.ModelForm):
             )
 
         if self.log is not None:
-            pay_dict = {'line_items': self.line_items, 'total': self.cleaned_data['amount'] + volunteer_points,
-                        'receipt': self.log.receipt}
+            pay_dict = {'line_items': self.line_items,
+                        'total': self.cleaned_data['amount'] + volunteer_points,
+                        'receipt': self.log.receipt,
+                        'instructions': instructions}
             if self.user is not None and not duplicate:
                 EmailMessage().payment_email_user(self.user, pay_dict)
             if volunteer_points:

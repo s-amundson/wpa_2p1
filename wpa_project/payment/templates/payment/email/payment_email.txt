@@ -11,6 +11,7 @@ Total   {{ total }}
 
 {{ receipt }}
 
+{% if instructions %}{{ instructions }}{% endif %}
 
 COVID-19 Policy
 
