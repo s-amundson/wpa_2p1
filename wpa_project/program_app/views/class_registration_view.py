@@ -27,6 +27,13 @@ StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamil
 class ClassRegistrationView(RegistrationSuperView):
     template_name = 'program_app/class_registration.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['awrl'] = get_template('program_app/awrl.txt').render()
+        context['covid_policy'] = get_template('program_app/covid_policy.txt').render()
+        context['cancel_policy'] = get_template('program_app/cancellation_policy.txt').render()
+        return context
+
     def get_form_kwargs(self):
         self.has_card = bool(Card.objects.filter(customer__user=self.request.user, enabled=True))
         kwargs = super().get_form_kwargs()
