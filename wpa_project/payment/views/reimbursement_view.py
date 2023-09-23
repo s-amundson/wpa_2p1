@@ -18,7 +18,7 @@ class ReimbursementFormView(StudentFamilyMixin, FormView):
     success_url = reverse_lazy('payment:reimbursement_list')
     instance = None
 
-    def form_invalid(self, form):
+    def form_invalid(self, form):  # pragma: no cover
         logger.warning(form.errors)
         return super().form_invalid(form)
 
@@ -42,7 +42,7 @@ class ReimbursementFormView(StudentFamilyMixin, FormView):
                     v.timestamp = timezone.now()
                     v.save()
             return super().form_valid(form)
-        else:
+        else:  # pragma: no cover
             logger.warning(formset.errors)
             logger.warning(formset.non_form_errors())
             return super().form_invalid(form)
@@ -60,6 +60,7 @@ class ReimbursementFormView(StudentFamilyMixin, FormView):
         else:
             kwargs['initial']['student'] = self.request.user.student_set.last()
             kwargs['board_student'] = self.request.user.is_board
+        logger.warning(kwargs['board_student'])
         kwargs['instance'] = self.instance
         return kwargs
 
@@ -115,7 +116,7 @@ class ReimbursementVoteView(BoardMixin, FormView):
             logger.warning(votes.last())
         return kwargs
 
-    def form_invalid(self, form):
+    def form_invalid(self, form):  # pragma: no cover
         logger.warning(form.errors)
         return super().form_invalid(form)
 
@@ -136,7 +137,5 @@ class ReimbursementVoteView(BoardMixin, FormView):
         if super().test_func():
             self.reimbursement = get_object_or_404(Reimbursement, pk=self.kwargs.get('pk'))
             self.student = self.request.user.student_set.last()
-            # if self.reimbursement.student == self.student:
-            #     return False
             return True
-        return False
+        return False  # pragma: no cover

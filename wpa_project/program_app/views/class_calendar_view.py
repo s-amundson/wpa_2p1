@@ -1,8 +1,10 @@
 import logging
-
+import time
 from django.views.generic.base import TemplateView
 from django.utils import timezone
 from django.utils.safestring import mark_safe
+from ..tasks import temp_task
+from celery.result import AsyncResult
 
 from facebook.views import PostList
 from ..models import BeginnerClass
@@ -67,6 +69,7 @@ class CalendarView(TemplateView):
 
         # Call the formatmonth method, which returns our calendar as a table
         context['html_cal'] = mark_safe(cal.formatmonth(withyear=True))
+
         return context
 
 

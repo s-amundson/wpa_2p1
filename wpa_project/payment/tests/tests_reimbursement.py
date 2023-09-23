@@ -1,5 +1,5 @@
 import logging
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 import tempfile
@@ -66,10 +66,17 @@ class TestsReimbursement(TestCase):
         response = self.client.get(reverse('payment:reimbursement_list'), secure=True)
         self.assertTemplateUsed(response, 'payment/reimbursement_list.html')
 
+    # @tag('temp')
     def test_get_reimbursement_form(self):
+        self.client.force_login(User.objects.get(pk=2))
         response = self.client.get(reverse('payment:reimbursement_form'), secure=True)
         self.assertTemplateUsed(response, 'payment/reimbursement_form.html')
 
+    def test_get_reimbursement_form_board(self):
+        response = self.client.get(reverse('payment:reimbursement_form'), secure=True)
+        self.assertTemplateUsed(response, 'payment/reimbursement_form.html')
+
+    # @tag('temp')
     def test_get_reimbursement_form_existing(self):
         reimbursement = Reimbursement.objects.create(
             status='pending',
@@ -83,8 +90,28 @@ class TestsReimbursement(TestCase):
             attachment=tempfile.NamedTemporaryFile().name
         )
         response = self.client.get(reverse('payment:reimbursement_form', kwargs={'pk': reimbursement.id}), secure=True)
+        # logger.warning(response.context['form']['status'])
+        self.assertNotContains(response, 'id_status')
         self.assertTemplateUsed(response, 'payment/reimbursement_form.html')
 
+    # @tag('temp')
+    def test_get_reimbursement_form_existing_approved(self):
+        reimbursement = Reimbursement.objects.create(
+            status='approved',
+            student=Student.objects.get(pk=2),
+            title='test title',
+        )
+        item = ReimbursementItem.objects.create(
+            reimbursement=reimbursement,
+            amount=123.00,
+            description='test stuff',
+            attachment=tempfile.NamedTemporaryFile().name
+        )
+        response = self.client.get(reverse('payment:reimbursement_form', kwargs={'pk': reimbursement.id}), secure=True)
+        self.assertContains(response, 'id_status')
+        self.assertTemplateUsed(response, 'payment/reimbursement_form.html')
+
+    # @tag('temp')
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_reimbursement_form(self):
         attach_file = SimpleUploadedFile("file.mp4", b"file_content", content_type="text/plain")
@@ -151,6 +178,22 @@ class TestsReimbursement(TestCase):
         self.assertEqual(reimbursements.count(), 1)
         self.assertEqual(reimbursements[0].reimbursementitem_set.count(), 2)
         self.assertNotEquals(r.modified, reimbursements[0].modified)
+
+    # # @tag('temp')
+    # @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    # def test_post_ammend_reimbursement_form_approved(self):
+    #     r, ri = self.create_reimbursement()
+    #     r.status = 'approved'
+    #     r.save()
+    #     self.post_dict['status'] = 'paid'
+    #     response = self.client.post(reverse('payment:reimbursement_form', kwargs={'pk': r.id}),
+    #                                 self.post_dict, secure=True)
+    #     self.assertRedirects(response, reverse('payment:reimbursement_list'))
+    #
+    #     reimbursements = Reimbursement.objects.all()
+    #     self.assertEqual(reimbursements.count(), 1)
+    #     self.assertEqual(reimbursements[0].reimbursementitem_set.count(), 2)
+    #     self.assertNotEquals(r.modified, reimbursements[0].modified)
 
     def test_get_reimbursement_vote(self):
         r, ri = self.create_reimbursement()

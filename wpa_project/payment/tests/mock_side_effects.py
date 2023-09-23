@@ -2,9 +2,16 @@ from django.utils import timezone
 from ..models import Card, Customer, PaymentLog, RefundLog
 from student_app.models import User
 
+import logging
+logger = logging.getLogger(__name__)
 
 class MockSideEffects:
     """ Used for testing in other apps to mock payments. Faster processing"""
+    class PaymentHelper():
+        def __init__(self, user):
+            self.payment = None
+            self.user = user
+
     def add_card(self, user):
         customer = Customer.objects.create(user=user,
                                            customer_id="9Z9Q0D09F0WMV0FHFA2QMZH8SC",
@@ -29,6 +36,10 @@ class MockSideEffects:
             prepaid_type="NOT_PREPAID",
             version=0)
         return card
+
+    def payment_error_side_effect(self, amount, category, donation, idempotency_key, note, source_id, autocomplete=True,
+                            saved_card_id=0):
+        return None, False
 
     def payment_side_effect(self, amount, category, donation, idempotency_key, note, source_id, autocomplete=True,
                             saved_card_id=0):
@@ -56,6 +67,7 @@ class MockSideEffects:
             total_money=response['approved_money']['amount'],
             user=User.objects.get(pk=3)
         )
+        logger.warning(payment)
         return payment, False
 
     def refund_side_effect(self, log, amount):

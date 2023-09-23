@@ -12,9 +12,7 @@
     <td class="{% if cr.student.dob > form.adult_dob %} text-warning {% endif %}">{{ cr.student.dob }}</td>
     <td>
         {% if form.is_closed %}
-            {% if cr.pay_status == 'waiting' %}
-                <a href="{% url 'programs:admit_wait' form.event.id cr.student.student_family.id %}">Admit</a>
-            {% else %}
+            {% if cr.pay_status in form.admit_statuses %}
                 {% if cr.student.signature or cr.student.user.is_staff %}
                     <input type="checkbox" class="m-2 attend-check" id="check_{{ cr.student.id }}"
                        attend_url="{% url 'events:event_attend' cr.id %}"
@@ -31,6 +29,8 @@
                         Signature Required
                     {% endif %}
                 </a>
+            {% else %}
+                <a href="{% url 'programs:admit_wait' form.event.id cr.student.student_family.id %}">Admit</a>
             {% endif %}
         {% endif %}
     </td>

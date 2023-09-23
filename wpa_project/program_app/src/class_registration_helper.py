@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class ClassRegistrationHelper:
     def charge_group(self, queryset):
+        response = {}
         for ikey in queryset.values('idempotency_key').annotate(ik_count=Count('idempotency_key')).order_by():
             logger.warning(ikey)
             icr = queryset.filter(idempotency_key=str(ikey['idempotency_key']))
@@ -27,26 +28,32 @@ class ClassRegistrationHelper:
 
             cost = icr[0].event.cost_standard
             note = f'Class on {str(icr[0].event.event_date)[:10]}, Students: '
+            user = icr.last().user
             for cr in icr:
                 note += f'{cr.student.first_name}, '
-            payment = None
-            if cr.user.customer_set.last():
-                card = cr.user.customer_set.last().card_set.filter(enabled=True, default=True).last()
-                payment = PaymentHelper(cr.user).create_payment(cost * ikey['ik_count'], 'intro', 0,
+            payment = None, False
+            if user.customer_set.last():
+                card = user.customer_set.last().card_set.filter(enabled=True, default=True).last()
+                payment = PaymentHelper(user).create_payment(cost * ikey['ik_count'], 'intro', 0,
                                                                 str(ikey['idempotency_key']), note, '',
                                                                 saved_card_id=card.id)
             logger.warning(payment)
-            if payment is None:  # a payment error happened
-                icr.update(pay_status='start')
+            if payment[0] is None:  # a payment error happened
+                logger.warning('error')
+                icr.update(pay_status='wait error')
+                response[str(ikey['idempotency_key'])] = 'ERROR'
+                # TODO add email for error
             else:
                 EmailMessage().wait_list_off(queryset)
+                response[str(ikey['idempotency_key'])] = 'SUCCESS'
+        return response
 
     def enrolled_count(self, beginner_class):
         event = Registration.objects.filter(event=beginner_class.event)
         return {'beginner': event.filter(event=beginner_class.event).intro_beginner_count(beginner_class.event.event_date.date()),
                 'staff': event.filter(event=beginner_class.event).intro_staff_count(),
                 'returnee': event.filter(event=beginner_class.event).intro_returnee_count(beginner_class.event.event_date.date()),
-                'waiting': event.filter(pay_status='waiting').count()}
+                'waiting': event.filter(pay_status__in=['waiting', 'wait error']).count()}
 
     def has_space(self, user, beginner_class, beginner, instructor, returnee):
         enrolled_count = self.enrolled_count(beginner_class)

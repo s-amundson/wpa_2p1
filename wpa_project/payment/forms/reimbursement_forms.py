@@ -16,8 +16,8 @@ class ReimbursementForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         if 'board_student' in kwargs:
             self.board_student = kwargs.pop('board_student')
-        else:
-            self.board_student = None
+        else:  # pragma: no cover
+            self.board_student = False
         super().__init__(*args, **kwargs)
         logging.debug(self.initial)
         self.fields['student'].widget = forms.HiddenInput()
@@ -27,7 +27,6 @@ class ReimbursementForm(forms.ModelForm):
             self.fields.pop('status')
         else:
             self.fields['status'].choices = [('approved', 'approved'), ('paid', 'paid')]
-            # self.fields['title'].widget.attrs.update({'disabled': 'disabled'})
             self.fields['title'].disabled = True
 
     def save(self, commit=True):

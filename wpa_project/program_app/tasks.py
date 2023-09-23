@@ -10,15 +10,16 @@ from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('program_app')
 from celery.utils.log import get_task_logger
-celery_logger = get_task_logger(__name__)
+celery_logger = get_task_logger('program_app')
 crh = ClassRegistrationHelper()
+logger.warning(__name__)
 
 
 @shared_task
-def charge_group(reg_list):  # pragma: no cover
-    crh.charge_group(Registration.objects.filter(id__in=reg_list))
+def charge_group(reg_list):
+    return crh.charge_group(Registration.objects.filter(id__in=reg_list))
 
 
 @shared_task

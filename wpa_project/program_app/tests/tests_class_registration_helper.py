@@ -3,7 +3,7 @@ import uuid
 from unittest.mock import patch
 
 from django.core import mail
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 
 from ..src import ClassRegistrationHelper
 from ..models import BeginnerClass
@@ -232,6 +232,7 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
         self.assertEqual(len(mail.outbox), 2)
 
+    # @tag('temp')
     @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
     def test_update_status_beginner_waiting_error(self, mock_payment):
         mock_payment.side_effect = self.payment_side_effect
@@ -272,7 +273,7 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         registrations = Registration.objects.filter(event=bc.event)
         self.assertEqual(len(registrations), 3)
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
-        self.assertEqual(len(registrations.filter(pay_status='start')), 1)
+        self.assertEqual(len(registrations.filter(pay_status='wait error')), 1)
 
     @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
     def test_update_status_return_waiting(self, mock_payment):
@@ -386,9 +387,11 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         bc.save()
         self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 3), 'wait')
 
+    # @tag('temp')
     @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
     def test_charge_group(self, mock_payment):
         mock_payment.side_effect = self.payment_side_effect
+        # MockHelper.return_value = self.PaymentHelper
         # set up beginner class to have wait list
         bc = BeginnerClass.objects.get(pk=1)
         bc.class_type = 'beginner'
@@ -410,16 +413,57 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
                               student=s,
                               pay_status='waiting',
                               idempotency_key=ik,
-                              user=self.test_user)
+                              user=user)
             cr.save()
             reg_list.append(cr.id)
 
-        self.crh.charge_group(Registration.objects.filter(id__in=reg_list))
+        response = self.crh.charge_group(Registration.objects.filter(id__in=reg_list))
         reg = Registration.objects.all()
         self.assertEqual(reg.count(), 3)
         self.assertEqual(reg.filter(idempotency_key=ik).count(), 3)
-        self.assertEqual(reg.filter(idempotency_key=ik).last().pay_status, 'start')
+        self.assertEqual(reg.filter(idempotency_key=ik).last().pay_status, 'paid')
+        mock_payment.assert_called()
+        self.assertEqual(response[str(ik)], 'SUCCESS')
 
+    # @tag('temp')
+    @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
+    def test_charge_group_error(self, mock_payment):
+        mock_payment.side_effect = self.payment_error_side_effect
+        # set up beginner class to have wait list
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_type = 'beginner'
+        bc.beginner_limit = 0
+        bc.beginner_wait_limit = 10
+        bc.returnee_limit = 0
+        bc.save()
+
+        # add 2 students paid and one waiting
+        user = User.objects.get(pk=2)
+        self.add_card(user)
+        ik = str(uuid.uuid4())
+        reg_list = []
+        for i in range(3):
+            s = Student.objects.get(pk=i + 3)
+            # s.safety_class = "2021-05-31"
+            s.save()
+            cr = Registration(event=bc.event,
+                              student=s,
+                              pay_status='waiting',
+                              idempotency_key=ik,
+                              user=user)
+            cr.save()
+            reg_list.append(cr.id)
+
+        response = self.crh.charge_group(Registration.objects.filter(id__in=reg_list))
+        self.assertEqual(response[str(ik)], 'ERROR')
+        reg = Registration.objects.all()
+        self.assertEqual(reg.count(), 3)
+        self.assertEqual(reg.filter(idempotency_key=ik).count(), 3)
+        self.assertEqual(reg.filter(idempotency_key=ik).last().pay_status, 'wait error')
+        logger.warning(reg.filter(idempotency_key=ik))
+        logger.warning(reg.filter(idempotency_key=ik, pay_status='waiting'))
+
+    # @tag('temp')
     @patch('payment.src.PaymentHelper.create_payment')
     def test_charge_partial_group(self, mock_payment):
         mock_payment.side_effect = self.payment_side_effect
@@ -454,4 +498,4 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         self.assertEqual(reg.filter(idempotency_key=ik).count(), 2)
 
         # this is start because mock is not getting called correctly
-        self.assertEqual(reg.filter(idempotency_key=ik).last().pay_status, 'start')
+        self.assertEqual(reg.filter(idempotency_key=ik).last().pay_status, 'wait error')

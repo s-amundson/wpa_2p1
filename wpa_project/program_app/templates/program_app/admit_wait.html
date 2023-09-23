@@ -1,28 +1,35 @@
 {% extends 'base.html' %}
 {% block main %}
-<form class="form" id="admit_form" method="post" autocomplete="off"
-    {% if form.family %}
-        action="{% url 'programs:admit_wait' form.event.id form.family.id %}">
-    {% else %}
-        action="{% url 'programs:admit_wait' form.event.id %}">
-    {% endif %}
+<form class="form" id="admit_form" method="post" autocomplete="off">
     {% csrf_token %}
-    <p mt-2 mb-2>
+    {{ formset.management_form }}
+    {{ form.event }}
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Student(s)</th>
+                <th>Status</th>
+                <th>Admit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student_form in formset %}
+                <tr>
+                    <td>{{ student_form.student }} {{ student_form.id }}</td>
+                    <td>{{ student_form.pay_status }} </td>
+                    <td> {{ student_form.admit }} </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="mt-2 mb-2">
         Admitting student(s) will cause their card to be charged the admission fee.
     </p>
 
-    {% for field in form.get_boxes %}
-        <p>
-            {{ field }} {{field.label}} {{ field.errors }}
-        </p>
-    {% empty %}
-        <p>
-            No Students
-        </p>
-    {% endfor %}
 
-    <div class="flex-row m-2">
+    <div class="d-flex flex-row justify-content-evenly m-2">
         <button class="btn btn-primary" type="submit">Admit Students</button>
+        <a href="{% url 'events:event_attend_list' event_id %}">Return to List</a>
     </div>
 
 </form>

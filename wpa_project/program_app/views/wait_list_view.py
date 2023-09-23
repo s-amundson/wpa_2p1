@@ -15,8 +15,11 @@ class WaitListView(UserPassesTestMixin, ListView):
     success_url = reverse_lazy('registration:index')
 
     def get_queryset(self):
-        registrations = self.beginner_class.event.registration_set.filter(pay_status__in=['admin', 'waiting', 'paid'])
+        registrations = self.beginner_class.event.registration_set.filter(
+            pay_status__in=['admin', 'waiting', 'wait error', 'paid'])
+        logger.warning(registrations)
         queryset = registrations.filter(student__in=self.request.user.student_set.last().student_family.student_set.all())
+
         object_list = []
         for cr in queryset.order_by('modified'):
             if self.beginner_class.class_type == 'beginner':
@@ -38,7 +41,7 @@ class WaitListView(UserPassesTestMixin, ListView):
     def test_func(self):
         if self.request.user.is_authenticated:
             bid = self.kwargs.get('event', None)
-            if bid is None:
+            if bid is None:  # pragma: no cover
                 return False
             self.beginner_class = get_object_or_404(BeginnerClass, event__id=bid)
             return True

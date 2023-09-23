@@ -58,6 +58,7 @@ class PaymentHelper(SquareHelper):
             return self.payment, False
 
         elif result.is_error():
+            logger.warning(result.errors)
             for error in result.errors:
                 self.log_error(category, error.get('code', 'unknown_error'), idempotency_key, 'payments.create_payment')
             self.handle_error(result, 'Payment Error')
