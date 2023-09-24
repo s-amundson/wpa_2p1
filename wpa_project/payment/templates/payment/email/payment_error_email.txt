@@ -1,0 +1,8 @@
+Hi {{ name }},
+
+Unfortunately there was an error with your payment and the transaction could not be completed.
+
+{% if message %}{{ message }}{% endif %}
+
+http://woodleyparkarchers.org/">WoodleyParkArchers.org
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

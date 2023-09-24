@@ -24,6 +24,15 @@ class EmailMessage(StudentEmailMessage):
         self.attach_alternative(get_template('payment/email/payment_email.html').render(pay_dict), 'text/html')
         self.send()
 
+    def payment_error_email(self, user, message=None):
+        self.get_email_address(user)
+        d = {'message': message, 'name': user.student_set.last().first_name}
+        self.subject = 'Woodley Park Archers Error with Payment'
+        self.body = get_template('payment/email/payment_error_email.txt').render(d)
+        self.attach_alternative(get_template('payment/email/payment_error_email.html').render(d),
+                                'text/html')
+        self.send()
+
     def refund_email(self, user, donation=False):
         self.get_email_address(user)
         d = {'name': user.student_set.last().first_name, 'donation': donation}

@@ -1,8 +1,9 @@
 import logging
 import uuid
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.apps import apps
+from django.core import mail
 
 from ..models import Card, Customer, PaymentLog
 from ..src import CardHelper, CustomerHelper, PaymentHelper
@@ -24,6 +25,7 @@ class TestsSquareHelper(TestCase):
         self.client.force_login(self.test_user)
         self.customer = Customer.objects.get(pk=1)
 
+    # @tag('temp')
     def test_payment_create_good(self):
         payment = PaymentHelper(user=self.test_user)
         payment_log, created = payment.create_payment(
@@ -38,6 +40,7 @@ class TestsSquareHelper(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
 
+    # @tag('temp')
     def test_payment_create_bad(self):
         payment = PaymentHelper(user=self.test_user)
         payment_log, created = payment.create_payment(
@@ -52,6 +55,7 @@ class TestsSquareHelper(TestCase):
         self.assertIn('Payment Error: CVV', payment.errors)
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 0)
+        self.assertTrue(mail.outbox[0].body.find('Payment Error: CVV') >= 0)
 
     def test_card_good(self):
         payment = PaymentHelper(user=self.test_user)

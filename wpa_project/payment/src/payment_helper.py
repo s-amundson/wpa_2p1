@@ -2,7 +2,8 @@ import logging
 from django.conf import settings
 
 from .square_helper import SquareHelper
-from ..models import Card, PaymentLog, PaymentErrorLog
+from ..models import Card, PaymentLog
+from .email import EmailMessage
 
 logger = logging.getLogger(__name__)
 
@@ -14,19 +15,18 @@ class PaymentHelper(SquareHelper):
         self.payment = None
         self.user = user
 
-    def create_payment(self, amount, category, donation, idempotency_key, note, source_id,
-                       autocomplete=True, saved_card_id=0):
+    def create_payment(self, amount, category, donation, idempotency_key, note, source_id, **kwargs):
         # logging.debug(note)
         logger.warning(idempotency_key)
         body = {
                 "idempotency_key": str(idempotency_key),
                 "amount_money": {"amount": amount * 100, "currency": "USD"},
-                "autocomplete": autocomplete,
+                "autocomplete": kwargs.get('autocomplete', True),
                 "location_id": settings.SQUARE_CONFIG['location_id'],
                 "note": note[:250]
             }
-        if saved_card_id != 0:
-            card = Card.objects.get(pk=saved_card_id)
+        if kwargs.get('saved_card_id', 0) != 0:
+            card = Card.objects.get(pk=kwargs.get('saved_card_id'))
             body['source_id'] = card.card_id
             body['customer_id'] = card.customer.customer_id
         else:
@@ -62,4 +62,7 @@ class PaymentHelper(SquareHelper):
             for error in result.errors:
                 self.log_error(category, error.get('code', 'unknown_error'), idempotency_key, 'payments.create_payment')
             self.handle_error(result, 'Payment Error')
+            if not kwargs.get('live', False):
+                # email the user since the user didn't directly initiate this payment
+                EmailMessage().payment_error_email(self.user, self.errors[0])
         return None, False

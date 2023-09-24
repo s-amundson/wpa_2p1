@@ -1,5 +1,5 @@
 import logging
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
@@ -32,6 +32,7 @@ class TestsCustomer(TestCase):
         response = self.client.get(self.url, secure=True)
         self.assertTemplateUsed(response, 'payment/make_payment.html')
 
+    # @tag('temp')
     def test_payment_success(self):
         # process a good payment
         response = self.client.post(self.url, self.pay_dict, secure=True)

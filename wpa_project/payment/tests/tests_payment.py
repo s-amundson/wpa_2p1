@@ -125,6 +125,7 @@ class TestsPayment(TestCase):
         self.assertFalse(card[1].default)
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
 
+    # @tag('temp')
     def test_payment_card_decline(self):
         self.pay_dict['source_id'] = 'cnon:card-nonce-declined'
         response = self.client.post(self.url, self.pay_dict, secure=True)
@@ -134,6 +135,7 @@ class TestsPayment(TestCase):
         self.assertTrue('Payment Error: Card Declined' in response.context['form'].payment_errors)
         pel = PaymentErrorLog.objects.all()
         self.assertEqual(len(pel), 1)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_payment_card_bad_cvv(self):
         self.pay_dict['source_id'] = 'cnon:card-nonce-rejected-cvv'

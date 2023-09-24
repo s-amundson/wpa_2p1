@@ -42,7 +42,6 @@ class ClassRegistrationHelper:
                 logger.warning('error')
                 icr.update(pay_status='wait error')
                 response[str(ikey['idempotency_key'])] = 'ERROR'
-                # TODO add email for error
             else:
                 EmailMessage().wait_list_off(queryset)
                 response[str(ikey['idempotency_key'])] = 'SUCCESS'

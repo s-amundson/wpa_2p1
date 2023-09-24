@@ -100,7 +100,8 @@ class PaymentForm(forms.ModelForm):
                 idempotency_key=idempotency_key,
                 note=note,
                 source_id=self.cleaned_data['source_id'],
-                saved_card_id=int(self.cleaned_data['card'])
+                saved_card_id=int(self.cleaned_data['card']),
+                live=True
             )
 
         if self.log is not None:
