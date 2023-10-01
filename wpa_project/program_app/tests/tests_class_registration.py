@@ -472,6 +472,27 @@ class TestsClassRegistration(TestCase):
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
         self.assertRedirects(response, reverse('payment:make_payment'))
 
+    # @tag('temp')
+    def test_resume_registration_no_wait_with_cancel(self):
+        cr = Registration(event=self.event,
+                          student=Student.objects.get(pk=4),
+                          pay_status='start',
+                          idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+                          reg_time='2021-06-09',
+                          attended=False)
+        cr.save()
+        Registration.objects.create(
+            event=self.event,
+            student=Student.objects.get(pk=4),
+            pay_status='canceled',
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
+        self.assertRedirects(response, reverse('payment:make_payment'))
+        self.assertEqual(len(self.client.session['line_items']), 1)
+        logger.warning(self.client.session['line_items'])
+
     def test_new_student_register_twice(self):
         d = timezone.now() + datetime.timedelta(days=2)
         bc = BeginnerClass.objects.get(pk=1)

@@ -40,6 +40,7 @@ class ClassRegistrationHelper:
             logger.warning(payment)
             if payment[0] is None:  # a payment error happened
                 logger.warning('error')
+                logger.warning(icr.last().event)
                 icr.update(pay_status='wait error')
                 response[str(ikey['idempotency_key'])] = 'ERROR'
             else:
@@ -174,14 +175,19 @@ class ClassRegistrationHelper:
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
                 logger.warning(f'next group {len(next_group)}')
                 if beginner_class.beginner_limit - len(admitted) >= len(next_group):
-                    self.charge_group(next_group)
-                    # EmailMessage().wait_list_off(next_group)
-                    # self.update_waiting(beginner_class)
+                    response = self.charge_group(next_group)
+                    if not response[str(waiting.first().idempotency_key)] == 'SUCCESS':  # pragma: no cover
+                        # There was a payment failure so try to admit the next student waiting.
+                        self.update_waiting(beginner_class)
+
         elif beginner_class.class_type == 'returnee':
             if len(admitted) < beginner_class.returnee_limit:
                 logger.warning(f'space available {beginner_class.returnee_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
                 logger.warning(f'next group {len(next_group)}')
                 if beginner_class.returnee_limit - len(admitted) >= len(next_group):
-                    self.charge_group(next_group)
-                    # EmailMessage().wait_list_off(next_group)
+                    response = self.charge_group(next_group)
+                    if not response[str(waiting.first().idempotency_key)] == 'SUCCESS':  # pragma: no cover
+                        # There was a payment failure so try to admit the next student waiting.
+                        self.update_waiting(beginner_class)
+

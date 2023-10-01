@@ -275,6 +275,7 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         self.assertEqual(len(registrations.filter(pay_status='waiting')), 0)
         self.assertEqual(len(registrations.filter(pay_status='wait error')), 1)
 
+    # @tag('temp')
     @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
     def test_update_status_return_waiting(self, mock_payment):
         mock_payment.side_effect = self.payment_side_effect

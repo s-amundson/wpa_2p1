@@ -22,9 +22,9 @@
                     <td>{{ student_form.instance.event.event_date }}</td>
                     <td>{{ student_form.instance.event.type|capfirst}}</td>
                     <td>
-                        {% if student_form.instance.pay_status == 'start' %}
+                        {% if student_form.instance.pay_status == 'start' or student_form.instance.pay_status == 'wait error' %}
                             <a href="{% url 'programs:resume_registration' student_form.instance.id %}">
-                                Unsuccessful
+                                {{ student_form.pay_status }}
                             </a>
                         {% elif student_form.instance.pay_status == 'cancel_pending' %}
                             Cancel Pending

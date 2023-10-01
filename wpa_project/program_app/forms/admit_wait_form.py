@@ -1,6 +1,7 @@
 from django import forms
 
 from event.models import Registration
+from payment.models import PaymentErrorLog
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,4 +25,8 @@ class AdmitWaitForm(forms.ModelForm):
             if self.instance.pay_status != 'waiting':
                 self.fields['admit'].disabled = True
                 if self.instance.pay_status.startswith('wait '):
-                    self.pay_status = self.instance.pay_status[5:]
+                    self.pay_status = self.instance.pay_status[5:].title()
+                if self.instance.pay_status == 'wait error':
+                    payment_error = PaymentErrorLog.objects.filter(idempotency_key=self.instance.idempotency_key).last()
+                    if payment_error:
+                        self.pay_status += f": {payment_error.error_code.replace('_', ' ').title()}"

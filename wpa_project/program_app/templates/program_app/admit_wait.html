@@ -16,7 +16,7 @@
             {% for student_form in formset %}
                 <tr>
                     <td>{{ student_form.student }} {{ student_form.id }}</td>
-                    <td>{{ student_form.pay_status }} </td>
+                    <td>{{ student_form.pay_status|linebreaks }} </td>
                     <td> {{ student_form.admit }} </td>
                 </tr>
             {% endfor %}

@@ -229,27 +229,34 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             # logger.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
             if cr.student.student_family != students[0].student_family:  # pragma: no cover
                 return Http404("registration mismatch")
-            registrations = Registration.objects.filter(idempotency_key=cr.idempotency_key)
+            registrations = Registration.objects.filter(idempotency_key=cr.idempotency_key,
+                                                        pay_status__in=['start', 'wait error'])
             logger.warning(cr.event.beginnerclass_set.last())
-            space = ClassRegistrationHelper().has_space(self.request.user,
-                                                        cr.event.beginnerclass_set.last(),
-                                                        len(registrations.filter(student__safety_class__isnull=True)),
-                                                        0,
-                                                        len(registrations.filter(student__safety_class__isnull=False))
-                                                        )
-            logger.debug(space)
-            if space == 'full':
-                messages.add_message(self.request, messages.ERROR, 'Not enough space available in this class')
-                return HttpResponseRedirect(reverse('programs:calendar'))
-            elif space == 'wait':
-                if Card.objects.filter(customer__user=self.request.user, enabled=True):
-                    registrations.update(pay_status='waiting')
-                    return HttpResponseRedirect(reverse('programs:wait_list',
-                                                        kwargs={'event': cr.event.id}))
-                else:
-                    return HttpResponseRedirect(reverse('payment:card_manage'))
-
-            request.session['idempotency_key'] = str(cr.idempotency_key)
+            if cr.pay_status == 'start':
+                space = ClassRegistrationHelper().has_space(self.request.user,
+                                                            cr.event.beginnerclass_set.last(),
+                                                            len(registrations.filter(student__safety_class__isnull=True)),
+                                                            0,
+                                                            len(registrations.filter(student__safety_class__isnull=False))
+                                                            )
+                logger.debug(space)
+                if space == 'full':
+                    messages.add_message(self.request, messages.ERROR, 'Not enough space available in this class')
+                    return HttpResponseRedirect(reverse('programs:calendar'))
+                elif space == 'wait':
+                    if Card.objects.filter(customer__user=self.request.user, enabled=True):
+                        registrations.update(pay_status='waiting')
+                        return HttpResponseRedirect(reverse('programs:wait_list',
+                                                            kwargs={'event': cr.event.id}))
+                    else:
+                        return HttpResponseRedirect(reverse('payment:card_manage'))
+                request.session['idempotency_key'] = str(cr.idempotency_key)
+            else:
+                new_idempotency_key = uuid.uuid4()
+                request.session['idempotency_key'] = str(new_idempotency_key)
+                registrations.update(idempotency_key=new_idempotency_key, pay_status='waiting')
+                return HttpResponseRedirect(reverse('programs:wait_list',
+                                                    kwargs={'event': cr.event.id}))
             request.session['line_items'] = []
             request.session['payment_category'] = 'intro'
             request.session['payment_description'] = f'Class on {str(cr.event.event_date)[:10]}'
