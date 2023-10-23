@@ -21,7 +21,7 @@ class MembershipView(AccessMixin, FormView):
     student_family = None
 
     def dispatch(self, request, *args, **kwargs):
-        logger.warning(self.request.user.is_authenticated)
+        # logger.warning(self.request.user.is_authenticated)
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         logging.warning(request.user.student_set.last())

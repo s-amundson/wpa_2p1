@@ -126,7 +126,6 @@ class ClassRegistrationView(RegistrationSuperView):
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
             self.request.session['instructions'] = instructions
-            logger.warning(instructions)
 
             for event in self.events:
                 for f in self.formset:

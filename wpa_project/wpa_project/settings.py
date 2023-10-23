@@ -22,19 +22,22 @@ with open(os.path.join(BASE_DIR, 'wpa_project', 'secrets.json')) as secrets_file
     secret_settings = json.load(secrets_file)
 
 
-def get_secret(setting, secrets=secret_settings):
+def get_secret(setting, secrets=secret_settings, default=None):
     """Get secret setting or fail with ImproperlyConfigured"""
     try:
         return secrets[setting]
     except KeyError:
+        if default is not None:
+            return default
         raise ImproperlyConfigured("Set the {} setting".format(setting))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
+ACCOUNT_ADAPTER = "src.account_adapter.CustomAccountAdapter"
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+ACCOUNT_EMAIL_DOMAIN_BLACKLIST = get_secret('ACCOUNT_EMAIL_DOMAIN_BLACKLIST', default=['example.com'])
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_FORMS = {'signup': 'student_app.forms.SignUpForm'}
@@ -46,9 +49,9 @@ ACCOUNT_RATE_LIMITS = {
     # Email management (e.g. add, remove, change primary)
     "manage_email": "10/m",
     # Request a password reset, global rate limit per IP
-    "reset_password": "20/m",
+    "reset_password": "5/h",
     # Rate limit measured per individual email address
-    "reset_password_email": "5/m",
+    "reset_password_email": "5/h",
     # Password reset (the view the password reset email links to).
     "reset_password_from_key": "20/m",
     # Signups.
@@ -256,6 +259,7 @@ LOGGING = {
         'contact_us': logger_default,
         'info': logger_default,
         'facebook': logger_default,
+        'src': logger_default,
         'django': {
             'handlers': ['django console'],
             'level': get_secret('DJANGO_LOG_LEVEL'),
