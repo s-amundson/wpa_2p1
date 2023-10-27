@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.11
 
 # These two environment variables prevent __pycache__/ files.
 ENV PYTHONUNBUFFERED 1
