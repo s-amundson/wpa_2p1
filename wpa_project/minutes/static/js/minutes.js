@@ -4,7 +4,6 @@ var report_owners = ['president', 'vice', 'secretary', 'treasure'];
 $(document).ready(function() {
     // if meeting has started display time started. else put button to start meeting.
     if (minutes_id) {
-        $("#id_start_time").show();
         $("#btn-start").hide();
     }
     else {
@@ -78,11 +77,11 @@ $(document).ready(function() {
         load_decision_form();
     });
     // update minutes on change of inputs
-    let arr = ['id_meeting_date', 'id_start_time', 'id_attending', 'id_minutes_text', 'id_memberships', 'id_balance',
-               'id_discussion', 'id_end_time'];
-    arr.forEach(function(item) {
-        $("#" + item).change(function(e){
-            update_minutes($(this))
+    $("#minutes-form .form-control").each(function(item) {
+        console.log($(this));
+        $(this).change(function(e){
+            console.log($(this));
+            update_minutes()
         });
     });
 });
@@ -272,21 +271,11 @@ async function save_update(update_element) {
 
 async function update_minutes() {
     if (minutes_id != null){
-        let post_data = {
-            'csrfmiddlewaretoken': $('#minutes-form').find('[name="csrfmiddlewaretoken"]').val(),
-            'update': true
-        }
-        let arr = ['meeting_date', 'start_time', 'attending', 'minutes_text', 'memberships', 'balance',
-                   'discussion', 'end_time'];
-        arr.forEach(function(item) {
-            post_data[item] = $("#id_" + item).val();
-        });
-
-        await $.post(url_minutes, post_data, function(data, status){
+        console.log('update minutes')
+        await $.post(url_minutes, $("#minutes-form").serializeArray(), function(data, status){
             if (status == 'success') {
                 $("#div-saved-message").html("Saved at:" + get_time());
             }
-
         }, "json");
     }
 }

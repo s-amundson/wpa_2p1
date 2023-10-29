@@ -1,6 +1,6 @@
 import logging
 from src.model_form import MyModelForm
-from django.utils import datetime_safe, timezone
+from django.utils import timezone
 
 from ..models import Minutes
 from membership.models import Member
@@ -22,6 +22,4 @@ class MinutesForm(MyModelForm):
         if 'edit' in kwargs:
             kwargs.pop('edit')
         super().__init__(*args, **kwargs)
-        # self.fields['meeting_date'].initial = datetime_safe.date.today()
         self.fields['memberships'].initial = len(Member.objects.filter(expire_date__gt=timezone.now()))
-        # self.fields['start_time'].initial = ''

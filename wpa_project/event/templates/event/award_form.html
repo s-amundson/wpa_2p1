@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %} Volunteer Award Form {% endblock %}
+
+{% block main %}
+    <h3>Volunteer Award Form</h3>
+    <form method="post">{% csrf_token %}
+        <div>
+            Select event(s) that this award drawing is for.
+            <div class="fieldWrapper d-flex flex-row">
+                <div class="m-2">{{ form.events.label_tag }}</div>
+                <div class="m-2">
+                    {{ form.events.errors }}
+                    {{ form.events }}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            Description of award e.g. "Work party on ..."
+            <div class="fieldWrapper d-flex flex-row">
+                <div class="m-2">{{ form.description.label_tag }}</div>
+                <div class="m-2">
+                    {{ form.description.errors }}
+                    {{ form.description }}
+                </div>
+            </div>
+        </div>
+        <div>
+            Award to be given to the student
+            <div class="fieldWrapper d-flex flex-row">
+                <div class="m-2">{{ form.award.label_tag }}</div>
+                <div class="m-2">
+                    {{ form.award.errors }}
+                    {{ form.award }}
+                </div>
+            </div>
+        </div>
+        {% if form.instance.id %}
+            <div>
+                Award given to:
+                <div class="fieldWrapper d-flex flex-row">
+                    <div class="m-2">{{ form.student.label_tag }}</div>
+                    <div class="m-2">
+                        {{ form.student.errors }}
+                        {{ form.student }}
+                    </div>
+                </div>
+            </div>
+            <div>
+                Check if volunteer has received their award.
+                <div class="fieldWrapper d-flex flex-row">
+                    <div class="m-2">{{ form.received.label_tag }}</div>
+                    <div class="m-2">
+                        {{ form.received.errors }}
+                        {{ form.received }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        <button class="btn btn-primary m-2" type="submit" name="button">Submit</button>
+    </form>
+
+{% endblock %}

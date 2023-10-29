@@ -20,8 +20,8 @@ class MinutesFormView(LoginRequiredMixin, View):
         for b in business:
             update_list = []
             for update in b.businessupdate_set.all():
-                logging.debug(update.update_date)
-                logging.debug(update.update_date.date())
+                logger.debug(update.update_date)
+                logger.debug(update.update_date.date())
                 o = timezone.now().date() > update.update_date.date()
                 update_list.append({'form': BusinessUpdateForm(instance=update, old=o, report=self.report_index),
                                     'id': update.id})
@@ -31,8 +31,8 @@ class MinutesFormView(LoginRequiredMixin, View):
         return bl
 
     def get(self, request, minutes_id=None):
-        logging.debug(request.POST)
-        logging.debug(request.user.is_member)
+        logger.debug(request.POST)
+        logger.debug(request.user.is_member)
         if not request.user.is_member:
             return HttpResponseForbidden()
         reports = {}
@@ -46,12 +46,12 @@ class MinutesFormView(LoginRequiredMixin, View):
             ob = Business.objects.filter(Q(resolved=None, added_date__date__lt=minutes.meeting_date) |
                                          Q(resolved__date__gte=minutes.meeting_date, added_date__lt=minutes.meeting_date))
             ob = ob.order_by('added_date', 'id')
-            logging.debug(ob)
+            logger.debug(ob)
             nb = Business.objects.filter(Q(resolved=None, added_date__date=minutes.meeting_date) |
                                          Q(resolved__date__gte=minutes.meeting_date, added_date__date=minutes.meeting_date))
             nb = nb.order_by('id')
             decisions_query = minutes.decision_set.all()
-            logging.debug(decisions_query)
+            logger.debug(decisions_query)
 
         else:
             form = MinutesForm(edit=request.user.is_board)
@@ -75,7 +75,7 @@ class MinutesFormView(LoginRequiredMixin, View):
         return render(request, 'minutes/minutes_form.html', context)
 
     def post(self, request, minutes_id=None):
-        logging.debug(request.POST)
+        logger.warning(request.POST)
         if not request.user.is_board:
             return HttpResponseForbidden()
         if minutes_id:
@@ -85,21 +85,21 @@ class MinutesFormView(LoginRequiredMixin, View):
             form = MinutesForm(request.POST)
 
         if form.is_valid():
-            logging.debug(form.cleaned_data)
+            logger.warning(form.cleaned_data)
             if minutes_id is None:
                 minutes = form.save(commit=False)
                 minutes.meeting_date = timezone.now()
                 minutes.save()
             else:
                 minutes = form.save()
-            if request.POST.get('update', False):
-                logging.debug('json response')
+            if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
+                logger.debug('json response')
                 return JsonResponse({'minutes_id': minutes.id, 'success': True})
             return HttpResponseRedirect(reverse('minutes:minutes_form', kwargs={'minutes_id': minutes.id}))
         else:  # pragma: no cover
-            logging.debug(form.errors)
-            if request.POST.get('update', False):
-                logging.debug('json response')
+            logger.debug(form.errors)
+            if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
+                logger.debug('json response')
                 return JsonResponse({'minutes_id': minutes_id, 'success': False})
             return render(request, 'minutes/minutes_form.html', {'form': form})
 

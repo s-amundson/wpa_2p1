@@ -1,6 +1,6 @@
 import logging
 import json
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.apps import apps
 
@@ -38,6 +38,7 @@ class TestsMinutes(TestCase):
         response = self.client.get(reverse('minutes:minutes_form'), secure=True)
         self.assertEqual(response.status_code, 403)
 
+    @tag('temp')
     def test_get_minutes_form_old(self):
         m = Minutes(
             meeting_date='2021-09-04T19:20:30+03:00', attending='', minutes_text='', memberships=0,
@@ -94,9 +95,9 @@ class TestsMinutes(TestCase):
         bu = BusinessUpdate(business=b1, update_date='2021-09-04', update_text="test update")
         bu.save()
 
-        d = {'meeting_date': '2021-09-04', 'memberships': 5, 'balance': 216}
+        d = {'meeting_date': '2021-09-04', 'memberships': 5, 'balance': 216.2}
         response = self.client.post(reverse('minutes:minutes_form', kwargs={'minutes_id': m.id}), d, secure=True)
         mr = Minutes.objects.last()
         self.assertEqual(mr.memberships, 5)
         self.assertNotEqual(mr.meeting_date, '2021-09-04 19:30')
-        self.assertEqual(mr.balance, 216)
+        self.assertEqual(mr.balance, 216.2)
