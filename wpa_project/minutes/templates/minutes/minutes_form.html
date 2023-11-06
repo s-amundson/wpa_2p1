@@ -54,9 +54,7 @@
                 {{ form.start_time.label }}
             </div>
             <div id="div-start-input" class="col-3">
-                {% if minutes_id %}
-                    {{ form.start_time }}
-                {% else %}
+                {% if not minutes_id %}
                     <button id="btn-start" class="btn btn-primary" type="submit">Start Meeting Now</button>
                 {% endif %}
             </div>

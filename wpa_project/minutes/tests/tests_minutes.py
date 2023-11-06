@@ -38,7 +38,7 @@ class TestsMinutes(TestCase):
         response = self.client.get(reverse('minutes:minutes_form'), secure=True)
         self.assertEqual(response.status_code, 403)
 
-    @tag('temp')
+    # @tag('temp')
     def test_get_minutes_form_old(self):
         m = Minutes(
             meeting_date='2021-09-04T19:20:30+03:00', attending='', minutes_text='', memberships=0,

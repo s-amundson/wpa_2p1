@@ -158,7 +158,7 @@ class ClassRegistrationView(RegistrationSuperView):
         if self.wait and self.has_card:
             # send email to student(s) confirming they are on the wait list.
             wait_list_email.delay(reg_list)
-
+        logger.warning(self.success_url)
         return HttpResponseRedirect(self.success_url)
 
 

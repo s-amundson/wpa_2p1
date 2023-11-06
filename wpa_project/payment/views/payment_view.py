@@ -33,6 +33,7 @@ class CreatePaymentView(FormView):
 
     def form_valid(self, form):
         idempotency_key = self.request.session.get('idempotency_key', str(uuid.uuid4()))
+        logger.warning(idempotency_key)
         if form.process_payment(idempotency_key, self.request.session.get('instructions', None)):
             if self.request.user.is_authenticated:
                 self.success_url = reverse_lazy('payment:view_payment', args=[form.log.id])
@@ -47,6 +48,7 @@ class CreatePaymentView(FormView):
             self.request.session['idempotency_key'] = new_ik
             payment_error_signal.send(sender=self.__class__, old_idempotency_key=idempotency_key,
                                       new_idempotency_key=new_ik)
+            logger.warning('replace idempotency key')
         return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):

@@ -26,9 +26,9 @@ class TestsVolunteerEvent(TestCase):
 
     # @tag('temp')
     def test_award_list_get(self):
-        response = self.client.get(reverse('events:volunteer_list'), secure=True)
+        response = self.client.get(reverse('events:volunteer_award_list'), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'event/award_form.html')
+        self.assertTemplateUsed(response, 'event/volunteer_award_list.html')
 
     # @tag('temp')
     def tests_award_post_new(self):

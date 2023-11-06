@@ -13,8 +13,7 @@ class MinutesForm(MyModelForm):
         model = Minutes
         exclude = []
         hidden_fields = ['minutes_text']
-        optional_fields = ['meeting_date', 'attending', 'memberships', 'balance',
-                           'discussion', 'end_time']
+        optional_fields = ['meeting_date', 'attending', 'memberships', 'balance', 'discussion', 'end_time']
         fields = optional_fields + hidden_fields
 
     def __init__(self, *args, **kwargs):
