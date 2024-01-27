@@ -49,7 +49,7 @@ class TestsClassSendEmail(TestCase):
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
         self.assertTrue(mail.outbox[0].body.find('Test message') >= 0)
 
-    @tag('temp')
+    # @tag('temp')
     def test_instructor_canceled(self):
         bc = create_beginner_class(
             date=(timezone.now() + timezone.timedelta(days=5)).replace(hour=9, minute=0, second=0),

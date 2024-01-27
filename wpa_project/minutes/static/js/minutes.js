@@ -77,7 +77,7 @@ $(document).ready(function() {
         load_decision_form();
     });
     // update minutes on change of inputs
-    $("#minutes-form .form-control").each(function(item) {
+    $(".minutes-input").each(function(item) {
         console.log($(this));
         $(this).change(function(e){
             console.log($(this));

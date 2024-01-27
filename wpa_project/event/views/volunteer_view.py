@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from ..forms import AwardForm, VolunteerEventForm, VolunteerRecordForm
 from ..models import VolunteerEvent
+from ..tasks import cancel_event
 
 from event.models import Event, VolunteerAward
 from student_app.models import Student, StudentFamily
@@ -68,16 +69,27 @@ class VolunteerEventListView(ListView):
 
 
 class VolunteerEventView(BoardMixin, FormView):
-    template_name = 'student_app/form_as_p.html'
+    template_name = 'event/event_update.html'
     form_class = VolunteerEventForm
     success_url = reverse_lazy('events:volunteer_event_list')
     volunteer_event = None
+    event = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['name'] = 'Student'
+        context['event'] = str(self.event)
+        context['event_type'] = "volunteer event"
+        context['message'] = ''
+        context['refund'] = False
+        logger.warning(context)
+        return context
 
     def get_form(self):
         eid = self.kwargs.get("event", None)
         if eid is not None:
-            event = get_object_or_404(Event, pk=eid)
-            self.volunteer_event = event.volunteerevent_set.last()
+            self.event = get_object_or_404(Event, pk=eid)
+            self.volunteer_event = self.event.volunteerevent_set.last()
             form = self.form_class(instance=self.volunteer_event, **self.get_form_kwargs())
         else:
             form = self.form_class(**self.get_form_kwargs())
@@ -102,6 +114,8 @@ class VolunteerEventView(BoardMixin, FormView):
             )
         v_event.save()
         logger.warning(f'v_event: {v_event.id} {v_event.description}, event: {v_event.event.id}')
+        if v_event.event.state == 'canceled':
+            cancel_event.delay(v_event.event.id, form.cleaned_data['cancel_message'])
         return super().form_valid(form)
 
 

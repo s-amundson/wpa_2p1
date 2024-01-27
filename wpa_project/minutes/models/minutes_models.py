@@ -12,6 +12,7 @@ class Minutes(models.Model):
     balance = models.FloatField(default=None, null=True)
     discussion = models.TextField()
     end_time = models.DateTimeField(null=True)
+    reimbursement_review = models.BooleanField(default=False)
 
     def __str__(self):
         return f'Minutes: {self.meeting_date.date()}'

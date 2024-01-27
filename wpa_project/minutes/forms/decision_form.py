@@ -33,5 +33,7 @@ class DecisionForm(MyModelForm):
             self.fields[f].required = False
             self.fields[f].widget.attrs.update({'class': 'form-control m-2', 'style': 'display:none'})
         self.fields['text'].widget.attrs.update({'cols': 80, 'rows': 3, 'class': 'form-control m-2 decision'})
+        for f in self.Meta.fields:
+            self.fields[f].widget.attrs['class'] += ' minutes-input'
         # if not edit:
         #     self.fields['report'].widget.attrs.update({'disabled': 'disabled'})

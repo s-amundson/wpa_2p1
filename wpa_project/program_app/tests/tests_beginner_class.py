@@ -84,7 +84,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         response = self.client.get(reverse('programs:beginner_class'), secure=True)
         self.assertEqual(response.context['form'].initial['beginner_limit'], 20)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'program_app/beginner_class.html')
+        self.assertTemplateUsed(response, 'event/event_update.html')
         self.assertEqual(response.context['form'].initial['class_date'].day, date(2022, 6, 19).day)
         self.assertEqual(response.context['form'].initial['class_date'].month, date(2022, 6, 19).month)
 
@@ -200,4 +200,4 @@ class TestsBeginnerClass2(TestCase):
         response = self.client.get(reverse('programs:beginner_class'), secure=True)
         self.assertEqual(response.context['form'].initial['beginner_limit'], 20)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'program_app/beginner_class.html')
+        self.assertTemplateUsed(response, 'event/event_update.html')

@@ -28,10 +28,11 @@ class ReportForm(MyModelForm):
         self.auto_id = 'report_%s' + f'_{self.report_index}'
         for f in self.Meta.optional_fields:
             self.fields[f].required = False
-            self.fields[f].widget.attrs.update({'class': 'form-control m-2'})
+            self.fields[f].widget.attrs.update({'class': 'form-control m-2 minutes-input'})
         for f in self.Meta.hidden_fields:
             self.fields[f].required = False
-            self.fields[f].widget.attrs.update({'class': 'form-control m-2', 'style': 'display:none'})
-        self.fields['report'].widget.attrs.update({'cols': 80, 'rows': 3, 'class': 'form-control m-2 report'})
+            self.fields[f].widget.attrs.update({'class': 'form-control m-2 minutes-input', 'style': 'display:none'})
+        self.fields['report'].widget.attrs.update({'cols': 80, 'rows': 3,
+                                                   'class': 'form-control m-2 report minutes-input'})
         if not edit:
             self.fields['report'].widget.attrs.update({'disabled': 'disabled'})

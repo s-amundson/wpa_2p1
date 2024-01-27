@@ -41,9 +41,9 @@ class EmailMessage(StudentEmailMessage):
         self.attach_alternative(get_template('payment/email/refund_email.html').render(d), 'text/html')
         self.send()
 
-    def refund_canceled_email(self, user, event, message=''):
+    def event_canceled_email(self, user, event, message='', refund=True):
         self.get_email_address(user)
-        d = {'name': user.student_set.last().first_name, 'event': event, 'message': message}
+        d = {'name': user.student_set.last().first_name, 'event': event, 'message': message, 'refund': refund}
         self.subject = 'Woodley Park Archers Cancellation'
         self.body = get_template('payment/email/refund_canceled_email.txt').render(d)
         self.attach_alternative(get_template('payment/email/refund_canceled_email.html').render(d), 'text/html')

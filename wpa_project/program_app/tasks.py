@@ -131,7 +131,7 @@ def refund_class(beginner_class, message=''):
                     transaction = cr.filter(idempotency_key=reg.idempotency_key)
                     for c in transaction:
                         if c.student.user is not None:
-                            email_message.refund_canceled_email(
+                            email_message.event_canceled_email(
                                 c.student.user,
                                 f'Class on {str(timezone.localtime(beginner_class.event.event_date))[:10]}',
                                 message
@@ -143,7 +143,7 @@ def refund_class(beginner_class, message=''):
                         if c:
                             for s in c.student.student_family.student_set.all():
                                 if s.user is not None:
-                                    email_message.refund_canceled_email(
+                                    email_message.event_canceled_email(
                                         s.user,
                                         f'Class on {str(timezone.localtime(beginner_class.event.event_date))[:10]}',
                                         message
