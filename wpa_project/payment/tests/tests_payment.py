@@ -51,16 +51,34 @@ class TestsPayment(TestCase):
         self.assertTrue(mail.outbox[0].body.find('Class on None student: test_user') >= 0)
         self.assertTrue(mail.outbox[0].body.find('be 30 minutes early') >= 0)
 
-    def test_payment_success_donation(self):
+    # @tag('temp')
+    def test_payment_success_donation_no_email(self):
         # process a good payment
         self.client.logout()
         self.pay_dict['donation'] = 5
         response = self.client.post(self.url, self.pay_dict, secure=True)
+        logger.warning(response.status_code)
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].donation, 500)
-        # self.assertRedirects(response, reverse('registration:index'))
+        self.assertEqual(len(mail.outbox), 0)
 
+    # @tag('temp')
+    def test_payment_success_donation_with_email(self):
+        # process a good payment
+        self.client.logout()
+        self.pay_dict['donation'] = 5
+        self.pay_dict['email'] = 'EmilyNConlan@einrot.com',
+        response = self.client.post(self.url, self.pay_dict, secure=True)
+        logger.warning(response.status_code)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].donation, 500)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(mail.outbox[0].body.find('Donation   1   5    5') >= 0)
+
+        # self.assertRedirects(response, reverse('registration:index'))
+    # @tag('temp')
     def test_payment_success_donation2(self):
         # process a good payment
         self.pay_dict['donation'] = 5

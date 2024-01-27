@@ -12,17 +12,23 @@ class EmailMessage(StudentEmailMessage):
             line['cost'] = int(line['quantity']) * line['amount_each']
         return line_items
 
+    def payment_email_to(self, to, pay_dict):
+        """ Takes information from the pay dict and emails it to the recipient. pay_dict = {line_items: string, total: int,
+                    receipt: url,} """
+        self.to = to
+        pay_dict['line_items'] = self.line_items(pay_dict['line_items'])
+        self.subject = 'Woodley Park Archers Payment Confirmation'
+        self.body = get_template('payment/email/payment_email.txt').render(pay_dict)
+        self.attach_alternative(get_template('payment/email/payment_email.html').render(pay_dict), 'text/html')
+        self.send()
+
     def payment_email_user(self, user, pay_dict):
         """ Takes information from the pay dict and emails it to the user. pay_dict = {line_items: string, total: int,
             receipt: url,} """
 
         self.get_email_address(user)
         pay_dict['name'] = user.student_set.last().first_name
-        pay_dict['line_items'] = self.line_items(pay_dict['line_items'])
-        self.subject = 'Woodley Park Archers Payment Confirmation'
-        self.body = get_template('payment/email/payment_email.txt').render(pay_dict)
-        self.attach_alternative(get_template('payment/email/payment_email.html').render(pay_dict), 'text/html')
-        self.send()
+        self.payment_email_to(self.to, pay_dict)
 
     def payment_error_email(self, user, message=None):
         self.get_email_address(user)

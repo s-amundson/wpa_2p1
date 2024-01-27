@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 from django.views.generic.detail import DetailView
+from ipware import get_client_ip
 
 from ..forms import PaymentForm
 from ..models import Card, PaymentLog
@@ -28,15 +29,15 @@ class CreatePaymentView(FormView):
         pay_url = "https://sandbox.web.squarecdn.com/v1/square.js"
 
     def form_invalid(self, form):
-        logging.warning(form.errors)
+        logger.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
         idempotency_key = self.request.session.get('idempotency_key', str(uuid.uuid4()))
         logger.warning(idempotency_key)
         if form.process_payment(idempotency_key, self.request.session.get('instructions', None)):
+            self.success_url = reverse_lazy('payment:view_payment', args=[form.log.id])
             if self.request.user.is_authenticated:
-                self.success_url = reverse_lazy('payment:view_payment', args=[form.log.id])
 
                 for k in ['description', 'line_items', 'idempotency_key', 'payment_category', 'instruction']:
                     if k in self.request.session:
@@ -79,6 +80,7 @@ class CreatePaymentView(FormView):
         kwargs['line_items'] = line_items
         kwargs['initial']['amount'] = total
         kwargs['initial']['category'] = self.request.session.get('payment_category', 'donation')
+        kwargs['client_ip'], is_routable = get_client_ip(self.request)
         return kwargs
 
 
@@ -89,4 +91,6 @@ class PaymentView(UserPassesTestMixin, DetailView):
 
     def test_func(self):
         self.object = self.get_object()
+        if self.object.user is None:
+            return True
         return self.request.user.is_staff or self.object.user == self.request.user

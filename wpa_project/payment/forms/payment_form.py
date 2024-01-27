@@ -4,6 +4,7 @@ from django.utils import timezone
 from ..models import Card, Customer, PaymentLog
 from ..src import CardHelper, CustomerHelper, EmailMessage, PaymentHelper
 from event.models import VolunteerRecord
+from contact_us.tasks import validate_email
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ class PaymentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
+        self.client_ip = kwargs.pop('client_ip')
         # logging.debug(user)
         if 'description' in kwargs:
             self.description = kwargs.pop('description')
@@ -56,6 +58,8 @@ class PaymentForm(forms.ModelForm):
             self.fields['default_card'].widget.attrs.update({'class': 'm-2 form-check-input', 'disabled': 'disabled'})
             self.fields['default_card'].initial = True
         self.payment_errors = []
+        self.fields['email'] = forms.EmailField(required=False)
+        self.fields['email'].widget.attrs.update({"placeholder": "Email"})
 
     def card_choices(self):
         if self.user is None:
@@ -66,6 +70,17 @@ class PaymentForm(forms.ModelForm):
             card_choices.append((card.id, str(card)))
         card_choices.append((0, "New Card"))
         return card_choices
+
+    def clean_email(self):
+        address = self.cleaned_data['email']
+        logger.warning(address)
+        if address == '':
+            return None
+        is_valid = validate_email(address, self.client_ip)
+        if is_valid:
+            return address
+        logging.warning(f'Invalid email {address}')
+        raise forms.ValidationError("Email validation error")
 
     def process_payment(self, idempotency_key, instructions=None):
         note = self.description
@@ -111,6 +126,8 @@ class PaymentForm(forms.ModelForm):
                         'instructions': instructions}
             if self.user is not None and not duplicate:
                 EmailMessage().payment_email_user(self.user, pay_dict)
+            if self.cleaned_data['email'] is not None and not duplicate:
+                EmailMessage().payment_email_to([self.cleaned_data['email']], pay_dict)
             if volunteer_points:
                 vr = VolunteerRecord.objects.create(
                     student=self.user.student_set.last(),

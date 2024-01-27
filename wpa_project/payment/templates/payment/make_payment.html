@@ -108,6 +108,12 @@
                   {{ form.default_card }} <span class="form-check-label">{{ form.default_card.label }}</span>
               </div>
           </div>
+          {% if not user.is_authenticated %}
+              <div class="p-3">
+                  <p>If you wish to receive an email confirmation for your donation please provide email address below.</p>
+                  <div>{{ form.email }}</div>
+              </div>
+          {% endif %}
           <button class="btn btn-primary m-2" id="card-button" type="button"> Pay Now </button>
       </form>
 

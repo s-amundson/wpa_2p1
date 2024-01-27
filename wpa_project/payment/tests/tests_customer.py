@@ -40,6 +40,7 @@ class TestsCustomer(TestCase):
         self.assertEqual(len(pl), 1)
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
 
+    # @tag('temp')
     def test_payment_success_donation(self):
         # process a good payment
         self.client.logout()
@@ -48,7 +49,7 @@ class TestsCustomer(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].donation, 500)
-        self.assertRedirects(response, reverse('registration:index'))
+        self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
 
     def test_payment_success_save_card(self):
         # process a good payment
