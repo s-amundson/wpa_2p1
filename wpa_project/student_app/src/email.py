@@ -39,21 +39,28 @@ class EmailMessage(EmailMultiAlternatives):
         self.attach(f'{student_name}.pdf', student.signature_pdf.read())
         self.send()
 
-    def bcc_from_students(self, queryset):
-        self.bcc = []
+    def bcc_append(self, address):
+        if address not in self.bcc:
+            self.bcc.append(address)
+
+    def bcc_from_students(self, queryset, append=False):
+        if not append:
+            self.bcc = []
+
         for row in queryset:
             if row.user is not None:
-                self.bcc.append(EmailAddress.objects.get_primary(row.user))
+                self.bcc_append(EmailAddress.objects.get_primary(row.user))
             else:
                 family = row.student_family.student_set.filter(user__isnull=False)
                 for s in family:
-                    if EmailAddress.objects.get_primary(s.user) not in self.bcc:
-                        self.bcc.append(EmailAddress.objects.get_primary(s.user))
+                    self.bcc_append(EmailAddress.objects.get_primary(s.user))
 
-    def bcc_from_users(self, users):
-        self.bcc = []
+    def bcc_from_users(self, users, append=False):
+        if not append:
+            self.bcc = []
+
         for user in users:
-            self.bcc.append(EmailAddress.objects.get_primary(user))
+            self.bcc_append(EmailAddress.objects.get_primary(user))
 
     def get_email_address(self, user):
         if settings.EMAIL_DEBUG:  # pragma: no cover

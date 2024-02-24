@@ -2,7 +2,7 @@ import logging
 import base64
 import uuid
 from django.core import mail
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from reportlab.pdfgen.canvas import Canvas
 from django.core.files.base import File
@@ -79,6 +79,7 @@ class TestsEmail(TestCase):
         response = self.client.get(reverse('registration:send_email'), secure=True)
         self.assertEqual(response.status_code, 403)
 
+    # @tag('temp')
     def test_send_email_board(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
@@ -88,6 +89,7 @@ class TestsEmail(TestCase):
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
         self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
 
+    # @tag('temp')
     def test_send_email_staff(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
@@ -98,6 +100,7 @@ class TestsEmail(TestCase):
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
         self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
 
+    # @tag('temp')
     def test_send_email_current_members(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
@@ -108,6 +111,7 @@ class TestsEmail(TestCase):
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
         self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
 
+    # @tag('temp')
     def test_send_email_students(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
@@ -143,6 +147,7 @@ class TestsEmail(TestCase):
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
         self.assertEqual(len(mail.outbox), 0)
 
+    # @tag('temp')
     def test_send_email_joad(self):
         student = Student.objects.get(pk=3)
         student.is_joad = True
@@ -155,4 +160,3 @@ class TestsEmail(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(len(mail.outbox[0].bcc), 1)
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
-

@@ -24,36 +24,40 @@ class SendEmailForm(forms.Form):
         #     label='Returning Students Only',
         #     required=False)
         self.fields['include_days'] = forms.IntegerField(max_value=90, min_value=0, initial=90, required=False)
-        self.fields['recipients'] = forms.ChoiceField(choices=choices, widget=forms.RadioSelect())
+        # self.fields['recipients'] = forms.ChoiceField(choices=choices, widget=forms.RadioSelect())
+        self.fields['recipients'] = forms.MultipleChoiceField(choices=choices, widget=forms.CheckboxSelectMultiple())
         self.fields['subject'] = forms.CharField(initial='Message from Woodley Park Archers')
         self.fields['subject'].widget.attrs.update({'class': 'form-control m-2'})
         self.fields['message'] = forms.CharField(widget=forms.Textarea)
         self.fields['message'].widget.attrs.update({'cols': 60, 'rows': 8, 'class': 'form-control m-2'})
 
     def send_message(self):
-        logging.debug(self.cleaned_data['recipients'])
+        logger.warning(self.cleaned_data['recipients'])
         em = EmailMessage()
+        em.bcc = []
         users = User.objects.filter(is_active=True)
-        if self.cleaned_data['recipients'] == 'board':
-            em.bcc_from_users(users.filter(is_board=True))
-        elif self.cleaned_data['recipients'] == 'staff':
-            em.bcc_from_users(users.filter(is_staff=True))
-        elif self.cleaned_data['recipients'] == 'current members':
-            em.bcc_from_users(users.filter(is_member=True))
-        elif self.cleaned_data['recipients'] == 'joad':
+        if 'board' in self.cleaned_data['recipients']:
+            em.bcc_from_users(users.filter(is_board=True), append=True)
+        if 'staff' in self.cleaned_data['recipients']:
+            em.bcc_from_users(users.filter(is_staff=True), append=True)
+        if 'current members' in self.cleaned_data['recipients']:
+            em.bcc_from_users(users.filter(is_member=True), append=True)
+        if 'joad' in self.cleaned_data['recipients']:
             students = Student.objects.filter(is_joad=True)
-            em.bcc_from_students(students)
+            em.bcc_from_students(students, append=True)
         # elif self.cleaned_data['recipients'] == 'all members':
         #     em.bcc_from_users(users.filter(is_staff=True))
-        elif self.cleaned_data['recipients'] == 'students':
+        if 'students' in self.cleaned_data['recipients']:
             days = self.cleaned_data.get('include_days', 0)
             if days is None:
                 days = 90
             d = timezone.now() - timezone.timedelta(days=days)
             students = Student.objects.filter(registration__event__event_date__gte=d, registration__attended=True)
             logger.warning(students)
-            em.bcc_from_students(students)
-        else:  # pragma no cover
-            logging.debug('return')
-            return
-        em.send_message(self.cleaned_data['subject'], self.cleaned_data['message'])
+            em.bcc_from_students(students, append=True)
+        # else:  # pragma no cover
+        #     logging.debug('return')
+        #     return
+        logger.warning(em.bcc)
+        if len(em.bcc):
+            em.send_message(self.cleaned_data['subject'], self.cleaned_data['message'])
