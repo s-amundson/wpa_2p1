@@ -1,6 +1,6 @@
 from src import MyModelForm
 from django.forms.widgets import CheckboxInput, SelectDateWidget
-from django.utils.datetime_safe import date
+from django.utils import timezone
 
 from ..models import User
 import logging
@@ -26,5 +26,4 @@ class UserForm(MyModelForm):
 
         self.fields['is_member'].widget.attrs.update({'disabled': 'disabled'})
         self.fields['instructor_expire_date'].widget = SelectDateWidget(
-            years=range(date.today().year, date.today().year + 3, 1))
-        # self.fields['instructor_expire_date'].widget.attrs.update({'class': 'form-control'})
+            years=range(timezone.datetime.today().year, timezone.datetime.today().year + 3, 1))

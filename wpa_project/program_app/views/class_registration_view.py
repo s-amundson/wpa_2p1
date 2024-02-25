@@ -17,6 +17,7 @@ from event.views.registration_view import RegistrationSuperView
 from ..src import ClassRegistrationHelper
 from ..tasks import wait_list_email
 from src.mixin import BoardMixin
+from src.years import sub_years
 from payment.models.card import Card
 
 logger = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ class ClassRegistrationView(RegistrationSuperView):
             return self.has_error(form, 'No students selected')
 
         # check for underage students
-        of_age_date = self.events[0].event_date.date().replace(year=self.events[0].event_date.date().year - 9)
+        of_age_date = sub_years(self.events[0].event_date.date(), 9)
         if self.students.filter(dob__gt=of_age_date).count():
             return self.has_error(form, 'Student must be at least 9 years old to participate')
 

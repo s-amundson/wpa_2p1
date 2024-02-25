@@ -3,6 +3,7 @@ from django.db.models import Q
 
 from student_app.src import StudentHelper
 from student_app.models import Student
+from src.years import sub_years
 
 import logging
 logger = logging.getLogger(__name__)
@@ -21,7 +22,8 @@ class EventAttendanceForm(forms.Form):
             'attended', 'student__last_name')
         self.class_date = self.event.event_date
 
-        self.adult_dob = self.class_date.date().replace(year=self.class_date.year - 18)
+        # self.adult_dob = self.class_date.date().replace(year=self.class_date.year - 18)
+        self.adult_dob = sub_years(self.class_date.date(), 18)
         self.new_students = registrations.exclude(student__in=staff)
         self.new_students_waiting = self.new_students.filter(pay_status__in=['waiting', 'waiting_error'])
         if self.event.type != 'work':

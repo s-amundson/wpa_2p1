@@ -1,6 +1,6 @@
 import logging
 import uuid
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.apps import apps
 from django.utils import timezone
@@ -25,6 +25,7 @@ class TestsSignal(TestCase):
         self.test_user = self.User.objects.get(pk=2)
         self.client.force_login(self.test_user)
 
+    # @tag('temp')
     def test_membership_signal_good_new(self):
         # Get the page, if not super or board, page is forbidden
         self.client.force_login(self.test_user)
@@ -57,6 +58,7 @@ class TestsSignal(TestCase):
         members = Member.objects.all()
         self.assertEqual(len(members), 2)
 
+    # @tag('temp')
     def test_membership_signal_different_uuid(self):
         # Get the page, if not super or board, page is forbidden
         self.client.force_login(self.test_user)
@@ -89,6 +91,7 @@ class TestsSignal(TestCase):
         members = Member.objects.all()
         self.assertEqual(len(members), 0)
 
+    # @tag('temp')
     def test_membership_signal_good_renew(self):
         # Get the page, if not super or board, page is forbidden
         self.client.force_login(self.test_user)
@@ -133,6 +136,7 @@ class TestsSignal(TestCase):
         self.assertEqual(len(members), 2)
         self.assertTrue(members[0].expire_date > date.today() + timedelta(days=380))
 
+    # @tag('temp')
     def test_membership_signal_bad_new(self):
         # Get the page, if not super or board, page is forbidden
         self.client.force_login(self.test_user)

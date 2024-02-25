@@ -1,6 +1,6 @@
 import logging
 from django.conf import settings
-from captcha.fields import ReCaptchaField
+from django_recaptcha.fields import ReCaptchaField
 from src.model_form import MyModelForm
 from ..models import Message
 logger = logging.getLogger(__name__)

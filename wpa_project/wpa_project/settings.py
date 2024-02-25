@@ -198,7 +198,7 @@ INSTALLED_APPS = [
     "sslserver",
     'django_sendfile',
     'django_celery_beat',
-    'captcha',
+    'django_recaptcha',
 ]
 
 LOGIN_REDIRECT_URL = 'registration:profile'
@@ -297,7 +297,7 @@ RECAPTCHA_PUBLIC_KEY = get_secret('RECAPTCHA')['SITE_KEY']
 RECAPTCHA_SECRET_KEY_V3 = get_secret('RECAPTCHA')['SECRET_KEY_V3']
 RECAPTCHA_SITE_KEY_V3 = get_secret('RECAPTCHA')['SITE_KEY_V3']
 
-SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
 ROOT_URLCONF = 'wpa_project.urls'
 

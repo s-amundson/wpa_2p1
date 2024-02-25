@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django.conf import settings
-from captcha.fields import ReCaptchaField
+from django_recaptcha.fields import ReCaptchaField
 
 from contact_us.tasks import validate_email
 from contact_us.models import Email

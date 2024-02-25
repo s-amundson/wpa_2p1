@@ -584,6 +584,7 @@ class TestsClassRegistration(TestCase):
         self.assertRedirects(response, reverse('programs:wait_list', kwargs={'event': bc.event.id}))
         wait_list_email.assert_called_with([cr[1].id, cr[2].id])
 
+    # @tag('temp')
     def test_class_register_wait_twice(self):
         bc1 = BeginnerClass.objects.get(pk=1)
         bc1.class_type = 'beginner'

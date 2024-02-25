@@ -1,6 +1,6 @@
 from django import forms
 from django.utils import timezone
-from django.utils.datetime_safe import date
+
 
 import logging
 
@@ -14,8 +14,8 @@ class StaffReportForm(forms.Form):
 
         self.fields['start_date'] = forms.DateField(initial=timezone.datetime(year=2022, month=1, day=1),
                                                     widget=forms.SelectDateWidget(
-                                                        years=range(date.today().year, 2022, -1)))
+                                                        years=range(timezone.datetime.today().year, 2022, -1)))
         self.fields['end_date'] = forms.DateField(initial=timezone.now().date(),
                                                   widget=forms.SelectDateWidget(
-                                                      years=range(date.today().year, 2022, -1)))
+                                                      years=range(timezone.datetime.today().year, 2022, -1)))
 

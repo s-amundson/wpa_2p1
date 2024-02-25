@@ -1,5 +1,5 @@
 from django.forms import SelectDateWidget
-from django.utils.datetime_safe import date
+from django.utils import timezone
 import logging
 from src.model_form import MyModelForm
 from ..models import Session
@@ -17,4 +17,4 @@ class SessionForm(MyModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['start_date'].widget = SelectDateWidget(
-            years=range(date.today().year, date.today().year + 3, 1))
+            years=range(timezone.datetime.today().year, timezone.datetime.today().year + 3, 1))
