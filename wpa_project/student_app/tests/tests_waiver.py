@@ -56,7 +56,7 @@ class TestsWaiver(TestCase):
         waiver_pdf(student.id, student.first_name, student.last_name)
         self.assertEqual(len(mail.outbox), 1)
 
-    @tag('temp')
+    # @tag('temp')
     def test_post_waiver_invalid(self):
         self.img['signature'] = self.invalid_sig
         response = self.client.post(reverse(self.url, kwargs={'student_id': 1}), self.img, secure=True)

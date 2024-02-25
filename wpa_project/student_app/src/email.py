@@ -40,8 +40,13 @@ class EmailMessage(EmailMultiAlternatives):
         self.send()
 
     def bcc_append(self, address):
-        if address not in self.bcc:
+        logger.warning(address)
+        if address not in self.bcc and EmailAddress.objects.is_verified(address):
             self.bcc.append(address)
+
+    def bcc_append_user(self, user):
+        if user.is_active:
+            self.bcc_append(EmailAddress.objects.get_primary(user))
 
     def bcc_from_students(self, queryset, append=False):
         if not append:
@@ -49,18 +54,18 @@ class EmailMessage(EmailMultiAlternatives):
 
         for row in queryset:
             if row.user is not None:
-                self.bcc_append(EmailAddress.objects.get_primary(row.user))
+                self.bcc_append_user(row.user)
             else:
                 family = row.student_family.student_set.filter(user__isnull=False)
                 for s in family:
-                    self.bcc_append(EmailAddress.objects.get_primary(s.user))
+                    self.bcc_append_user(s.user)
 
     def bcc_from_users(self, users, append=False):
         if not append:
             self.bcc = []
 
         for user in users:
-            self.bcc_append(EmailAddress.objects.get_primary(user))
+            self.bcc_append_user(user)
 
     def get_email_address(self, user):
         if settings.EMAIL_DEBUG:  # pragma: no cover

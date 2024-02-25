@@ -133,10 +133,14 @@ class TestsEmail(TestCase):
                 reg_time="2021-06-09",
                 attended=True
             )
+        u = User.objects.get(pk=3)
+        u.is_active = False
+        u.save()
+
         self.send_dict['recipients'] = 'students'
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(len(mail.outbox[0].bcc), 5)
+        self.assertEqual(len(mail.outbox[0].bcc), 4)
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
         self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
 
