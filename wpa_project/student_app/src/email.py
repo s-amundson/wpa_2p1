@@ -40,8 +40,7 @@ class EmailMessage(EmailMultiAlternatives):
         self.send()
 
     def bcc_append(self, address):
-        logger.warning(address)
-        if address not in self.bcc and EmailAddress.objects.is_verified(address):
+        if address.verified and address not in self.bcc:
             self.bcc.append(address)
 
     def bcc_append_user(self, user):
