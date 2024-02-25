@@ -23,7 +23,7 @@ class SendEmailForm(forms.Form):
         #     widget=forms.CheckboxInput(attrs={'class': "m-2"}),
         #     label='Returning Students Only',
         #     required=False)
-        self.fields['include_days'] = forms.IntegerField(max_value=90, min_value=0, initial=90, required=False)
+        self.fields['include_days'] = forms.IntegerField(max_value=1000, min_value=0, initial=90, required=False)
         # self.fields['recipients'] = forms.ChoiceField(choices=choices, widget=forms.RadioSelect())
         self.fields['recipients'] = forms.MultipleChoiceField(choices=choices, widget=forms.CheckboxSelectMultiple())
         self.fields['subject'] = forms.CharField(initial='Message from Woodley Park Archers')
