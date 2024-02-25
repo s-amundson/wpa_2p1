@@ -83,7 +83,13 @@ class EmailMessage(EmailMultiAlternatives):
         d = {'name': '', 'paragraphs': paragraphs}
         self.body = get_template('student_app/email/paragraph_message.txt').render(d)
         self.attach_alternative(get_template('student_app/email/paragraph_message.html').render(d), 'text/html')
-        self.send()
+        send_list = self.bcc
+        for i in range(0, len(send_list), 500):
+            if len(send_list) - i > 500:
+                self.bcc = send_list[i: i + 500]
+            else:
+                self.bcc = send_list[i: len(send_list)]
+            self.send()
 
     def invite_user_email(self, send_student, add_student):
         self.to = [add_student.email]

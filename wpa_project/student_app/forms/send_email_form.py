@@ -58,6 +58,6 @@ class SendEmailForm(forms.Form):
         # else:  # pragma no cover
         #     logging.debug('return')
         #     return
-        logger.warning(em.bcc)
+        logger.warning(len(em.bcc))
         if len(em.bcc):
             em.send_message(self.cleaned_data['subject'], self.cleaned_data['message'])
