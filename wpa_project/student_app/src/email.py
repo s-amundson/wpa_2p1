@@ -84,9 +84,9 @@ class EmailMessage(EmailMultiAlternatives):
         self.body = get_template('student_app/email/paragraph_message.txt').render(d)
         self.attach_alternative(get_template('student_app/email/paragraph_message.html').render(d), 'text/html')
         send_list = self.bcc
-        for i in range(0, len(send_list), 500):
-            if len(send_list) - i > 500:
-                self.bcc = send_list[i: i + 500]
+        for i in range(0, len(send_list), settings.EMAIL_BCC_LIMIT):
+            if len(send_list) - i > settings.EMAIL_BCC_LIMIT:
+                self.bcc = send_list[i: i + settings.EMAIL_BCC_LIMIT]
             else:
                 self.bcc = send_list[i: len(send_list)]
             self.send()
