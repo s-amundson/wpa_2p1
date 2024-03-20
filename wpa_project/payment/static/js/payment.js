@@ -73,8 +73,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log('card button clicked');
         if(cost_no_donation + parseFloat($("#id_donation").val()) > 0) {
             console.log('pay');
-            await handlePaymentMethodSubmission(event, card);
-            $("#id_amount").prop("disabled", false);
+            if(cost_no_donation <= parseFloat($("#id_volunteer_points").val())) {
+                console.log('pay with points')
+            } else {
+                await handlePaymentMethodSubmission(event, card);
+                $("#id_amount").prop("disabled", false);
+            }
         }
         else {
 //            await createPayment('no-payment')
