@@ -47,8 +47,9 @@ class PaymentForm(forms.ModelForm):
         if self.user and self.user.student_set.last() and self.user.student_set.last().student_family:
             self.available_volunteer_points = VolunteerRecord.objects.get_family_points(
                 self.user.student_set.last().student_family)
-        self.fields['volunteer_points'] = forms.FloatField(max_value=self.available_volunteer_points, min_value=0,
-                                                           required=False)
+
+        self.fields['volunteer_points'] = forms.FloatField(
+            max_value=min(self.amount_initial, self.available_volunteer_points), min_value=0, required=False)
         self.fields['card'].choices = self.card_choices()
         self.fields['category'].widget = forms.HiddenInput()
         self.fields['donation_note'].widget.attrs.update({'cols': 30, 'rows': 3, 'class': 'form-control'})

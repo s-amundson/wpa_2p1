@@ -31,22 +31,21 @@ def membership_expire_notice():
     em = EmailMessage()
     for member in notice_members:
         em.expire_notice(member)
-        # pass
 
 
 @shared_task
 def membership_expire_update():
-    celery_logger.warning('membership membership expire update')
+    logger.warning('membership membership expire update')
     # Update the memberships that have expired.
     d = timezone.localtime(timezone.now()).date()
     try:
         expired_members = Member.objects.filter(expire_date__lt=d)
-        celery_logger.warning(expired_members)
+        logger.warning(expired_members)
         for member in expired_members:
             u = member.student.user
             logging.warning(u.id)
             u.is_member = False
             u.save()
     except Exception as e:
-        celery_logger.error(traceback.format_exc())
+        logger.error(traceback.format_exc())
         # Logs the error appropriately.
