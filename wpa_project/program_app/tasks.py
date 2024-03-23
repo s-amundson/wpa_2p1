@@ -114,6 +114,7 @@ def instructor_canceled(event):
 
 @shared_task
 def membership_expire():
+    celery_logger.warning('program membership expire')
     # Update the memberships that have expired.
     d = timezone.localtime(timezone.now()).date()
     expired_members = Member.objects.filter(expire_date__lt=d)
@@ -123,7 +124,7 @@ def membership_expire():
         u.is_member = False
         u.save()
 
-    logger.warning(d + timedelta(days=14))
+    celery_logger.warning(d + timedelta(days=14))
     print(d + timedelta(days=14))
     # Send notifications to members that are about to expire
     notice_members = Member.objects.filter(expire_date__in=[d + timedelta(days=7), d + timedelta(days=14)])
