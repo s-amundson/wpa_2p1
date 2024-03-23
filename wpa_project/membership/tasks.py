@@ -9,6 +9,13 @@ logger = logging.getLogger(__name__)
 from celery.utils.log import get_task_logger
 celery_logger = get_task_logger(__name__)
 
+
+@shared_task
+def debug_task():
+    celery_logger.debug('membership debug task')
+    celery_logger.warning('membership debug task')
+
+
 @shared_task
 def membership_expire():
     # Update the memberships that have expired.
