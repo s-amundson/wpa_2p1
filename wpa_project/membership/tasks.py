@@ -19,8 +19,10 @@ def membership_expire():
         u.is_member = False
         u.save()
 
+    logger.warning(d + timedelta(days=14))
     # Send notifications to members that are about to expire
     notice_members = Member.objects.filter(expire_date=d + timedelta(days=14))
+    logger.warning(notice_members)
     em = EmailMessage()
     for member in notice_members:
         em.expire_notice(member)
