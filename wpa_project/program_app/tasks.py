@@ -3,12 +3,13 @@ from celery import shared_task
 from django.utils import timezone
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from django.conf import settings
+from datetime import timedelta
 
 from .src import ClassRegistrationHelper, UpdatePrograms, EmailMessage as ProgramEmailMessage
 from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
-from membership.tasks import membership_expire
+from membership.models import Member
 
 import logging
 logger = logging.getLogger('program_app')
@@ -42,7 +43,7 @@ def daily_update():
 @shared_task
 def debug_task():
     celery_logger.warning('program debug task')
-    membership_expire()
+    # membership_expire()
 
 
 @shared_task
@@ -110,6 +111,28 @@ def instructor_canceled(event):
         email_message = ProgramEmailMessage()
         email_message.instructor_canceled_email(event, len(reg))
 
+
+@shared_task
+def membership_expire():
+    # Update the memberships that have expired.
+    d = timezone.localtime(timezone.now()).date()
+    expired_members = Member.objects.filter(expire_date__lt=d)
+    for member in expired_members:
+        u = member.student.user
+        logging.debug(u.id)
+        u.is_member = False
+        u.save()
+
+    logger.warning(d + timedelta(days=14))
+    print(d + timedelta(days=14))
+    # Send notifications to members that are about to expire
+    notice_members = Member.objects.filter(expire_date__in=[d + timedelta(days=7), d + timedelta(days=14)])
+    logger.critical(notice_members)
+    celery_logger.critical(notice_members)
+    print(notice_members)
+    em = EmailMessage()
+    for member in notice_members:
+        em.expire_notice(member)
 
 @shared_task
 def refund_class(beginner_class, message=''):
