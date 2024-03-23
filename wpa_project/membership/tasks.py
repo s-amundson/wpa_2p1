@@ -22,12 +22,13 @@ def membership_expire():
     celery_logger.warning('membership membership expire')
     # Update the memberships that have expired.
     d = timezone.localtime(timezone.now()).date()
-    # expired_members = Member.objects.filter(expire_date__lt=d)
-    # for member in expired_members:
-    #     u = member.student.user
-    #     logging.debug(u.id)
-    #     u.is_member = False
-    #     u.save()
+    expired_members = Member.objects.filter(expire_date__lt=d)
+    celery_logger.warning(expired_members)
+    for member in expired_members:
+        u = member.student.user
+        logging.warning(u.id)
+        u.is_member = False
+        u.save()
 
     logger.warning(d + timedelta(days=14))
     # Send notifications to members that are about to expire
