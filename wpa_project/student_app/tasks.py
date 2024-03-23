@@ -25,6 +25,7 @@ logger = get_task_logger(__name__)
 
 @shared_task
 def student_membership_expire():
+    logger.warning('student membership expire')
     membership_expire()
 
 
