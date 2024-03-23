@@ -19,22 +19,21 @@ def debug_task():
 
 @shared_task
 def membership_expire():
+    celery_logger.warning('membership membership expire')
     # Update the memberships that have expired.
     d = timezone.localtime(timezone.now()).date()
-    expired_members = Member.objects.filter(expire_date__lt=d)
-    for member in expired_members:
-        u = member.student.user
-        logging.debug(u.id)
-        u.is_member = False
-        u.save()
+    # expired_members = Member.objects.filter(expire_date__lt=d)
+    # for member in expired_members:
+    #     u = member.student.user
+    #     logging.debug(u.id)
+    #     u.is_member = False
+    #     u.save()
 
     logger.warning(d + timedelta(days=14))
-    print(d + timedelta(days=14))
     # Send notifications to members that are about to expire
     notice_members = Member.objects.filter(expire_date__in=[d + timedelta(days=7), d + timedelta(days=14)])
     logger.critical(notice_members)
     celery_logger.critical(notice_members)
-    print(notice_members)
     em = EmailMessage()
     for member in notice_members:
         em.expire_notice(member)

@@ -10,6 +10,7 @@ from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
 from membership.models import Member
+from membership.tasks import membership_expire
 
 import logging
 logger = logging.getLogger('program_app')
@@ -43,8 +44,9 @@ def daily_update():
 @shared_task
 def debug_task():
     celery_logger.warning('program debug task')
-    # membership_expire()
-
+    celery_logger.warning('to membership expire')
+    membership_expire()
+    celery_logger.warning('ran membership expire')
 
 @shared_task
 def init_class():  # pragma: no cover
@@ -113,7 +115,7 @@ def instructor_canceled(event):
 
 
 @shared_task
-def membership_expire():
+def program_membership_expire():
     celery_logger.warning('program membership expire')
     # Update the memberships that have expired.
     d = timezone.localtime(timezone.now()).date()
@@ -129,9 +131,7 @@ def membership_expire():
     print(d + timedelta(days=14))
     # Send notifications to members that are about to expire
     notice_members = Member.objects.filter(expire_date__in=[d + timedelta(days=7), d + timedelta(days=14)])
-    logger.critical(notice_members)
-    celery_logger.critical(notice_members)
-    print(notice_members)
+    celery_logger.warning(notice_members)
     em = EmailMessage()
     for member in notice_members:
         em.expire_notice(member)
