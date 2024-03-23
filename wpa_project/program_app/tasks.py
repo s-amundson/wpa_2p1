@@ -39,6 +39,11 @@ def daily_update():
 
 
 @shared_task
+def debug_task():
+    celery_logger.warning('program debug task')
+
+
+@shared_task
 def init_class():  # pragma: no cover
     # used to set up classes for the first time, should only need to be run once.
     UpdatePrograms().add_weekly()

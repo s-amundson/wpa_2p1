@@ -5,9 +5,9 @@ from celery import shared_task
 
 from membership.models import Member
 from membership.src import EmailMessage
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 from celery.utils.log import get_task_logger
-logger = get_task_logger(__name__)
+celery_logger = get_task_logger(__name__)
 
 @shared_task
 def membership_expire():
@@ -23,12 +23,13 @@ def membership_expire():
     logger.warning(d + timedelta(days=14))
     print(d + timedelta(days=14))
     # Send notifications to members that are about to expire
-    notice_members = Member.objects.filter(expire_date=d + timedelta(days=14))
-    logger.warning(notice_members)
+    notice_members = Member.objects.filter(expire_date__in=[d + timedelta(days=7), d + timedelta(days=14)])
+    logger.critical(notice_members)
+    celery_logger.critical(notice_members)
     print(notice_members)
     em = EmailMessage()
     for member in notice_members:
-        # em.expire_notice(member)
-        pass
+        em.expire_notice(member)
+        # pass
 
 
