@@ -7,7 +7,7 @@ from datetime import timedelta
 
 from student_app.models import Student, User
 from ..models import Level, Member
-from ..tasks import membership_expire
+from ..tasks import membership_expire_notice, membership_expire_update
 logger = logging.getLogger(__name__)
 
 
@@ -23,7 +23,7 @@ class TestsTasks(TestCase):
         member = Member(student=student, expire_date=d_now - timedelta(days=6), level=Level.objects.get(pk=1),
                         join_date=d_now - timedelta(days=600))
         member.save()
-        membership_expire()
+        membership_expire_update()
         s = Student.objects.get(pk=2)
         self.assertFalse(s.user.is_member)
 
@@ -36,7 +36,7 @@ class TestsTasks(TestCase):
         member = Member(student=student, expire_date=d_now + timedelta(days=30), level=Level.objects.get(pk=1),
                         join_date=d_now - timedelta(days=600))
         member.save()
-        membership_expire()
+        membership_expire_update()
         s = Student.objects.get(pk=2)
         self.assertTrue(s.user.is_member)
 
@@ -52,7 +52,7 @@ class TestsTasks(TestCase):
                         join_date=d_now - timedelta(days=600))
         member.save()
         logging.debug(member.expire_date)
-        membership_expire()
+        membership_expire_notice()
         s = Student.objects.get(pk=2)
         self.assertTrue(s.user.is_member)
         self.assertEqual(len(mail.outbox), 1)

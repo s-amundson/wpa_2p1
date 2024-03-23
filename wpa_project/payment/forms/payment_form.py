@@ -122,7 +122,7 @@ class PaymentForm(forms.ModelForm):
 
         if self.log is not None:
             pay_dict = {'line_items': self.line_items,
-                        'total': self.cleaned_data['amount'] + volunteer_points,
+                        'total': self.cleaned_data['amount'],
                         'receipt': self.log.receipt,
                         'instructions': instructions}
             if self.user is not None and not duplicate:

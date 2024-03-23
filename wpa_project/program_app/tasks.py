@@ -9,8 +9,7 @@ from .src import ClassRegistrationHelper, UpdatePrograms, EmailMessage as Progra
 from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
-from membership.models import Member
-from membership.tasks import membership_expire
+from membership.tasks import membership_expire_notice, membership_expire_update
 
 import logging
 logger = logging.getLogger('program_app')
@@ -45,7 +44,7 @@ def daily_update():
 def debug_task():
     celery_logger.warning('program debug task')
     celery_logger.warning('to membership expire')
-    membership_expire()
+    membership_expire_notice()
     celery_logger.warning('ran membership expire')
 
 @shared_task
@@ -117,9 +116,12 @@ def instructor_canceled(event):
 @shared_task
 def program_membership_expire():
     celery_logger.warning('program membership expire')
-    celery_logger.warning('to membership expire')
-    membership_expire()
-    celery_logger.warning('ran membership expire')
+    celery_logger.warning('to membership expire notice')
+    membership_expire_notice()
+    celery_logger.warning('ran membership expire notice')
+    membership_expire_update()
+    celery_logger.warning('ran membership expire update')
+
 
 @shared_task
 def refund_class(beginner_class, message=''):

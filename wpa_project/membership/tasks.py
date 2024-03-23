@@ -1,4 +1,5 @@
 import logging
+import traceback
 from django.utils import timezone
 from datetime import timedelta
 from celery import shared_task
@@ -18,18 +19,10 @@ def debug_task():
 
 
 @shared_task
-def membership_expire():
-    celery_logger.warning('membership membership expire')
-    # Update the memberships that have expired.
-    d = timezone.localtime(timezone.now()).date()
-    expired_members = Member.objects.filter(expire_date__lt=d)
-    celery_logger.warning(expired_members)
-    for member in expired_members:
-        u = member.student.user
-        logging.warning(u.id)
-        u.is_member = False
-        u.save()
+def membership_expire_notice():
+    celery_logger.warning('membership membership expire notice')
 
+    d = timezone.localtime(timezone.now()).date()
     logger.warning(d + timedelta(days=14))
     # Send notifications to members that are about to expire
     notice_members = Member.objects.filter(expire_date__in=[d + timedelta(days=7), d + timedelta(days=14)])
@@ -40,4 +33,19 @@ def membership_expire():
         em.expire_notice(member)
         # pass
 
-
+@shared_task
+def membership_expire_update():
+    celery_logger.warning('membership membership expire update')
+    # Update the memberships that have expired.
+    d = timezone.localtime(timezone.now()).date()
+    try:
+        expired_members = Member.objects.filter(expire_date__lt=d)
+        celery_logger.warning(expired_members)
+        for member in expired_members:
+            u = member.student.user
+            logging.warning(u.id)
+            u.is_member = False
+            u.save()
+    except Exception as e:
+        logging.error(traceback.format_exc())
+        # Logs the error appropriately.

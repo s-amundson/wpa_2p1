@@ -235,13 +235,14 @@ class TestsPayment(TestCase):
         # self.assertTemplateUsed(response, 'payment/view_payment.html')
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
 
+    # @tag('temp')
     def test_payment_success_volunteer_points(self):
         student = self.test_user.student_set.last()
         vr = VolunteerRecord.objects.create(
             student=student,
             volunteer_points=6.5
         )
-        self.pay_dict['amount'] = 0
+        self.pay_dict['amount'] = 5
         self.pay_dict['volunteer_points'] = 5
         self.pay_dict['source_id'] = ''
 
@@ -254,5 +255,6 @@ class TestsPayment(TestCase):
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Payment Confirmation')
-        self.assertTrue(mail.outbox[0].body.find('Class on None student: test_user') >= 0)
+        self.assertTrue(mail.outbox[0].body.find('Class on None student: test_user') > 0)
+        self.assertTrue(mail.outbox[0].body.find('Total   5') > 0)
         self.assertEqual(VolunteerRecord.objects.get_family_points(student.student_family), 1.5)

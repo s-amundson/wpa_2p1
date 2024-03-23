@@ -13,7 +13,7 @@
         <div class="col">
             <form method="post">
                 {% csrf_token %}
-
+                {{ form.errors }}
                 <div class="row p-3">
                     <div class="col-3 text-right">
                         Select students to join:
@@ -22,7 +22,7 @@
                         {% for student in form.get_boxes %}
                             <div class="row">
                                 <div class="col input-group input-group-md">
-                                    {{ student }} {{ student.label }}
+                                    {{ student.errors }} {{ student }} {{ student.label }}
                                 </div>
                             </div>
                         {% endfor %}

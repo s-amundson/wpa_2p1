@@ -13,8 +13,9 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=PaymentLog)
 def member_update(sender, instance, created, **kwargs):
-    memberships = Membership.objects.filter(idempotency_key=instance.idempotency_key)
+    memberships = Membership.objects.filter(idempotency_key=instance.idempotency_key, pay_status='start')
     if instance.status in ["SUCCESS", 'COMPLETED', 'volunteer points', 'comped']:
+        logger.warning(memberships)
         for membership in memberships:
             membership.pay_status = 'paid'
             for student in membership.students.all():
