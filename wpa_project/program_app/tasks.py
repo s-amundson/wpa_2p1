@@ -8,6 +8,7 @@ from .src import ClassRegistrationHelper, UpdatePrograms, EmailMessage as Progra
 from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
+from membership.tasks import membership_expire
 
 import logging
 logger = logging.getLogger('program_app')
@@ -41,6 +42,7 @@ def daily_update():
 @shared_task
 def debug_task():
     celery_logger.warning('program debug task')
+    membership_expire()
 
 
 @shared_task
