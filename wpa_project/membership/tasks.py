@@ -33,6 +33,7 @@ def membership_expire_notice():
         em.expire_notice(member)
         # pass
 
+
 @shared_task
 def membership_expire_update():
     celery_logger.warning('membership membership expire update')
@@ -47,5 +48,5 @@ def membership_expire_update():
             u.is_member = False
             u.save()
     except Exception as e:
-        logging.error(traceback.format_exc())
+        celery_logger.error(traceback.format_exc())
         # Logs the error appropriately.
