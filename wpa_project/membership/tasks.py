@@ -14,6 +14,7 @@ celery_logger = get_task_logger(__name__)
 def debug_task():
     celery_logger.debug('membership debug task')
     celery_logger.warning('membership debug task')
+    logger.warning('membership debug task')
 
 
 @shared_task
