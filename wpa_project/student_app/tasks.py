@@ -12,6 +12,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Frame, Image, Spacer
 from reportlab.lib.pagesizes import letter
 
+from membership.tasks import membership_expire
 from student_app.src import EmailMessage
 from .models import Student, User
 
@@ -20,6 +21,11 @@ import os
 # logger = get_task_logger(__name__)
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
+
+
+@shared_task
+def student_membership_expire():
+    membership_expire()
 
 
 @shared_task
