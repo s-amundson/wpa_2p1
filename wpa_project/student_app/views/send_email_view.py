@@ -3,6 +3,7 @@ from django.views.generic import FormView
 from django.urls import reverse_lazy
 
 from ..forms import SendEmailForm
+from ..tasks import send_email
 
 
 class SendEmailView(UserPassesTestMixin, FormView):
@@ -22,7 +23,8 @@ class SendEmailView(UserPassesTestMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        form.send_message()
+        send_email.delay(form.cleaned_data['recipients'], form.cleaned_data['subject'], form.cleaned_data['message'],
+                         form.cleaned_data.get('include_days', None))
         return super().form_valid(form)
 
     def test_func(self):

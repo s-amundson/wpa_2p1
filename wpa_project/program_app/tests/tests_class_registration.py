@@ -3,7 +3,7 @@ import logging
 import uuid
 from unittest.mock import patch
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 
@@ -96,10 +96,14 @@ class TestsClassRegistration(TestCase):
         response = self.client.get(reverse('programs:class_registration'), secure=True)
         self.assertRedirects(response, reverse('registration:profile'))
 
+    # @tag('temp')
     def test_class_register_good(self):
+        bc = BeginnerClass.objects.get(pk=1)
+        bc.class_type = 'beginner'
+        bc.save()
 
         # add a user to the class
-        self.client.post(reverse('programs:class_registration'),
+        response = self.client.post(reverse('programs:class_registration'),
                          self.get_post_dict([self.event.id]), secure=True)
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'open')
@@ -109,6 +113,8 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(self.client.session['line_items'][0]['name'],
                          f'Class on {str(self.event.event_date)[:10]} student: Charles')
         self.assertEqual(self.client.session['payment_category'], 'intro')
+        self.assertTrue(self.client.session['instructions'].startswith(
+                            'Please plan to be at the range 30 minutes prior to the class to allow us to sign you in.'))
         self.assertEqual(cr[0].user, self.test_user)
 
     def test_class_register_over_limit(self):
@@ -267,6 +273,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(self.client.session['message'], 'Address form is required')
         self.assertRedirects(response, reverse('registration:profile'))
 
+    # @tag('temp')
     def test_class_register_return_for_payment(self):
         # add 1 beginner students and 1 returnee.
 
@@ -280,6 +287,8 @@ class TestsClassRegistration(TestCase):
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': 1}), secure=True)
         self.assertEqual(self.client.session['idempotency_key'], str(cr[0].idempotency_key))
         self.assertEqual(self.client.session['payment_category'], 'intro')
+        self.assertTrue(self.client.session['instructions'].startswith(
+                            'Please plan to be at the range 15 minutes prior to the class to allow us to sign you in.'))
 
     def test_class_register_instructor_current(self):
         # make user instructor
@@ -463,6 +472,27 @@ class TestsClassRegistration(TestCase):
         response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
         self.assertRedirects(response, reverse('payment:make_payment'))
 
+    # @tag('temp')
+    def test_resume_registration_no_wait_with_cancel(self):
+        cr = Registration(event=self.event,
+                          student=Student.objects.get(pk=4),
+                          pay_status='start',
+                          idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+                          reg_time='2021-06-09',
+                          attended=False)
+        cr.save()
+        Registration.objects.create(
+            event=self.event,
+            student=Student.objects.get(pk=4),
+            pay_status='canceled',
+            idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52f",
+            reg_time='2021-06-09',
+            attended=False)
+        response = self.client.get(reverse('programs:resume_registration', kwargs={'reg_id': cr.id}), secure=True)
+        self.assertRedirects(response, reverse('payment:make_payment'))
+        self.assertEqual(len(self.client.session['line_items']), 1)
+        logger.warning(self.client.session['line_items'])
+
     def test_new_student_register_twice(self):
         d = timezone.now() + datetime.timedelta(days=2)
         bc = BeginnerClass.objects.get(pk=1)
@@ -554,6 +584,7 @@ class TestsClassRegistration(TestCase):
         self.assertRedirects(response, reverse('programs:wait_list', kwargs={'event': bc.event.id}))
         wait_list_email.assert_called_with([cr[1].id, cr[2].id])
 
+    # @tag('temp')
     def test_class_register_wait_twice(self):
         bc1 = BeginnerClass.objects.get(pk=1)
         bc1.class_type = 'beginner'

@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class BeginnerClassView(UserPassesTestMixin, FormView):
-    template_name = 'program_app/beginner_class.html'
+    template_name = 'event/event_update.html'
     form_class = BeginnerClassForm
     success_url = reverse_lazy('programs:class_list')
     beginner_class = None
@@ -27,6 +27,12 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['email_form'] = SendClassEmailForm(beginner_class=self.beginner_class)
+        # context['name'] = 'Student'
+        if self.beginner_class is not None:
+            context['event'] = str(self.beginner_class.event)
+        context['event_type'] = "class"
+        context['message'] = ''
+        context['refund'] = True
         return context
 
     def get_form_kwargs(self):

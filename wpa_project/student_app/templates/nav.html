@@ -84,6 +84,7 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="{% url 'programs:class_list'%}">Intro Class List</a>
                             <a class="dropdown-item" href="{% url 'registration:search'%}">Search Students</a>
+                            <a class="dropdown-item" href="{% url 'payment:reimbursement_list'%}">Reimbursement List</a>
 
                             {% if user.is_board %}
                                 <div class="dropdown-divider"></div>
@@ -100,6 +101,7 @@
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'information:announcement_list'%}">Announcements</a>
                                 <a class="dropdown-item" href="{% url 'information:staff_list'%}">Staff List</a>
+                                <a class="dropdown-item" href="{% url 'facebook:add_post'%}">Add Facebook Post</a>
                             {% endif %}
                         </div>
                     </li>
@@ -128,11 +130,16 @@
                         <a class="dropdown-item" href="{% url 'programs:google_calendar' %}">Events</a>
                     </div>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        Account
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'registration:profile' %}">Profile</a>
+                        <a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a>
+                        <a class="dropdown-item" href="{% url 'account_change_password' %}">Change Password</a>
+                    </div>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'registration:profile' %}">Profile</a>
 
             {% else %}
                 <li class="nav-item dropdown">

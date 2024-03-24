@@ -1,18 +1,19 @@
-coverage==7.2.7
-Django==4.2.1
-django-allauth==0.54.0
-django-celery-beat==2.5.0
+coverage==7.4.3
+Django==5.0.2
+django-allauth==0.61.1
+# django-celery-beat was at version 2.5.0 but 2.5.0 does not support Django > 5 so using a git version until pip is updated.
+django-celery-beat @ git+https://github.com/celery/django-celery-beat@f66796b9c5c9e47d118cb5b41d970f07cce72bbe
 django-csp==3.7
-django-ipware==5.0.0
+django-ipware==6.0.4
 django-pandas==0.6.6
-django-recaptcha==3.0.0
-django-sendfile2==0.7.0
+django-recaptcha==4.0.0
+django-sendfile2==0.7.1
 django-sslserver==0.22
-gunicorn==20.1.0
-numpy==1.24.3
-phonenumbers==8.13.13
-psycopg2-binary==2.9.6
+gunicorn==21.2.0
+numpy==1.26.4
+phonenumbers==8.13.30
+psycopg2-binary==2.9.9
 pyenchant==3.2.2
-reportlab==4.0.0
-scikit-learn==1.2.2
-squareup==27.0.0.20230517
+reportlab==4.0.6
+scikit-learn==1.4.1.post1
+squareup==35.0.0.20240222

@@ -7,6 +7,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class VolunteerAward(models.Model):
+    events = models.ManyToManyField(Event)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, default=None)
+    received = models.BooleanField(default=False)
+    award = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    award_date = models.DateTimeField(auto_now=True)
+
 class VolunteerEventManager(models.Manager):
     def get_queryset(self):
         return VolunteerEventQueryset(self.model, using=self._db)

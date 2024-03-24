@@ -1,7 +1,7 @@
 import logging
 import json
 from django.core import mail
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 from allauth.account.models import EmailAddress
@@ -249,6 +249,7 @@ class TestsStudent(TestCase):
         response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 2}), secure=True)
         self.assertRedirects(response, reverse('registration:delete_student_family', kwargs={'pk': 2}))
 
+    # @tag("temp")
     def test_post_delete_student_superuser(self):
         response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
                                     {'delete': 'delete', 'pk': 3}, secure=True)
@@ -256,6 +257,7 @@ class TestsStudent(TestCase):
         students = Student.objects.all()
         self.assertEqual(len(students), 5)
         self.assertEqual(len(students.filter(pk=3)), 0)
+        self.assertEqual(len(User.objects.filter(pk=1)), 1)
 
     def test_post_delete_student(self):
         self.test_user = User.objects.get(pk=2)

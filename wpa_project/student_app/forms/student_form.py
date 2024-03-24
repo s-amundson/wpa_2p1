@@ -1,9 +1,7 @@
 from src import MyModelForm
 from django import forms
-from django.utils.datetime_safe import date
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from allauth.account.models import EmailAddress
 
 from ..models import Student, StudentFamily
 from event.models import Registration
@@ -85,11 +83,12 @@ class StudentForm(MyModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['dob'].widget = forms.SelectDateWidget(years=range(date.today().year, date.today().year - 100, -1))
+        self.fields['dob'].widget = forms.SelectDateWidget(years=range(timezone.datetime.today().year,
+                                                                       timezone.datetime.today().year - 100, -1))
         self.fields['first_name'].widget.attrs.update({'placeholder': 'First Name'})
         self.fields['last_name'].widget.attrs.update({'placeholder': 'Last Name'})
         self.fields['dob'].label = "Date of Birth"
-        self.fields['safety_class'].widget = forms.SelectDateWidget(years=range(date.today().year, 2019, -1))
+        self.fields['safety_class'].widget = forms.SelectDateWidget(years=range(timezone.datetime.today().year, 2019, -1))
 
         if self.instance.user:
             self.fields['email'].widget.attrs.update({'disabled': 'disabled'})

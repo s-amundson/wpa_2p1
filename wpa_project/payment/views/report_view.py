@@ -2,8 +2,6 @@ import logging
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import FormView
 from django.urls import reverse_lazy
-from django.utils.datetime_safe import date
-
 
 from ..forms import ReportForm
 from ..models import PaymentLog

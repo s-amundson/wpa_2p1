@@ -2,16 +2,19 @@ import logging
 import base64
 import uuid
 from django.core import mail
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from reportlab.pdfgen.canvas import Canvas
 from django.core.files.base import File
+from django.test import override_settings
 from django.utils import timezone
+from unittest.mock import patch
 
 from event.models import Event, Registration
 from ..models import Student, User
 from ..src import EmailMessage
 from .helper import remove_signatures
+from ..tasks import send_email
 
 logger = logging.getLogger(__name__)
 
@@ -79,36 +82,38 @@ class TestsEmail(TestCase):
         response = self.client.get(reverse('registration:send_email'), secure=True)
         self.assertEqual(response.status_code, 403)
 
-    def test_send_email_board(self):
+    # @tag('temp')
+    @patch('student_app.tasks.send_email.delay')
+    def test_send_email_board(self, task_send_email):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(len(mail.outbox[0].bcc), 1)
-        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
-        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+        self.assertRedirects(response, reverse('registration:index'))
+        task_send_email.assert_called_with(['board'], self.send_dict['subject'], self.send_dict['message'], None)
 
-    def test_send_email_staff(self):
+    # @tag('temp')
+    @patch('student_app.tasks.send_email.delay')
+    def test_send_email_staff(self, task_send_email):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.send_dict['recipients'] = 'staff'
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(len(mail.outbox[0].bcc), 2)
-        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
-        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+        self.assertRedirects(response, reverse('registration:index'))
+        task_send_email.assert_called_with(['staff'], self.send_dict['subject'], self.send_dict['message'], None)
 
-    def test_send_email_current_members(self):
+    # @tag('temp')
+    @patch('student_app.tasks.send_email.delay')
+    def test_send_email_current_members(self, task_send_email):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.send_dict['recipients'] = 'current members'
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(len(mail.outbox[0].bcc), 1)
-        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
-        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+        self.assertRedirects(response, reverse('registration:index'))
+        task_send_email.assert_called_with(['current members'], self.send_dict['subject'], self.send_dict['message'], None)
 
-    def test_send_email_students(self):
+    # @tag('temp')
+    @patch('student_app.tasks.send_email.delay')
+    def test_send_email_students(self, task_send_email):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         event = Event.objects.create(
@@ -129,21 +134,28 @@ class TestsEmail(TestCase):
                 reg_time="2021-06-09",
                 attended=True
             )
+        u = User.objects.get(pk=3)
+        u.is_active = False
+        u.save()
+
         self.send_dict['recipients'] = 'students'
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(len(mail.outbox[0].bcc), 5)
-        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
-        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+        self.assertRedirects(response, reverse('registration:index'))
+        task_send_email.assert_called_with(['students'], self.send_dict['subject'], self.send_dict['message'],
+                                           None)
 
-    def test_send_email_invalid(self):
+    # @tag('temp')
+    @patch('student_app.tasks.send_email.delay')
+    def test_send_email_invalid(self, task_send_email):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
         self.send_dict['recipients'] = 'invalid'
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
-        self.assertEqual(len(mail.outbox), 0)
+        task_send_email.assert_not_called()
 
-    def test_send_email_joad(self):
+    # @tag('temp')
+    @patch('student_app.tasks.send_email.delay')
+    def test_send_email_joad(self, task_send_email):
         student = Student.objects.get(pk=3)
         student.is_joad = True
         student.save()
@@ -152,7 +164,74 @@ class TestsEmail(TestCase):
         self.client.force_login(self.test_user)
         self.send_dict['recipients'] = 'joad'
         response = self.client.post(reverse('registration:send_email'), self.send_dict, secure=True)
+        self.assertRedirects(response, reverse('registration:index'))
+        task_send_email.assert_called_with(['joad'], self.send_dict['subject'], self.send_dict['message'],
+                                           None)
+
+    # @tag('temp')
+    def test_task_send_email_board(self):
+        send_email(['board'], self.send_dict['subject'], self.send_dict['message'], None)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(len(mail.outbox[0].bcc), 1)
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
+        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
 
+    # @tag('temp')
+    def test_task_send_email_staff(self):
+        send_email(['staff'], self.send_dict['subject'], self.send_dict['message'], None)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox[0].bcc), 2)
+        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
+        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+
+    # @tag('temp')
+    def test_task_send_email_current_members(self):
+        send_email(['current members'], self.send_dict['subject'], self.send_dict['message'], None)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox[0].bcc), 1)
+        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
+        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+
+    # @tag('temp')
+    @override_settings(EMAIL_BCC_LIMIT=2)
+    def test_task_send_email_students(self):
+        event = Event.objects.create(
+            event_date=timezone.now() - timezone.timedelta(days=20),
+            type="work",
+            cost_standard=0,
+            cost_member=0,
+            state="open",
+            volunteer_points=2
+        )
+        ik = uuid.uuid4()
+        for student in Student.objects.all():
+            Registration.objects.create(
+                event=event,
+                student=student,
+                pay_status='paid',
+                idempotency_key=ik,
+                reg_time="2021-06-09",
+                attended=True
+            )
+        u = User.objects.get(pk=3)
+        u.is_active = False
+        u.save()
+
+        send_email(['students'], self.send_dict['subject'], self.send_dict['message'],
+                                           None)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(len(mail.outbox[0].bcc), 2)
+        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
+        self.assertTrue(mail.outbox[0].body.find('Test Message') > 0)
+
+    # @tag('temp')
+    def test_task_send_email_joad(self):
+        student = Student.objects.get(pk=3)
+        student.is_joad = True
+        student.save()
+
+        send_email(['joad'], self.send_dict['subject'], self.send_dict['message'],
+                                           None)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox[0].bcc), 1)
+        self.assertEqual(mail.outbox[0].subject, 'Test Subject')

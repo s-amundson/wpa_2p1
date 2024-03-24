@@ -2,7 +2,7 @@ import logging
 from unittest.mock import patch
 
 from django.apps import apps
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 
 from payment.tests import MockSideEffects
@@ -13,7 +13,7 @@ User = apps.get_model('student_app', 'User')
 logger = logging.getLogger(__name__)
 
 
-class TestsAdmitWait(MockSideEffects, TestCase):
+class TestsWait(MockSideEffects, TestCase):
     fixtures = ['f1']
 
     def __init__(self, *args, **kwargs):
@@ -62,25 +62,60 @@ class TestsAdmitWait(MockSideEffects, TestCase):
                 attended=False)
             cr.save()
 
+    # @tag('temp')
     def test_get_wait_list(self):
         # Get the page
         response = self.client.get(reverse('programs:admit_wait', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/admit_wait.html')
-        self.assertEqual(len(response.context['form'].fields), 4)
+        self.assertEqual(len(response.context['formset']), 4)
 
         # get same thing with student_family
         response = self.client.get(reverse('programs:admit_wait', kwargs={'event': 1, 'family_id': 2}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/admit_wait.html')
-        self.assertEqual(len(response.context['form'].fields), 2)
+        self.assertEqual(len(response.context['formset']), 2)
 
+    # @tag('temp')
     @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
-    @patch('program_app.forms.admit_wait_form.charge_group.delay')
+    @patch('program_app.views.admit_wait_view.charge_group.delay')
     def test_post_wait_list(self, chg_group, mock_payment):
         mock_payment.side_effect = self.payment_side_effect
-        d = {'admit_1': True, 'admit_2': True, 'admit_3': False, 'admit_4': False}
+        d = {
+            'event': 1,
+            'form-TOTAL_FORMS': 4,
+            'form-INITIAL_FORMS': 4,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+            'form-0-id': 1,
+            'form-0-admit': True,
+            'form-1-id': 2,
+            'form-1-admit': True,
+            'form-2-id': 3,
+            'form-2-admit': False,
+            'form-3-id': 4,
+            'form-3-admit': False,
+        }
         response = self.client.post(reverse('programs:admit_wait', kwargs={'event': 1}), d, secure=True)
-        self.assertRedirects(response, reverse('events:event_attend_list', kwargs={'event': 1}))
-        chg_group.assert_called_with([2, 1])
+        self.assertRedirects(response, reverse('programs:admit_wait', kwargs={'event': 1}))
+        chg_group.assert_called_with([1, 2])
 
+    # @tag('temp')
+    def test_wait_list_returning(self):
+        self.beginner_class.class_type = 'returnee'
+        self.beginner_class.save()
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('programs:wait_list', kwargs={'event': self.beginner_class.event.id}))
+        self.assertTemplateUsed(response, 'program_app/wait_list.html')
+        self.assertEqual(len(response.context['object_list']), 2)
+
+    # @tag('temp')
+    def test_wait_list_combo(self):
+        self.beginner_class.class_type = 'combo'
+        self.beginner_class.save()
+        self.test_user = User.objects.get(pk=2)
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse('programs:wait_list', kwargs={'event': self.beginner_class.event.id}))
+        self.assertTemplateUsed(response, 'program_app/wait_list.html')
+        self.assertEqual(len(response.context['object_list']), 2)

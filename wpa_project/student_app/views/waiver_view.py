@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
 from django.utils.decorators import method_decorator
 from csp.decorators import csp_update
 
@@ -30,6 +31,7 @@ class WaiverView(UserPassesTestMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['student'] = self.student
+        context['awrl'] = get_template('program_app/awrl.txt').render()
         return context
 
     def get_form(self):

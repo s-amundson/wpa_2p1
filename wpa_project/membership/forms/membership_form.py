@@ -1,5 +1,5 @@
 from django.forms import BooleanField, CheckboxInput, RadioSelect
-from django.utils.datetime_safe import date
+from django.utils import timezone
 import logging
 from src.model_form import MyModelForm
 from ..models import Membership, Level
@@ -18,7 +18,7 @@ class MembershipForm(MyModelForm):
         super().__init__(*args, **kwargs)
         for student in students:
             dob = student.dob
-            age = date.today().year - student.dob.year
+            age = timezone.datetime.today().year - student.dob.year
             self.fields[f'student_{student.id}'] = BooleanField(widget=CheckboxInput(
                 attrs={'class': "m-2 student-check", 'age': age}), required=False,
                 label=f'{student.first_name} {student.last_name}', initial=False)

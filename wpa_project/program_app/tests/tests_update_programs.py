@@ -5,7 +5,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.test import TestCase, Client
 
-from ..models import BeginnerClass
+from ..models import BeginnerClass, BeginnerSchedule
 from event.models import Event, Registration, RegistrationAdmin
 from .helper import create_beginner_class
 from student_app.models import Student, User
@@ -190,4 +190,39 @@ class TestsUpdatePrograms2(TestCase):
 
     def test_add_class(self):
         UpdatePrograms().add_weekly()
-        self.assertTrue(BeginnerClass.objects.all().count() in [18])
+        self.assertEqual(BeginnerClass.objects.all().count(), 20)
+
+    def test_create_class_1(self):
+        sch = BeginnerSchedule.objects.get(pk=1)
+        UpdatePrograms().create_class(sch)
+        bc = BeginnerClass.objects.all()
+        events = Event.objects.all()
+        self.assertEqual(bc.count(), 6)
+        self.assertEqual(events.count(), 6)
+        self.assertEqual(bc[0].class_type, 'beginner')
+        self.assertEqual(timezone.localtime(bc[0].event.event_date).time(), sch.class_time)
+
+        # do it again and don't create classes
+        UpdatePrograms().create_class(sch)
+        bc = BeginnerClass.objects.all()
+        events = Event.objects.all()
+        self.assertEqual(bc.count(), 6)
+        self.assertEqual(events.count(), 6)
+        self.assertEqual(bc[0].class_type, 'beginner')
+        self.assertEqual(timezone.localtime(bc[0].event.event_date).time(), sch.class_time)
+
+    def test_create_class_2(self):
+        sch = BeginnerSchedule.objects.get(pk=2)
+        UpdatePrograms().create_class(sch)
+        bc = BeginnerClass.objects.all()
+        self.assertEqual(bc.count(), 6)
+        self.assertEqual(bc[0].class_type, 'returnee')
+        self.assertEqual(timezone.localtime(bc[0].event.event_date).time(), sch.class_time)
+
+    def test_create_class_4(self):
+        sch = BeginnerSchedule.objects.get(pk=4)
+        UpdatePrograms().create_class(sch)
+        bc = BeginnerClass.objects.all()
+        self.assertEqual(bc.count(), 2)
+        self.assertEqual(bc[0].class_type, 'special')
+        self.assertEqual(timezone.localtime(bc[0].event.event_date).time(), sch.class_time)

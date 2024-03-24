@@ -60,6 +60,8 @@ class Calendar(HTMLCalendar):
                     elif bc.class_type == 'returnee':
                         btn_color = 'btn-success'
                     elif bc.class_type == 'special':
+                        if not self.staff:
+                            continue
                         btn_color = 'btn-outline-primary'
                     url = reverse('programs:class_registration', kwargs={'event': event.id})
                     data += f'<a href="{url}" role="button" type="button" bc_id="{event.id}" class="btn {btn_color} '

@@ -1,11 +1,11 @@
-FROM python:3
+FROM python:3.11
 
 # These two environment variables prevent __pycache__/ files.
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 # install netcat for entry script
-RUN apt-get update && apt-get install -y netcat enchant-2 myspell-es myspell-ru
+RUN apt-get update && apt-get install -y netcat-traditional enchant-2 myspell-es myspell-ru
 
 # Create an app user in the app group.
 RUN useradd --user-group --create-home --no-log-init --shell /bin/bash app

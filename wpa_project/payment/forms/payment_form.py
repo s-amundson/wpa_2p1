@@ -4,6 +4,7 @@ from django.utils import timezone
 from ..models import Card, Customer, PaymentLog
 from ..src import CardHelper, CustomerHelper, EmailMessage, PaymentHelper
 from event.models import VolunteerRecord
+from contact_us.tasks import validate_email
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ class PaymentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
+        self.client_ip = kwargs.pop('client_ip')
         # logging.debug(user)
         if 'description' in kwargs:
             self.description = kwargs.pop('description')
@@ -45,7 +47,9 @@ class PaymentForm(forms.ModelForm):
         if self.user and self.user.student_set.last() and self.user.student_set.last().student_family:
             self.available_volunteer_points = VolunteerRecord.objects.get_family_points(
                 self.user.student_set.last().student_family)
-        self.fields['volunteer_points'] = forms.FloatField(max_value=self.available_volunteer_points, required=False)
+
+        self.fields['volunteer_points'] = forms.FloatField(
+            max_value=min(self.amount_initial, self.available_volunteer_points), min_value=0, required=False)
         self.fields['card'].choices = self.card_choices()
         self.fields['category'].widget = forms.HiddenInput()
         self.fields['donation_note'].widget.attrs.update({'cols': 30, 'rows': 3, 'class': 'form-control'})
@@ -56,6 +60,8 @@ class PaymentForm(forms.ModelForm):
             self.fields['default_card'].widget.attrs.update({'class': 'm-2 form-check-input', 'disabled': 'disabled'})
             self.fields['default_card'].initial = True
         self.payment_errors = []
+        self.fields['email'] = forms.EmailField(required=False)
+        self.fields['email'].widget.attrs.update({"placeholder": "Email"})
 
     def card_choices(self):
         if self.user is None:
@@ -67,7 +73,18 @@ class PaymentForm(forms.ModelForm):
         card_choices.append((0, "New Card"))
         return card_choices
 
-    def process_payment(self, idempotency_key):
+    def clean_email(self):
+        address = self.cleaned_data['email']
+        logger.warning(address)
+        if address == '':
+            return None
+        is_valid = validate_email(address, self.client_ip)
+        if is_valid:
+            return address
+        logging.warning(f'Invalid email {address}')
+        raise forms.ValidationError("Email validation error")
+
+    def process_payment(self, idempotency_key, instructions=None):
         note = self.description
         if self.cleaned_data['donation'] > 0:
             note = note + f", Donation of {self.cleaned_data['donation']}"
@@ -100,14 +117,19 @@ class PaymentForm(forms.ModelForm):
                 idempotency_key=idempotency_key,
                 note=note,
                 source_id=self.cleaned_data['source_id'],
-                saved_card_id=int(self.cleaned_data['card'])
+                saved_card_id=int(self.cleaned_data['card']),
+                live=True
             )
 
         if self.log is not None:
-            pay_dict = {'line_items': self.line_items, 'total': self.cleaned_data['amount'] + volunteer_points,
-                        'receipt': self.log.receipt}
+            pay_dict = {'line_items': self.line_items,
+                        'total': self.cleaned_data['amount'],
+                        'receipt': self.log.receipt,
+                        'instructions': instructions}
             if self.user is not None and not duplicate:
                 EmailMessage().payment_email_user(self.user, pay_dict)
+            if self.cleaned_data['email'] is not None and not duplicate:
+                EmailMessage().payment_email_to([self.cleaned_data['email']], pay_dict)
             if volunteer_points:
                 vr = VolunteerRecord.objects.create(
                     student=self.user.student_set.last(),

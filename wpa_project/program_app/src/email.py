@@ -26,8 +26,10 @@ class EmailMessage(StudentEmailMessage):
         self.bcc_from_students(students)
         logger.warning(self.bcc)
         self.subject = 'Woodley Park Archers Instructor Cancellation'
-        self.body = get_template('program_app/email/instructor_cancel_email.html').render(
+        self.body = get_template('program_app/email/instructor_cancel_email.txt').render(
             {'event': event, 'num_instructors': num_instructors})
+        self.attach_alternative(get_template('program_app/email/instructor_cancel_email.html').render(
+            {'event': event, 'num_instructors': num_instructors}), 'text/html')
         self.send()
 
     def status_email(self, class_list, staff):

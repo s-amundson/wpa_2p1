@@ -2,6 +2,7 @@ from django.db.models import Sum
 from django.views.generic import FormView
 from django.urls import reverse_lazy
 from django.forms import model_to_dict
+from django.utils import timezone
 
 from ..forms import StaffReportForm
 from event.models import Registration, VolunteerRecord
@@ -18,6 +19,11 @@ class StaffReportView(BoardMixin, FormView):
     success_url = reverse_lazy('registration:index')
     start_date = None
     end_date = None
+
+    def aware_date(self, date):
+        if date is None:
+            return None
+        return timezone.datetime.combine(date, timezone.datetime.min.time(), timezone.get_current_timezone())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -42,6 +48,6 @@ class StaffReportView(BoardMixin, FormView):
         return context
 
     def form_valid(self, form):
-        self.start_date = form.cleaned_data.get('start_date', None)
-        self.end_date = form.cleaned_data.get('end_date', None)
+        self.start_date = self.aware_date(form.cleaned_data.get('start_date', None))
+        self.end_date = self.aware_date(form.cleaned_data.get('end_date', None))
         return self.form_invalid(form)

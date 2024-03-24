@@ -28,15 +28,15 @@
 </div>
 
 <div class="row">
-    <form class="form m-2" id="payment-form" method="post">
+    <form class="form p-2" id="payment-form" method="post">
         {% csrf_token %}
         {{ form.source_id }}
 
-        <table class="col table table-bordered">
+        <table class="col table table-bordered p-2">
             <thead>
-            <tr>
-                <th colspan="2" class="text-center"> Saved Cards</th>
-            </tr>
+                <tr>
+                    <th colspan="3" class="text-center"> Saved Cards</th>
+                </tr>
             </thead>
             <tbody id="class-list-body">
             {% for card in cards %}
@@ -83,7 +83,7 @@
         <div class="form-check">
             {{ form.default_card }} <span class="form-check-label">{{ form.default_card.label }}</span>
         </div>
-        <button class="btn btn-primary m-2" id="card-button" type="button"> Add Card</button>
+        <button class="btn btn-primary p-2" id="card-button" type="button"> Add Card</button>
     </form>
 
 </div>

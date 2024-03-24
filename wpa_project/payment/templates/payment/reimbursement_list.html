@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load reimbursement_tags %}
+
+{% block title %} Reimbursement List {% endblock %}
+
+{% block main %}
+    <div class="row p-3">
+        <h3>Reimbursement List</h3>
+    </div>
+    <table class="col table table-bordered">
+        <thead>
+            <tr>
+                <th>Created Date</th>
+                <th>Title</th>
+                <th>Requestor</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <td>{{ object.created }}</td>
+                    <td>{{ object.title }}</td>
+                    <td>{{ object.student.first_name }}</td>
+                    <td>{{ object.status|capfirst }} <br/>{% vote_counts object %}</td>
+                    <td>
+                        {% if object.status in edit_status %}
+                            {% if object.student.user == user or user.is_superuser %}
+                                <a class="mx-2" href="{% url 'payment:reimbursement_form' object.id%}">Edit</a><br/>
+                            {% endif %}
+                            {% if object.student.user != user and user.is_board %}
+                                {% voter_status object user%}
+                                <a href="{% url 'payment:reimbursement_vote' object.id%}">
+                                    Vote {% vote_again object user %}</a>
+                            {% endif %}
+                        {% else %}
+                            {% if object.status == 'approved' and user.is_board %}
+                                <a class="mx-2" href="{% url 'payment:reimbursement_form' object.id%}">Edit</a>
+                            {% endif %}
+                            <a href="{% url 'payment:reimbursement_vote' object.id%}">View</a>
+                        {% endif %}
+
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">
+                        No Reimbursements
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="d-flex flex-row m-2">
+        <div class="m-3">
+            <a href="{% url 'payment:reimbursement_form'%}" class="btn btn-primary" role="button">
+                Add Reimbursement
+            </a>
+        </div>
+    </div>
+    {% include 'student_app/paginate.html' %}
+{% endblock %}

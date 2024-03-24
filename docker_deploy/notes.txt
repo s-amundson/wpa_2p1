@@ -10,14 +10,12 @@ docker logs django
 
 docker exec -it nginx ./init-letsencrypt.sh
 docker exec -it nginx nginx -s reload
-docker exec -it docker_development_mysql_1 sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < m4vd43996587286.sql
 
-docker exec -it django_dev python manage.py test program_app --pattern temp_tests.py --keepdb
-docker exec -it django_dev coverage run --source='.' manage.py test student_app --keepdb && coverage html
+docker exec -it django_dev python manage.py test program_app --pattern temp_tests.py
+docker exec -it django_dev coverage run --source='.' manage.py test student_app
 docker exec -it django_dev coverage run --source='.' manage.py test student_app membership minutes payment program_app
 docker exec -it django_dev python manage.py dumpdata membership > wpa_project/membership/fixtures/level.json
 
-sudo docker exec -t postgresdb pg_dumpall -c -U USERNAME  > ~/bkup/dump_`date +%Y-%m-%d"_"%H_%M_%S`.sql
 privatefiles.txt has information on creating the files that contain private information.
 
 docker exec -it sftp /bin/bash
@@ -37,16 +35,3 @@ For server firewall:
     sudo ufw enable
 
 Create issue with Django on migration from date to datetime field with postgres. Note: behaves properly in testing.
-
-To update wordpress:
-    backup the wordpress directory
-        cp -r ~/wpa_2p1/wordpress ~/bkup/wordpress
-    backup the wordpress database
-    delete * from worpress directroy except the wp-content folder. or delete all then copy wp-content back
-        sudo rm -r ~/wpa_2p1/wordpress/*
-        sudo cp -r ~/bkup/wordpress/wp-content ~/wpa_2p1/wordpress/wp-content
-    restart docker
-        cd ~/wpa_2p1/docker_deploy
-        chmod +x wp_entry.sh
-        docker-compose down
-        docker-compose up

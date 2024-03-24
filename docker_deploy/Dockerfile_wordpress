@@ -1,7 +1,0 @@
-FROM wordpress:fpm
-
-# RUN apt-get install -y php7.4-mysql
-RUN docker-php-ext-install pdo pdo_mysql
-COPY ./wp_entry.sh /
-
-ENTRYPOINT ["/wp_entry.sh"]

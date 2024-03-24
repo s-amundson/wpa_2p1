@@ -24,8 +24,8 @@ class BeginnerClassForm(forms.ModelForm):
             default_date = timezone.datetime.now().replace(hour=9, minute=0, second=0, microsecond=0)
             default_state = 'open'
         # logging.warning(f'date {default_date}, state {default_state}')
-        self.fields['cancel_message'] = forms.CharField(required=False)
         self.fields['class_date'] = forms.DateTimeField(initial=default_date)
         self.fields['cost'] = forms.IntegerField(initial=5)
         self.fields['state'] = forms.ChoiceField(choices=choices(BeginnerClass.class_states),
                                                  initial=default_state)
+        self.fields['cancel_message'] = forms.CharField(required=False)

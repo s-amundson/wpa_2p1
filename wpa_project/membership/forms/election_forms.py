@@ -1,5 +1,4 @@
-from django.forms import BooleanField, CheckboxInput, RadioSelect, HiddenInput
-from django.utils.datetime_safe import date
+from django.forms import HiddenInput
 from django.utils import timezone
 import logging
 from src.model_form import MyModelForm
@@ -17,9 +16,10 @@ class ElectionForm(MyModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['election_date'].initial = date.today() + timezone.timedelta(days=30)
+        self.fields['election_date'].initial = timezone.datetime.today() + timezone.timedelta(days=30)
         if self.instance.id:
             logger.warning(self.instance.electioncandidate_set.all())
+
 
 class ElectionCanidateForm(MyModelForm):
     class Meta(MyModelForm.Meta):
@@ -35,6 +35,7 @@ class ElectionCanidateForm(MyModelForm):
         logger.warning(d)
         self.fields['student'].queryset = self.fields['student'].queryset.filter(
             dob__lte=d, member__expire_date__gte=self.initial['election'].election_date)
+
 
 class ElectionVoteForm(MyModelForm):
     class Meta(MyModelForm.Meta):

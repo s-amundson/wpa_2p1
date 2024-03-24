@@ -1,3 +1,7 @@
+# recommend to use @tag("temp")
+# from django.test import TestCase, Client, tag
+
+
 # from .tests.tests_covid_vax import TestsCovidVax
 # from .tests.tests_email import TestsEmail
 # from .tests.tests_index import TestsIndex
@@ -12,5 +16,3 @@
 # from .tests.tests_theme import TestsTheme
 # from .tests.tests_user import TestsUserView
 # from .tests.tests_waiver import TestsWaiver
-
-

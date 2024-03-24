@@ -42,6 +42,8 @@ class BusinessForm(MyModelForm):
         else:
             self.fields['resolved_bool'].initial = False
         self.fields['resolved_bool'].widget.attrs.update({'class': "form-check-input resolved-check"})
+        for f in self.Meta.fields:
+            self.fields[f].widget.attrs['class'] += ' minutes-input'
 
 
 class BusinessUpdateForm(MyModelForm):

@@ -1,4 +1,4 @@
-FROM python:3-bullseye
+FROM python:3.11-bullseye
 
 ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y enchant-2 myspell-es myspell-ru

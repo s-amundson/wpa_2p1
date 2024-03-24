@@ -37,8 +37,8 @@ class TestsEmail(TestCase):
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
         self.assertTrue(mail.outbox[0].body.find('Thank you for your purchase with Woodley Park Archers.') < 0)
 
-    def test_refund_canceled_email(self):
-        EmailMessage().refund_canceled_email(self.test_user, Event.objects.get(pk=1))
+    def test_event_canceled_email(self):
+        EmailMessage().event_canceled_email(self.test_user, Event.objects.get(pk=1))
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Cancellation')
         s = 'Your refund with Woodley Park Archers has successfully been sent to square for processing. '

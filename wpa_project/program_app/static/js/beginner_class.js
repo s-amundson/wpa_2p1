@@ -8,12 +8,14 @@ $(document).ready(function(){
         console.log($(this).val())
         if ($(this).val() == 'beginner') {
             $("#id_returnee_limit").val(0);
+            $("#id_returnee_wait_limit").val(0);
             if ($("#id_beginner_limit").val() == 0) {
                 $("#id_beginner_limit").val(beginner_default);
             }
         }
         else if ($(this).val() == 'returnee') {
             $("#id_beginner_limit").val(0);
+            $("#id_beginner_wait_limit").val(0);
             if ($("#id_returnee_limit").val() == 0) {
                 $("#id_returnee_limit").val(return_default);
             }

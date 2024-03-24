@@ -2,7 +2,6 @@
 # from .tests.tests_beginner_class import TestsBeginnerClass
 # from .tests.tests_beginner_class import TestsBeginnerClass2
 # from .tests.tests_calendar import TestsCalendar
-# from .tests.tests_class_attendance import TestsClassAttendance
 # from .tests.tests_class_registration import TestsClassRegistration
 # from .tests.tests_class_registration_admin import TestsClassAdminRegistration
 # from .tests.tests_class_registration_helper import TestsClassRegistrationHelper

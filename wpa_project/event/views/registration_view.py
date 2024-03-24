@@ -56,7 +56,10 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
             self.events = self.event_queryset.filter(pk=self.kwargs.get('event'))
             if not self.request.user.is_staff:
                 self.event_queryset = self.events
-
+            else:
+                self.event_queryset = self.event_queryset.filter(
+                    event_date__date=self.events.last().event_date
+                )
         kwargs['event_queryset'] = self.event_queryset
         kwargs['students'] = self.formset_students = self.student_family.student_set.all()
         kwargs['event_type'] = self.event_type
@@ -136,7 +139,7 @@ class RegistrationView(RegistrationSuperView):
         self.form = form
         logger.warning(form.cleaned_data)
         if self.request.user.is_board:
-            self.student_family = form.cleaned_data['student_family']
+            self.student_family = get_object_or_404(StudentFamily, pk=form.cleaned_data['student_family'])
         processed_formset = self.process_formset()
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])
@@ -150,7 +153,7 @@ class RegistrationView(RegistrationSuperView):
                     # f.instance = None
                     new_reg = Registration.objects.create(
                         event=event,
-                        student=None,
+                        student=f.cleaned_data['student'],
                         pay_status='paid',
                         idempotency_key=ik,
                         user=self.request.user,

@@ -3,22 +3,25 @@ from celery import shared_task
 from django.utils import timezone
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from django.conf import settings
+from datetime import timedelta
 
 from .src import ClassRegistrationHelper, UpdatePrograms, EmailMessage as ProgramEmailMessage
 from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
+from membership.tasks import membership_expire_notice, membership_expire_update
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('program_app')
 from celery.utils.log import get_task_logger
-celery_logger = get_task_logger(__name__)
+celery_logger = get_task_logger('program_app')
 crh = ClassRegistrationHelper()
+logger.warning(__name__)
 
 
 @shared_task
-def charge_group(reg_list):  # pragma: no cover
-    crh.charge_group(Registration.objects.filter(id__in=reg_list))
+def charge_group(reg_list):
+    return crh.charge_group(Registration.objects.filter(id__in=reg_list))
 
 
 @shared_task
@@ -36,6 +39,13 @@ def daily_update():
     update_programs.record_classes()
     update_programs.status_email()
 
+
+@shared_task
+def debug_task():
+    celery_logger.warning('program debug task')
+    celery_logger.warning('to membership expire')
+    membership_expire_notice()
+    celery_logger.warning('ran membership expire')
 
 @shared_task
 def init_class():  # pragma: no cover
@@ -104,6 +114,16 @@ def instructor_canceled(event):
 
 
 @shared_task
+def program_membership_expire():
+    celery_logger.warning('program membership expire')
+    celery_logger.warning('to membership expire notice')
+    membership_expire_notice()
+    celery_logger.warning('ran membership expire notice')
+    membership_expire_update()
+    celery_logger.warning('ran membership expire update')
+
+
+@shared_task
 def refund_class(beginner_class, message=''):
     if type(beginner_class) == int:
         beginner_class = BeginnerClass.objects.get(pk=beginner_class)
@@ -130,7 +150,7 @@ def refund_class(beginner_class, message=''):
                     transaction = cr.filter(idempotency_key=reg.idempotency_key)
                     for c in transaction:
                         if c.student.user is not None:
-                            email_message.refund_canceled_email(
+                            email_message.event_canceled_email(
                                 c.student.user,
                                 f'Class on {str(timezone.localtime(beginner_class.event.event_date))[:10]}',
                                 message
@@ -142,7 +162,7 @@ def refund_class(beginner_class, message=''):
                         if c:
                             for s in c.student.student_family.student_set.all():
                                 if s.user is not None:
-                                    email_message.refund_canceled_email(
+                                    email_message.event_canceled_email(
                                         s.user,
                                         f'Class on {str(timezone.localtime(beginner_class.event.event_date))[:10]}',
                                         message

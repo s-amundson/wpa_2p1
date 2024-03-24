@@ -1,4 +1,5 @@
 import logging
+import uuid
 from django.db.models import Count
 
 from .email import EmailMessage
@@ -11,29 +12,48 @@ logger = logging.getLogger(__name__)
 
 class ClassRegistrationHelper:
     def charge_group(self, queryset):
+        response = {}
         for ikey in queryset.values('idempotency_key').annotate(ik_count=Count('idempotency_key')).order_by():
             logger.warning(ikey)
             icr = queryset.filter(idempotency_key=str(ikey['idempotency_key']))
+
+            # change the idempotency key of any registrations that are not
+            exclude_reg = Registration.objects.filter(idempotency_key=str(ikey['idempotency_key'])).exclude(
+                id__in=icr.values_list('id', flat=True)
+            )
+            new_ik = uuid.uuid4()
+            for reg in exclude_reg:
+                reg.idempotency_key = new_ik
+                reg.save()
+
             cost = icr[0].event.cost_standard
             note = f'Class on {str(icr[0].event.event_date)[:10]}, Students: '
+            user = icr.last().user
             for cr in icr:
                 note += f'{cr.student.first_name}, '
-            payment = None
-            if cr.user.customer_set.last():
-                card = cr.user.customer_set.last().card_set.filter(enabled=True, default=True).last()
-                payment = PaymentHelper(cr.user).create_payment(cost * ikey['ik_count'], 'intro', 0,
+            payment = None, False
+            if user.customer_set.last():
+                card = user.customer_set.last().card_set.filter(enabled=True, default=True).last()
+                payment = PaymentHelper(user).create_payment(cost * ikey['ik_count'], 'intro', 0,
                                                                 str(ikey['idempotency_key']), note, '',
                                                                 saved_card_id=card.id)
             logger.warning(payment)
-            if payment is None:  # a payment error happened
-                icr.update(pay_status='start')
+            if payment[0] is None:  # a payment error happened
+                logger.warning('error')
+                logger.warning(icr.last().event)
+                icr.update(pay_status='wait error')
+                response[str(ikey['idempotency_key'])] = 'ERROR'
+            else:
+                EmailMessage().wait_list_off(queryset)
+                response[str(ikey['idempotency_key'])] = 'SUCCESS'
+        return response
 
     def enrolled_count(self, beginner_class):
         event = Registration.objects.filter(event=beginner_class.event)
         return {'beginner': event.filter(event=beginner_class.event).intro_beginner_count(beginner_class.event.event_date.date()),
                 'staff': event.filter(event=beginner_class.event).intro_staff_count(),
                 'returnee': event.filter(event=beginner_class.event).intro_returnee_count(beginner_class.event.event_date.date()),
-                'waiting': event.filter(pay_status='waiting').count()}
+                'waiting': event.filter(pay_status__in=['waiting', 'wait error']).count()}
 
     def has_space(self, user, beginner_class, beginner, instructor, returnee):
         enrolled_count = self.enrolled_count(beginner_class)
@@ -155,14 +175,19 @@ class ClassRegistrationHelper:
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
                 logger.warning(f'next group {len(next_group)}')
                 if beginner_class.beginner_limit - len(admitted) >= len(next_group):
-                    self.charge_group(next_group)
-                    EmailMessage().wait_list_off(next_group)
-                    # self.update_waiting(beginner_class)
+                    response = self.charge_group(next_group)
+                    if not response[str(waiting.first().idempotency_key)] == 'SUCCESS':  # pragma: no cover
+                        # There was a payment failure so try to admit the next student waiting.
+                        self.update_waiting(beginner_class)
+
         elif beginner_class.class_type == 'returnee':
             if len(admitted) < beginner_class.returnee_limit:
                 logger.warning(f'space available {beginner_class.returnee_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
                 logger.warning(f'next group {len(next_group)}')
                 if beginner_class.returnee_limit - len(admitted) >= len(next_group):
-                    self.charge_group(next_group)
-                    EmailMessage().wait_list_off(next_group)
+                    response = self.charge_group(next_group)
+                    if not response[str(waiting.first().idempotency_key)] == 'SUCCESS':  # pragma: no cover
+                        # There was a payment failure so try to admit the next student waiting.
+                        self.update_waiting(beginner_class)
+

@@ -1,1 +1,1 @@
-from .post_view import PostList, PostListInsert
+from .post_view import PostAddView, PostList, PostListInsert

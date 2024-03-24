@@ -1,5 +1,4 @@
 import logging
-
 from django.views.generic.base import TemplateView
 from django.utils import timezone
 from django.utils.safestring import mark_safe
@@ -67,6 +66,7 @@ class CalendarView(TemplateView):
 
         # Call the formatmonth method, which returns our calendar as a table
         context['html_cal'] = mark_safe(cal.formatmonth(withyear=True))
+
         return context
 
 

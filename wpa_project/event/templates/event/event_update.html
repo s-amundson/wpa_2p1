@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/event_update.js' %}"></script>
+    {% if event_type == 'class' %}
+        <script src="{% static 'js/beginner_class.js' %}"></script>
+    {% endif %}
+
+{% endblock %}
+
+{% block title %} Event Update {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form method="post" {% if form.multipart %} enctype="multipart/form-data" {% endif %}>{% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary m-2" type="submit" name="button">Submit</button>
+    </form>
+    {% include "event/event_cancel_insert.html" %}
+    {% if event_type == 'class' %}
+        {% if form.instance.id is not None %}
+            <hr>
+            <p class="pt-2"><h5>Send email to students</h5></p>
+            <form class="pt-2" method="post" action="{% url 'programs:send_email' email_form.beginner_class.id %}">
+                {% csrf_token %}
+                {{ email_form.as_p }}
+                <input class="btn btn-primary" type="submit" value="Send Email">
+            </form>
+        {% endif %}
+    {% endif %}
+{% endblock %}

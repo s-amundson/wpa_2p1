@@ -3,7 +3,7 @@ import uuid
 
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
-from django.utils.datetime_safe import date
+from django.utils import timezone
 from ..forms import MembershipForm
 from ..models import Level
 from src.mixin import StudentFamilyMixin, AccessMixin
@@ -21,7 +21,7 @@ class MembershipView(AccessMixin, FormView):
     student_family = None
 
     def dispatch(self, request, *args, **kwargs):
-        logger.warning(self.request.user.is_authenticated)
+        # logger.warning(self.request.user.is_authenticated)
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         logging.warning(request.user.student_set.last())
@@ -81,7 +81,7 @@ class MembershipView(AccessMixin, FormView):
                 min_age = level.min_age
 
             member = members[0]
-            age = date.today().year - member.dob.year
+            age = timezone.datetime.today().year - member.dob.year
             logging.debug(age)
 
             if age > max_age:

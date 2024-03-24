@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic.base import View
@@ -16,6 +17,7 @@ from event.views.registration_view import RegistrationSuperView
 from ..src import ClassRegistrationHelper
 from ..tasks import wait_list_email
 from src.mixin import BoardMixin
+from src.years import sub_years
 from payment.models.card import Card
 
 logger = logging.getLogger(__name__)
@@ -25,6 +27,13 @@ StudentFamily = apps.get_model(app_label='student_app', model_name='StudentFamil
 
 class ClassRegistrationView(RegistrationSuperView):
     template_name = 'program_app/class_registration.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['awrl'] = get_template('program_app/awrl.txt').render()
+        context['covid_policy'] = get_template('program_app/covid_policy.txt').render()
+        context['cancel_policy'] = get_template('program_app/cancellation_policy.txt').render()
+        return context
 
     def get_form_kwargs(self):
         self.has_card = bool(Card.objects.filter(customer__user=self.request.user, enabled=True))
@@ -45,7 +54,7 @@ class ClassRegistrationView(RegistrationSuperView):
             return self.has_error(form, 'No students selected')
 
         # check for underage students
-        of_age_date = self.events[0].event_date.date().replace(year=self.events[0].event_date.date().year - 9)
+        of_age_date = sub_years(self.events[0].event_date.date(), 9)
         if self.students.filter(dob__gt=of_age_date).count():
             return self.has_error(form, 'Student must be at least 9 years old to participate')
 
@@ -57,9 +66,12 @@ class ClassRegistrationView(RegistrationSuperView):
         if self.events.count() > 1 and not self.request.user.is_staff:
             return self.has_error(form, 'Must only select one class at a time.')
 
+        event_list = []
+        instructions = ''
         for event in self.events:
             # check if student signing up for incorrect class
             beginner_class = event.beginnerclass_set.last()
+            event_list.append(event.id)
             if beginner_class.class_type == 'returnee' and beginners.count():
                 return self.has_error(form, 'First time students cannot enroll in this class')
             elif beginner_class.class_type == 'beginner' and returnee.count():
@@ -90,6 +102,10 @@ class ClassRegistrationView(RegistrationSuperView):
                 return self.has_error(form, 'This class is closed')
             else:
                 self.wait = space == 'wait'
+            # add instructions for the confirmation email
+            instructions += get_template('program_app/instruction_beginner.txt').render(
+                {'event': event, 'beginner_class': beginner_class}
+            )
 
         reg_list = []
         with transaction.atomic():
@@ -110,6 +126,8 @@ class ClassRegistrationView(RegistrationSuperView):
             self.request.session['line_items'] = []
             self.request.session['payment_category'] = 'intro'
             self.request.session['payment_description'] = f'Class on {str(class_date)[:10]}'
+            self.request.session['instructions'] = instructions
+
             for event in self.events:
                 for f in self.formset:
                     if f.cleaned_data['register']:
@@ -141,7 +159,7 @@ class ClassRegistrationView(RegistrationSuperView):
         if self.wait and self.has_card:
             # send email to student(s) confirming they are on the wait list.
             wait_list_email.delay(reg_list)
-
+        logger.warning(self.success_url)
         return HttpResponseRedirect(self.success_url)
 
 
@@ -211,30 +229,39 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
             # logger.debug(f'Students: {students[0].student_family.id}, cr:{cr.student.student_family.id}')
             if cr.student.student_family != students[0].student_family:  # pragma: no cover
                 return Http404("registration mismatch")
-            registrations = Registration.objects.filter(idempotency_key=cr.idempotency_key)
+            registrations = Registration.objects.filter(idempotency_key=cr.idempotency_key,
+                                                        pay_status__in=['start', 'wait error'])
             logger.warning(cr.event.beginnerclass_set.last())
-            space = ClassRegistrationHelper().has_space(self.request.user,
-                                                        cr.event.beginnerclass_set.last(),
-                                                        len(registrations.filter(student__safety_class__isnull=True)),
-                                                        0,
-                                                        len(registrations.filter(student__safety_class__isnull=False))
-                                                        )
-            logger.debug(space)
-            if space == 'full':
-                messages.add_message(self.request, messages.ERROR, 'Not enough space available in this class')
-                return HttpResponseRedirect(reverse('programs:calendar'))
-            elif space == 'wait':
-                if Card.objects.filter(customer__user=self.request.user, enabled=True):
-                    registrations.update(pay_status='waiting')
-                    return HttpResponseRedirect(reverse('programs:wait_list',
-                                                        kwargs={'event': cr.event.id}))
-                else:
-                    return HttpResponseRedirect(reverse('payment:card_manage'))
-
-            request.session['idempotency_key'] = str(cr.idempotency_key)
+            if cr.pay_status == 'start':
+                space = ClassRegistrationHelper().has_space(self.request.user,
+                                                            cr.event.beginnerclass_set.last(),
+                                                            len(registrations.filter(student__safety_class__isnull=True)),
+                                                            0,
+                                                            len(registrations.filter(student__safety_class__isnull=False))
+                                                            )
+                logger.debug(space)
+                if space == 'full':
+                    messages.add_message(self.request, messages.ERROR, 'Not enough space available in this class')
+                    return HttpResponseRedirect(reverse('programs:calendar'))
+                elif space == 'wait':
+                    if Card.objects.filter(customer__user=self.request.user, enabled=True):
+                        registrations.update(pay_status='waiting')
+                        return HttpResponseRedirect(reverse('programs:wait_list',
+                                                            kwargs={'event': cr.event.id}))
+                    else:
+                        return HttpResponseRedirect(reverse('payment:card_manage'))
+                request.session['idempotency_key'] = str(cr.idempotency_key)
+            else:
+                new_idempotency_key = uuid.uuid4()
+                request.session['idempotency_key'] = str(new_idempotency_key)
+                registrations.update(idempotency_key=new_idempotency_key, pay_status='waiting')
+                return HttpResponseRedirect(reverse('programs:wait_list',
+                                                    kwargs={'event': cr.event.id}))
             request.session['line_items'] = []
             request.session['payment_category'] = 'intro'
             request.session['payment_description'] = f'Class on {str(cr.event.event_date)[:10]}'
+            request.session['instructions'] = get_template('program_app/instruction_beginner.txt').render(
+                {'event': cr.event, 'beginner_class': cr.event.beginnerclass_set.last()})
             beginner = 0
             returnee = 0
 

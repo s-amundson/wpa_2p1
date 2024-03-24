@@ -4,7 +4,6 @@ import datetime
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
@@ -29,10 +28,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('contact_name', models.CharField(max_length=100)),
-                ('created_time', models.DateTimeField(default=datetime.datetime(2022, 1, 5, 0, 7, 5, 153869, tzinfo=utc))),
+                ('created_time', models.DateTimeField(default=datetime.datetime(2022, 1, 5, 0, 7, 5, 153869,
+                                                                                tzinfo=datetime.timezone.utc))),
                 ('email', models.EmailField(max_length=254)),
                 ('message', models.TextField()),
-                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='contact_us.category')),
+                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                               to='contact_us.category')),
             ],
         ),
     ]

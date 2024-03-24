@@ -54,9 +54,7 @@
                 {{ form.start_time.label }}
             </div>
             <div id="div-start-input" class="col-3">
-                {% if minutes_id %}
-                    {{ form.start_time }}
-                {% else %}
+                {% if not minutes_id %}
                     <button id="btn-start" class="btn btn-primary" type="submit">Start Meeting Now</button>
                 {% endif %}
             </div>
@@ -157,6 +155,12 @@
                 {{ form.balance }}
             </div>
             <div class="col"></div>
+            <div class="col-2">
+                {{ form.reimbursement_review.label }}{{ form.reimbursement_review }}
+            </div>
+            <div class="col">
+
+            </div>
         </div>
 
         <div class="row p-3">

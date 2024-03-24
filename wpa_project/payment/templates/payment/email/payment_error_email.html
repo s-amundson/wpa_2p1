@@ -1,0 +1,24 @@
+{% extends "student_app/email/email_layout.html" %}
+{% block main %}
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+
+        Hi {{ name }},
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Unfortunately there was an error with your payment and the transaction could not be completed.
+    </p>
+
+    {% if message %}
+        <p style="margin-bottom: 0in; line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+            {{ message }}
+        </p>
+    {% endif %}
+    <br>
+
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+    </p>
+{% endblock %}

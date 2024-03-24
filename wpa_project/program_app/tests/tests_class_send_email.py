@@ -3,7 +3,7 @@ import uuid
 
 from django.apps import apps
 from django.core import mail
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 
@@ -49,12 +49,23 @@ class TestsClassSendEmail(TestCase):
         self.assertEqual(mail.outbox[0].subject, 'Test Subject')
         self.assertTrue(mail.outbox[0].body.find('Test message') >= 0)
 
+    # @tag('temp')
     def test_instructor_canceled(self):
         bc = create_beginner_class(
             date=(timezone.now() + timezone.timedelta(days=5)).replace(hour=9, minute=0, second=0),
             state='open',
             class_type='beginner'
         )
+        student = Student.objects.get(pk=1)
+        ik = uuid.uuid4()
+        cr1 = Registration.objects.create(
+            event=bc.event,
+            student=student,
+            pay_status='paid',
+            idempotency_key=ik,
+            user=student.user,
+        )
         instructor_canceled(bc.event)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Instructor Cancellation')
+        logger.warning(mail.outbox[0].alternatives)

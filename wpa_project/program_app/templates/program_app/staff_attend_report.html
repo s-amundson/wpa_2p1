@@ -29,7 +29,7 @@
                 <td> {{ staff.user.instructor_level }}</td>
                 <td> {{ staff.registrations }} </td>
                 <td> {{ staff.attended }} </td>
-                <td> {{ staff.points }}</td>
+                <td> {{ staff.points|floatformat:"1" }}</td>
             </tr>
         {% endfor %}
         </tbody>

@@ -2,7 +2,7 @@ import logging
 import time
 import uuid
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.contrib.auth import get_user_model
 
 from ..forms import PaymentForm
@@ -35,8 +35,9 @@ class TestsRefund(TestCase):
         rp = RefundHelper().refund_with_idempotency_key(str(uuid.uuid4()), 1000)
         self.assertEqual(rp, {'status': "FAIL", 'error': 'Record does not exist'})
 
+    # @tag('temp')
     def test_square_helper_refund_payment(self):
-        pf = PaymentForm(user=self.test_user, initial={'amount': 5, 'category': 'donation'})
+        pf = PaymentForm(user=self.test_user, initial={'amount': 5, 'category': 'donation'}, client_ip='')
         pf.cleaned_data = {
             'amount': 5,
             'card': '0',
@@ -48,7 +49,8 @@ class TestsRefund(TestCase):
                 'quantity': '1',
                 'amount_each': 5},
             'save_card': False,
-            'source_id': 'cnon:card-nonce-ok'
+            'source_id': 'cnon:card-nonce-ok',
+            'email': ''
         }
         pf.process_payment(str(uuid.uuid4()))
 
@@ -67,8 +69,9 @@ class TestsRefund(TestCase):
         self.assertEqual(len(rl), 1)
         self.assertEqual(error_refund['status'], 'error')
 
+    # @tag('temp')
     def test_refund_amount_zero(self):
-        pf = PaymentForm(user=self.test_user, initial={'amount': 0, 'category': 'donation'})
+        pf = PaymentForm(user=self.test_user, initial={'amount': 0, 'category': 'donation'}, client_ip='')
         pf.cleaned_data = {
             'amount': 0,
             'card': '0',
@@ -80,7 +83,8 @@ class TestsRefund(TestCase):
                 'quantity': '1',
                 'amount_each': 0},
             'save_card': False,
-            'source_id': 'no-payment'
+            'source_id': 'no-payment',
+            'email': ''
         }
         pf.process_payment(str(uuid.uuid4()))
         time.sleep(5)
@@ -91,6 +95,7 @@ class TestsRefund(TestCase):
         self.assertEqual(len(rl), 0)
         self.assertEqual(pf.log.status, 'refund')
 
+    # @tag('temp')
     def test_refund_volunteer_points(self):
         # set up initial points
         student = self.test_user.student_set.last()
@@ -100,7 +105,7 @@ class TestsRefund(TestCase):
         )
 
         # create a payment to charge against points
-        pf = PaymentForm(user=self.test_user, initial={'amount': 5, 'category': 'donation'})
+        pf = PaymentForm(user=self.test_user, initial={'amount': 5, 'category': 'donation'}, client_ip='')
         pf.save_log(uuid.uuid4(), 'refund volunteer points', 'volunteer points', 5)
         logger.warning(pf.log)
         vr = VolunteerRecord.objects.create(
@@ -118,6 +123,7 @@ class TestsRefund(TestCase):
         self.assertEqual(len(vr), 2)
         self.assertEqual(VolunteerRecord.objects.get_family_points(student.student_family), 6.5)
 
+    # @tag('temp')
     def test_square_helper_refund_payment_and_points(self):
         # set up initial points
         student = self.test_user.student_set.last()
@@ -126,7 +132,7 @@ class TestsRefund(TestCase):
             volunteer_points=2.5
         )
 
-        pf = PaymentForm(user=self.test_user, initial={'amount': 5, 'category': 'donation'})
+        pf = PaymentForm(user=self.test_user, initial={'amount': 5, 'category': 'donation'}, client_ip='')
         pf.cleaned_data = {
             'amount': 5,
             'card': '0',
@@ -139,7 +145,8 @@ class TestsRefund(TestCase):
                 'amount_each': 5},
             'save_card': False,
             'source_id': 'cnon:card-nonce-ok',
-            'volunteer_points': 2
+            'volunteer_points': 2,
+            'email': ''
         }
         pf.process_payment(str(uuid.uuid4()))
         self.assertEqual(VolunteerRecord.objects.get_family_points(student.student_family), 0.5)

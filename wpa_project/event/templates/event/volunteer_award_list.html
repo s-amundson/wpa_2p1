@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %} Volunteer Event List {% endblock %}
+
+{% block main %}
+    <div class="row p-2" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    <div class="row p-2">
+        <p>
+            Below are the awards given to our volunteers as a statement of thanks.
+        </p>
+    </div>
+    <div class="row p-2">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Award Date</th>
+                    <th>Award</th>
+                    <th>Description</th>
+                    <th>Volunteer</th>
+                    <th>Received</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in object_list %}
+                    <tr>
+                        <td>
+                            {% if user.is_board %}
+                                <a class="nav-link" href="{% url 'events:volunteer_award' c.id %}">
+                                    {{ c.award_date|date }}
+                                </a>
+                            {% else %}
+                                {{ c.award_date|date }}
+                            {% endif %}
+                        </td>
+                        <td>{{ c.award }}</td>
+                        <td>{{ c.description }}</td>
+                        <td>{{ c.student }}</td>
+                        <td>{{ c.received }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5">No awards given yet</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include 'student_app/paginate.html' %}
+    <div class="row p-2">
+
+        {% if user.is_board %}
+            <div class="col">
+                <a class="nav-link" href="{% url 'events:volunteer_award' %}">
+                    Add
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+

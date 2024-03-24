@@ -1,11 +1,11 @@
 import logging
 import uuid
 from unittest.mock import patch, call
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.core import mail
 
 from ..models import BeginnerClass
-from ..tasks import close_create_class, daily_update, reminder_email, wait_list_email, refund_class
+from ..tasks import charge_group, close_create_class, daily_update, reminder_email, wait_list_email, refund_class
 from event.models import Registration, Event
 from payment.tests import MockSideEffects
 from student_app.models import Student
@@ -118,3 +118,10 @@ class TestsTasks(MockSideEffects, TestCase):
         #     call(ik, 2 * event.cost_standard * 100),
         #     call(ik2, 1 * event.cost_standard * 100)])
         self.assertEqual(refund_ik.call_count, 2)
+
+    # @tag('temp')
+    @patch('program_app.tasks.ClassRegistrationHelper.charge_group')
+    def test_charge_group(self, chrg_group):
+        # chrg_group.return_value = {'72eaee80-9f87-440a-9c60-a24f3feff4b3': 'SUCCESS'}
+        charge_group([1])
+        chrg_group.assert_called()

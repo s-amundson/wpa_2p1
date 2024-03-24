@@ -6,6 +6,7 @@ from django.utils import timezone
 import logging
 logger = logging.getLogger(__name__)
 
+
 class BoardMixin(UserPassesTestMixin):
     def test_func(self):
         if self.request.user.is_authenticated:

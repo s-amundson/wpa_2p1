@@ -23,6 +23,7 @@ class VolunteerEventForm(MyModelForm):
         d = timezone.now().replace(year=d.year, month=d.month, day=d.day, hour=16, minute=0, second=0)
         self.fields['event_date'] = forms.DateTimeField(initial=d)
         self.fields['state'] = forms.ChoiceField(choices=choices(Event.event_states))
+        self.fields['cancel_message'] = forms.CharField(required=False)
         if self.instance.id:
             self.fields['event_date'].initial = self.instance.event.event_date
             self.fields['state'].initial = self.instance.event.state

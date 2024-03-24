@@ -1,5 +1,5 @@
 import logging
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core import mail
@@ -35,7 +35,11 @@ class TestsPayment(TestCase):
         response = self.client.get(self.url, secure=True)
         self.assertTemplateUsed(response, 'payment/make_payment.html')
 
+    # @tag('temp')
     def test_payment_success(self):
+        session = self.client.session
+        session['instructions'] = "be 30 minutes early"
+        session.save()
         # process a good payment
         response = self.client.post(self.url, self.pay_dict, secure=True)
         pl = PaymentLog.objects.all()
@@ -45,17 +49,36 @@ class TestsPayment(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Payment Confirmation')
         self.assertTrue(mail.outbox[0].body.find('Class on None student: test_user') >= 0)
+        self.assertTrue(mail.outbox[0].body.find('be 30 minutes early') >= 0)
 
-    def test_payment_success_donation(self):
+    # @tag('temp')
+    def test_payment_success_donation_no_email(self):
         # process a good payment
         self.client.logout()
         self.pay_dict['donation'] = 5
         response = self.client.post(self.url, self.pay_dict, secure=True)
+        logger.warning(response.status_code)
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].donation, 500)
-        # self.assertRedirects(response, reverse('registration:index'))
+        self.assertEqual(len(mail.outbox), 0)
 
+    # @tag('temp')
+    def test_payment_success_donation_with_email(self):
+        # process a good payment
+        self.client.logout()
+        self.pay_dict['donation'] = 5
+        self.pay_dict['email'] = 'EmilyNConlan@einrot.com',
+        response = self.client.post(self.url, self.pay_dict, secure=True)
+        logger.warning(response.status_code)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].donation, 500)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(mail.outbox[0].body.find('Donation   1   5    5') >= 0)
+
+        # self.assertRedirects(response, reverse('registration:index'))
+    # @tag('temp')
     def test_payment_success_donation2(self):
         # process a good payment
         self.pay_dict['donation'] = 5
@@ -120,6 +143,7 @@ class TestsPayment(TestCase):
         self.assertFalse(card[1].default)
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
 
+    # @tag('temp')
     def test_payment_card_decline(self):
         self.pay_dict['source_id'] = 'cnon:card-nonce-declined'
         response = self.client.post(self.url, self.pay_dict, secure=True)
@@ -129,6 +153,7 @@ class TestsPayment(TestCase):
         self.assertTrue('Payment Error: Card Declined' in response.context['form'].payment_errors)
         pel = PaymentErrorLog.objects.all()
         self.assertEqual(len(pel), 1)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_payment_card_bad_cvv(self):
         self.pay_dict['source_id'] = 'cnon:card-nonce-rejected-cvv'
@@ -210,13 +235,14 @@ class TestsPayment(TestCase):
         # self.assertTemplateUsed(response, 'payment/view_payment.html')
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
 
+    # @tag('temp')
     def test_payment_success_volunteer_points(self):
         student = self.test_user.student_set.last()
         vr = VolunteerRecord.objects.create(
             student=student,
             volunteer_points=6.5
         )
-        self.pay_dict['amount'] = 0
+        self.pay_dict['amount'] = 5
         self.pay_dict['volunteer_points'] = 5
         self.pay_dict['source_id'] = ''
 
@@ -229,5 +255,6 @@ class TestsPayment(TestCase):
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Payment Confirmation')
-        self.assertTrue(mail.outbox[0].body.find('Class on None student: test_user') >= 0)
+        self.assertTrue(mail.outbox[0].body.find('Class on None student: test_user') > 0)
+        self.assertTrue(mail.outbox[0].body.find('Total   5') > 0)
         self.assertEqual(VolunteerRecord.objects.get_family_points(student.student_family), 1.5)

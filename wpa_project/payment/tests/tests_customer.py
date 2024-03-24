@@ -1,5 +1,5 @@
 import logging
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
@@ -32,6 +32,7 @@ class TestsCustomer(TestCase):
         response = self.client.get(self.url, secure=True)
         self.assertTemplateUsed(response, 'payment/make_payment.html')
 
+    # @tag('temp')
     def test_payment_success(self):
         # process a good payment
         response = self.client.post(self.url, self.pay_dict, secure=True)
@@ -39,6 +40,7 @@ class TestsCustomer(TestCase):
         self.assertEqual(len(pl), 1)
         self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
 
+    # @tag('temp')
     def test_payment_success_donation(self):
         # process a good payment
         self.client.logout()
@@ -47,7 +49,7 @@ class TestsCustomer(TestCase):
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].donation, 500)
-        self.assertRedirects(response, reverse('registration:index'))
+        self.assertRedirects(response, reverse('payment:view_payment', args=[pl[0].id]))
 
     def test_payment_success_save_card(self):
         # process a good payment
