@@ -22,7 +22,7 @@
     {% if event_type == 'class' %}
         {% if form.instance.id is not None %}
             <hr>
-            <p class="pt-2"><h5>Send email to students</h5></p>
+            <p class="pt-2"><h5>Send email to students</h5> do not use this to cancel class.</p>
             <form class="pt-2" method="post" action="{% url 'programs:send_email' email_form.beginner_class.id %}">
                 {% csrf_token %}
                 {{ email_form.as_p }}

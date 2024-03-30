@@ -79,12 +79,24 @@ class TestsTasks(MockSideEffects, TestCase):
         self.assertTrue(str(mail.outbox[0].message()).count('Charles Wells') == 2)
         self.assertTrue(str(mail.outbox[0].message()).count('Gary Wells') == 2)
 
+    # @tag('temp')
     @patch('program_app.tasks.RefundHelper.refund_with_idempotency_key')
     def test_refund_class(self, refund_ik):
-
+        refund_ik.side_effect = [{'status': "FAIL", 'error': 'Record does not exist'},
+                                 {'status': "SUCCESS", 'error': ''},
+                                 {'status': "SUCCESS", 'error': ''}]
         # put a record in to the database
         student = Student.objects.get(pk=4)
         event = Event.objects.get(pk=1)
+        ik0 = uuid.uuid4()
+
+        cr0 = Registration.objects.create(
+            event=event,
+            student=student,
+            pay_status='waiting',
+            idempotency_key=ik0,
+            user=Student.objects.get(pk=5).user,
+        )
         ik = uuid.uuid4()
         cr1 = Registration.objects.create(
             event=event,
@@ -93,6 +105,7 @@ class TestsTasks(MockSideEffects, TestCase):
             idempotency_key=ik,
             user=student.user,
         )
+
         cr2 = Registration.objects.create(
             event=event,
             student=Student.objects.get(pk=5),
@@ -100,7 +113,7 @@ class TestsTasks(MockSideEffects, TestCase):
             idempotency_key=ik,
             user=student.user,
         )
-
+        # self.payment_side_effect(10, 'intro', 0, ik, 'test_event', '')
         ik2 = uuid.uuid4()
         cr3 = Registration.objects.create(
             event=event,
@@ -109,15 +122,17 @@ class TestsTasks(MockSideEffects, TestCase):
             idempotency_key=ik2,
             user=Student.objects.get(pk=2).user,
         )
+        # self.payment_side_effect(10, 'intro', 0, ik, 'test_event', '')
 
         refund_class(BeginnerClass.objects.get(pk=1), 'due to extreme bytes')
         self.assertEqual(len(mail.outbox), 3)
         # refund_ik.assert_called_with(ik, 2 * event.cost_standard * 100)
         refund_ik.assert_called_with(ik2, 1 * event.cost_standard * 100)
+        refund_ik.assert_any_call(ik0, 0)
         # refund_ik.assert_has_calls([
-        #     call(ik, 2 * event.cost_standard * 100),
+        #     call(ik0, 0), call(ik, 2 * event.cost_standard * 100),
         #     call(ik2, 1 * event.cost_standard * 100)])
-        self.assertEqual(refund_ik.call_count, 2)
+        self.assertEqual(refund_ik.call_count, 3)
 
     # @tag('temp')
     @patch('program_app.tasks.ClassRegistrationHelper.charge_group')

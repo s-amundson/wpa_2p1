@@ -17,36 +17,10 @@ from .models import Student, User
 
 import os
 # import logging
-# logger = get_task_logger(__name__)
+# logger = logging.getLogger(__name__)
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
-
-@shared_task
-def send_email(recipients, subject, message, days=None):
-    logger.warning(recipients)
-    em = EmailMessage()
-    em.bcc = []
-    users = User.objects.filter(is_active=True)
-    if 'board' in recipients:
-        em.bcc_from_users(users.filter(is_board=True), append=True)
-    if 'staff' in recipients:
-        em.bcc_from_users(users.filter(is_staff=True), append=True)
-    if 'current members' in recipients:
-        em.bcc_from_users(users.filter(is_member=True), append=True)
-    if 'joad' in recipients:
-        students = Student.objects.filter(is_joad=True)
-        em.bcc_from_students(students, append=True)
-    if 'students' in recipients:
-        if days is None:
-            days = 90
-        d = timezone.now() - timezone.timedelta(days=days)
-        students = Student.objects.filter(registration__event__event_date__gte=d, registration__attended=True)
-        logger.warning(students)
-        em.bcc_from_students(students, append=True)
-    logger.warning(len(em.bcc))
-    if len(em.bcc):
-        em.send_message(subject, message)
 
 @shared_task
 def waiver_pdf(student_id, sig_first_name, sig_last_name):

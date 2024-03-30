@@ -181,6 +181,7 @@ INSTALLED_APPS = [
     'contact_us',
     'info',
     'facebook',
+    '_email',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -251,6 +252,7 @@ LOGGING = {
     },
     'loggers': {
         '': {'handelers': ['console'], 'level': 'CRITICAL'},
+        '_email': logger_default,
         'event': logger_default,
         'student_app': logger_default,
         'payment': logger_default,
