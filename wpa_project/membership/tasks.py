@@ -3,19 +3,42 @@ import traceback
 from django.utils import timezone
 from datetime import timedelta
 from celery import shared_task
+from django_celery_beat.models import PeriodicTask
 
-from membership.models import Member
+from membership.models import Election, Member
 from membership.src import EmailMessage
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('membership')
 from celery.utils.log import get_task_logger
 celery_logger = get_task_logger(__name__)
 
 
-@shared_task
-def debug_task():
+@shared_task(bind=True, ignore_result=True)
+def debug_task(self):
     celery_logger.debug('membership debug task')
     celery_logger.warning('membership debug task')
     logger.warning('membership debug task')
+    print(PeriodicTask.objects.get(task=self.name).last_run_at)
+    print(f'Request: {self.request!r}')
+
+
+@shared_task
+def membership_election_close(election_id):
+    election = Election.objects.get(pk=election_id)
+    election.state = 'closed'
+    election.save()
+
+
+def membership_election_calendar_notify(last_run):
+    """ Send out a notification about election 7 days before election."""
+    election_notification_days = [2, 7]
+    em = EmailMessage()
+    for nd in election_notification_days:
+        elections = Election.objects.filter(election_date__lte=timezone.now() + timedelta(days=nd))
+        if last_run is not None:
+            elections = elections.filter(election_date__gte=last_run + timedelta(days=nd))
+        logger.warning(elections)
+        for election in elections:
+            em.election_notification(election, False)
 
 
 @shared_task

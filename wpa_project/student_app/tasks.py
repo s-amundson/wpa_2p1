@@ -12,6 +12,8 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Frame, Image, Spacer
 from reportlab.lib.pagesizes import letter
 
+from django_celery_beat.models import PeriodicTask
+
 from student_app.src import EmailMessage
 from .models import Student, User
 

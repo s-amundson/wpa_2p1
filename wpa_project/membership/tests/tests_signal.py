@@ -35,7 +35,7 @@ class TestsSignal(TestCase):
         uid = uuid.uuid4()
         membership = Membership.objects.create(
             level=Level.objects.get(pk=1),
-            pay_status='started',
+            pay_status='start',
             idempotency_key=uid
         )
         membership.students.set(sf.student_set.all())
@@ -68,7 +68,7 @@ class TestsSignal(TestCase):
         uid = uuid.uuid4()
         membership = Membership.objects.create(
             level=Level.objects.get(pk=1),
-            pay_status='started',
+            pay_status='start',
             idempotency_key=uid
         )
         membership.students.set(sf.student_set.all())
@@ -112,7 +112,7 @@ class TestsSignal(TestCase):
         ).save()
         membership = Membership.objects.create(
             level=Level.objects.get(pk=1),
-            pay_status='started',
+            pay_status='start',
             idempotency_key=uid
         )
         membership.students.set(sf.student_set.all())
@@ -146,7 +146,7 @@ class TestsSignal(TestCase):
         uid = uuid.uuid4()
         membership = Membership.objects.create(
             level=Level.objects.get(pk=1),
-            pay_status='started',
+            pay_status='start',
             idempotency_key=uid
         )
         membership.students.set(sf.student_set.all())

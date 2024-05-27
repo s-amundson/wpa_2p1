@@ -40,6 +40,8 @@ class MemberMixin(StudentFamilyMixin):
         self.member = None
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
         dispatch = super().dispatch(request, *args, **kwargs)
         self.member = request.user.student_set.last().member_set.last()
         logger.warning(self.member)
