@@ -38,9 +38,22 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'payment:make_payment' %}">Donate</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'events:volunteer_event_list'%}">Volunteering</a>
-            </li>
+            {% if user.is_staff %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                        Volunteering
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'events:volunteer_event_list'%}">Event List</a>
+                        <a class="dropdown-item" href="{% url 'events:volunteer_award_list' %}">Volunteer Award List</a>
+
+                    </div>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'events:volunteer_event_list'%}">Volunteering</a>
+                </li>
+            {% endif %}
 
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
