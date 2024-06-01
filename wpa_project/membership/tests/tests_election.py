@@ -6,7 +6,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from ..models import Election, ElectionCandidate, ElectionPosition, ElectionVote, Level, Member
 from ..src.email import EmailMessage
-from ..tasks import membership_election_calendar_notify
+from ..tasks import membership_election_calendar_notify, membership_election_close
 from student_app.models import Student, User
 from _email.models import BulkEmail
 
@@ -500,3 +500,11 @@ class TestsElection(TestCase):
         membership_election_calendar_notify(timezone.now() - timezone.timedelta(days=1))
         bulk_emails = BulkEmail.objects.all()
         self.assertEqual(bulk_emails.count(), 1)
+
+    # @tag('temp')
+    def test_task_election_close(self):
+        election = self.make_election()
+        membership_election_close(election.id)
+
+        e = Election.objects.get(pk=election.id)
+        self.assertEqual(e.state, 'closed')

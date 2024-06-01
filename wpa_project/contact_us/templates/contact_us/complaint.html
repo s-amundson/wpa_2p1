@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %} Complaint Form {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form method="post">{% csrf_token %}
+        <p> {{ form.category.label }} {{ form.category }} {{ form.category.errors }}</p>
+        <p> {{ form.incident_date.label }} {{ form.incident_date }} {{ form.incident_date.errors }}</p>
+        <p> {{ form.message.label }} {{ form.message }} {{ form.message.errors }}</p>
+        <p> {{ form.anonymous.label }} {{ form.anonymous }} {{ form.anonymous.errors }}</p>
+        {% if form.instance.id and user.is_board %}
+            <p>{{ formset }}</p>
+            <p> {{ form.resolved.label }} {{ form.resolved }} {{ form.resolved.errors }}</p>
+        {% else %}
+            {{ formset.management_form }}
+        {% endif %}
+        <button class="m-2 btn btn-primary submit-btn" type="submit">
+            Submit
+        </button>
+    </form>
+
+{% endblock %}

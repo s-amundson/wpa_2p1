@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %} Complaint List {% endblock %}
+
+
+{% block main %}
+    <div class="m-2"><h5>Complaints:</h5></div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th> Category </th>
+                <th> Submission Time </th>
+                <th> Resolved </th>
+            </tr>
+        </thead>
+        <tbody id="class-list-body">
+            {% for complaint in object_list %}
+                <tr>
+                    <td><a href="{% url 'contact_us:complaint' complaint.id %}"> {{ complaint.id }} </a></td>
+                    <td>{{ complaint.category }}</td>
+                    <td>{{ complaint.created_time }}</td>
+                    <td>{{ complaint.resolved }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No complaints yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'student_app/paginate.html' %}
+
+{% endblock %}

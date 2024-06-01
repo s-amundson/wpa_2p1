@@ -13,7 +13,7 @@ celery_logger = get_task_logger(__name__)
 
 
 @shared_task(bind=True, ignore_result=True)
-def debug_task(self):
+def debug_task(self):  # pragma: no cover
     celery_logger.debug('membership debug task')
     celery_logger.warning('membership debug task')
     logger.warning('membership debug task')
@@ -69,6 +69,6 @@ def membership_expire_update():
             logging.warning(u.id)
             u.is_member = False
             u.save()
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         logger.error(traceback.format_exc())
         # Logs the error appropriately.

@@ -1,0 +1,9 @@
+Hi,
+
+The following was received as a complaint under the category of {{ complaint.category }} on {{ complaint.created_time }}.
+
+{{ complaint.message }}
+
+{% if complaint.incident_date %}The complaint is reguarding an incident on {{ complaint.incident_date }}.{% endif %}
+This complaint was submitted {% if complaint.user.id %} by {{ student.first_name }} {{ student.last_name }}. {% else %} anonymously. {% endif %}
+
