@@ -10,7 +10,7 @@ from django.template.loader import get_template
 from django.conf import settings
 from allauth.account.models import EmailAddress
 
-from ..forms import ComplaintForm, ComplientCommentForm
+from ..forms import ComplaintForm, ComplaintCommentForm
 from ..models import Complaint, ComplaintComment
 from ..tasks import send_contact_email
 from student_app.models import User
@@ -58,13 +58,17 @@ class ComplaintView(UserPassesTestMixin, FormView):
         return kwargs
 
     def get_formset(self, **kwargs):
-        formset = modelformset_factory(ComplaintComment, form=ComplientCommentForm, can_delete=False, extra=1)
+        formset = modelformset_factory(ComplaintComment, form=ComplaintCommentForm, can_delete=False, extra=1)
         data = None
         if self.request.method.lower() == 'post':
             data = self.request.POST
+
+        user = self.request.user._wrapped if hasattr(self.request.user, '_wrapped') else self.request.user
         formset = formset(
             queryset=ComplaintComment.objects.filter(complaint=self.complaint).order_by('comment_date'),
-            initial=[{'complaint': self.complaint}], data=data, **kwargs
+            initial=[{'complaint': self.complaint, 'user': self.request.user,
+                      'student': self.request.user.student_set.last()}],
+            data=data, **kwargs
             )
         return formset
 
@@ -75,13 +79,14 @@ class ComplaintView(UserPassesTestMixin, FormView):
     def form_valid(self, form):
         if self.complaint is not None:
             formset = self.get_formset()
-            # logger.warning(formset.cleaned_data)
+            logger.warning(formset.cleaned_data)
             if formset.is_valid():
                 formset.save()
 
             else:  # pragma: no cover
                 logger.warning(formset.errors)
                 logger.warning(formset.non_form_errors())
+                return self.form_invalid(form)
         # logger.warning(self.complaint.id)
         complaint = form.save()
         if not form.cleaned_data.get('anonymous', True):
@@ -104,11 +109,12 @@ class ComplaintView(UserPassesTestMixin, FormView):
         if complaint.resolved_date is None and form.cleaned_data.get('resolved', False):
             complaint.resolved_date = timezone.now()
         complaint.save()
-        self.success_url = reverse_lazy('contact_us:thanks')
+        if self.request.user.is_board:
+            self.success_url = reverse_lazy('contact_us:complaint_list')
+        else:
+            self.success_url = reverse_lazy('contact_us:thanks')
         return super().form_valid(form)
-    #
-    # def post(self, request, *args, **kwargs):
-    #     return super().post(request, *args, **kwargs)
+
 
     def test_func(self):
         if self.request.user.is_authenticated:

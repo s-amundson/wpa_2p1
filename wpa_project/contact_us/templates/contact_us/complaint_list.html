@@ -20,7 +20,7 @@
                     <td><a href="{% url 'contact_us:complaint' complaint.id %}"> {{ complaint.id }} </a></td>
                     <td>{{ complaint.category }}</td>
                     <td>{{ complaint.created_time }}</td>
-                    <td>{{ complaint.resolved }}</td>
+                    <td>{{ complaint.resolved_date }}</td>
                 </tr>
             {% empty %}
                 <tr>

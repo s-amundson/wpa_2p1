@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.forms import BooleanField, CheckboxInput, SelectDateWidget
 from src.model_form import MyModelForm
 from ..models import Complaint, ComplaintComment
+from student_app.models import User
 logger = logging.getLogger(__name__)
 
 
@@ -34,17 +35,33 @@ class ComplaintForm(MyModelForm):
             label='This complaint has been resolved')
         if self.instance.id:
             for f in ['category', 'incident_date', 'message', 'anonymous']:
-                self.fields[f].widget.attrs.update({'readonly': 'readonly'})
+                self.fields[f].disabled = True
+            if self.instance.resolved_date is not None:
+                self.fields['resolved'].initial = True
 
-class ComplientCommentForm(MyModelForm):
+
+class ComplaintCommentForm(MyModelForm):
     class Meta(MyModelForm.Meta):
         model = ComplaintComment
         required_fields = ['comment']
-        hidden_fields = ['complaint']
-        read_fields = ['comment_date']
-        fields = hidden_fields + required_fields + read_fields
+        hidden_fields = ['complaint', 'user']
+        read_fields = ['comment_date',]
+        fields = required_fields + hidden_fields + read_fields
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        logger.warning(self.initial)
         self.fields['complaint'].label = ""
         self.fields['comment_date'].initial = ''
+        if self.instance.user:
+            self.fields['comment'].disabled = True
+            self.student = self.instance.user.student_set.last()
+        else:
+            self.student = self.initial.get('student', None)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.instance.id is None:
+            if len(cleaned_data['comment']):
+                cleaned_data['comment_date'] = timezone.now()
+        return cleaned_data

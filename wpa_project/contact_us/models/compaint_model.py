@@ -11,7 +11,6 @@ class Complaint(models.Model):
     created_time = models.DateTimeField(default=timezone.now)
     incident_date = models.DateField(null=True, default=None)
     message = models.TextField()
-    # anonymous = models.BooleanField(default=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, default=None)
     resolved_date = models.DateTimeField(default=None, null=True)
 
@@ -20,3 +19,4 @@ class ComplaintComment(models.Model):
     complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE)
     comment = models.TextField()
     comment_date = models.DateTimeField(default=timezone.now)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, default=None)
