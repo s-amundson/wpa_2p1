@@ -17,8 +17,6 @@ def debug_task(self):  # pragma: no cover
     celery_logger.debug('membership debug task')
     celery_logger.warning('membership debug task')
     logger.warning('membership debug task')
-    print(PeriodicTask.objects.get(task=self.name).last_run_at)
-    print(f'Request: {self.request!r}')
 
 
 @shared_task

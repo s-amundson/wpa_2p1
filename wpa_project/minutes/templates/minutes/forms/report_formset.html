@@ -1,0 +1,10 @@
+{{ formset.management_form }}
+    {% for form in formset %}
+        {{ form.as_div }}
+    {% endfor %}
+<div class="empty_form" style="display:none">
+    {{ formset.empty_form.as_div }}
+</div>
+<button class="btn btn-primary btn-report">Add Report Item</button>
+
+

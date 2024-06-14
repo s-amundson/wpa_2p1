@@ -1,112 +1,85 @@
 import logging
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.shortcuts import render, reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
-from django.views.generic.base import View
-from django.utils import timezone
-from ..forms import MinutesForm, BusinessForm, BusinessUpdateForm, DecisionForm, ReportForm
-from ..models import Business, Decision, Minutes
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.generic.edit import FormView
+from django.urls import reverse_lazy
+from django.forms import modelformset_factory
+
+from src.mixin import MemberMixin
+from ..forms import MinutesForm, ReportForm2, ReportFormset
+from ..models import Business, Minutes, Report
 
 logger = logging.getLogger(__name__)
 
 
-class MinutesFormView(LoginRequiredMixin, View):
-    report_index = 0
+class MinutesView(MemberMixin, FormView):
+    template_name = 'minutes/minutes.html'
+    form_class = MinutesForm
+    success_url = reverse_lazy('registration:index')
+    minutes = None
+    owners = ['president', 'vice', 'secretary', 'treasure']
 
-    def business_list(self, business, old):
-        bl = []
-        for b in business:
-            update_list = []
-            for update in b.businessupdate_set.all():
-                logger.debug(update.update_date)
-                logger.debug(update.update_date.date())
-                o = timezone.now().date() > update.update_date.date()
-                update_list.append({'form': BusinessUpdateForm(instance=update, old=o, report=self.report_index),
-                                    'id': update.id})
-                self.report_index += 1
-            bl.append({'form': BusinessForm(instance=b, old=old, report=self.report_index), 'id': b.id, 'updates': update_list})
-            self.report_index += 1
-        return bl
-
-    def get(self, request, minutes_id=None):
-        logger.debug(request.POST)
-        logger.debug(request.user.is_member)
-        if not request.user.is_member:
-            return HttpResponseForbidden()
-        reports = {}
-
-        owners = ['president', 'vice', 'secretary', 'treasure']
-        if minutes_id:
-            minutes = Minutes.objects.get(pk=minutes_id)
-            form = MinutesForm(instance=minutes, edit=request.user.is_board)
-            for owner in owners:
-                reports[owner] = self.report_forms(minutes, owner, request.user.is_board)
-            ob = Business.objects.filter(Q(resolved=None, added_date__date__lt=minutes.meeting_date) |
-                                         Q(resolved__date__gte=minutes.meeting_date, added_date__lt=minutes.meeting_date))
-            ob = ob.order_by('added_date', 'id')
-            logger.debug(ob)
-            nb = Business.objects.filter(Q(resolved=None, added_date__date=minutes.meeting_date) |
-                                         Q(resolved__date__gte=minutes.meeting_date, added_date__date=minutes.meeting_date))
-            nb = nb.order_by('id')
-            decisions_query = minutes.decision_set.all()
-            logger.debug(decisions_query)
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        logger.warning(self.minutes)
+        if self.minutes is not None:
+            ob = Business.objects.filter(Q(resolved=None, added_date__date__lt=self.minutes.meeting_date) |
+                                         Q(resolved__date__gte=self.minutes.meeting_date, added_date__lt=self.minutes.meeting_date))
+            nb = Business.objects.filter(minutes=self.minutes)
+            logger.warning(nb)
         else:
-            form = MinutesForm(edit=request.user.is_board)
-            for owner in owners:
-                reports[owner] = []
+            ob = nb = Business.objects.none()
 
-            ob = Business.objects.filter(resolved__lt=timezone.now()).order_by('added_date', 'id')
-            nb = []
-            decisions_query = Decision.objects.filter(decision_date__date=timezone.now().date()).order_by('id')
+        context['old_businesses'] = ob.order_by('added_date', 'id')
 
-        old_business = self.business_list(ob, True)
-        new_business = self.business_list(nb, False)
-        decisions = []
-        for decision in decisions_query:
-            decisions.append({'form': DecisionForm(instance=decision, report_index=self.report_index), 'id': decision.id})
-            self.report_index += 1
+        context['new_business'] = nb.order_by('id')
+        context['minutes'] = self.minutes
+        context['minutes_edit'] = self.minutes is not None and self.minutes.end_time is None
 
-        context = {'form': form, 'minutes_id': minutes_id, 'reports': reports, 'old_business': old_business,
-                   'new_business': new_business, 'decisions': decisions, 'report_index': self.report_index}
+        for owner in self.owners:
+            context[f'{owner}_formset'] = self.get_formset(owner)
+        return context
 
-        return render(request, 'minutes/minutes_form.html', context)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if 'minutes' in self.kwargs:
+            kwargs['instance'] = self.minutes = get_object_or_404(Minutes, pk=self.kwargs.get('minutes'))
+        return kwargs
 
-    def post(self, request, minutes_id=None):
-        logger.warning(request.POST)
-        if not request.user.is_board:
-            return HttpResponseForbidden()
-        if minutes_id:
-            minutes = Minutes.objects.get(pk=minutes_id)
-            form = MinutesForm(request.POST, instance=minutes)
+    def get_formset(self, owner, **kwargs):
+        if self.minutes is not None:
+            queryset = self.minutes.report_set.filter(owner=owner)
         else:
-            form = MinutesForm(request.POST)
+            queryset = Report.objects.none()
+        if self.minutes and self.minutes.end_time is None:
+            extra = 1
+        else:
+            extra = 0
+        formset = modelformset_factory(Report, formset=ReportFormset, form=ReportForm2, can_delete=False, extra=extra)
+        data = None
+        if self.request.method.lower() == 'post':
+            data = self.request.POST
+        formset = formset(
+            queryset=queryset,
+            initial=[{'minutes': self.minutes, 'owner': owner}],
+            data=data, prefix=owner, **kwargs
+            )
+        return formset
 
-        if form.is_valid():
-            logger.warning(form.cleaned_data)
-            if minutes_id is None:
-                minutes = form.save(commit=False)
-                minutes.meeting_date = timezone.now()
-                minutes.save()
-            else:
-                minutes = form.save()
-            if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
-                logger.debug('json response')
-                return JsonResponse({'minutes_id': minutes.id, 'success': True})
-            return HttpResponseRedirect(reverse('minutes:minutes_form', kwargs={'minutes_id': minutes.id}))
-        else:  # pragma: no cover
-            logger.debug(form.errors)
-            if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
-                logger.debug('json response')
-                return JsonResponse({'minutes_id': minutes_id, 'success': False})
-            return render(request, 'minutes/minutes_form.html', {'form': form})
+    def form_invalid(self, form):
+        logging.debug(form.errors)
+        # if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
+        #     return JsonResponse({'business_id': self.business_id, 'success': False, 'resolved': False})
+        return super().form_invalid(form)
 
-    def report_forms(self, minutes, owner, is_board):
-        forms = []
-        for report in minutes.report_set.filter(owner=owner):
-            forms.append({'form': ReportForm(instance=report, edit=is_board, report_index=self.report_index),
-                          'id': report.id})
-            self.report_index += 1
-        return forms
+    def form_valid(self, form):
+        minutes = form.save()
+        self.success_url = reverse_lazy('minutes:minutes', kwargs={'minutes': minutes.id})
+        minutes.save()
+
+        if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
+            return JsonResponse({'minutes': minutes.id, 'success': True})
+        return super().form_valid(form)

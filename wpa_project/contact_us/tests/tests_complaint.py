@@ -84,7 +84,7 @@ class TestsComplaint(TestCase):
         self.assertTrue(be[0].body.find('Charles Wells') > 0)
         self.assertIsNone(Complaint.objects.last().resolved_date)
 
-    @tag('temp')
+    # @tag('temp')
     def test_post_complaint_resolved(self):
         self.add_message()
         self.post_dict['form-0-complaint'] = self.complaint.id,

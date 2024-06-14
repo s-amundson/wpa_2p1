@@ -1,0 +1,8 @@
+<div >
+    {{ form.minutes }}
+    {{ form.owner }}
+    {{ form.report }}
+    {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+    {% endfor %}
+</div>

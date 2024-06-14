@@ -45,6 +45,6 @@ class MemberMixin(StudentFamilyMixin):
         dispatch = super().dispatch(request, *args, **kwargs)
         self.member = request.user.student_set.last().member_set.last()
         logger.warning(self.member)
-        if self.member.expire_date >= timezone.now().date():
+        if self.member and self.member.expire_date >= timezone.now().date():
             return dispatch
         return self.handle_no_permission()
