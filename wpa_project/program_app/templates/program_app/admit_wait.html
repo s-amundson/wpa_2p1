@@ -3,6 +3,9 @@
 <form class="form" id="admit_form" method="post" autocomplete="off">
     {% csrf_token %}
     {{ formset.management_form }}
+    {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+    {% endfor %}
     {{ form.event }}
     <table class="table table-bordered table-striped">
         <thead>

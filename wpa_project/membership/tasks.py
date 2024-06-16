@@ -64,9 +64,10 @@ def membership_expire_update():
         logger.warning(expired_members)
         for member in expired_members:
             u = member.student.user
-            logging.warning(u.id)
-            u.is_member = False
-            u.save()
+            if u is not None:
+                logging.warning(u.id)
+                u.is_member = False
+                u.save()
     except Exception as e:  # pragma: no cover
         logger.error(traceback.format_exc())
         # Logs the error appropriately.
