@@ -112,9 +112,8 @@ class ComplaintView(UserPassesTestMixin, FormView):
         if self.request.user.is_board:
             self.success_url = reverse_lazy('contact_us:complaint_list')
         else:
-            self.success_url = reverse_lazy('contact_us:thanks')
+            self.success_url = reverse_lazy('contact_us:thanks', kwargs={'arg': 'complaint'})
         return super().form_valid(form)
-
 
     def test_func(self):
         if self.request.user.is_authenticated:

@@ -6,6 +6,7 @@
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
 
     <form method="post">{% csrf_token %}
+        <p>Your comments will be emailed to the board and will be reviewed.</p>
         <p> {{ form.category.label }} {{ form.category }} {{ form.category.errors }}</p>
         <p> {{ form.incident_date.label }} {{ form.incident_date }} {{ form.incident_date.errors }}</p>
         <p> {{ form.message.label }} {{ form.message }} {{ form.message.errors }}</p>

@@ -13,5 +13,6 @@ urlpatterns = [
     path('delete_category/<int:category_id>/', CategoryDeleteView.as_view(), name='delete_category'),
     path('message_list/', MessageListView.as_view(), name='message_list'),
     path('message_list/<int:spam>/', MessageListView.as_view(), name='message_list'),
-    path('thanks', ThanksView.as_view(), name='thanks')
+    path('thanks/', ThanksView.as_view(), name='thanks'),
+    path('thanks/<str:arg>/', ThanksView.as_view(), name='thanks')
 ]

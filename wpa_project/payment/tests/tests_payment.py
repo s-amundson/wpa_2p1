@@ -1,8 +1,10 @@
 import logging
+import time
 from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.utils import timezone
 
 from ..models import Card, PaymentLog, PaymentErrorLog
 from event.models import VolunteerRecord
@@ -88,6 +90,39 @@ class TestsPayment(TestCase):
         self.assertEqual(len(pl), 1)
         self.assertEqual(pl[0].donation, 500)
         self.assertTrue(mail.outbox[0].body.find('Donation   1   5    5') >= 0)
+
+    # @tag('temp')
+    def test_payment_success_donation_twice(self):
+        # process a good payment
+        self.pay_dict['donation'] = 5
+        self.pay_dict['amount'] = 10
+        response = self.client.post(self.url, self.pay_dict, secure=True)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].donation, 500)
+        self.assertTrue(mail.outbox[0].body.find('Donation   1   5    5') >= 0)
+        response = self.client.post(self.url, self.pay_dict, secure=True)
+        pl = PaymentLog.objects.all()
+        self.assertEqual(len(pl), 1)
+        self.assertEqual(pl[0].donation, 500)
+        self.assertTrue(mail.outbox[0].body.find('Donation   1   5    5') >= 0)
+
+    # @tag('temp')
+    # def test_payment_success_donation_twice_slow(self):
+    #     # process a good payment
+    #     self.pay_dict['donation'] = 5
+    #     self.pay_dict['amount'] = 10
+    #     response = self.client.post(self.url, self.pay_dict, secure=True)
+    #     pl = PaymentLog.objects.all()
+    #     self.assertEqual(len(pl), 1)
+    #     self.assertEqual(pl[0].donation, 500)
+    #     self.assertTrue(mail.outbox[0].body.find('Donation   1   5    5') >= 0)
+    #     time.sleep(10)
+    #     response = self.client.post(self.url, self.pay_dict, secure=True)
+    #     pl = PaymentLog.objects.all()
+    #     self.assertEqual(len(pl), 2)
+    #     self.assertEqual(pl[1].donation, 500)
+    #     self.assertTrue(mail.outbox[1].body.find('Donation   1   5    5') >= 0)
 
     def test_payment_success_save_card_default(self):
         old_card = Card.objects.get(pk=1)
