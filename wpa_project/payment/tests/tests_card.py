@@ -1,6 +1,6 @@
 import logging
 import uuid
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
@@ -105,6 +105,7 @@ class TestsCard(TestCase):
         pel = PaymentErrorLog.objects.all()
         self.assertEqual(len(pel), 1)
 
+    # @tag('temp')
     def test_add_force_default(self):
         payment = PaymentHelper(user=self.test_user)
         payment_log, created = payment.create_payment(

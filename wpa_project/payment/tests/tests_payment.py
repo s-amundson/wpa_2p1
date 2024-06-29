@@ -124,6 +124,7 @@ class TestsPayment(TestCase):
     #     self.assertEqual(pl[1].donation, 500)
     #     self.assertTrue(mail.outbox[1].body.find('Donation   1   5    5') >= 0)
 
+    # @tag("temp")
     def test_payment_success_save_card_default(self):
         old_card = Card.objects.get(pk=1)
         old_card.default = True
@@ -139,6 +140,9 @@ class TestsPayment(TestCase):
         response = self.client.post(self.url, self.pay_dict, secure=True)
         pl = PaymentLog.objects.all()
         self.assertEqual(len(pl), 1)
+        pl1 = pl[0]
+        pl1.checkout_created_time -= timezone.timedelta(seconds=10)
+        pl1.save()
         card = Card.objects.all()
         self.assertEqual(len(card), 2)
         self.assertEqual(card[1].customer.user, self.test_user)

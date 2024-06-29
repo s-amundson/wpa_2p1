@@ -62,9 +62,10 @@ class TestsComplaint(TestCase):
     # @tag('temp')
     def test_post_complaint_user_anonymous(self):
         self.client.force_login(User.objects.get(pk=3))
-        response = self.client.post(reverse('contact_us:complaint'), self.post_dict, secure=True)
+        response = self.client.post(reverse('contact_us:complaint'),
+                                    self.post_dict, secure=True)
 
-        self.assertRedirects(response, reverse('contact_us:thanks'))
+        self.assertRedirects(response, reverse('contact_us:thanks', kwargs={'arg':'complaint'}))
         be = BulkEmail.objects.all()
         self.assertEqual(len(be), 1)
         self.assertTrue(be[0].body.find('anonymously') > 0)
@@ -76,7 +77,7 @@ class TestsComplaint(TestCase):
         self.post_dict['anonymous'] = False
         response = self.client.post(reverse('contact_us:complaint'), self.post_dict, secure=True)
 
-        self.assertRedirects(response, reverse('contact_us:thanks'))
+        self.assertRedirects(response, reverse('contact_us:thanks', kwargs={'arg':'complaint'}))
         be = BulkEmail.objects.all()
         self.assertEqual(len(be), 1)
         logger.warning(be[0].body)

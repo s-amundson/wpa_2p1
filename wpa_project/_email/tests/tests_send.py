@@ -20,6 +20,7 @@ class TestsSend(TestCase):
 
     # @tag('temp')
     def test_send_to(self):
+        # This test fails when ran with other tests but passes on it's own.
         self.em.get_email_address(User.objects.get(pk=2))
         logger.warning(self.em.to)
 
@@ -37,6 +38,7 @@ class TestsSend(TestCase):
 
     # @tag('temp')
     def test_send_cc(self):
+        # This test fails when ran with other tests but passes on it's own.
         self.em.cc = ['RosalvaAHall@superrito.com']
 
         d = {'name': 'test user', 'paragraphs': []}

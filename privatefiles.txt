@@ -36,6 +36,8 @@ wpa_project/wpa_project/secrets.json
       "DEBUG": true,
       "DEBUG_LEVEL": "DEBUG",
       "DEFAULT_FROM_EMAIL": "none@example.com",
+      "DJANGO_LOG_LEVEL": "WARNING",
+      "EMAIL_BACKEND": "django.core.mail.backends.console.EmailBackend",
       "EMAIL_DEBUG": false,
       "EMAIL_HOST_USER": "none@example.com",
       "EMAIL_HOST_PASSWORD": "password",
