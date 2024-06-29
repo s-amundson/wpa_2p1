@@ -31,7 +31,6 @@ class ClassRegistrationView(RegistrationSuperView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         context['awrl'] = get_template('program_app/awrl.txt').render()
-        context['covid_policy'] = get_template('program_app/covid_policy.txt').render()
         context['cancel_policy'] = get_template('program_app/cancellation_policy.txt').render()
         return context
 

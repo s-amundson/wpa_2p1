@@ -12,7 +12,7 @@ Note sudo may be needed. Also, docker-compose has been replaced docker compose\
 &nbsp;&nbsp; docker compose up
 
 ### To run tests:
-docker exec -it django_dev python manage.py test \
+docker exec -it django_dev python manage.py test [app]\
 To isolate one test from other tests uncomment the @tag('temp') above the test then run: \
 docker exec -it django_dev python manage.py test --tag temp
 
