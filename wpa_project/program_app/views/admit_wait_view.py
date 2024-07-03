@@ -73,7 +73,7 @@ class AdmitWaitView(UserPassesTestMixin, FormView):
             )
 
     def form_invalid(self, form):  # pragma: no cover
-        # logger.warning(form.errors)
+        logger.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
@@ -87,7 +87,9 @@ class AdmitWaitView(UserPassesTestMixin, FormView):
                     r = f.save()
                     r.pay_status = 'wait processing'
                     r.save()
+            logger.warning(reg_list)
             if len(reg_list):
+                logger.warning('charge user')
                 charge_group.delay(reg_list)
                 return super().form_valid(form)
             form.add_error(None, 'No students selected')
