@@ -18,4 +18,4 @@ docker exec -it django_dev python manage.py test --tag temp
 
 ### To load fixture data into database
 Use this to import the fixture data for manual testing.\
-docker exec -it django_dev python manage.py loaddata beginner_schedule.json f1.json
+docker exec -it django_dev python manage.py loaddata beginner_schedule.json f1.json level.json

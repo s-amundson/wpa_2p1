@@ -22,6 +22,15 @@ class MinutesView(MemberMixin, FormView):
     minutes = None
     owners = ['president', 'vice', 'secretary', 'treasure']
 
+    def dispatch(self, request, *args, **kwargs):
+        dispatch = super().dispatch(request, *args, **kwargs)
+        if 'minutes' not in self.kwargs:
+            if not self.request.user.is_authenticated:
+                return self.handle_no_permission()
+            if not self.request.user.is_board:
+                return self.handle_no_permission()
+        return dispatch
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         logger.warning(self.minutes)
