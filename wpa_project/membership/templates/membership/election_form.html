@@ -9,8 +9,11 @@
         <div class="col">
             <form method="post">
                 {% csrf_token %}
-                <p>{{ form.election_date }}</p>
-                <p>{{ form.state }}</p>
+                <p>{{ form.election_date.label }} {{ form.election_date }} {{ form.election_date.errors }}</p>
+                <p>{{ form.state.label}} {{ form.state }}{{ form.state.errors }}</p>
+                <p>{{ form.notify }}{{form.notify.label}}{{form.notify.errors}}</p>
+                <p>{{ form.description.label }} (remote meeting details) <br> {{ form.description }}{{ form.description.errors }}</p>
+                <p>{{ form.election_close.label }} {{ form.election_close }}{{ form.election_close.errors }}</p>
 
                 <div class="row">
                     <input class="btn btn-primary" type="submit" value="Submit">

@@ -1,4 +1,4 @@
-from django.forms import HiddenInput
+from django.forms import HiddenInput, BooleanField, CheckboxInput, DateTimeInput, SplitDateTimeField
 from django.utils import timezone
 import logging
 from src.model_form import MyModelForm
@@ -10,13 +10,19 @@ class ElectionForm(MyModelForm):
 
     class Meta(MyModelForm.Meta):
         model = Election
-        fields = ['election_date', 'state']
+        fields = ['election_date', 'state', 'description', 'election_close']
         hidden_fields = []
         optional_fields = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['election_date'].initial = timezone.datetime.today() + timezone.timedelta(days=30)
+        self.fields['description'].required = False
+        self.fields['election_date'].widget = DateTimeInput()
+        self.fields['election_date'].initial = timezone.now() + timezone.timedelta(days=30)
+
+        self.fields['election_close'].widget = DateTimeInput()
+        self.fields['notify'] = BooleanField(widget=CheckboxInput(
+                attrs={'class': "m-2"}), required=False, label="Send out notification email to members")
         if self.instance.id:
             logger.warning(self.instance.electioncandidate_set.all())
 
@@ -55,3 +61,7 @@ class ElectionVoteForm(MyModelForm):
         # self.fields['member'].hidden = True
         self.fields['election'].widget = HiddenInput()
         self.fields['member'].widget = HiddenInput()
+
+        # limit the canidates to this election
+        for f in self.Meta.optional_fields:
+            self.fields[f].queryset = self.fields[f].queryset.filter(election=self.initial['election'])

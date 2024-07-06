@@ -9,3 +9,18 @@ Useful Commands:
 
     For deployment need to add SSL Certs started ssl per: https://stackify.com/how-to-configure-https-for-an-nginx-docker-container/
     https://docs.djangoproject.com/en/3.2/howto/outputting-pdf/
+
+    To initialize classes: This only needs to be run once to set up classes.
+        edit beginnerschedule table (progam_app_beginnerschedule) as needed.
+        login as a superuser to https://0.0.0.0:8000/admin
+        navigate to https://0.0.0.0:8000/admin/django_celery_beat/periodictask/
+        create an 'init class' periodic task:
+            select program_app.tasks.init_class in task registered
+            create a cron schedule for the task.
+            check the One-off-task checkbox
+            save
+        run the 'init class' task:
+            navigate to https://0.0.0.0:8000/admin/django_celery_beat/periodictask/
+            select the checkbox next to 'init class'
+            under actions click run selected tasks
+            click go.

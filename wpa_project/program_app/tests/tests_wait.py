@@ -4,10 +4,13 @@ from unittest.mock import patch
 from django.apps import apps
 from django.test import TestCase, Client, tag
 from django.urls import reverse
+from django.utils import timezone
 
 from payment.tests import MockSideEffects
 from ..models import BeginnerClass
 from event.models import Registration
+from .helper import create_beginner_class
+
 Student = apps.get_model('student_app', 'Student')
 User = apps.get_model('student_app', 'User')
 logger = logging.getLogger(__name__)
@@ -99,6 +102,70 @@ class TestsWait(MockSideEffects, TestCase):
         response = self.client.post(reverse('programs:admit_wait', kwargs={'event': 1}), d, secure=True)
         self.assertRedirects(response, reverse('programs:admit_wait', kwargs={'event': 1}))
         chg_group.assert_called_with([1, 2])
+
+    @tag('temp')
+    @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
+    @patch('program_app.views.admit_wait_view.charge_group.delay')
+    def test_post_wait_list2(self, chg_group, mock_payment):
+        mock_payment.side_effect = self.payment_side_effect
+        bc3 = create_beginner_class(
+            timezone.now() + timezone.timedelta(days=14),
+            'open',
+            'beginner'
+        )
+        students = [Student.objects.get(pk=2), Student.objects.get(pk=3)]
+        for s in students:
+            cr = Registration(
+                event=bc3.event,
+                student=s,
+                pay_status="paid",
+                idempotency_key="7b16fadf-4851-4206-8dc6-81a92b70e52e",
+                reg_time='2021-06-09',
+                user=self.test_user,
+                attended=False)
+            cr.save()
+        d = {
+            'event': 1,
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 2,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+            'form-0-id': 1,
+            'form-0-admit': True,
+            'form-1-id': 2,
+            'form-1-admit': True,
+            # 'form-2-id': 3,
+            # 'form-2-admit': False,
+            # 'form-3-id': 4,
+            # 'form-3-admit': False,
+        }
+        response = self.client.post(reverse('programs:admit_wait', kwargs={'event': 1}), d, secure=True)
+        self.assertRedirects(response, reverse('programs:admit_wait', kwargs={'event': 1}))
+        chg_group.assert_called_with([1, 2])
+
+    # @tag('temp')
+    @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
+    @patch('program_app.views.admit_wait_view.charge_group.delay')
+    def test_post_wait_list_admit_none(self, chg_group, mock_payment):
+        mock_payment.side_effect = self.payment_side_effect
+        d = {
+            'event': 1,
+            'form-TOTAL_FORMS': 4,
+            'form-INITIAL_FORMS': 4,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+            'form-0-id': 1,
+            'form-0-admit': False,
+            'form-1-id': 2,
+            'form-1-admit': False,
+            'form-2-id': 3,
+            'form-2-admit': False,
+            'form-3-id': 4,
+            'form-3-admit': False,
+        }
+        response = self.client.post(reverse('programs:admit_wait', kwargs={'event': 1}), d, secure=True)
+        # self.assertRedirects(response, reverse('programs:admit_wait', kwargs={'event': 1}))
+        chg_group.assert_not_called()
 
     # @tag('temp')
     def test_wait_list_returning(self):

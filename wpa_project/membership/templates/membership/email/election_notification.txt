@@ -1,0 +1,21 @@
+{% if opened %} Elections are now open and will close at {{ election.election_close }}
+{% else %} We will be having elections on {{ election.election_date|date }} at {{ election.election_date|time }}. {% endif %}
+The slate is as follows:
+
+  President: {{ pres|join:", " }}
+
+  Vice President: {{ vp|join:", " }}
+
+  Secretary: {{ sec|join:", " }}
+
+  Treasurer: {{ tres|join:", " }}
+
+  Members at Large (select 3): {{ mal|join:", " }}
+
+{% if election.state  == 'scheduled' %} Nominations may be made at the meeting, then online voting will start and be available until {{ election.election_close }}.
+
+{{ election.description }}
+{% endif %}
+
+http://woodleyparkarchers.org/
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

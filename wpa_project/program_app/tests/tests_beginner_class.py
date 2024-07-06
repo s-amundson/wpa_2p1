@@ -1,16 +1,13 @@
 import logging
 import uuid
-from django.db.models import Q
 from datetime import date
 from django.apps import apps
-from django.core import mail
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 from unittest.mock import patch
 
 from ..models import BeginnerClass
-from ..tasks import refund_class
 from event.models import Event, Registration
 from payment.models import PaymentLog
 from payment.tests import MockSideEffects
@@ -144,6 +141,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 2)
 
+    # @tag('temp')
     @patch('program_app.views.beginner_class_view.refund_class.delay')
     def test_refund_success_class(self, refund):
         self.test_user = User.objects.get(pk=2)

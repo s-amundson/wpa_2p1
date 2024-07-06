@@ -15,7 +15,13 @@
             <tbody>
                 {% for election in object_list %}
                     <tr>
-                        <td>{{ election.id }}</td>
+                        <td>
+                            {% if user.is_superuser %}
+                                <a href="{% url 'membership:election' election.id %}">{{ election.id }}</a>
+                            {% else %}
+                                {{ election.id }}
+                            {% endif %}
+                        </td>
                         <td>{{ election.election_date }}</td>
                         <td>{{ election.state }}</td>
                         <td>

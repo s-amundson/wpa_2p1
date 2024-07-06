@@ -1,0 +1,30 @@
+{% extends "email/email_layout.html" %}
+{% block main %}
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        We will be having elections on {{ election.election_date|date }} at {{ election.election_date|time }}.
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        The slate is as follows:
+
+          President: {{ pres|join:", " }}
+
+          Vice President: {{ vp|join:", " }}
+
+          Secretary: {{ sec|join:", " }}
+
+          Treasurer: {{ tres|join:", " }}
+
+          Members at Large (select 3): {{ mal|join:", " }}
+    </p>
+
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">Nominations may be made at the meeting, then online voting will start and be available until {{ election.election_close }}.</p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">{{ election.description }}</p>
+    <br>
+
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+    </p>
+{% endblock %}

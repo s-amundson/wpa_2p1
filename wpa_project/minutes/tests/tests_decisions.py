@@ -1,5 +1,5 @@
 import logging
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.apps import apps
 
@@ -21,16 +21,19 @@ class TestsDecision(TestCase):
         self.test_user = self.User.objects.get(pk=1)
         self.client.force_login(self.test_user)
 
+    # @tag('temp')
     def test_get_decision(self):
         response = self.client.get(reverse('minutes:decision'), secure=True)
         self.assertTemplateUsed('minutes/forms/decision_form.html')
 
+    # @tag('temp')
     def test_get_decision_no_auth(self):
         self.test_user = self.User.objects.get(pk=3)
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('minutes:decision'), secure=True)
         self.assertEqual(response.status_code, 403)
 
+    # @tag('temp')
     def test_get_report_existing(self):
 
         d = Decision(decision_date='2021-12-20', text='test decision')
@@ -39,6 +42,7 @@ class TestsDecision(TestCase):
         response = self.client.get(reverse('minutes:decision', kwargs={'decision_id': d.id}), secure=True)
         self.assertTemplateUsed('minutes/forms/decision_form.html')
 
+    # @tag('temp')
     def test_post_report(self):
         m = Minutes(
             meeting_date='2021-09-04 19:30', attending='', minutes_text='', memberships=0,
@@ -51,6 +55,7 @@ class TestsDecision(TestCase):
         self.assertEqual(len(Decision.objects.all()), 1)
         self.assertEqual(Decision.objects.last().text, 'test decision')
 
+    # @tag('temp')
     def test_post_report_no_auth(self):
         self.test_user = self.User.objects.get(pk=3)
         self.client.force_login(self.test_user)
@@ -64,6 +69,7 @@ class TestsDecision(TestCase):
         response = self.client.post(reverse('minutes:decision'), d, secure=True)
         self.assertEqual(len(Decision.objects.all()), 0)
 
+    # @tag('temp')
     def test_post_report_existing(self):
         r = Decision(decision_date='2021-12-20', text='old decision')
         r.save()
@@ -73,6 +79,7 @@ class TestsDecision(TestCase):
         self.assertEqual(len(Decision.objects.all()), 1)
         self.assertEqual(Decision.objects.last().text, 'updated decision')
 
+    # @tag('temp')
     def test_get_decision_list(self):
         r = Decision(decision_date='2021-12-20', text='old decision')
         r.save()

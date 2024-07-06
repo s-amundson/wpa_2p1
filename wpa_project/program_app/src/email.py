@@ -1,14 +1,14 @@
 from django.template.loader import get_template
 from django.utils import timezone
 
-from student_app.src import EmailMessage as StudentEmailMessage
+from _email.src import EmailMessage as _EmailMessage
 from student_app.models import Student
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class EmailMessage(StudentEmailMessage):
+class EmailMessage(_EmailMessage):
     def beginner_reminder(self, beginner_class, students):
         self.bcc_from_students(students)
         self.subject = f'WPA Class Reminder {timezone.localtime(beginner_class.event.event_date).date()}'

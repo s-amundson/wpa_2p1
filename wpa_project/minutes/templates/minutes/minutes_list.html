@@ -10,13 +10,13 @@
     {% for minutes in minutes_list %}
         <div class="row">
             <div class="col">
-                <a href="{% url 'minutes:minutes_form' minutes.id %}">{{ minutes.meeting_date }}</a>
+                <a href="{% url 'minutes:minutes' minutes.id %}">{{ minutes.meeting_date }}</a>
             </div>
         </div>
     {% endfor %}
     <div class="d-flex flex-row m-2">
         <div class="m-3">
-            <a href="{% url 'minutes:minutes_form'%}" class="btn btn-primary" role="button">
+            <a href="{% url 'minutes:minutes'%}" class="btn btn-primary" role="button">
                 Add Minutes
             </a>
         </div>

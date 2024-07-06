@@ -2,7 +2,7 @@ import logging
 
 from django.apps import apps
 from django.core import mail
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 
 from ..src import EmailMessage
 from event.models import Event
@@ -44,4 +44,14 @@ class TestsEmail(TestCase):
         s = 'Your refund with Woodley Park Archers has successfully been sent to square for processing. '
             # 'Please allow 5 to 10 business days for the refund to process.'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
+        self.assertTrue(mail.outbox[0].body.find('Thank you for your purchase with Woodley Park Archers.') < 0)
+
+    # @tag('temp')
+    def test_event_canceled_email_no_refund(self):
+        EmailMessage().event_canceled_email(self.test_user, Event.objects.get(pk=1), 'due to test', refund=False)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Cancellation')
+        s = 'Your refund with Woodley Park Archers has successfully been sent to square for processing. '
+            # 'Please allow 5 to 10 business days for the refund to process.'
+        self.assertTrue(mail.outbox[0].body.find(s) < 0)
         self.assertTrue(mail.outbox[0].body.find('Thank you for your purchase with Woodley Park Archers.') < 0)
