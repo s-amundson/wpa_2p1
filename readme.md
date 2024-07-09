@@ -5,6 +5,7 @@ It uses Postgres, Celery, RabbitMQ, Nginx
 ### To setup development environment:
 Create 'wpa_project/wpa_project/secrets.json' using keys from privatefiles.txt\
 Create 'wpa_project/wpa_project.env' using keys from privatefiles.txt
+Run this command: docker exec -it django_dev python manage.py migrate
 
 ### To run navigate to the docker_development folder: 
 Note sudo may be needed. Also, docker-compose has been replaced docker compose\
