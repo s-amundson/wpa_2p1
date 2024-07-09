@@ -27,7 +27,7 @@ wpa_project/wpa_project/secrets.json
         },
       "DATABASE": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "wpa_db2",
+            "NAME": "database",
             "USER": "user",
             "PASSWORD": "password",
             "HOST": "db",
