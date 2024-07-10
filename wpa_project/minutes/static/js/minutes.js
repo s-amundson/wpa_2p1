@@ -1,44 +1,37 @@
 "use strict";
 
 $(document).ready(async function() {
-    await old_business_urls.forEach(async function(url) {
-        await $.get(url, function(data, status){
-            if (status == 'success') {
-//                console.log(data);
-                $("#old-business-forms").html($("#old-business-forms").html() + data);
-                $(".business-form :input").off('change');
-                $(".business-form :input").change(function(e){
-                    save_business($(this));
-                });
-            }
-        });
-        console.log(url);
-    });
-    if (new_business_urls.length > 0) {
-        await new_business_urls.forEach(async function(url) {
+    if (minutes_id != null){
+        await old_business_urls.forEach(async function(url) {
             await $.get(url, function(data, status){
                 if (status == 'success') {
     //                console.log(data);
-                    $("#new-business-forms").html($("#new-business-forms").html() + data);
+                    $("#old-business-forms").html($("#old-business-forms").html() + data);
                     $(".business-form :input").off('change');
                     $(".business-form :input").change(function(e){
                         save_business($(this));
                     });
                 }
             });
+            console.log(url);
         });
-    } else {
-        await $.get(new_business_url, function(data, status){
-            if (status == 'success') {
-                $("#new-business-forms").html($("#new-business-forms").html() + data);
-                $(".business-form :input").off('change');
-                $(".business-form :input").change(function(e){
-                    save_business($(this));
+        if (new_business_urls.length > 0) {
+            await new_business_urls.forEach(async function(url) {
+                await $.get(url, function(data, status){
+                    if (status == 'success') {
+        //                console.log(data);
+                        $("#new-business-forms").html($("#new-business-forms").html() + data);
+                        $(".business-form :input").off('change');
+                        $(".business-form :input").change(function(e){
+                            save_business($(this));
+                        });
+                    }
                 });
-            }
-        });
+            });
+        } else {
+            get_new_business();
+        }
     }
-
 
     $(".btn-report").click(function(e) {
         e.preventDefault();
@@ -71,7 +64,24 @@ $(document).ready(async function() {
     if (minutes_edit == false) {
         console.log('lock editing')
         $(":input").prop('disabled', true);
+        if (minutes_id == null){
+            $("#btn-start").prop('disabled', false);
+            $("#id_attending").prop('disabled', false);
+        }
     }
+
+    $("#btn-new-business").click(function(e) {
+        e.preventDefault();
+        console.log('add new business')
+        get_new_business();
+    });
+
+    $("#btn-start").click(function(e){
+        e.preventDefault();
+        $(":input").prop('disabled', false);
+        $("#minutes-form").submit();
+    });
+
     $("#btn-end").click(function(e){
         e.preventDefault();
         $("#id_end_time").val(get_time)
@@ -82,6 +92,17 @@ $(document).ready(async function() {
 
 });
 
+async function get_new_business() {
+    await $.get(new_business_url, function(data, status){
+        if (status == 'success') {
+            $("#new-business-forms").html($("#new-business-forms").html() + data);
+            $(".business-form :input").off('change');
+            $(".business-form :input").change(function(e){
+                save_business($(this));
+            });
+        }
+    });
+}
 function get_time() {
     var dt = new Date();
     return pad(dt.getFullYear(), 4) + '-' + pad(dt.getMonth() + 1, 2) + "-" + pad(dt.getDate(), 2) + " " + pad(dt.getHours(), 2) + ":" + pad(dt.getMinutes(), 2) + ":" + pad(dt.getSeconds(), 2);
