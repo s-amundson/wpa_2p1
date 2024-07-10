@@ -94,7 +94,6 @@ class ComplaintView(UserPassesTestMixin, FormView):
         if self.complaint is None:
             logger.warning('send email')
             complaint_dict = {'complaint': complaint, 'student': None, 'email': None}
-            logger.warning(complaint.user)
             if complaint.user is not None:
                 complaint_dict['student'] = complaint.user.student_set.last()
                 complaint_dict['email'] = EmailAddress.objects.get_primary(complaint.user)

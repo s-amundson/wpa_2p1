@@ -27,7 +27,6 @@
         <script nonce="{{request.csp_nonce}}">
             let url_theme = "{% url 'registration:theme' %}";
             let theme = "{{request.session.theme}}";
-            let recaptcha_site_v2 = "{{RECAPTCHA_SITE_KEY_V2}}";
             let recaptcha_site_v3 = "{{RECAPTCHA_SITE_KEY_V3}}";
             let url_recaptcha = "{% url 'registration:recaptcha' %}";
             let recaptcha_url_list = [
