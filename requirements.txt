@@ -1,8 +1,7 @@
 coverage==7.4.3
 Django==5.0.2
 django-allauth==0.61.1
-# django-celery-beat was at version 2.5.0 but 2.5.0 does not support Django > 5 so using a git version until pip is updated.
-django-celery-beat @ git+https://github.com/celery/django-celery-beat@f66796b9c5c9e47d118cb5b41d970f07cce72bbe
+django-celery-beat==2.6.0
 django-csp==3.7
 django-ipware==6.0.4
 django-pandas==0.6.6
