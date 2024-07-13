@@ -29,7 +29,7 @@ class AdmitWaitView(UserPassesTestMixin, FormView):
         self.formset_students = []
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data()
+        context = super().get_context_data(**kwargs)
         context['formset'] = self.formset
         context['event_id'] = self.event.id
         return context
@@ -87,11 +87,16 @@ class AdmitWaitView(UserPassesTestMixin, FormView):
                     r = f.save()
                     r.pay_status = 'wait processing'
                     r.save()
+            logger.warning(reg_list)
             if len(reg_list):
+                logger.warning('charge user')
                 charge_group.delay(reg_list)
                 return super().form_valid(form)
+            form.add_error(None, 'No students selected')
+            return self.form_invalid(form)
         else:  # pragma: no cover
             logger.warning(self.formset.errors)
+            return self.form_invalid(form)
 
     def test_func(self):
         if self.request.user.is_authenticated and self.request.user.is_staff:

@@ -10,7 +10,7 @@
             <form method="post">
                 {% csrf_token %}
                 <h4 class="text-center">WPA {{ form.election_date.year }} Election</h4>
-                {% if form.instance %}
+                {% if form.instance.id %}
                     <p>Your vote has been accepted. You may update your vote by resubmitting this form while the election is open.</p>
                 {% endif %}
                 {{ form.as_p }}

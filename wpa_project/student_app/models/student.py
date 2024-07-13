@@ -1,6 +1,7 @@
 import logging
 from django.db import models
 from django.conf import settings
+from django.apps import apps
 
 from .student_family import StudentFamily
 
@@ -27,3 +28,17 @@ class Student(models.Model):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+
+    def get_user(self):
+        User = apps.get_model('student_app', 'User')
+        if self.user is None:
+            # users = User.objects.none()
+            return User.objects.filter(student__student_family=self.student_family)
+            # family = self.student_family.student_set.filter(user__isnull=False)
+            # logger.warning(family)
+            # for s in family:
+            #     # self.bcc_append_user(s.user)
+            #     users = users | users.filter(id=s.user.id)
+        else:
+            users = User.objects.filter(id=self.user.id)
+        return users

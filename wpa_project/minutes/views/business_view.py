@@ -1,17 +1,14 @@
 import logging
 
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponseForbidden
-from django.views.generic.base import View
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
 from django.views.generic.edit import FormView
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
-from django.contrib import messages
+from django.forms import modelformset_factory
 
-from ..forms import BusinessForm, BusinessUpdateForm
-from ..models import Business, BusinessUpdate
+from ..forms import BusinessForm, BusinessFormset, BusinessUpdateForm
+from ..models import Business, BusinessUpdate, Minutes
 
 logger = logging.getLogger(__name__)
 
@@ -20,71 +17,98 @@ class BusinessView(UserPassesTestMixin, FormView):
     template_name = 'minutes/forms/business_form.html'
     form_class = BusinessForm
     success_url = reverse_lazy('registration:index')
+    business = None
     business_id = None
+    minutes = None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        return {'business': {'form': context['form'], 'id': self.business_id}}
+        context['formset'] = self.get_formset()
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if self.business_id is not None:
-            kwargs['instance'] = Business.objects.get(pk=self.business_id)
-        kwargs['report'] = self.request.GET.get('report_index', None)
+
+        if self.business is not None:
+            kwargs['instance'] = self.business
+            kwargs['action_url'] = reverse_lazy('minutes:business',
+                                                kwargs={'minutes': self.minutes.id, 'business_id': self.business.id})
+        else:
+            if self.minutes:
+                kwargs['initial']['minutes'] = self.minutes
+            kwargs['action_url'] = reverse_lazy('minutes:business', kwargs={'minutes': self.minutes.id})
+        # kwargs['report'] = self.request.GET.get('report_index', None)
         return kwargs
 
-    def form_invalid(self, form):
-        logging.debug(form.errors)
-        return JsonResponse({'business_id': self.business_id, 'success': False, 'resolved': False})
+    def get_formset(self, **kwargs):
+        def calculate_extra():
+            logger.warning(self.minutes)
+            logger.warning(self.business)
+            if self.minutes.end_time is not None:
+                return 0
+            if self.business is None:
+                return 0
+            if self.business.minutes == self.minutes:
+                return 0
+            if self.business.resolved is not None:
+                return 0
+            if not self.request.user.is_board:
+                return 0
+            if queryset.count() == 0:
+                return 1
+            if (queryset.last() is not None
+                    and queryset.last().update_date + timezone.timedelta(hours=12) < timezone.now()):
+                return 1
+            return 0
+
+        queryset = BusinessUpdate.objects.filter(business=self.business).order_by('update_date')
+
+        formset = modelformset_factory(BusinessUpdate, form=BusinessUpdateForm, can_delete=False,
+                                       formset=BusinessFormset, extra=calculate_extra())
+        data = None
+        if self.request.method.lower() == 'post':
+            data = self.request.POST
+        formset = formset(
+            queryset=queryset,
+            initial=[{'business': self.business}], data=data, minutes=self.minutes, **kwargs
+            )
+        return formset
+
+    def form_invalid(self, form):  # pragma: no cover
+        logger.warning(form.errors)
+        return super().form_invalid(form)
 
     def form_valid(self, form):
+        formset = self.get_formset()
+        if formset.is_valid():
+            formset.save()
+
+        else:  # pragma: no cover
+            logger.warning(formset.errors)
+            logger.warning(formset.non_form_errors())
         report = form.save()
-        resolved = False
+        self.success_url = reverse_lazy('minutes:business', kwargs={'minutes': self.minutes.id, 'business_id': report.id})
         if form.cleaned_data.get('resolved_bool', False) and report.resolved is None:
             report.resolved = timezone.now()
-            resolved = True
         elif not form.cleaned_data.get('resolved_bool', False) and report.resolved:
             report.resolved = None
-            resolved = False
 
         report.save()
         self.business_id = report.id
-        return JsonResponse({'business_id': self.business_id, 'success': True, 'resolved': resolved})
+        return super().form_valid(form)
 
     def test_func(self):
-        logging.debug(self.request.GET)
-        logging.debug(self.kwargs)
-        self.business_id = self.kwargs.get('business_id', None)
-        if self.request.method == 'GET':
-            return self.request.user.is_member
-        return self.request.user.is_board
-
-
-class BusinessUpdateView(LoginRequiredMixin, View):
-    def get(self, request, update_id=None):
-        logging.debug(request.GET)
-        if update_id:
-            report = BusinessUpdate.objects.get(pk=update_id)
-            form = BusinessUpdateForm(instance=report, report=request.GET.get('report_index', None))
-        else:
-            form = BusinessUpdateForm(report=request.GET.get('report_index', None))
-        b = {'form': form, 'id': update_id}
-        return render(request, 'minutes/forms/business_update_form.html', {'update': b})
-
-    def post(self, request, update_id=None):
-        logging.debug(request.POST)
-        if update_id:
-            report = BusinessUpdate.objects.get(pk=update_id)
-            form = BusinessUpdateForm(request.POST, instance=report)
-        else:
-            form = BusinessUpdateForm(request.POST)
-
-        if form.is_valid():
-            logging.debug(form.cleaned_data)
-            report = form.save()
-            update_id = report.id
-            success = True
-        else:  # pragma: no cover
-            logging.error(form.errors)
-            success = False
-        return JsonResponse({'update_id': update_id, 'success': success})
+        logger.warning(self.kwargs)
+        if self.request.user.is_authenticated:
+            if 'business_id' in self.kwargs:
+                self.business = get_object_or_404(Business, pk=self.kwargs.get('business_id'))
+                self.business_id = self.kwargs.get('business_id', None)
+            if 'minutes' in self.kwargs:
+                self.minutes = get_object_or_404(Minutes, pk=self.kwargs.get('minutes'))
+                logger.warning(self.minutes)
+            else:
+                return False
+            if self.request.method == 'GET':
+                return self.request.user.is_member
+            return self.request.user.is_board
+        return False

@@ -1,39 +1,50 @@
-<div class="row business-div" id="business-div-{{ business.form.report_index }}">
+<form id="buiness-form-{{form.instance.id}}" class="business-form row" method="post"
+          action="{{ form.action_url }}">
     <div class="col">
         <div class="row">
             {% csrf_token %}
-            {{ business.form.business_id }}
-            {{ business.form.minutes }}
+            {{ form.business_id }}
+            {{ form.minutes }}
             <div class="col">
-                {{ business.form.business }}
+                {{ form.business }}
             </div>
             <div class="col-2">
-                {{ business.form.added_date.label }} {{ business.form.added_date }}
+                {{ form.added_date.label }} {{ form.added_date }}
             </div>
         </div>
-        <div class="div-business-update" id="div-business-update-{{ business.form.report_index }}">
-            {% for update in business.updates%}
-                {% include "minutes/forms/business_update_form.html" %}
+        <div class="div-business-update" id="div-business-update-{{ form.report_index }}">
+            {{ formset.management_form }}
+            {% for update_form in formset %}
+            <div class="d-flex flex-row m-2 ps-3">
+                <div>
+                    {{ update_form.update_text.label }}{{ update_form.update_text }}
+                </div>
+                {% if update_form.instance.id %}
+                    <div class="m-2 ps-2 pt-2">
+                        {{ update_form.update_date.label}}<br>{{ update_form.update_date }}
+                        {{ update_form.update_date.initial|date }}
+                    </div>
+                {% endif %}
+                {{ update_form.business }}
+            </div>
+                {% for hidden in update_form.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
             {% endfor %}
         </div>
 
-        <div class="row">
-            <div class="col">
-                {% if user.is_board %}
-                    <button id="btn-add-update-{{ business.form.report_index }}" class="btn btn-primary btn-update-business">
-                        Add Update
-                    </button>
-                {% endif %}
-            </div>
+        <div class="d-flex flex-row">
+            <div class="col"></div>
             <div class="col"></div>
             <div class="col form-check mb-3">
-                    {% if user.is_board %}
+                {% if user.is_board %}
                     <label class="form-check-label">
-                        {{ business.form.resolved_bool }} Resolved
+                        {{ form.resolved_bool }} Resolved
                     </label>
-                    {% endif %}
+                {% endif %}
             </div>
 
         </div>
     </div>
-</div>
+
+</form>

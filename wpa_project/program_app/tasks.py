@@ -142,18 +142,19 @@ def refund_class(beginner_class, message=''):
                 qty = len(cr.filter(idempotency_key=reg.idempotency_key).filter(pay_status='paid'))
                 square_response = refund.refund_with_idempotency_key(
                     reg.idempotency_key, qty * beginner_class.event.cost_standard * 100)
-                if square_response['status'] == 'error':
-                    if square_response['error'] != 'Previously refunded':  # pragma: no cover
-                        celery_logger.error(square_response)
+
+                if square_response['error'] == 'Previously refunded':  # pragma: no cover
+                    celery_logger.error(square_response)
                 else:
                     email_sent = False
                     transaction = cr.filter(idempotency_key=reg.idempotency_key)
                     for c in transaction:
-                        if c.student.user is not None:
+                        if not email_sent and c.student.user is not None:
                             email_message.event_canceled_email(
                                 c.student.user,
                                 f'Class on {str(timezone.localtime(beginner_class.event.event_date))[:10]}',
-                                message
+                                message,
+                                qty > 0
                             )
                             email_sent = True
                             transaction.update(pay_status='refund')

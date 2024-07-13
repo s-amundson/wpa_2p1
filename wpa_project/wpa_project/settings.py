@@ -154,6 +154,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_FROM_EMAIL = get_secret('DEFAULT_FROM_EMAIL')
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = get_secret("EMAIL_BACKEND") #'django.core.mail.backends.console.EmailBackend'
+EMAIL_FILE_PATH = "/tmp/app-messages"
 EMAIL_BATCH_DAY_LIMIT = 1500
 EMAIL_BCC_LIMIT = 500
 EMAIL_DEBUG = get_secret("EMAIL_DEBUG")
@@ -181,6 +182,7 @@ INSTALLED_APPS = [
     'contact_us',
     'info',
     'facebook',
+    '_email',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -251,6 +253,7 @@ LOGGING = {
     },
     'loggers': {
         '': {'handelers': ['console'], 'level': 'CRITICAL'},
+        '_email': logger_default,
         'event': logger_default,
         'student_app': logger_default,
         'payment': logger_default,

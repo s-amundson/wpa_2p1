@@ -1,148 +1,111 @@
 "use strict";
-var report_owners = ['president', 'vice', 'secretary', 'treasure'];
 
-$(document).ready(function() {
-    // if meeting has started display time started. else put button to start meeting.
-    if (minutes_id) {
-        $("#btn-start").hide();
-    }
-    else {
-        $("#btn-start").show();
-        $("#id_start_time").hide();
-    }
-    $("#btn-start").click(function(e){
-        e.preventDefault();
-        disable_inputs(false);
-        $("#minutes-form").submit();
-        $(".btn-report").prop('disabled', false);
-    });
-
-    if ($("#id_end_time").val() == "") {
-        $("#id_end_time").hide();
-    }
-    else {
-        $("#btn-end").hide();
-    }
-    $("#btn-end").click(function(e){
-        e.preventDefault();
-        $("#id_end_time").val(get_time)
-        disable_inputs(false);
-        $("#minutes-form").submit();
-        $(".btn-report").prop('disabled', false);
-    });
-
-    // loop though the report owners
-    $.each(report_owners, function(index, value) {
-        // loop though the existing reports and update indexes and set event
-        $("#div-" + value).find(".report-div").each(function(index) {
-            index_report_div($(this))
+$(document).ready(async function() {
+    if (minutes_id != null){
+        await old_business_urls.forEach(async function(url) {
+            await $.get(url, function(data, status){
+                if (status == 'success') {
+    //                console.log(data);
+                    $("#old-business-forms").html($("#old-business-forms").html() + data);
+                    $(".business-form :input").off('change');
+                    $(".business-form :input").change(function(e){
+                        save_business($(this));
+                    });
+                }
+            });
+            console.log(url);
         });
+        if (new_business_urls.length > 0) {
+            await new_business_urls.forEach(async function(url) {
+                await $.get(url, function(data, status){
+                    if (status == 'success') {
+        //                console.log(data);
+                        $("#new-business-forms").html($("#new-business-forms").html() + data);
+                        $(".business-form :input").off('change');
+                        $(".business-form :input").change(function(e){
+                            save_business($(this));
+                        });
+                    }
+                });
+            });
+        } else {
+            get_new_business();
+        }
+    }
 
-        // add listener to the report buttons
-        $("#btn-" + value + "-report").click(function(e){
-            e.preventDefault();
-            load_report_form($("#div-" + value), value);
+    $(".btn-report").click(function(e) {
+        e.preventDefault();
+        let empty_form = $(this).parent().find(".empty_form")
+        let total_forms = $(this).parent().find("[name$='TOTAL_FORMS']")
+        let html = empty_form.html().replace(/__prefix__/g, total_forms.val());
+        console.log(html)
+        total_forms.val(parseInt(total_forms.val()) + 1)
+        $(html).insertBefore(empty_form);
+        let new_form = empty_form.prev();
+        let prior_form = new_form.prev();
+        new_form.find(":input").each(function() {
+            let el_id = $(this).attr('id').split('-')[$(this).attr('id').split('-').length -1];
+            if (['report', 'id'].indexOf(el_id) === -1) {
+                $(this).val(prior_form.find("[name$='" + el_id + "']").val());
+            }
         });
-    });
-
-    $(".btn-update-business").click(function(e){
-        e.preventDefault();
-//        load_business_update($("#business-id-" + $(this).attr("count")).val());
-        load_business_update($(this));
-    });
-    // index old business
-    $("#div-old-business").find(".business-div").each(function(index) {
-        index_business_div($(this), false);
-    });
-
-    // index new business
-    $("#div-new-business").find(".business-div").each(function(index) {
-        index_business_div($(this), true);
-    });
-
-    // index decisions
-    $("#div-decisions").find(".decision-div").each(function(index) {
-        index_decision_div($(this), true);
-    });
-
-    // add listener to the new business button
-    $("#btn-new-business").click(function(e){
-        e.preventDefault();
-        load_business_form();
-    });
-
-    // add listener to the new decision button
-    $("#btn-new-decision").click(function(e){
-        e.preventDefault();
-        load_decision_form();
-    });
-    // update minutes on change of inputs
-    $(".minutes-input").each(function(item) {
-        console.log($(this));
-        $(this).change(function(e){
+        new_form.find(".minutes-input").change(function(e){
             console.log($(this));
             update_minutes()
         });
     });
+
+    $(".minutes-input").not(".report").change(function(e){
+        console.log($(this));
+        update_minutes()
+    });
+    $(".report").change(save_report);
+
+    if (minutes_edit == false) {
+        console.log('lock editing')
+        $(":input").prop('disabled', true);
+        if (minutes_id == null){
+            $("#btn-start").prop('disabled', false);
+            $("#id_attending").prop('disabled', false);
+        }
+    }
+
+    $("#btn-new-business").click(function(e) {
+        e.preventDefault();
+        console.log('add new business')
+        get_new_business();
+    });
+
+    $("#btn-start").click(function(e){
+        e.preventDefault();
+        $(":input").prop('disabled', false);
+        $("#minutes-form").submit();
+    });
+
+    $("#btn-end").click(function(e){
+        e.preventDefault();
+        $("#id_end_time").val(get_time)
+        $("#minutes-form").submit();
+    });
+
+    console.log('done loading')
+
 });
 
-function disable_inputs(state) {
-    let arr = ['id_meeting_date', 'btn-start', 'id_attending'];
-    if ($.inArray($(this).prop('id'), arr) == -1) {
-        $(this).prop('disabled', state);
-    }
+async function get_new_business() {
+    await $.get(new_business_url, function(data, status){
+        if (status == 'success') {
+            $("#new-business-forms").html($("#new-business-forms").html() + data);
+            $(".business-form :input").off('change');
+            $(".business-form :input").change(function(e){
+                save_business($(this));
+            });
+        }
+    });
 }
-
 function get_time() {
     var dt = new Date();
     return pad(dt.getFullYear(), 4) + '-' + pad(dt.getMonth() + 1, 2) + "-" + pad(dt.getDate(), 2) + " " + pad(dt.getHours(), 2) + ":" + pad(dt.getMinutes(), 2) + ":" + pad(dt.getSeconds(), 2);
-}
-
-function index_business_div(container, new_business) {
-    container.attr("new-business", new_business)
-    if(container.find('[name="resolved_bool"]').prop('checked')) {
-        container.find("[name=business]").prop('disabled', true);
-    }
-    console.log(new_business)
-
-    if (new_business) {
-        container.find(".btn-update-business").hide();
-    }
-    else {
-        container.find("[name=business]").prop('disabled', true);
-    }
-
-    container.find("[name=business]").change(function(e){
-        save_business(container);
-    });
-
-    $(".resolved-check").change(function(e){
-        save_business($(this).parents(".business-div"));
-    });
-
-    $("btn-update-business").click(function(e){
-        e.preventDefault();
-        load_business_update($(this));
-    });
-}
-
-function index_decision_div(container) {
-
-    container.find("[name='decision_date']").hide()
-    console.log(container.find("[name='decision_date']").val())
-//    $("#decision_decision_date-" + report_count).hide()
-    container.find("[name='text']").change(function(e){
-        e.preventDefault();
-        save_decision(container);
-    });
-
-}
-
-function index_report_div(container) {
-    container.find("[name='report']").change(function(e){
-        e.preventDefault();
-        save_report(container);
-    });
 }
 
 function indicate_saved(status) {
@@ -155,116 +118,40 @@ function indicate_saved(status) {
     }
 }
 
-async function load_business_form() {
-    await $.get(url_business, { report_index: report_count }, function(data, status){
-        $("#div-new-business").append(data);
-        $("#business_minutes_" + report_count).val(minutes_id);
-        index_business_div($("#business-div-" + report_count), true)
-        report_count = report_count + 1;
+async function save_business(element) {
+    console.log('form changed');
+    console.log(element.closest('form').serializeArray());
+//    $(this).closest('form').submit();
+    await $.post(element.closest('form').attr('action'), element.closest('form').serializeArray(), function(data, status){
+        if (status == 'success') {
+            $("#div-saved-message").html("Saved at:" + get_time());
+            element.closest('form').replaceWith(data)
+            $(".business-form :input").change(function(e){
+                    save_business($(this));
+                });
+        } else {
+            console.log('failed save');
+        }
     });
 }
 
-async function load_business_update(btn) {
-    let business_div = btn.parents(".business-div")
-    await $.get(url_business_update, { report_index: report_count }, function(data, status){
-        business_div.find(".div-business-update").append(data);
-        $("#update_business_" + report_count ).val(business_div.find("[name='business_id']").val());
-        $("#update_update_text_" + report_count).change(function(e){
-            save_update($(this));
-        });
-        report_count = report_count + 1;
-    });
-}
-
-async function load_decision_form() {
-    await $.get(url_decision, { report_index: report_count }, function(data, status){
-        $("#div-decisions").append(data);
-        index_decision_div($("#decision-div-" + report_count))
-        $("#decision-div-" + report_count).find("[name='minutes']").val(minutes_id)
-        report_count = report_count + 1;
-    });
-}
-
-async function load_report_form(container, owner) {
-    await $.get(url_report, { report_index: report_count }, function(data, status){
-        console.log(status)
-        container.append(data);
-        container.find('[name="owner"]').val(owner);
-        console.log(container.find('[name="owner"]').val());
-        container.find('[name="minutes"]').val(minutes_id);
-        index_report_div($("#report-div-" + report_count))
-        report_count = report_count + 1;
-    });
-}
-
-async function save_business(business_div) {
-
-    let url_string = url_business
-    console.log(business_div.attr("id"))
-    if (business_div.find('[name="business_id"]').val() != "") {
-        url_string = url_string + "/" + business_div.find('[name="business_id"]').val()
-    }
-
-    await $.post(url_string, {
-        csrfmiddlewaretoken: business_div.find('[name="csrfmiddlewaretoken"]').val(),
-        added_date: business_div.find('[name="added_date"]').val(),
-        minutes: business_div.find('[name="business_minutes"]').val(),
-        business: business_div.find('[name="business"]').val(),
-        resolved_bool: business_div.find('[name="resolved_bool"]').prop('checked'),
-    }, function(data, status){
-        business_div.find('[name="business_id"]').val(data.business_id);
-        indicate_saved(data.success)
-
-        business_div.find('[name="resolved_bool"]').prop('disabled', false);
-    }, "json");
-}
-
-async function save_decision(container) {
-    let url_string = url_decision
-    if (container.find("[name='decision_id']").val() != "") {
-        url_string = url_string + "/" + container.find("[name='decision_id']").val();
-    }
-//    $("#instructor_form").serializeArray()
-    await $.post(url_string, container.find('[name="decision-form"]').serializeArray(), function(data, status){
-        container.find("[name='decision_id']").val(data.decision_id);
-        indicate_saved(data.success);
-    }, "json");
-}
-
-async function save_report(report_container) {
-
+async function save_report() {
+    console.log('report change');
     let url_string = url_report
-    console.log(report_container.find('[name="report_id"]').val())
-    if (report_container.find('[name="report_id"]').val() != "") {
-        url_string = url_string + "/" + report_container.find('[name="report_id"]').val();
+    let element_id = $(this).parent().find("[name$='id']")
+    if ($(this).parent().find("[name$='id']").val() != "") {
+        url_string = url_string + $(this).parent().find("[name$='id']").val() + "/";
     }
-    let report_data = report_container.find('[name="report"]').val();
-    await $.post(url_string, {
-        csrfmiddlewaretoken: report_container.find('[name="csrfmiddlewaretoken"]').val(),
-        owner: report_container.find('[name="owner"]').val(),
-        minutes: report_container.find('[name="minutes"]').val(),
-        report: report_data
-    }, function(data, status){
-        console.log(report_data)
-        report_container.find('[name="report_id"]').val(data.report_id);
-        indicate_saved(data.success);
-//        report_element.val(report_data);
-    }, "json");
-}
 
-async function save_update(update_element) {
-    let update_row = update_element.parents(".div-update-row")
-//    let count = update_element.attr('count')
-    let url_string = url_business_update
-    if (update_row.find("[name='update_id']").val() != "") {
-        url_string = url_string + "/" + update_row.find("[name='update_id']").val()
-    }
     await $.post(url_string, {
-        csrfmiddlewaretoken: update_row.find('[name="csrfmiddlewaretoken"]').val(),
-        business: update_row.find('[name="business"]').val(),
-        update_text: update_element.val()
+        csrfmiddlewaretoken: $("#minutes-form").find('[name="csrfmiddlewaretoken"]').val(),
+        owner: $(this).parent().find("[name$='owner']").val(),
+        minutes: $(this).parent().find("[name$='minutes']").val(),
+        report: $(this).parent().find("[name$='report']").val(),
+        id: $(this).parent().find("[name$='id']").val()
     }, function(data, status){
-        update_row.find('[name="business"]').val(data.update_id);
+        console.log(data.report_id);
+        element_id.val(data.report_id);
         indicate_saved(data.success);
     }, "json");
 }
@@ -275,6 +162,7 @@ async function update_minutes() {
         await $.post(url_minutes, $("#minutes-form").serializeArray(), function(data, status){
             if (status == 'success') {
                 $("#div-saved-message").html("Saved at:" + get_time());
+                console.log("Saved at:" + get_time())
             }
         }, "json");
     }

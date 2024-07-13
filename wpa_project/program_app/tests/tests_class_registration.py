@@ -247,12 +247,15 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(self.client.session['payment_category'], 'intro')
         self.assertEqual(cr[0].user, self.test_user)
 
+    # @tag('temp')
     def test_underage_student(self):
         sf = StudentFamily.objects.get(pk=3)
+        d = timezone.now()
+        d.replace(year=d.year - 7)
         s = Student(student_family=sf,
                     first_name='Brad',
                     last_name='Conlan',
-                    dob='2015-06-30')
+                    dob=d.date())
         s.save()
 
         self.get_post_dict([self.event.id])

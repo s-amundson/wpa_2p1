@@ -1,12 +1,12 @@
 from django.template.loader import get_template
 
-from student_app.src import EmailMessage
+from _email.src import EmailMessage as EM
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class EmailMessage(EmailMessage):
+class EmailMessage(EM):
     def contact_email(self, message):
         self.bcc_from_users(message.category.recipients.all())
         self.bcc.append(message.email)

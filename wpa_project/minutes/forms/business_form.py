@@ -1,5 +1,6 @@
 import logging
-from django.forms import BooleanField, IntegerField
+from django.forms import BooleanField
+from django.forms.models import BaseModelFormSet
 from django.utils import timezone
 
 from src import MyModelForm
@@ -9,69 +10,68 @@ logger = logging.getLogger(__name__)
 
 
 class BusinessForm(MyModelForm):
-    business_id = IntegerField(required=False)
-    # report_number = IntegerField(required=False)
     resolved_bool = BooleanField(required=False, initial=False)
 
     class Meta(MyModelForm.Meta):
         model = Business
         read_fields = []
-        hidden_fields = ['business_id', 'minutes']
+        hidden_fields = ['minutes']
         optional_fields = ['business', 'resolved', 'resolved_bool']
         fields = optional_fields + hidden_fields + read_fields
 
     def __init__(self, *args, **kwargs):
-        old_business = kwargs.get('old', False)
-        self.report_index = kwargs.get('report', 0)
-        if 'old' in kwargs:
-            kwargs.pop('old')
-        if 'report' in kwargs:
-            kwargs.pop('report')
+        self.action_url = kwargs.pop('action_url')
+
+        super().__init__(*args, **kwargs)
+        logger.warning(self.initial)
+        self.fields['business'].widget.attrs.update({'cols': 80, 'rows': 3, 'class': 'form-control m-2'})
+        self.fields['resolved_bool'].initial = False
+        self.fields['resolved_bool'].widget.attrs.update({'class': "form-check-input resolved-check"})
+        if self.instance.id:
+            # self.fields['business_id'].initial = self.instance.id
+            if self.instance.minutes and self.instance.minutes.end_time is not None:
+                self.fields['business'].widget.attrs.update({'readonly': 'readonly'})
+                self.fields['resolved_bool'].widget.attrs.update({'disabled': 'disabled'})
+            if self.instance.resolved is not None:
+                self.fields['resolved_bool'].initial = True
+                self.fields['business'].widget.attrs.update({'readonly': 'readonly'})
+            self.auto_id = 'business_%s' + f'_{self.instance.id}'
+
+
+        for f in self.Meta.fields:
+            self.fields[f].widget.attrs['class'] += ' business-input'
+
+
+class BusinessFormset(BaseModelFormSet):
+    def __init__(self, *args, **kwargs):
+        self.minutes = None
+        if 'minutes' in kwargs:
+            self.minutes = kwargs.pop('minutes')
         super().__init__(*args, **kwargs)
 
-        if self.instance:
-            self.fields['business_id'].initial = self.instance.id
-        # self.fields['report_number'].inital = self.report_index
-        self.auto_id = 'business_%s' + f'_{self.report_index}'
-        self.fields['business'].widget.attrs.update({'cols': 80, 'rows': 3, 'class': 'form-control m-2 report'})
-        if old_business: # if true; disable the input so it can't be modified
-            self.fields['business'].widget.attrs.update({'class': 'form-control m-2', 'readonly': 'readonly'})
-        if self.initial.get('resolved', None) is not None:
-            self.fields['resolved_bool'].initial = True
-
-        else:
-            self.fields['resolved_bool'].initial = False
-        self.fields['resolved_bool'].widget.attrs.update({'class': "form-check-input resolved-check"})
-        for f in self.Meta.fields:
-            self.fields[f].widget.attrs['class'] += ' minutes-input'
-
+    def get_form_kwargs(self, index):
+        kwargs = super().get_form_kwargs(index)
+        kwargs['minutes'] = self.minutes
+        return kwargs
 
 class BusinessUpdateForm(MyModelForm):
-    report_index = 0
-    update_id = IntegerField(required=False)
-
     class Meta(MyModelForm.Meta):
         model = BusinessUpdate
         read_fields = []
-        hidden_fields = ['business', 'update_id']
+        hidden_fields = ['business', 'update_date']
         optional_fields = ['update_text', ]
         fields = optional_fields + hidden_fields + read_fields
 
     def __init__(self, *args, **kwargs):
-        old_update = kwargs.get('old', False)
-        self.report_index = kwargs.get('report', 0)
-        if 'old' in kwargs:
-            kwargs.pop('old')
-        if 'report' in kwargs:
-            kwargs.pop('report')
+        minutes = None
+        if 'minutes' in kwargs:
+            minutes = kwargs.pop('minutes')
         super().__init__(*args, **kwargs)
-        self.update_date = None
-        if self.instance:
-            self.fields['update_id'].initial = self.instance.id
-            self.update_date = self.instance.update_date
-        if self.update_date is None:
-            self.update_date = timezone.now()
-        self.auto_id = 'update_%s' + f'_{self.report_index}'
         self.fields['update_text'].widget.attrs.update({'cols': 60, 'rows': 3, 'class': 'form-control m-2 update'})
-        if old_update:
+        logger.warning(minutes)
+        if minutes is None or minutes.end_time is not None:
             self.fields['update_text'].widget.attrs.update({'readonly': 'readonly'})
+        if self.instance.id:
+            if self.instance.update_date + timezone.timedelta(hours=12) < timezone.now() or self.instance.business.resolved is not None:
+                logger.warning('read only')
+                self.fields['update_text'].widget.attrs.update({'readonly': 'readonly'})

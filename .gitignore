@@ -9,3 +9,4 @@ secrets.json
 wordpress/
 /docker_development/db_backup/
 */htmlcov/
+*.pyc

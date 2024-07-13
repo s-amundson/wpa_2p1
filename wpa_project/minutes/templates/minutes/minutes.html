@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %} Minutes{% endblock %}
+{% block script %}
+    {% load static %}
+    <script src="{% static 'js/minutes.js' %}"></script>
+    <script nonce="{{request.csp_nonce}}">
+        {% if minutes.id %}
+            let old_business_urls = [{% for b in old_businesses %} "{% url 'minutes:business' minutes.id b.id %}", {% endfor %}];
+            let new_business_urls = [{% for b in new_business %} "{% url 'minutes:business' minutes.id b.id %}", {% endfor %}];
+            let new_business_url = "{% url 'minutes:business' minutes.id%}"
+            let url_minutes = "{% url 'minutes:minutes' minutes.id %}";
+            let minutes_id = {{ minutes.id }};
+        {% else %}
+            let minutes_id = null;
+        {% endif %}
+
+
+        let minutes_edit = {{minutes_edit|lower }};
+        let url_report = "{% url 'minutes:report' %}";
+    </script>
+{% endblock %}
+
+{% block main %}
+    <form id="minutes-form" method="post">
+        {% csrf_token %}
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.meeting_date.label }}
+            </div>
+            <div class="col-3">
+                {{ form.meeting_date }}
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.attending.label }}
+            </div>
+            <div class="col">
+                {{ form.attending }}
+            </div>
+
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.start_time.label }}
+            </div>
+            <div id="div-start-input" class="col-3">
+                {% if not minutes.id %}
+                    <button id="btn-start" class="btn btn-primary" type="submit">Start Meeting Now</button>
+                {% endif %}
+                {{ form.end_time }}
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2"> President's Report:</div>
+            <div class="col">
+                {{ president_formset.as_div }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2"> Vice President's Report:</div>
+            <div class="col">
+                {{ vice_formset.as_div }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2"> Secretary's Report:</div>
+            <div class="col">
+                {{ secretary_formset.as_div }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2"> Treasure's Report:</div>
+            <div class="col">
+                {{ treasure_formset.as_div }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.balance.label }}
+            </div>
+            <div class="col-2">
+                {{ form.balance }}
+            </div>
+            <div class="col"></div>
+            <div class="col-2">
+                {{ form.reimbursement_review.label }}{{ form.reimbursement_review }}
+            </div>
+            <div class="col">
+
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.memberships.label }}
+            </div>
+            <div class="col-2">
+                {{ form.memberships }}
+            </div>
+        </div>
+
+        <div class="row p-3">
+            <div class="col-2">
+                {{ form.discussion.label }}
+            </div>
+            <div class="col">
+                {{ form.discussion }}
+            </div>
+        </div>
+
+    </form>
+    <h5 class="p-3">Old Business</h5>
+    <div id="old-business-forms"></div>
+    <h5 class="p-3">New Business</h5>
+    <div id="new-business-forms"></div>
+    <div class="d-flex flex-row ps-3">
+        <button id="btn-new-business" class="btn btn-primary">Add New Business</button>
+    </div>
+    {% if form.instance%}
+    <div class="row p-3">
+        <div class="col-2">End Time</div>
+        <div class="col-3">
+            {% if form.instance.end_time %}
+                {{ form.instance.end_time }}
+            {% else %}
+
+                {% if user.is_board %}
+                    <button id="btn-end" class="btn btn-primary" type="submit">End Meeting Now</button>
+                {% endif %}
+            {% endif %}
+        </div>
+        <div class="col"></div>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block right %}
+    <div id="div-saved-message" class="row p-3 sticky-top">
+        Saved At:
+    </div>
+{% endblock %}

@@ -10,18 +10,27 @@ logger = logging.getLogger(__name__)
 
 class Election(models.Model):
     STATES = ['scheduled', 'open', 'closed']
-    election_date = models.DateField(default=timezone.now)
+    election_date = models.DateTimeField(default=timezone.now)
     state = models.CharField(max_length=20, null=True, choices=choices(STATES))
-    # description = models.CharField(max_length=150, null=True, default='General Election')
+    election_close = models.DateTimeField(null=True, default=None)
+    description = models.TextField(null=True, default=None)
 
     def __str__(self):
         return f'{self.election_date} {self.state}'
+
+
+class ElectionNotificationDates(models.Model):
+    election = models.ForeignKey(Election, on_delete=models.CASCADE)
+    notification_date = models.DateField(default=timezone.now)
+    status = models.CharField(max_length=20, default='scheduled')
+
 
 class ElectionPosition(models.Model):
     position = models.CharField(max_length=40)
 
     def __str__(self):
         return self.position
+
 
 class ElectionCandidate(models.Model):
     # positions = [(1, 'President'),

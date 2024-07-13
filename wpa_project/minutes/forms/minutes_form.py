@@ -12,9 +12,8 @@ class MinutesForm(MyModelForm):
     class Meta(MyModelForm.Meta):
         model = Minutes
         exclude = []
-        hidden_fields = ['minutes_text']
-        optional_fields = ['meeting_date', 'attending', 'memberships', 'balance', 'reimbursement_review', 'discussion',
-                           'end_time']
+        hidden_fields = ['minutes_text', 'end_time']
+        optional_fields = ['meeting_date', 'attending', 'memberships', 'balance', 'reimbursement_review', 'discussion']
         fields = optional_fields + hidden_fields
 
     def __init__(self, *args, **kwargs):

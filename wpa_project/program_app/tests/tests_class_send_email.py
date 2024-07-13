@@ -12,6 +12,7 @@ from .helper import create_beginner_class
 
 from event.models import Event, Registration
 from student_app.models import Student
+from _email.models import BulkEmail
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -36,18 +37,21 @@ class TestsClassSendEmail(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'student_app/form_as_p.html')
 
+    # @tag('temp')
     def test_post_send_email_good(self):
         cr = Registration(event=Event.objects.get(pk=1),
                           student=Student.objects.get(pk=4),
                           pay_status='paid',
-                          idempotency_key=str(uuid.uuid4()))
+                          idempotency_key=str(uuid.uuid4()),
+                          user=User.objects.get(pk=3))
         cr.save()
         response = self.client.post(reverse('programs:send_email', kwargs={'beginner_class': 1}), self.test_dict,
                                     secure=True)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
-        self.assertTrue(mail.outbox[0].body.find('Test message') >= 0)
+        be = BulkEmail.objects.last()
+        self.assertEqual(be.subject, 'Test Subject')
+        self.assertTrue(be.body.find('Test message') >= 0)
+        self.assertEqual(be.users.all().count(), 1)
 
     # @tag('temp')
     def test_instructor_canceled(self):

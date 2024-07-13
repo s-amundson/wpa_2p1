@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %} Complaint Form {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <form method="post">{% csrf_token %}
+        <p>Your comments will be emailed to the board and will be reviewed.</p>
+        <p> {{ form.category.label }} {{ form.category }} {{ form.category.errors }}</p>
+        <p> {{ form.incident_date.label }} {{ form.incident_date }} {{ form.incident_date.errors }}</p>
+        <p> {{ form.message.label }} {{ form.message }} {{ form.message.errors }}</p>
+        <p> {{ form.anonymous.label }} {{ form.anonymous }} {{ form.anonymous.errors }}</p>
+        {% if form.instance.id and user.is_board %}
+            {% for comment in formset %}
+                <div class="row pt-2">
+                    {{ comment.comment.label }} {{ comment.comment }} {{ comment.comment.errors }}
+                </div>
+                <div class="d-flex flex-row">
+                    <div>
+                        {{ comment.comment_date.label }} {{ comment.comment_date }} {{ comment.comment_date.errors }}
+                    </div>
+                    <div>
+                        By: {{ comment.student }}
+                    </div>
+                </div>
+
+            {% endfor %}
+            <p> {{ form.resolved.label }} {{ form.resolved }} {{ form.resolved.errors }}</p>
+        {% else %}
+            {{ formset.management_form }}
+        {% endif %}
+        <button class="m-2 btn btn-primary submit-btn" type="submit">
+            Submit
+        </button>
+    </form>
+
+{% endblock %}
