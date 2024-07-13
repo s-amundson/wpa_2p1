@@ -12,7 +12,7 @@ It uses Postgres, Celery, RabbitMQ, Nginx
 
 ### To load fixture data into database:
 Use this to import the fixture data for manual testing.\
-`docker exec -it django_dev python manage.py loaddata beginner_schedule.json f1.json`
+`docker exec -it django_dev python manage.py loaddata beginner_schedule.json f1.json level.json`
 
 **Note:** The *f1.json* file contains users you may log in as. User 1 is a superuser, User 2 is an instructor, and Users 3-5 are regular members. Ask Sam for the password for these users. You may also create your own user to log in with.
 
@@ -24,13 +24,12 @@ Run the following commands. **Note:** `sudo` may be needed. Also, `docker-compos
 If the above ran successfully, open your browser and visit https://0.0.0.0:8000/ to access the dev version of the website.
 
 ### To run tests:
-`docker exec -it django_dev python manage.py test [app]`\
+`docker exec -it django_dev python manage.py test [app]`
 
 To isolate one test from other tests uncomment the @tag('temp') above the test then run: 
 
 `docker exec -it django_dev python manage.py test --tag temp`
 
-### To load fixture data into database
-Use this to import the fixture data for manual testing.\
-docker exec -it django_dev python manage.py loaddata beginner_schedule.json f1.json level.json
-
+To run coverage: (To show python code that was not tested.)\
+`docker exec -it django_dev coverage run --source='.' manage.py test` \
+`docker exec -it django_dev coverage html`
