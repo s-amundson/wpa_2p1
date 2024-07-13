@@ -131,19 +131,6 @@ def validate_email(address, client_ip, default_state=True):
             raise forms.ValidationError("Email cannot be checked at this time.")
 
         record = Email.objects.create(email=address)
-        # status = is_it_real(address)
-        # # status = 'valid'
-        # if status == "valid":
-        #     record.is_valid = True
-        # elif status == "invalid":
-        #     logging.warning(f'{address} is invalid')
-        #     record.is_valid = False
-        #     raise forms.ValidationError("Email validation error")
-        # else:
-        #     logging.warning(f'{address} is unknown')
-        #     record.is_valid = default_state
-        #     if not default_state:
-        #         raise forms.ValidationError("Email validation error")
         record.ip = client_ip
         record.save()
     return record.is_valid
