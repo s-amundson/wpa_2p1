@@ -18,18 +18,12 @@ class SignUpForm(SignupForm):
         self.client_ip = kwargs.pop('client_ip')
         self.is_routable = kwargs.pop('is_routable')
         super().__init__(*args, **kwargs)
-        logging.warning("signup")
+        logger.warning("signup")
         terms = reverse_lazy("information:info", kwargs={'info': 'terms'})
         self.fields['terms'] = forms.BooleanField(widget=forms.CheckboxInput(
                 attrs={'class': "m-2"}), required=True,
                 label=mark_safe(_(f"I have read and agree with the <a href='{terms}'>Terms and Conditions</a>")),
                 initial=False)
-        # self.fields['captcha'] = forms.CharField()
-        # self.fields['captcha'].widget.attrs.update({'class': 'form-control m-2', 'style': 'display:none'})
-        self.fields['captcha'] = ReCaptchaField(
-            public_key=settings.RECAPTCHA_PUBLIC_KEY,
-            private_key=settings.RECAPTCHA_PRIVATE_KEY,
-        )
 
     def clean_email(self):  # pragma: no cover
         address = super().clean_email()
@@ -43,5 +37,5 @@ class SignUpForm(SignupForm):
             is_valid = validate_email(address, self.client_ip)
             if is_valid:
                 return address
-            logging.warning(f'Invalid email {address}')
+            logger.warning(f'Invalid email {address}')
             raise forms.ValidationError("Email validation error")

@@ -152,7 +152,7 @@ DEBUG = get_secret("DEBUG")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_FROM_EMAIL = get_secret('DEFAULT_FROM_EMAIL')
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 EMAIL_BACKEND = get_secret("EMAIL_BACKEND") #'django.core.mail.backends.console.EmailBackend'
 EMAIL_FILE_PATH = "/tmp/app-messages"
 EMAIL_BATCH_DAY_LIMIT = 1500
