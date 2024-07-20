@@ -163,6 +163,10 @@ a {
   width: 100%;
 }
 
+#block-main {
+  padding: 14px;
+}
+
 /* NAVIGATION BAR */
 
 #navbar {
