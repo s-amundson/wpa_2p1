@@ -1,13 +1,7 @@
 {% load static %}
-<nav class="navbar navbar-dark bg-dark border">
-    <a class="navbar-brand" href="/">
-        <div class="container px-4">
-            <img src="{% static 'images/cropped-WPA-Logo-4.png' %}" alt="Header" width="40">
-        </div>
-    </a>
-
-    <div class="navbar-expand-md" id="navbar">
-        <ul class="navbar-nav md-auto mt-2">
+<nav id="navbar-container" class="navbar-dark bg-dark border">
+    <div id="navbar" class="navbar-expand-md" >
+        <ul class="navbar-nav md-auto mt-2 navbar-custom">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                     About
@@ -189,5 +183,8 @@
                 </form>
             </li>
         </ul>
+        {% if not user.is_authenticated %}
+            {% include "account/login_bar.html" %}
+        {% endif %}
     </div>
 </nav>

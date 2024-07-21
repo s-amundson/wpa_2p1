@@ -2,7 +2,7 @@
   box-sizing: border-box;
 }
 
-body {
+#payment-form body {
   font-family: Arial, sans-serif;
 }
 
@@ -62,20 +62,20 @@ body {
   gap: 15px;
 }
 
-h3 {
+#payment-form h3 {
   margin: 0;
 }
 
-p {
+#payment-form p {
   line-height: 24px;
 }
 
-label {
+#payment-form label {
   font-size: 12px;
   width: 100%;
 }
 
-input {
+#payment-form input {
   padding: 12px;
   width: 100%;
   border-radius: 5px;
@@ -85,11 +85,11 @@ input {
   border: 1px solid rgba(0, 0, 0, 0.15);
 }
 
-input:focus {
+#payment-form input:focus {
   border: 1px solid #006aff;
 }
 
-button {
+#payment-form button {
   color: #ffffff;
   background-color: #006aff;
   border-radius: 5px;
@@ -105,11 +105,11 @@ button {
   box-shadow: 1px;
 }
 
-button:active {
+#payment-form button:active {
   background-color: rgb(0, 85, 204);
 }
 
-button:disabled {
+#payment-form button:disabled {
   background-color: rgba(0, 0, 0, 0.05);
   color: rgba(0, 0, 0, 0.3);
 }

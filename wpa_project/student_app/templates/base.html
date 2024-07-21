@@ -53,23 +53,17 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         {% block script %}{% endblock %}
 
-
         <title>{% block title %}{% endblock %}</title>
-
     </head>
     <body>
-        {% include "nav.html" %}
-
-        <div class="container-fluid m-md-3">
-            <div class="row justify-content-center">
-                <div class="col-6">
-                    <img class="img-fluid pb-2" alt="Woodley Park Archers"
-                        src="{% static 'images/WPAHeader4.jpg' %}" title="Woodley Park Archers">
-                </div>
-            </div>
+        <a href="/">
+            <img class="banner-img" alt="Woodley Park Archers" 
+                src="{% static 'images/WPAHeader4.jpg' %}" title="Woodley Park Archers">
+        </a>
+        {% include "nav.html" %}        
+        <div>
             <input type="hidden" id="alert-message" value="{{ alert_message }}">
-            <div class="row">
-                <div class="col-lg-2">
+            <div id="messages-container">
                     {% if messages %}
                     <ul class="messages">
                         {% for message in messages %}
@@ -77,9 +71,13 @@
                         {% endfor %}
                     </ul>
                     {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2">
                     {% block left %}{% endblock %}
                 </div>
-                <div class="col-lg container block-main {{request.session.theme|default:'browser'}}-theme" id="block-main">
+                <div id="block-main" class="col-lg container block-main {{request.session.theme|default:'browser'}}-theme">
                     {% block main %}{% endblock %}
                 </div>
                 <div class="col-lg-2">
