@@ -20,7 +20,7 @@ class MinutesView(MemberMixin, FormView):
     form_class = MinutesForm
     success_url = reverse_lazy('registration:index')
     minutes = None
-    owners = ['president', 'vice', 'secretary', 'treasure']
+    owners = ['president', 'vice', 'secretary', 'treasure', 'webmaster']
 
     def dispatch(self, request, *args, **kwargs):
         dispatch = super().dispatch(request, *args, **kwargs)

@@ -73,6 +73,13 @@
         </div>
 
         <div class="row p-3">
+            <div class="col-2"> Treasure's Report:</div>
+            <div class="col">
+                {{ treasure_formset.as_div }}
+            </div>
+        </div>
+
+        <div class="row p-3">
             <div class="col-2"> Secretary's Report:</div>
             <div class="col">
                 {{ secretary_formset.as_div }}
@@ -80,9 +87,9 @@
         </div>
 
         <div class="row p-3">
-            <div class="col-2"> Treasure's Report:</div>
+            <div class="col-2"> Webmaster's Report:</div>
             <div class="col">
-                {{ treasure_formset.as_div }}
+                {{ webmaster_formset.as_div }}
             </div>
         </div>
 

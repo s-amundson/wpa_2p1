@@ -7,10 +7,7 @@ $(document).ready(async function() {
                 if (status == 'success') {
     //                console.log(data);
                     $("#old-business-forms").html($("#old-business-forms").html() + data);
-                    $(".business-form :input").off('change');
-                    $(".business-form :input").change(function(e){
-                        save_business($(this));
-                    });
+                    business_updated();
                 }
             });
             console.log(url);
@@ -21,10 +18,7 @@ $(document).ready(async function() {
                     if (status == 'success') {
         //                console.log(data);
                         $("#new-business-forms").html($("#new-business-forms").html() + data);
-                        $(".business-form :input").off('change');
-                        $(".business-form :input").change(function(e){
-                            save_business($(this));
-                        });
+                        business_updated();
                     }
                 });
             });
@@ -90,16 +84,22 @@ $(document).ready(async function() {
 
     console.log('done loading')
 
-});
+}); // $(document).ready(async function()
 
+function business_updated() {
+    $(".business-form :input").off('change');
+    $(".business-form :input").change(function(e){
+        save_business($(this));
+    });
+    if (minutes_edit == false) {
+        $("[name$='resolved_bool']").prop('disabled', true)
+    }
+}
 async function get_new_business() {
     await $.get(new_business_url, function(data, status){
         if (status == 'success') {
             $("#new-business-forms").html($("#new-business-forms").html() + data);
-            $(".business-form :input").off('change');
-            $(".business-form :input").change(function(e){
-                save_business($(this));
-            });
+            business_updated();
         }
     });
 }
@@ -126,9 +126,7 @@ async function save_business(element) {
         if (status == 'success') {
             $("#div-saved-message").html("Saved at:" + get_time());
             element.closest('form').replaceWith(data)
-            $(".business-form :input").change(function(e){
-                    save_business($(this));
-                });
+            business_updated();
         } else {
             console.log('failed save');
         }
