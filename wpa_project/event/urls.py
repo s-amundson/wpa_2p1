@@ -10,6 +10,7 @@ urlpatterns = [
     path('registration/<int:event>/', RegistrationView.as_view(), name='registration'),
     path('volunteer_award/', VolunteerAwardView.as_view(), name='volunteer_award'),
     path('volunteer_award/<int:pk>/', VolunteerAwardView.as_view(), name='volunteer_award'),
+    path('volunteer_award_info/', VolunteerAwardInfoView.as_view(), name='volunteer_award_info'),
     path('volunteer_award_list/', VolunteerAwardListView.as_view(), name='volunteer_award_list'),
     path('volunteer_event/', VolunteerEventView.as_view(), name='volunteer_event'),
     path('volunteer_event/<int:event>/', VolunteerEventView.as_view(), name='volunteer_event'),

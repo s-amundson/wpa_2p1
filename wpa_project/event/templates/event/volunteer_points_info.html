@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %} Volunteer Points Info {% endblock %}
+
+{% block main %}
+    <div class="d-flex justify-content-center"><h3>Volunteer Points</h3></div>
+    <p>
+        Volunteer points are earned by volunteering for our classes as well as other events. Volunteer points
+        can be used to pay for classes or for reimbursement of approved purchases, each point is worth $1 for such purchases.
+        Instructor certification training may be reimbursed at $3 per point.
+    </p>
+    {% if user.is_board %}
+        <h4>Modifying Student's Awards (Board Members)</h4>
+        <p>
+            To modify a student's awards for either volunteering or for reimbursement of approved purchases find the
+            student <a href="{% url 'registration:student_list'%}">here</a> then click on "Modify Points" button on their
+            profile page (toward the bottom).
+        </p>
+    {% endif %}
+
+{% endblock %}
