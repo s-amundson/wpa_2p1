@@ -29,7 +29,7 @@ class BusinessForm(MyModelForm):
         self.fields['resolved_bool'].widget.attrs.update({'class': "form-check-input resolved-check"})
         if self.instance.id:
             # self.fields['business_id'].initial = self.instance.id
-            logger.warning(f'minutes: {self.instance.minutes}, end time:{self.instance.minutes.end_time}')
+            # logger.warning(f'minutes: {self.instance.minutes}, end time:{self.instance.minutes.end_time}')
             if self.instance.minutes and self.instance.minutes.end_time is not None:
                 self.fields['business'].widget.attrs.update({'readonly': 'readonly'})
             if self.instance.resolved is not None:
