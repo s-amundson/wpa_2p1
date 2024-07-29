@@ -131,7 +131,7 @@ class TestsClassAdminRegistration(TestCase):
         self.assertEqual(len(cr), 1)
         self.assertContains(response, 'Student is already enrolled')
 
-    @tag('temp')
+    # @tag('temp')
     def test_add_student_registered_admin(self):
         bc = BeginnerClass.objects.get(pk=1)
         s = Student.objects.get(pk=4)

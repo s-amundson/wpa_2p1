@@ -5,7 +5,9 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from src.mixin import BoardMixin
 from ..forms import PostForm
-from ..models import EmbeddedPosts
+from ..models import EmbeddedPosts, Posts
+from ..tasks import get_facebook_posts
+import requests
 
 import logging
 logger = logging.getLogger(__name__)
@@ -26,13 +28,11 @@ class PostList(ListView):
     template_name = 'facebook/post_list.html'
 
     def get_queryset(self):
-        queryset = EmbeddedPosts.objects.filter(
-            begin_date__lt=timezone.now(), end_date__gt=timezone.now()).order_by('-begin_date')
+        queryset = Posts.objects.filter(active=True).order_by('-created_time')
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['fb_id'] = settings.FACEBOOK_ID
         return context
 
 
