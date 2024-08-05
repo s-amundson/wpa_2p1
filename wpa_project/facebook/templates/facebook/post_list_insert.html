@@ -8,7 +8,9 @@
 
 {% for post in object_list %}
     <div class="d-flex flex-row align-items-center p-3">
-        <div class="mx-auto bg-white">{{ post.content|safe }}</div>
+        <div class="mx-auto bg-white">
+            <div class="fb-post" data-href="{{post.post_url}}" title="{{post.message}}" data-width="500"></div>
+        </div>
     </div>
 {% endfor %}
 

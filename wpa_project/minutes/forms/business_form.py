@@ -29,14 +29,13 @@ class BusinessForm(MyModelForm):
         self.fields['resolved_bool'].widget.attrs.update({'class': "form-check-input resolved-check"})
         if self.instance.id:
             # self.fields['business_id'].initial = self.instance.id
+            # logger.warning(f'minutes: {self.instance.minutes}, end time:{self.instance.minutes.end_time}')
             if self.instance.minutes and self.instance.minutes.end_time is not None:
                 self.fields['business'].widget.attrs.update({'readonly': 'readonly'})
-                self.fields['resolved_bool'].widget.attrs.update({'disabled': 'disabled'})
             if self.instance.resolved is not None:
                 self.fields['resolved_bool'].initial = True
                 self.fields['business'].widget.attrs.update({'readonly': 'readonly'})
             self.auto_id = 'business_%s' + f'_{self.instance.id}'
-
 
         for f in self.Meta.fields:
             self.fields[f].widget.attrs['class'] += ' business-input'
@@ -54,6 +53,7 @@ class BusinessFormset(BaseModelFormSet):
         kwargs['minutes'] = self.minutes
         return kwargs
 
+
 class BusinessUpdateForm(MyModelForm):
     class Meta(MyModelForm.Meta):
         model = BusinessUpdate
@@ -68,7 +68,7 @@ class BusinessUpdateForm(MyModelForm):
             minutes = kwargs.pop('minutes')
         super().__init__(*args, **kwargs)
         self.fields['update_text'].widget.attrs.update({'cols': 60, 'rows': 3, 'class': 'form-control m-2 update'})
-        logger.warning(minutes)
+        logger.warning(f'minutes: {minutes}, end time:{minutes.end_time}')
         if minutes is None or minutes.end_time is not None:
             self.fields['update_text'].widget.attrs.update({'readonly': 'readonly'})
         if self.instance.id:
