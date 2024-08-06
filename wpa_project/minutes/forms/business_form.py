@@ -52,7 +52,7 @@ class BusinessFormset(BaseModelFormSet):
         kwargs = super().get_form_kwargs(index)
         kwargs['minutes'] = self.minutes
         return kwargs
-r
+
 
 class BusinessUpdateForm(MyModelForm):
     class Meta(MyModelForm.Meta):
