@@ -30,12 +30,11 @@ class PostList(ListView):
     def get_queryset(self):
         logger.warning('facebook get queryset')
         queryset = Posts.objects.filter(active=True).order_by('-created_time')
-        # queryset = Posts.
         return queryset
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     return context
 
 
 class PostListInsert(PostList):

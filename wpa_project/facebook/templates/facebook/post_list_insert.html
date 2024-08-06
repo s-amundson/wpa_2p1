@@ -3,13 +3,14 @@
         <h2> Posts </h2>
     </div>
 </div>
-<div id="fb-root"></div>
 
 
 {% for post in object_list %}
     <div class="d-flex flex-row align-items-center p-3">
+        {{post.post_url}}
         <div class="mx-auto bg-white">
-            <div class="fb-post" data-href="{{post.post_url}}" title="{{post.message}}" data-width="500"></div>
+
+
         </div>
     </div>
 {% endfor %}
