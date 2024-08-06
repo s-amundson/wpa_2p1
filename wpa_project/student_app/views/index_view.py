@@ -2,13 +2,15 @@ from django.shortcuts import reverse
 from django.utils import timezone
 from facebook.views import PostList
 from allauth.account.forms import LoginForm
+from django.views.generic import TemplateView
 
 from info.models import Announcement
 import logging
 logger = logging.getLogger(__name__)
 
 
-class IndexView(PostList):
+# class IndexView(PostList):
+class IndexView(TemplateView):
     template_name = 'student_app/index.html'
 
     def get_context_data(self, **kwargs):
