@@ -1,6 +1,6 @@
 import logging
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 
@@ -131,6 +131,7 @@ class TestsClassAdminRegistration(TestCase):
         self.assertEqual(len(cr), 1)
         self.assertContains(response, 'Student is already enrolled')
 
+    # @tag('temp')
     def test_add_student_registered_admin(self):
         bc = BeginnerClass.objects.get(pk=1)
         s = Student.objects.get(pk=4)

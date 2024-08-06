@@ -173,7 +173,7 @@ class ClassRegistrationAdminView(BoardMixin, ClassRegistrationView):
         self.form = form
         if self.request.user.is_board:
             self.student_family = get_object_or_404(StudentFamily, pk=form.cleaned_data['student_family'])
-        processed_formset = self.process_formset()
+        processed_formset = self.process_formset(admin=True)
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])
         events = form.cleaned_data['event']

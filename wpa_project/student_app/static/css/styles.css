@@ -1,3 +1,9 @@
+/* Variables */
+:root {
+  --color-green: rgb(157, 180, 143);  /* Main green color */
+  --color-brown: #8d6625;
+}
+
 nav .navbar-brand
 {
     /* size for brand */
@@ -21,7 +27,7 @@ nav .navbar-brand .yellow
 nav .navbar-brand .green
 {
     /* color: #2e944b; */
-    color: rgb(157, 180, 143)
+    color: rgb(157, 180, 143);
 }
 
 main .form-control
@@ -151,4 +157,58 @@ a {
 .btn-work {
     background-color: var(--bs-gray);
     color: var(--bs-white);
+}
+
+.banner-img {
+  width: 100%;
+}
+
+#block-main {
+  padding: 14px;
+}
+
+/* NAVIGATION BAR */
+
+#navbar {
+  background-color: var(--bs-dark);
+  width: 100%;
+  float: right;
+  padding: 0px 10px 10px 10px;
+  margin-bottom: 12px;
+}
+
+.navbar-custom {
+  width: fit-content;
+  float: left;
+}
+
+/* LOGIN BAR */
+
+.login-container {
+  width: 100%;
+  color: var(--bs-white);
+  background-color: var(--bs-dark);
+  padding: 10px 10px 0px 10px;
+  text-align: right;
+}
+
+.login-bar-form-element {
+  text-align: left;
+  width: fit-content;
+  display: inline-block;
+  font-size: 12px;
+}
+
+#login-bar-button {
+  font-size: 12px;
+  padding: 2px 6px 2px 6px;
+  margin-left: 6px;
+  background-color: var(--color-brown);
+  border: none;
+}
+
+/* MESSAGES */
+
+#messages-container {
+  text-align: center;
 }

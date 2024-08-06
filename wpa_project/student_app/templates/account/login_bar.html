@@ -1,0 +1,28 @@
+{% load i18n %}
+
+<div class="login-container">
+    <div class="login-contents">
+        <form class="login" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            <div>
+                <div class="login-bar-form-element">
+                    <label>Login: </label>
+                    <input id="id_login" type="email" name="login" placeholder="Email address" autocomplete="email" maxlength="320" required="">
+                    <input id="id_password" type="password" name="password" placeholder="Password" autocomplete="current-password" required="" aria-describedby="id_password_helptext">
+                </div>
+            </div>
+            <div>
+                <div class="login-bar-form-element">
+                    {% blocktrans %}<a class="captcha-link" href="{{ signup_url }}">Sign Up</a>{% endblocktrans %} &emsp;
+                    <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a> &emsp;
+                    <label for="id_remember">Remember Me:</label>
+                    <input id="id_remember" type="checkbox" name="remember">
+                    <button id="login-bar-button" class="btn btn-primary primaryAction" type="submit">{% trans "Log In" %}</button>
+                </div>
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+            </div>
+          </form>
+    </div>
+</div>

@@ -70,9 +70,6 @@ def cancel_pending(reg_list, donated):
     )
     if staff_registrations:
         for ir in staff_registrations.values('event').annotate(event_count=Count('event')).order_by():
-            logger.warning(ir)
-            celery_logger.warning(ir)
-            logger.warning(type(ir['event']))
             reg = Registration.objects.filter(
                 event__id=ir['event'],
                 student__user__is_instructor=True,
@@ -83,7 +80,7 @@ def cancel_pending(reg_list, donated):
             if len(reg) < 4:
                 celery_logger.warning('send instructors a warning')
                 email_message = ProgramEmailMessage()
-                email_message.instructor_canceled_email(ir['event'], len(reg))
+                email_message.instructor_canceled_email(Event.objects.get(pk=ir['event']), len(reg))
     staff_registrations.update(pay_status='canceled')
 
     # remove the instructor registrations

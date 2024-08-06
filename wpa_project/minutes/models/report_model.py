@@ -3,7 +3,7 @@ from django.db import models
 from . import Minutes
 logger = logging.getLogger(__name__)
 
-REPORT_CHOICES = ['President', 'Vice', 'Secretary', 'Treasure']
+REPORT_CHOICES = ['President', 'Vice', 'Secretary', 'Treasure', 'Webmaster']
 
 
 def make_choices(choice_list):

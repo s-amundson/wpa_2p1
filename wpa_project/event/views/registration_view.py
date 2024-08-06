@@ -105,7 +105,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         logger.warning(message)
         return self.form_invalid(form)
 
-    def process_formset(self):
+    def process_formset(self, admin=False):
         self.get_formset(event=self.form.cleaned_data['event'])
         self.events = self.form.cleaned_data['event']
         logger.warning(self.form.cleaned_data['event'])
@@ -118,8 +118,12 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
                     for f in self.formset:
                         if f.cleaned_data['register']:
                             if reg.filter(student=f.cleaned_data['student']):
-                                # return {'success': False, 'error': 'Student is already enrolled'}
-                                raise Exception('Student is already enrolled')
+                                logger.warning(admin)
+                                logger.warning(reg.filter(student=f.cleaned_data['student']))
+                                if admin and reg.filter(student=f.cleaned_data['student'], pay_status__in=['paid', 'admin']):
+                                    raise Exception('Student is already enrolled')
+                                if not admin:
+                                    raise Exception('Student is already enrolled')
                             self.students.append(f.cleaned_data['student'].id)
                     # make self.students a queryset.
                 self.students = self.student_family.student_set.filter(id__in=self.students)

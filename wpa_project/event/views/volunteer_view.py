@@ -1,5 +1,6 @@
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
+from django.views.generic import TemplateView
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -14,6 +15,10 @@ from src.mixin import BoardMixin
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+class VolunteerAwardInfoView(TemplateView):
+    template_name = 'event/volunteer_points_info.html'
 
 
 class VolunteerAwardListView(ListView):

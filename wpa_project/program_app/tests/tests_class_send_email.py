@@ -55,8 +55,9 @@ class TestsClassSendEmail(TestCase):
 
     # @tag('temp')
     def test_instructor_canceled(self):
+        d = (timezone.now() + timezone.timedelta(days=5)).replace(hour=9, minute=0, second=0)
         bc = create_beginner_class(
-            date=(timezone.now() + timezone.timedelta(days=5)).replace(hour=9, minute=0, second=0),
+            date=d,
             state='open',
             class_type='beginner'
         )
@@ -72,4 +73,4 @@ class TestsClassSendEmail(TestCase):
         instructor_canceled(bc.event)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Instructor Cancellation')
-        logger.warning(mail.outbox[0].alternatives)
+        self.assertTrue(mail.outbox[0].alternatives[0][0].find(d.strftime('%b. %d, %Y,')))
