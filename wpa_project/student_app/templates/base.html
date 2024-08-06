@@ -22,10 +22,9 @@
                 integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
                 crossorigin="anonymous"></script>
         <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaCallback&render={{RECAPTCHA_SITE_KEY_V3}}" async defer></script>
-        <script async defer src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>
 
         <script src="{% static 'js/main.js' %}"></script>
-        <script nonce="{{request.csp_nonce}}">
+        <script nonce="{{CSP_NONCE}}">
             let url_theme = "{% url 'registration:theme' %}";
             let theme = "{{request.session.theme}}";
             let recaptcha_site_v3 = "{{RECAPTCHA_SITE_KEY_V3}}";
