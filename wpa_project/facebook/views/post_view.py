@@ -24,7 +24,9 @@ class PostList(ListView):
 
     def get_queryset(self):
         logger.warning('facebook get queryset')
-        queryset = Posts.objects.filter(active=True).order_by('-created_time')
+        # queryset = Posts.objects.filter(active=True).order_by('-created_time')
+        queryset = Posts.objects.all()
+        logger.warning(queryset)
         # queryset = Posts.objects.none()
         return queryset
 
