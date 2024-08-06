@@ -2,6 +2,7 @@
 :root {
   --color-green: rgb(157, 180, 143);  /* Main green color */
   --color-brown: #8d6625;
+  --color-dark-brown: #372a13;
 }
 
 nav .navbar-brand
@@ -167,6 +168,10 @@ a {
   padding: 14px;
 }
 
+.header-divider {
+  border: 1px solid white;
+}
+
 /* NAVIGATION BAR */
 
 #navbar {
@@ -205,6 +210,24 @@ a {
   margin-left: 6px;
   background-color: var(--color-brown);
   border: none;
+}
+
+/* UI BUTTONS */
+.signup-button {
+  background-color: var(--color-brown);
+  color: var(--color-white);
+  padding: 20px;
+  width: 200px;
+  font-family: "Papyrus", fantasy;
+  font-size: 28px;
+  font-weight: 900;
+  border-radius: 10px;
+  border: 2px solid var(--bs-white);
+  margin: 10px;
+}
+
+.signup-button-container {
+  text-align: center;
 }
 
 /* MESSAGES */
