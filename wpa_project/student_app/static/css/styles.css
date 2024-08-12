@@ -191,6 +191,19 @@ a {
   float: left;
 }
 
+.navbar-right-container {
+  float: right;
+  display: inline-flex;
+}
+
+/* SOCIAL MEDIA LINKS */
+
+.navbar-right-container svg {
+  fill: white;
+  margin: 0.5rem 0.1rem;
+  padding: 0.2rem;
+}
+
 /* LOGIN BAR */
 
 .login-container {
