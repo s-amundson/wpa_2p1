@@ -164,6 +164,10 @@ a {
   width: 100%;
 }
 
+.welcome-img {
+  margin: 0 1rem !important;
+}
+
 #block-main {
   padding: 14px;
 }
