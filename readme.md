@@ -33,3 +33,6 @@ To isolate one test from other tests uncomment the @tag('temp') above the test t
 To run coverage: (To show python code that was not tested.)\
 `docker exec -it django_dev coverage run --source='.' manage.py test` \
 `docker exec -it django_dev coverage html`
+
+### Troubleshooting:
+- When there are updates to the database, you may need to migrate the database again using `docker exec -it django_dev python manage.py migrate`. Otherwise, you may run into SQL errors.
