@@ -235,9 +235,9 @@ a {
   color: var(--color-white);
   padding: 20px;
   width: 200px;
-  font-family: "Papyrus", fantasy;
+  font-family: "Verdana", sans-serif;
   font-size: 28px;
-  font-weight: 900;
+  font-weight: 500;
   border-radius: 10px;
   border: 2px solid var(--bs-white);
   margin: 10px;
