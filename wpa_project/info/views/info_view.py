@@ -21,6 +21,8 @@ class InfoView(View):
             return render(request, 'info/directions.html')
         if info == 'privacy':
             return render(request, 'info/privacy.html', {'current_site': current_site})
+        if info == 'rules':
+            return render(request, 'info/rules.html')
         if info == 'terms':
             return render(request, 'info/terms.html', {'current_site': current_site})
         raise Http404("Policy not found")

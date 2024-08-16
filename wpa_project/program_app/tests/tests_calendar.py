@@ -1,7 +1,7 @@
 import logging
 
 from django.apps import apps
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 
@@ -127,6 +127,7 @@ class TestsCalendar(TestCase):
         self.assertEqual(html_cal.count('JOAD Pin Shoot 01:00 PM Closed'), 1)
         self.assertEqual(html_cal.count('Work Event 03:00 PM Closed'), 1)
 
+    # @tag('temp')
     def test_get_event_calendar(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)

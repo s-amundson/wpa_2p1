@@ -72,8 +72,3 @@ class CalendarView(TemplateView):
 
 class EventCalendarView(PostList):
     template_name = 'program_app/google_calendar.html'
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.filter(is_event=True)
-        return queryset

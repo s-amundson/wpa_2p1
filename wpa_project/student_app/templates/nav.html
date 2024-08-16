@@ -8,6 +8,7 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="{% url 'information:info' 'about' %}">About</a>
+                    <a class="dropdown-item" href="{% url 'information:info' 'rules' %}">Rules</a>
                     <a class="dropdown-item" href="{% url 'information:info' 'directions' %}">Directions</a>
                     <a class="dropdown-item" href="{% url 'information:info' 'class_description' %}">Class Description</a>
                     {% if user.is_board %}
@@ -58,6 +59,7 @@
                     Policies
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'information:info' 'rules' %}">Rules</a>
                     <a class="dropdown-item" href="{% url 'information:info' 'terms' %}">Terms</a>
                     <a class="dropdown-item" href="{% url 'information:info' 'privacy' %}">Privacy</a>
                     <a class="dropdown-item" href="{% url 'information:info' 'covid' %}">Covid 19</a>
@@ -112,7 +114,6 @@
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'information:announcement_list'%}">Announcements</a>
                                 <a class="dropdown-item" href="{% url 'information:staff_list'%}">Staff List</a>
-                                <a class="dropdown-item" href="{% url 'facebook:add_post'%}">Add Facebook Post</a>
                             {% endif %}
                         </div>
                     </li>
