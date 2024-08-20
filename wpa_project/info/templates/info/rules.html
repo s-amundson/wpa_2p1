@@ -37,7 +37,7 @@
         </p>
         <h4>Verbal Commands</h4>
         <p>
-            <strong>CLEAR:</strong> when all archers are done shooting, anyone may call CLEAR. All archers should repeat
+            <strong>CLEAR:</strong> When all archers are done shooting, anyone may call CLEAR. All archers should repeat
             CLEAR, and then retrieve arrows<br>
             <strong>RANGE IS HOT:</strong> When the range is busy/crowded, this command tells archers they may begin shooting
             again. CHECK CAREFULLY that no archers are down range ANYWHERE before issuing this command or shooting.<br>
@@ -140,11 +140,7 @@
         </li>
     </ul>
 
-    <button class="btn btn-primary" onclick="goBack()">Go Back</button>
+    <button id="go-back-button" class="btn btn-primary">Go Back</button>
 
-    <script nonce="{{request.csp_nonce}}">
-        function goBack() {
-          window.history.back();
-        }
-    </script>
+
 {% endblock %}

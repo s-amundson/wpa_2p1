@@ -8,7 +8,6 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="{% url 'information:info' 'about' %}">About</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'rules' %}">Rules</a>
                     <a class="dropdown-item" href="{% url 'information:info' 'directions' %}">Directions</a>
                     <a class="dropdown-item" href="{% url 'information:info' 'class_description' %}">Class Description</a>
                     {% if user.is_board %}
@@ -33,7 +32,9 @@
                     <a class="dropdown-item" href="{% url 'information:staff_list' %}">Staff</a>
                 </div>
             </li>
-
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'information:info' 'rules' %}">Rules</a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'payment:make_payment' %}">Donate</a>
             </li>
