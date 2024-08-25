@@ -1,1 +1,2 @@
-from .post_view import PostAddView, PostList, PostListInsert
+from .post_view import PostList, PostListInsert
+from .webhooks_view import PageHook
