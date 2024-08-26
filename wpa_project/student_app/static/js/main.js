@@ -39,6 +39,12 @@ $(document).ready(function(){
         await post_recapcha_href($(this).attr('href'), false);
 //        window.location = $(this).attr("href");
     });
+
+    // for the back button on the info pages. rules, policy,
+    $("#go-back-button").click(function() {
+        window.history.back();
+    });
+
 });
 
 async function add_student_function(student_id) {

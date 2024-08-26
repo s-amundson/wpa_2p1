@@ -1,23 +1,8 @@
 from django.views.generic import ListView
-from django.conf import settings
-from django.utils import timezone
-from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView
-from src.mixin import BoardMixin
-from ..forms import PostForm
-from ..models import EmbeddedPosts, Posts
-from ..tasks import get_facebook_posts
-import requests
+from ..models import Posts
 
 import logging
 logger = logging.getLogger(__name__)
-
-
-class PostAddView(BoardMixin, CreateView):
-    model = EmbeddedPosts
-    form_class = PostForm
-    template_name = 'student_app/form_as_p.html'
-    success_url = reverse_lazy('facebook:posts')
 
 
 class PostList(ListView):

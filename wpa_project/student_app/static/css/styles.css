@@ -2,6 +2,7 @@
 :root {
   --color-green: rgb(157, 180, 143);  /* Main green color */
   --color-brown: #8d6625;
+  --color-dark-brown: #372a13;
 }
 
 nav .navbar-brand
@@ -163,8 +164,16 @@ a {
   width: 100%;
 }
 
+.welcome-img {
+  margin: 0 1rem !important;
+}
+
 #block-main {
   padding: 14px;
+}
+
+.header-divider {
+  border: 1px solid white;
 }
 
 /* NAVIGATION BAR */
@@ -180,6 +189,19 @@ a {
 .navbar-custom {
   width: fit-content;
   float: left;
+}
+
+.navbar-right-container {
+  float: right;
+  display: inline-flex;
+}
+
+/* SOCIAL MEDIA LINKS */
+
+.navbar-right-container svg {
+  fill: white;
+  margin: 0.5rem 0.1rem;
+  padding: 0.2rem;
 }
 
 /* LOGIN BAR */
@@ -205,6 +227,24 @@ a {
   margin-left: 6px;
   background-color: var(--color-brown);
   border: none;
+}
+
+/* UI BUTTONS */
+.signup-button {
+  background-color: var(--color-brown);
+  color: var(--color-white);
+  padding: 20px;
+  width: 200px;
+  font-family: "Verdana", sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  border-radius: 10px;
+  border: 2px solid var(--bs-white);
+  margin: 10px;
+}
+
+.signup-button-container {
+  text-align: center;
 }
 
 /* MESSAGES */

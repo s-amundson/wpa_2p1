@@ -130,11 +130,5 @@
             read the privacy statements of any other site that collects personally identifiable information.
         </p>
     </div>
-    <button class="btn btn-primary" onclick="goBack()">Go Back</button>
-
-    <script nonce="{{request.csp_nonce}}">
-        function goBack() {
-          window.history.back();
-        }
-    </script>
+    <button id="go-back-button" class="btn btn-primary">Go Back</button>
 {% endblock %}
