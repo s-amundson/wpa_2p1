@@ -16,10 +16,11 @@ Use this to import the fixture data for manual testing.\
 
 **Note:** The *f1.json* file contains users you may log in as. User 1 is a superuser, User 2 is an instructor, and Users 3-5 are regular members. Ask Sam for the password for these users. You may also create your own user to log in with.
 
-### To run the app, navigate to the docker_development folder: 
-Run the following commands. **Note:** `sudo` may be needed. Also, `docker-compose` has been replaced with `docker compose`
-1. &nbsp;&nbsp; `docker compose build`
-2. &nbsp;&nbsp; `docker compose up`
+### To run the app:
+1. Navigate to the 'docker_development' folder.
+1. Run the following commands. **Note:** `sudo` may be needed. Also, `docker-compose` has been replaced with `docker compose`
+- &nbsp;&nbsp; `docker compose build`
+- &nbsp;&nbsp; `docker compose up`
 
 If the above ran successfully, open your browser and visit https://0.0.0.0:8000/ to access the dev version of the website.
 
@@ -35,4 +36,8 @@ To run coverage: (To show python code that was not tested.)\
 `docker exec -it django_dev coverage html`
 
 ### Troubleshooting:
-- When there are updates to the database, you may need to migrate the database again using `docker exec -it django_dev python manage.py migrate`. Otherwise, you may run into SQL errors.
+![Screenshot of SQL error page](/screenshots/troubleshoot_sql-error.png?raw=true "SQL Error Screenshot")
+- If you encounter this SQL error when attempting to access https://0.0.0.0:8000/, there may be updates to the database and you'll need to migrate the database again. Follow these steps:
+1. Make sure the server is running using `docker compose up`.
+1. Open a new console window and run `docker exec -it django_dev python manage.py migrate`.
+1. Access https://0.0.0.0:8000/ and the issue should hopefully be recovered! 
