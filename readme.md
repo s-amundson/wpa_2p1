@@ -3,6 +3,7 @@ This project uses docker containers. The site is built on the Django web framewo
 It uses Postgres, Celery, RabbitMQ, Nginx
 
 ### To setup development environment:
+1. Clone this repo
 1. Create 'wpa_project/wpa_project/secrets.json' using keys from *privatefiles.txt*
 1. Create 'wpa_project/wpa_project.env' using keys from *privatefiles.txt*
     * **Optional:** Change the value of "SESSION_COOKIE_AGE" to 86400 to avoid being logged out too soon
@@ -36,8 +37,9 @@ To run coverage: (To show python code that was not tested.)\
 `docker exec -it django_dev coverage html`
 
 ### Troubleshooting:
+## SQL Error
 ![Screenshot of SQL error page](/screenshots/troubleshoot_sql-error.png?raw=true "SQL Error Screenshot")
-- If you encounter this SQL error when attempting to access https://0.0.0.0:8000/, there may be updates to the database and you'll need to migrate the database again. Follow these steps:
+If you encounter this SQL error when attempting to access https://0.0.0.0:8000/, there may be updates to the database, so you will need to migrate the database again. Follow these steps:
 1. Make sure the server is running using `docker compose up`.
 1. Open a new console window and run `docker exec -it django_dev python manage.py migrate`.
 1. Access https://0.0.0.0:8000/ and the issue should hopefully be recovered! 
