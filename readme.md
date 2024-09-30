@@ -1,5 +1,5 @@
 # Website for Woodley Park Archers
-This project uses [docker](https://www.docker.com/) containers. The site is built on the [Django web framework](https://www.djangoproject.com/). It also uses the following:
+This project uses [Docker](https://www.docker.com/) containers. The site is built on the [Django web framework](https://www.djangoproject.com/). It also uses the following:
 
 1. [PostgreSQL](https://www.postgresql.org/)
 1. [Celery](https://docs.celeryq.dev/en/stable/)
@@ -46,4 +46,7 @@ To run coverage: (To show python code that was not tested.)\
 If you encounter this SQL error when attempting to access https://0.0.0.0:8000/, there may be updates to the database, so you will need to migrate the database again. Follow these steps:
 1. Make sure the server is running using `docker compose up`.
 1. Open a new console window and run `docker exec -it django_dev python manage.py migrate`.
-1. Access https://0.0.0.0:8000/ and the issue should hopefully be recovered! 
+1. Access https://0.0.0.0:8000/ and the issue should hopefully be resolved!
+
+### Docker Desktop
+While not necessary, you may find it helpfu to install the [Docker Desktop](https://www.docker.com/products/docker-desktop/) UI to manage your containers. If there are build-related issues, try clearing your containers, images, volumes, and builds.
