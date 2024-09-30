@@ -1,6 +1,10 @@
 # Website for Woodley Park Archers
-This project uses docker containers. The site is built on the Django web framework. 
-It uses Postgres, Celery, RabbitMQ, Nginx
+This project uses [docker](https://www.docker.com/) containers. The site is built on the [Django web framework](https://www.djangoproject.com/). It also uses the following:
+
+1. [PostgreSQL](https://www.postgresql.org/)
+1. [Celery](https://docs.celeryq.dev/en/stable/)
+1. [RabbitMQ](https://www.rabbitmq.com/)
+1. [Nginx](https://github.com/nginx/nginx/)
 
 ## To setup development environment:
 1. Clone this repo
@@ -20,8 +24,8 @@ Use this to import the fixture data for manual testing.\
 ## To run the app:
 1. Navigate to the 'docker_development' folder.
 1. Run the following commands. **Note:** `sudo` may be needed. Also, `docker-compose` has been replaced with `docker compose`
-- &nbsp;&nbsp; `docker compose build`
-- &nbsp;&nbsp; `docker compose up`
+    1. &nbsp;&nbsp; `docker compose build`
+    1. &nbsp;&nbsp; `docker compose up`
 
 If the above ran successfully, open your browser and visit https://0.0.0.0:8000/ to access the dev version of the website.
 
