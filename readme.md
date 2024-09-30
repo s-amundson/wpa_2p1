@@ -49,4 +49,4 @@ If you encounter this SQL error when attempting to access https://0.0.0.0:8000/,
 1. Access https://0.0.0.0:8000/ and the issue should hopefully be resolved!
 
 ### Docker Desktop
-While not necessary, you may find it helpfu to install the [Docker Desktop](https://www.docker.com/products/docker-desktop/) UI to manage your containers. If there are build-related issues, try clearing your containers, images, volumes, and builds.
+While not necessary, you may find it helpful to install the [Docker Desktop](https://www.docker.com/products/docker-desktop/) UI to manage your containers. If there are build-related issues, try clearing your containers, images, volumes, and builds.
