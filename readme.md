@@ -1,5 +1,5 @@
 # Website for Woodley Park Archers
-This project uses [Docker](https://www.docker.com/) containers. The site is built on the [Django web framework](https://www.djangoproject.com/). It also uses the following:
+This project uses [Docker](https://www.docker.com/) containers. The site is built on the [Django web framework](https://www.djangoproject.com/). It also uses the following frameworks. These are loaded up in the Docker container and do not need to be manually installed:
 
 1. [PostgreSQL](https://www.postgresql.org/)
 1. [Celery](https://docs.celeryq.dev/en/stable/)
