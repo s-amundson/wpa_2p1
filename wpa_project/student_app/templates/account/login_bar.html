@@ -13,7 +13,7 @@
             </div>
             <div>
                 <div class="login-bar-form-element">
-                    {% blocktrans %}<a class="captcha-link" href="{{ signup_url }}">Sign Up</a>{% endblocktrans %} &emsp;
+                    <a class="captcha-link" href="{% url 'account_signup' %}">Sign Up</a> &emsp;
                     <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a> &emsp;
                     <label for="id_remember">Remember Me:</label>
                     <input id="id_remember" type="checkbox" name="remember">
