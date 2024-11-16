@@ -13,7 +13,7 @@ class PaymentLog(models.Model):
     checkout_created_time = models.DateTimeField()
     description = models.CharField(max_length=255, null=True)
     donation = models.IntegerField(default=0)
-    idempotency_key = models.UUIDField()
+    idempotency_key = models.UUIDField(unique=True)
     location_id = models.CharField(max_length=100, null=True)
     order_id = models.CharField(max_length=100, null=True)
     payment_id = models.CharField(max_length=100, null=True)
