@@ -26,4 +26,4 @@ class UserForm(MyModelForm):
 
         self.fields['is_member'].widget.attrs.update({'disabled': 'disabled'})
         self.fields['instructor_expire_date'].widget = SelectDateWidget(
-            years=range(timezone.datetime.today().year, timezone.datetime.today().year + 3, 1))
+            years=range(timezone.datetime.today().year, timezone.datetime.today().year + 4, 1))

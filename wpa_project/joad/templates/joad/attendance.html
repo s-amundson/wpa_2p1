@@ -28,7 +28,6 @@
                 <th> Last Name </th>
                 <th> Attending </th>
                 <th> Signature </th>
-                <th> Covid Vaccination</th>
             </tr>
         </thead>
         <tbody id="class-list-body">
@@ -50,11 +49,6 @@
                                 Signature Required
                             {% endif %}
                         </a>
-                    </td>
-                    <td>
-                        <input type="checkbox" class="m-2 attend-check"
-                            attend_url="{% url 'registration:covid_vax' row.id %}"  id="{{ row.covid_vax_check }}"
-                            {% if row.covid_vax %} checked="checked" {% endif %}>
                     </td>
                 </tr>
             {% endfor %}
