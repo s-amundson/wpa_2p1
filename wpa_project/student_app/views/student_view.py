@@ -70,6 +70,7 @@ class AddStudentView(UserPassesTestMixin, FormView):
         context['student'] = kwargs.get('student', {})
         context['student']['is_user'] = 0
         context['student']['this_user'] = True
+        context['student']['staff'] = False
         student_id = self.kwargs.get('student_id', None)
         if student_id is not None:
             context['student']['id'] = student_id
@@ -81,6 +82,8 @@ class AddStudentView(UserPassesTestMixin, FormView):
                 context['student']['this_user'] = (self.student.user == self.request.user)
             age = StudentHelper().calculate_age(self.student.dob)
             context['student']['joad_age'] = 8 < age < 21
+            if self.student.user is not None and self.student.user.is_staff:
+                context['student']['staff'] = True
         return context
 
     def get_form_kwargs(self):
@@ -163,11 +166,14 @@ class StudentIsJoadView(StaffMixin, View):
     def post(self, request, student_id):
         # logging.debug(request.POST)
         student = Student.objects.get(pk=student_id)
-        age = StudentHelper().calculate_age(student.dob)
-        if age < 9:
-            return JsonResponse({'error': True, 'message': 'Student to young'})
-        elif age > 20:
-            return JsonResponse({'error': True, 'message': 'Student to old'})
+        if student.user is not None and student.user.is_staff:
+            pass
+        else:
+            age = StudentHelper().calculate_age(student.dob)
+            if age < 9:
+                return JsonResponse({'error': True, 'message': 'Student to young'})
+            elif age > 20:
+                return JsonResponse({'error': True, 'message': 'Student to old'})
 
         if f'joad_check_{student.id}' in request.POST:
             student.is_joad = request.POST[f'joad_check_{student.id}'].lower() in ['true', 'on']

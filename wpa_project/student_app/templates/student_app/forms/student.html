@@ -65,11 +65,12 @@
                 {% endfor %}
             </div>
 
-            {% if student.joad_age %}
+            {% if student.joad_age  or student.staff %}
             <div class="m-2">
                 <input type="checkbox" class="m-2 is-joad-check"
                     joad_url="{% url 'registration:is_joad' student.id %}"  id="joad_check_{{ student.id }}"
-                            {% if student.is_joad %} checked="checked" {% endif %}> Joad Student
+                            {% if student.is_joad %} checked="checked" {% endif %}>
+                    Joad {% if student.staff %}Staff {% else %}Student {% endif %}
             </div>
             {% endif %}
             <div>
