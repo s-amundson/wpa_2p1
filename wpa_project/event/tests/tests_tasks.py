@@ -1,7 +1,7 @@
 import logging
 import uuid
 from unittest.mock import patch
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.utils import timezone
 from django.db.models import signals
 from django.core import mail
@@ -63,25 +63,26 @@ class TestsEventTasks(MockSideEffects, TestCase):
                 user=self.test_user
             )
             reg.append(r)
-            if payment:
-                payment = PaymentLog.objects.create(
-                    category='class',
-                    checkout_created_time=timezone.now(),
-                    description='programs_test',  # database set to 255 characters
-                    donation=0,  # storing pennies in the database
-                    idempotency_key=ik,
-                    location_id='',
-                    order_id='',
-                    payment_id='test_payment',
-                    receipt='',
-                    source_type='',
-                    status='SUCCESS',
-                    total_money=amount,
-                    user=self.test_user
-                )
-                self.payments.append(payment)
+        if payment:
+            payment = PaymentLog.objects.create(
+                category='class',
+                checkout_created_time=timezone.now(),
+                description='programs_test',  # database set to 255 characters
+                donation=0,  # storing pennies in the database
+                idempotency_key=ik,
+                location_id='',
+                order_id='',
+                payment_id='test_payment',
+                receipt='',
+                source_type='',
+                status='SUCCESS',
+                total_money=amount * students.count(),
+                user=self.test_user
+            )
+            self.payments.append(payment)
         return reg
 
+    # @tag('temp')
     def test_cancel(self, refund, refund_email):
         refund.side_effect = self.refund_side_effect
 
@@ -95,6 +96,7 @@ class TestsEventTasks(MockSideEffects, TestCase):
         refund.assert_called_with(self.payments[-1], 1000)
         refund_email.assert_called_with(self.test_user, False)
 
+    # @tag('temp')
     def test_cancel_donate(self, refund, refund_email):
         refund.side_effect = self.refund_side_effect
 
@@ -108,6 +110,7 @@ class TestsEventTasks(MockSideEffects, TestCase):
         self.assertFalse(refund.called)
         refund_email.assert_called_with(self.test_user, True)
 
+    # @tag('temp')
     def test_cancel_partial(self, refund, refund_email):
         refund.side_effect = self.refund_side_effect
 
@@ -124,6 +127,7 @@ class TestsEventTasks(MockSideEffects, TestCase):
         refund.assert_called_with(self.payments[-1], 500)
         refund_email.assert_called_with(self.test_user, False)
 
+    # @tag('temp')
     def test_cancel_within_24_hours(self, refund, refund_email):
         refund.side_effect = self.refund_side_effect
 

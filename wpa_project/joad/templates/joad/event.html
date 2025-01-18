@@ -16,7 +16,6 @@
                     <th> First Name </th>
                     <th> Last Name </th>
                     <th> Signature </th>
-                    <th> Covid Vaccination </th>
                     <th> Attending </th>
 
                 </tr>
@@ -34,11 +33,6 @@
                                     Signature Required
                                 {% endif %}
                             </a>
-                        </td>
-                        <td>
-                            <input type="checkbox" class="m-2 attend-check" id="{{ student.covid_vax_check }}"
-                                attend_url="{% url 'registration:covid_vax' student.id %}"
-                                {% if student.covid_vax %} checked="checked" {% endif %}>
                         </td>
                         <td>
                             {% if student.attend_record %}
