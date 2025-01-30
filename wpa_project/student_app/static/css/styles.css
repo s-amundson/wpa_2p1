@@ -5,6 +5,40 @@
   --color-dark-brown: #372a13;
 }
 
+/* Mobile and Small Screens */
+@media only screen and (max-width: 770px) {
+  #menu-button {
+    display: inline-flex;
+  }
+  
+  .navbar-nav {
+    display: none;    
+  }
+
+  .navbar-custom {
+    clear: both;
+  }
+
+  .login-container {
+    display: none;
+  }
+}
+
+/* Larger Screens */
+@media only screen and (min-width: 771px) {
+  #menu-button {
+    display: none;
+  }
+
+  .navbar-nav {
+    display: inline-flex;
+  }
+
+  .navbar-custom {
+    float: left;
+  }
+}
+
 nav .navbar-brand
 {
     /* size for brand */
@@ -136,7 +170,6 @@ hr {
   font-size: 16px;
 }
 
-
 a {
   color: #17a2b8;
 }
@@ -176,6 +209,12 @@ a {
   border: 1px solid white;
 }
 
+/* SVG */
+
+svg {
+  fill: white;
+}
+
 /* NAVIGATION BAR */
 
 #navbar {
@@ -188,7 +227,6 @@ a {
 
 .navbar-custom {
   width: fit-content;
-  float: left;
 }
 
 .navbar-right-container {
@@ -196,13 +234,19 @@ a {
   display: inline-flex;
 }
 
+#menu-button {
+  margin: 0.5rem;
+  width: 50px;
+  float: left;
+}
+
 /* SOCIAL MEDIA LINKS */
 
 .navbar-right-container svg {
-  fill: white;
   margin: 0.5rem 0.1rem;
   padding: 0.2rem;
 }
+
 
 /* LOGIN BAR */
 
