@@ -6,12 +6,12 @@
 }
 
 /* Mobile and Small Screens */
-@media only screen and (max-width: 770px) {
+@media only screen and (max-width: 823px) {
   #menu-button {
     display: inline-flex;
   }
   
-  .navbar-nav {
+  #navbar-link-container {
     display: none;    
   }
 
@@ -22,19 +22,40 @@
   .login-container {
     display: none;
   }
+
+  .main-content-block {
+    margin: 0;
+  }
+
+  .welcome-img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 8px;
+  }
 }
 
 /* Larger Screens */
-@media only screen and (min-width: 771px) {
+@media only screen and (min-width: 824px) {
   #menu-button {
     display: none;
   }
 
-  .navbar-nav {
-    display: inline-flex;
+  #navbar-link-container {
+    display: inline-flex;    
   }
 
   .navbar-custom {
+    display: inline-flex;
+    float: left;
+  }
+
+  .main-content-block {
+    margin: 20px 100px 50px 100px;
+  }
+
+  .welcome-img {
+    margin: 0 1rem !important;
     float: left;
   }
 }
@@ -197,16 +218,8 @@ a {
   width: 100%;
 }
 
-.welcome-img {
-  margin: 0 1rem !important;
-}
-
 #block-main {
   padding: 14px;
-}
-
-.main-content-block {
-  margin: 20px 100px 50px 100px;
 }
 
 .header-divider {
@@ -234,10 +247,10 @@ svg {
 }
 
 .navbar-custom {
-  width: fit-content;
-  list-style: none;
   display: inline-flex;
   padding: 0;
+  width: fit-content;
+  list-style: none;
 }
 
 .navbar-custom :not(:hover) {
