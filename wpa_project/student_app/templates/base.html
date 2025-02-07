@@ -73,14 +73,11 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="row">
-                <div class="col-lg-2">
-                    {% block left %}{% endblock %}
-                </div>
-                <div id="block-main" class="col-lg container block-main {{request.session.theme|default:'browser'}}-theme">
+            <div class="main-content-block">
+                <div id="block-main" class="{{request.session.theme|default:'browser'}}-theme">
                     {% block main %}{% endblock %}
                 </div>
-                <div class="col-lg-2">
+                <div>
                     {% block right %}{% endblock %}
                     <form id="recaptcha-form" method="post" action="{% url 'registration:recaptcha' %}">{% csrf_token %}
                         {{ recaptcha_form.captcha }}

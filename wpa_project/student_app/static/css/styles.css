@@ -205,6 +205,10 @@ a {
   padding: 14px;
 }
 
+.main-content-block {
+  margin: 20px 100px 50px 100px;
+}
+
 .header-divider {
   border: 1px solid white;
 }
@@ -217,21 +221,40 @@ svg {
 
 /* NAVIGATION BAR */
 
+#navbar-container {
+  display: flow-root;
+}
+
 #navbar {
   background-color: var(--bs-dark);
   width: 100%;
-  float: right;
-  padding: 0px 10px 10px 10px;
+  padding: 0;
+  margin: 0;
   margin-bottom: 12px;
 }
 
 .navbar-custom {
   width: fit-content;
+  list-style: none;
+  display: inline-flex;
+  padding: 0;
+}
+
+.navbar-custom :not(:hover) {
+  color: rgba(255, 255, 255, .55);
+}
+
+.navbar-custom :hover {
+  color: rgba(255, 255, 255, .75);
+}
+
+.navbar-custom .dropdown-item {
+  color: black;
 }
 
 .navbar-right-container {
-  float: right;
   display: inline-flex;
+  float: right;
 }
 
 #menu-button {
