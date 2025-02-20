@@ -183,7 +183,10 @@ class ElectionVoteView(MemberMixin, FormView):
         if len(votes):
             logger.warning(votes.last())
             kwargs['instance'] = votes.last()
-        kwargs['members'] = Member.objects.filter(pk=self.member.id)
+        if self.member is None:
+            kwargs['members'] = Member.objects.none()
+        else:
+            kwargs['members'] = Member.objects.filter(pk=self.member.id)
 
         return kwargs
 
