@@ -50,8 +50,10 @@ class ClassRegistrationHelper:
 
     def enrolled_count(self, beginner_class):
         event = Registration.objects.filter(event=beginner_class.event)
+        instructor_count = event.filter(event=beginner_class.event).intro_instructor_count()
         return {'beginner': event.filter(event=beginner_class.event).intro_beginner_count(beginner_class.event.event_date.date()),
-                'staff': event.filter(event=beginner_class.event).intro_staff_count(),
+                'staff': event.filter(event=beginner_class.event).intro_staff_count() - instructor_count,
+                'instructor': instructor_count,
                 'returnee': event.filter(event=beginner_class.event).intro_returnee_count(beginner_class.event.event_date.date()),
                 'waiting': event.filter(pay_status__in=['waiting', 'wait error']).count()}
 

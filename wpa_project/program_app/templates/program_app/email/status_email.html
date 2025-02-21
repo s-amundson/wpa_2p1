@@ -6,8 +6,8 @@
     {% for c in class_list %}
         <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
             {{ c.class.class_type|capfirst }} class on {{ c.class.event.event_date }} has
-            {{ c.count.beginner|add:c.count.returnee }} students signed up and {{ c.count.staff }} volunteers
-            signed up. The following volunteers are signed up:
+            {{ c.count.beginner|add:c.count.returnee }} students, {{ c.count.instructor }} instructors,
+            and {{ c.count.staff }} volunteers signed up.
         </p>
         <table style="font-family: arial, sans-serif; border-collapse: collapse; color: black; margin: 10px;">
             <tr>

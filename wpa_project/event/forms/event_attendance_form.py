@@ -15,6 +15,7 @@ class EventAttendanceForm(forms.Form):
         self.event = kwargs.pop('event')
         super().__init__(*args, **kwargs)
         staff = Student.objects.filter(user__is_staff=True)
+        instructors = Student.objects.filter(user__is_instructor=True)
         self.student_helper = StudentHelper()
         self.is_closed = self.event.state == 'closed'
         registrations = self.event.registration_set.filter(
@@ -31,7 +32,8 @@ class EventAttendanceForm(forms.Form):
                 Q(student__safety_class__isnull=True) | Q(student__safety_class__gte=self.class_date.date()))
             self.new_students_waiting = self.new_students.filter(pay_status__startswith='wait')
             self.new_students = self.new_students.exclude(pay_status__startswith='wait')
-        self.staff = registrations.filter(student__in=staff)
+        self.instructors = registrations.filter(student__in=instructors)
+        self.staff = registrations.exclude(student__in=instructors).filter(student__in=staff)
         self.return_students = registrations.exclude(student__in=staff).filter(
             student__safety_class__lt=self.class_date.date())
         self.return_students_waiting = self.return_students.filter(pay_status__startswith='wait')
@@ -39,5 +41,6 @@ class EventAttendanceForm(forms.Form):
 
         self.attend_count = {'beginner': len(self.new_students.filter(attended=True)),
                              'returnee': len(self.return_students.filter(attended=True)),
+                             'instructors': len(self.instructors.filter(attended=True)),
                              'staff': len(self.staff.filter(attended=True))}
         self.admit_statuses = ['paid', 'admin']

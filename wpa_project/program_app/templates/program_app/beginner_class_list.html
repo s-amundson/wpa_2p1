@@ -14,6 +14,7 @@
                     <th>Waiting</th>
                     {% if user.is_staff or user.is_instructor %}
                         <th>Instructors</th>
+                        <th>Staff </th>
                     {% endif %}
                     <th>State</th>
                 </tr>
@@ -29,11 +30,10 @@
                         <td>{{ c.beginner }}/{{ c.beginner_limit }}</td>
                         <td>{{ c.returnee }}/{{ c.returnee_limit }}</td>
                         <td>{{ c.waiting }}/{{ c.beginner_wait_limit|add:c.returnee_wait_limit }}</td>
-                        <td>
-                            {% if user.is_staff or user.is_instructor %}
-                                {{ c.staff }}/{{ c.instructor_limit }}
-                            {% endif %}
-                        </td>
+                        {% if user.is_staff or user.is_instructor %}
+                            <td>{{c.instructor}}/{{ c.instructor_limit }}</td>
+                            <td>{{ c.staff}}/{{ c.instructor_limit }}</td>
+                        {% endif %}
                         <td>{{ c.event_state }}</td>
                     </tr>
                 {% endfor %}
