@@ -65,7 +65,7 @@ class TestsUpdatePrograms(TestCase):
         s = 'has 2 students, 2 instructors, and 1 volunteers signed up. The following volunteers are signed up:'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
 
-    @tag('temp')
+    # @tag('temp')
     def test_email_staff_notice_instructor_canceled(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
