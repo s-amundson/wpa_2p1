@@ -84,13 +84,19 @@
                     </a>
                 {% endif %}
             </div>
-            <div>
-                {% if user.is_board and student.is_user %}
-                    <a href="{% url 'registration:update_user' student.is_user%}">Edit User</a>
-                {% endif %}
-            </div>
-
         </div>
+
+        {% if user.is_board and student.is_user %}
+        <div class="d-flex flex-row px-3 input-group input-group-md">
+            <div class="m-2">{{user_form.is_staff}} {{user_form.is_staff.label}}</div>
+            <div class="m-2">{{user_form.is_instructor}} {{user_form.is_instructor.label}}</div>
+            <div class="m-2">{{user_form.instructor_expire_date}} {{user_form.instructor_expire_date.label}}</div>
+            {% if user.is_superuser %}
+                <div class="m-2">{{user_form.is_active}} {{user_form.is_active.label}}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+
     {% endif %}
 
     <div class="flex-row m-2">
