@@ -45,6 +45,9 @@ class RegistrationQuerySet(models.QuerySet):
         qs = qs.filter(models.Q(student__user__is_staff=False) | models.Q(student__user__isnull=True))
         return qs.filter(student__safety_class__lt=date).count()
 
+    def intro_instructor_count(self):
+        return self.filter(event__type='class', student__user__is_instructor=True, pay_status__in=['paid', 'admin']).count()
+
     def intro_staff_count(self):
         return self.filter(event__type='class', student__user__is_staff=True, pay_status__in=['paid', 'admin']).count()
 

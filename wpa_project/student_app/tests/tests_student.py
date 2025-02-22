@@ -21,16 +21,19 @@ class TestsStudent(TestCase):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
 
+    # @tag("temp")
     def test_get_student(self):
         response = self.client.get(reverse('registration:add_student'), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/forms/student.html')
 
+    # @tag("temp")
     def test_get_student_id(self):
         response = self.client.get(reverse('registration:add_student', kwargs={'student_id': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/forms/student.html')
 
+    # @tag("temp")
     def test_get_student_id_not_staff(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
@@ -38,12 +41,14 @@ class TestsStudent(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/forms/student.html')
 
+    # @tag("temp")
     def test_get_student_id_not_authorized(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
         response = self.client.get(reverse('registration:add_student', kwargs={'student_id': 1}), secure=True)
         self.assertEqual(response.status_code, 404)
 
+    # @tag("temp")
     def test_post_add_student(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
@@ -55,6 +60,7 @@ class TestsStudent(TestCase):
         self.assertEqual(student.student_family, self.test_user.student_set.last().student_family)
         self.assertEqual(len(mail.outbox), 0)
 
+    # @tag("temp")
     def test_post_add_student_no_address(self):
         self.test_user = User.objects.get(pk=4)
         s = self.test_user.student_set.last()
@@ -72,6 +78,7 @@ class TestsStudent(TestCase):
         # self.assertEqual(student.student_family, self.test_user.student_set.last().student_family)
         self.assertEqual(len(mail.outbox), 0)
 
+    # @tag("temp")
     def test_post_add_student_json(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
@@ -85,6 +92,7 @@ class TestsStudent(TestCase):
         content = json.loads(response.content)
         self.assertEqual(content['first_name'], "Kiley")
 
+    # @tag("temp")
     def test_post_student_id(self):
         self.test_user = User.objects.get(pk=5)
         self.client.force_login(self.test_user)
@@ -95,16 +103,19 @@ class TestsStudent(TestCase):
         self.assertEqual(student.last_name, d['last_name'])
         self.assertEqual(len(mail.outbox), 0)
 
+    # @tag("temp")
     def test_post_student_id_staff(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03"}
+        d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03", "is_staff": "on"}
         response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 6}), d, secure=True)
         student = Student.objects.get(pk=6)
         self.assertEqual(student.first_name, d['first_name'])
         self.assertEqual(student.last_name, d['last_name'])
         self.assertEqual(len(mail.outbox), 0)
 
+
+    # @tag("temp")
     def test_post_student_id_invalid(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
@@ -116,6 +127,7 @@ class TestsStudent(TestCase):
         self.assertNotEqual(student.last_name, d['last_name'])
         self.assertEqual(len(mail.outbox), 0)
 
+    # @tag("temp")
     def test_post_student_form_invalid_json(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
@@ -131,6 +143,7 @@ class TestsStudent(TestCase):
         logging.warning(content)
         self.assertNotEqual(content['error'], {})
 
+    # @tag("temp")
     def test_post_student_errors(self):
         self.test_user = User.objects.get(pk=4)
         self.client.force_login(self.test_user)
@@ -141,6 +154,7 @@ class TestsStudent(TestCase):
         self.assertEqual(len(student), 6)
         self.assertEqual(len(mail.outbox), 0)
 
+    # @tag("temp")
     def test_new_user_new_student(self):
         u = User(username='testuser', email='test@example.com', password='password')
         u.save()
@@ -153,15 +167,7 @@ class TestsStudent(TestCase):
         self.assertEqual(student.email, 'test@example.com')
         self.assertEqual(len(mail.outbox), 0)
 
-    # def test_new_user_new_student_existing_email(self):
-    #     self.test_user = User.objects.get(pk=4)
-    #     self.client.force_login(self.test_user)
-    #     d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03", "email": "RicardoRHoyt@Ricardo.com"}
-    #     response = self.client.post(reverse('registration:add_student'), d, secure=True)
-    #     self.assertContains(response, 'Email in use')
-    #     self.assertEqual(len(Student.objects.all()), 6)
-    #     self.assertEqual(len(mail.outbox), 0)
-
+    # @tag("temp")
     def test_new_user_existing_student(self):
         self.test_user = User.objects.get(pk=5)
         self.client.force_login(self.test_user)
@@ -173,6 +179,7 @@ class TestsStudent(TestCase):
         self.assertEqual(student.email, 'test@example.com')
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Invitation')
 
+    # @tag("temp")
     def test_add_email_existing_student(self):
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
@@ -184,10 +191,22 @@ class TestsStudent(TestCase):
         self.assertEqual(student.email, 'test@example.com')
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Invitation')
 
+    # @tag('temp')
+    def test_modify_existing_user(self):
+        d = {"first_name": "Charles", "last_name": "Wells", "dob": "1995-12-03", "is_instructor": True}
+        response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 4}), d, secure=True)
+        student = Student.objects.get(pk=4)
+        self.assertEqual(student.first_name, d['first_name'])
+        self.assertEqual(student.last_name, d['last_name'])
+        self.assertTrue(student.user.is_staff)
+        self.assertTrue(student.user.is_instructor)
+
+    # @tag("temp")
     def test_get_student_table(self):
         response = self.client.get(reverse('registration:student_table'), secure=True)
         self.assertEqual(response.status_code, 200)
 
+    # @tag("temp")
     def test_student_is_joad_young(self):
         student = Student.objects.get(pk=3)
         birth = timezone.now().date()
@@ -200,6 +219,7 @@ class TestsStudent(TestCase):
         self.assertTrue(content['error'])
         self.assertEqual(content['message'], 'Student to young')
 
+    # @tag("temp")
     def test_student_is_joad_good(self):
         student = Student.objects.get(pk=3)
         birth = timezone.now().date()
@@ -212,6 +232,7 @@ class TestsStudent(TestCase):
         self.assertFalse(content['error'])
         self.assertEqual(content['message'], '')
 
+    # @tag("temp")
     def test_student_is_joad_old(self):
         student = Student.objects.get(pk=3)
         birth = timezone.now().date()
@@ -225,11 +246,13 @@ class TestsStudent(TestCase):
         self.assertTrue(content['error'])
         self.assertEqual(content['message'], 'Student to old')
 
+    # @tag("temp")
     def test_get_delete_student_superuser(self):
         response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 4}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'student_app/delete.html')
 
+    # @tag("temp")
     def test_get_delete_student_valid(self):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)

@@ -27,3 +27,10 @@ class UserForm(MyModelForm):
         self.fields['is_member'].widget.attrs.update({'disabled': 'disabled'})
         self.fields['instructor_expire_date'].widget = SelectDateWidget(
             years=range(timezone.datetime.today().year, timezone.datetime.today().year + 4, 1))
+        self.fields['is_staff'].help_text = ''
+        self.fields['is_active'].help_text = ''
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data['is_instructor']:
+            cleaned_data['is_staff'] = True

@@ -63,6 +63,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
                            'returnee_limit': 2,
                            'returnee_wait_limit': 0,
                            'instructor_limit': 2,
+                           'staff_limit': 3,
                            'state': 'scheduled',
                            'cost': 5}
 
@@ -85,6 +86,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.assertEqual(response.context['form'].initial['class_date'].day, date(2022, 6, 19).day)
         self.assertEqual(response.context['form'].initial['class_date'].month, date(2022, 6, 19).month)
 
+    # @tag('temp')
     def test_add_class(self):
         # Add a class
         response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
@@ -122,6 +124,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         bc = BeginnerClass.objects.all()
         self.assertEquals(len(bc), 2)
 
+    # @tag('temp')
     def test_2nd_class_good(self):
         bc = BeginnerClass.objects.get(pk=1)
         # New class same day
@@ -169,6 +172,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         beginner_class = BeginnerClass.objects.get(pk=1)
         refund.assert_called_with(bc.id, 'due to extreme bytes')
 
+    # @tag('temp')
     def test_beginner_class_with_returnee(self):
         self.class_dict['class_type'] = 'beginner'
         response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)
@@ -176,6 +180,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
         self.assertEquals(len(bc), 3)
         self.assertEqual(bc[2].returnee_limit, 0)
 
+    # @tag('temp')
     def test_returnee_class_with_beginner(self):
         self.class_dict['class_type'] = 'returnee'
         response = self.client.post(reverse('programs:beginner_class'), self.class_dict, secure=True)

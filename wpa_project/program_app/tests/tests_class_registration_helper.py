@@ -361,11 +361,11 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
                                    pay_status='paid',
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
-        self.assertEqual(self.crh.has_space(self.test_user, bc, 1, 0, 0), 'open')
-        self.assertEqual(self.crh.has_space(self.test_user, bc, 3, 0, 0), 'full')
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 1, 0, 0, 0), 'open')
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 3, 0, 0, 0), 'full')
         bc.beginner_wait_limit = 3
         bc.save()
-        self.assertEqual(self.crh.has_space(self.test_user, bc, 3, 0, 0), 'wait')
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 3, 0, 0, 0), 'wait')
 
     def test_has_space_returnee(self):
         bc = BeginnerClass.objects.get(pk=1)
@@ -382,11 +382,11 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
                                    pay_status='paid',
                                    idempotency_key=str(uuid.uuid4()))
             cr.save()
-        self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 1), 'open')
-        self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 3), 'full')
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 1, 0), 'open')
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 3, 0), 'full')
         bc.returnee_wait_limit = 3
         bc.save()
-        self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 3), 'wait')
+        self.assertEqual(self.crh.has_space(self.test_user, bc, 0, 0, 3, 0), 'wait')
 
     # @tag('temp')
     @patch('program_app.src.class_registration_helper.PaymentHelper.create_payment')
