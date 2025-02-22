@@ -21,9 +21,12 @@ class CommonPin(models.Model):
 
 
 class PinManager(models.Manager):
-    def high_score(self, **kwargs):
+    def high_score(self, id=None, **kwargs):
         # the method accepts **kwargs, so that it is possible to filter
-        return self.filter(stars__gte=1).order_by('-stars', '-score').first()
+        if id is None:
+            return self.filter(stars__gte=1).order_by('-stars', '-score').first()
+        else:
+            return self.filter(id__lt=id, stars__gte=1).order_by('-stars', '-score').first()
 
     def last_event(self):
         return self.order_by('-id').first()
@@ -41,5 +44,6 @@ class PinAttendance(CommonPin):
     pay_status = models.CharField(max_length=20, null=True, default=None)
     idempotency_key = models.CharField(max_length=40, null=True, default=None)
     award_received = models.BooleanField(default=False)
+    pay_method = models.CharField(max_length=20, choices=[('card', 'Card'), ('cash', 'Cash')], default='card')
 
     objects = PinManager()
