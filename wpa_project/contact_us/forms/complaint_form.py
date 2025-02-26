@@ -58,6 +58,7 @@ class ComplaintCommentForm(MyModelForm):
             self.student = self.instance.user.student_set.last()
         else:
             self.student = self.initial.get('student', None)
+        self.fields['comment'].widget.attrs.update({'cols': 80, 'rows': 3})
 
     def clean(self):
         cleaned_data = super().clean()

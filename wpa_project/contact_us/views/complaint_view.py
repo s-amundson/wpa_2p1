@@ -79,15 +79,14 @@ class ComplaintView(UserPassesTestMixin, FormView):
     def form_valid(self, form):
         if self.complaint is not None:
             formset = self.get_formset()
-            logger.warning(formset.cleaned_data)
             if formset.is_valid():
+                # logger.warning(formset.cleaned_data)
                 formset.save()
 
             else:  # pragma: no cover
                 logger.warning(formset.errors)
                 logger.warning(formset.non_form_errors())
                 return self.form_invalid(form)
-        # logger.warning(self.complaint.id)
         complaint = form.save()
         if not form.cleaned_data.get('anonymous', True):
             complaint.user = self.request.user
