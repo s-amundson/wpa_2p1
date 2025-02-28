@@ -1,8 +1,11 @@
 {% extends 'base.html' %}
-
+{% block script %}
+    <script async defer src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>
+{% endblock %}
 {% block title %} Posts {% endblock %}
 
 {% load static %}
+
 
 {% block main %}
     {% include "facebook/post_list_insert.html" %}

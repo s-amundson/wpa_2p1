@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from _email.models import BulkEmail
 
-from ..models import Category, Message, Complaint
+from ..models import Category, Message, Complaint, ComplaintComment
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -85,7 +85,7 @@ class TestsComplaint(TestCase):
         self.assertTrue(be[0].body.find('Charles Wells') > 0)
         self.assertIsNone(Complaint.objects.last().resolved_date)
 
-    # @tag('temp')
+    @tag('temp')
     def test_post_complaint_resolved(self):
         self.add_message()
         self.post_dict['form-0-complaint'] = self.complaint.id,
@@ -97,3 +97,6 @@ class TestsComplaint(TestCase):
         complaints = Complaint.objects.all()
         self.assertEqual(complaints.count(), 1)
         self.assertGreater(complaints.last().resolved_date, self.post_dict['form-0-comment_date'])
+        comments = ComplaintComment.objects.all()
+        self.assertEqual(comments.count(), 1)
+        self.assertEqual(comments[0].comment, 'test comment')
