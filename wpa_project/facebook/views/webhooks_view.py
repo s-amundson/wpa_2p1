@@ -15,6 +15,8 @@ class PageHook(View):
         logger.warning(self.request.GET)
         if 'hub.verify_token' in self.request.GET:
             pass
+        return JsonResponse({})
+
     def post(self, request):
         logger.warning(self.request.POST)
         # TODO figure out how to process data to add posts to the website as they are posted to facebook.
