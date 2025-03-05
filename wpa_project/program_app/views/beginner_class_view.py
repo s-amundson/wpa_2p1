@@ -57,7 +57,7 @@ class BeginnerClassView(UserPassesTestMixin, FormView):
         return kwargs
 
     def form_invalid(self, form):
-        logging.warning(form.errors)
+        logger.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):

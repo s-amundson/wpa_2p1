@@ -3,13 +3,13 @@ import uuid
 from django.core import mail
 from django.utils import timezone
 from datetime import timedelta
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 
 from ..models import BeginnerClass, BeginnerSchedule
 from event.models import Event, Registration, RegistrationAdmin
 from .helper import create_beginner_class
 from student_app.models import Student, User
-from ..src import UpdatePrograms
+from ..src import UpdatePrograms, EmailMessage
 logger = logging.getLogger(__name__)
 
 
@@ -39,6 +39,7 @@ class TestsUpdatePrograms(TestCase):
         UpdatePrograms().daily_update()
         self.assertEqual(BeginnerClass.objects.get(pk=bc.id).event.state, 'recorded')
 
+    # @tag('temp')
     def test_email_staff_notice(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
@@ -60,16 +61,16 @@ class TestsUpdatePrograms(TestCase):
 
         UpdatePrograms().status_email()
         self.assertEqual(mail.outbox[0].subject, f"WPA Class Status {d.strftime('%Y-%m-%d')}")
-        # logging.warning(mail.outbox[0].body)
-        s = 'has 2 students signed up and 3 volunteers signed up. The following volunteers are signed up:'
+        # logger.warning(mail.outbox[0].body)
+        s = 'has 2 students, 2 instructors, and 1 volunteers signed up. The following volunteers are signed up:'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
 
+    # @tag('temp')
     def test_email_staff_notice_instructor_canceled(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=2)
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
         d = timezone.make_aware(d, timezone.get_current_timezone())
         bc1 = create_beginner_class(d, 'open', 'beginner')
-        bc2 = create_beginner_class(timezone.datetime(year=d.year, month=d.month, day=d.day, hour=11), 'open', 'returnee')
         u = User.objects.get(pk=3)
         u.is_staff = True
         u.is_instructor = True
@@ -87,10 +88,13 @@ class TestsUpdatePrograms(TestCase):
         reg.pay_status = 'canceled'
         reg.save()
 
-        UpdatePrograms().status_email()
-        self.assertEqual(mail.outbox[0].subject, f"WPA Class Status {d.strftime('%Y-%m-%d')}")
-        # logging.warning(mail.outbox[0].body)
-        s = 'has 2 students signed up and 2 volunteers signed up. The following volunteers are signed up:'
+        email_message = EmailMessage()
+        email_message.instructor_canceled_email(bc1.event, 2)
+        self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Instructor Cancellation')
+        # logger.warning(mail.outbox[0].body)
+        s = 'One of our instructors has cannot make it to the event'
+        self.assertTrue(mail.outbox[0].body.find(s) > 0)
+        s = 'and we now have 2 singed up.'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
 
     def test_email_staff_notice_no_class(self):

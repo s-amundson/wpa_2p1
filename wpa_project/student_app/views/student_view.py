@@ -6,7 +6,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic.base import View
 from django.views.generic import FormView
 
-from ..forms import StudentDeleteForm, StudentForm
+from ..forms import StudentDeleteForm, StudentForm, UserForm
 from ..models import Student
 from ..src import EmailMessage, StudentHelper
 from src.mixin import StaffMixin, StudentFamilyMixin
@@ -33,6 +33,9 @@ class AddStudentView(UserPassesTestMixin, FormView):
         # logger.warning(form.cleaned_data)
         if self.request.user.is_board:
             f = form.save()
+            uf = UserForm(self.request.POST, instance=self.student.user)
+            if uf.is_valid():
+                uf.save()
         else:
             f = form.save(commit=False)
 
@@ -84,6 +87,8 @@ class AddStudentView(UserPassesTestMixin, FormView):
             context['student']['joad_age'] = 8 < age < 21
             if self.student.user is not None and self.student.user.is_staff:
                 context['student']['staff'] = True
+            if self.request.user.is_board and self.student.user_id:
+                context['user_form'] = UserForm(instance=self.student.user)
         return context
 
     def get_form_kwargs(self):

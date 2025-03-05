@@ -17,6 +17,7 @@ class BeginnerCommonClass(models.Model):
     returnee_limit = models.IntegerField()
     returnee_wait_limit = models.IntegerField(default=0)
     instructor_limit = models.IntegerField(default=10)
+    staff_limit = models.IntegerField(default=3)
 
     class Meta:
         abstract = True

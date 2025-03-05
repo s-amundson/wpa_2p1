@@ -3,7 +3,7 @@ import uuid
 import json
 
 from django.apps import apps
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 
@@ -26,13 +26,14 @@ class TestsEventAttendance(TestCase):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
 
+    # @tag('temp')
     def test_class_attendance(self):
         # Get the page
         response = self.client.get(reverse('events:event_attend_list', kwargs={'event': 1}), secure=True)
         # list the class students but since class is not closed Attending column is missing
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('event/event_attendance.html')
-        self.assertContains(response, 'Attending', 3)
+        self.assertContains(response, 'Attending', 4)
 
         # change user, then add 2 new.
         self.client.force_login(User.objects.get(pk=2))
@@ -60,7 +61,7 @@ class TestsEventAttendance(TestCase):
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('events:event_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Attending', 6)
+        self.assertContains(response, 'Attending', 8)
 
     def test_class_beginner_attendance(self):
         # register instructor and close class.

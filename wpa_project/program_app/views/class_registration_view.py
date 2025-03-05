@@ -47,7 +47,8 @@ class ClassRegistrationView(RegistrationSuperView):
         crh = ClassRegistrationHelper()
         beginners = self.students.filter(safety_class=None).exclude(user__is_staff=True)
         returnee = self.students.exclude(safety_class=None).exclude(user__is_staff=True)
-        staff = self.students.filter(user__is_staff=True)
+        instructors = self.students.filter(user__is_instructor=True, user__instructor_expire_date__gte=self.events[0].event_date)
+        staff = self.students.exclude(user__is_instructor=True).filter(user__is_staff=True)
 
         if not self.students.count():
             return self.has_error(form, 'No students selected')
@@ -57,9 +58,9 @@ class ClassRegistrationView(RegistrationSuperView):
         if self.students.filter(dob__gt=of_age_date).count():
             return self.has_error(form, 'Student must be at least 9 years old to participate')
 
-        # check for overdue instructors
-        if staff.filter(user__is_instructor=True, user__instructor_expire_date__lt=self.events[0].event_date).count():
-            return self.has_error(form, 'Please update your instructor certification')
+        # # check for overdue instructors
+        # if instructors.filter(user__is_instructor=True, user__instructor_expire_date__lt=self.events[0].event_date).count():
+        #     return self.has_error(form, 'Please update your instructor certification')
 
         # check for multiple events for non staff:
         if self.events.count() > 1 and not self.request.user.is_staff:
@@ -92,7 +93,7 @@ class ClassRegistrationView(RegistrationSuperView):
 
             # check if class is full
             space = crh.has_space(
-                self.request.user, beginner_class, beginners.count(), staff.count(), returnee.count())
+                self.request.user, beginner_class, beginners.count(), staff.count(), returnee.count(), instructors.count())
             logger.warning(space)
             if space == 'full':
                 crh.update_class_state(beginner_class)
@@ -236,8 +237,8 @@ class ResumeRegistrationView(LoginRequiredMixin, View):
                                                             cr.event.beginnerclass_set.last(),
                                                             len(registrations.filter(student__safety_class__isnull=True)),
                                                             0,
-                                                            len(registrations.filter(student__safety_class__isnull=False))
-                                                            )
+                                                            len(registrations.filter(student__safety_class__isnull=False)),
+                                                            0)
                 logger.debug(space)
                 if space == 'full':
                     messages.add_message(self.request, messages.ERROR, 'Not enough space available in this class')

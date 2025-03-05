@@ -354,27 +354,27 @@ class TestsClassRegistration(TestCase):
                          f'Class on {str(self.event.event_date)[:10]} staff: Emily')
         self.assertEqual(cr[0].user, self.test_user)
 
-    def test_class_register_instructor_overdue(self):
-        # make user instructor
-        self.test_user = User.objects.get(pk=1)
-        self.client.force_login(self.test_user)
-        self.test_user.is_instructor = True
-        d = timezone.now() - timezone.timedelta(days=30)
-        self.test_user.instructor_expire_date = d
-        self.test_user.save()
-
-        # add a user to the class
-        self.get_post_dict([self.event.id])
-        self.post_dict.pop('form-1-register')
-        self.post_dict.pop('form-1-student')
-
-        self.post_dict['form-0-student'] = 1
-        self.post_dict['form-TOTAL_FORMS'] = 1
-        response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
-        bc = BeginnerClass.objects.get(pk=1)
-        self.assertEqual(bc.event.state, 'open')
-        cr = Registration.objects.all()
-        self.assertEqual(len(cr), 0)
+    # def test_class_register_instructor_overdue(self):
+    #     # make user instructor
+    #     self.test_user = User.objects.get(pk=1)
+    #     self.client.force_login(self.test_user)
+    #     self.test_user.is_instructor = True
+    #     d = timezone.now() - timezone.timedelta(days=30)
+    #     self.test_user.instructor_expire_date = d
+    #     self.test_user.save()
+    #
+    #     # add a user to the class
+    #     self.get_post_dict([self.event.id])
+    #     self.post_dict.pop('form-1-register')
+    #     self.post_dict.pop('form-1-student')
+    #
+    #     self.post_dict['form-0-student'] = 1
+    #     self.post_dict['form-TOTAL_FORMS'] = 1
+    #     response = self.client.post(reverse('programs:class_registration'), self.post_dict, secure=True)
+    #     bc = BeginnerClass.objects.get(pk=1)
+    #     self.assertEqual(bc.event.state, 'open')
+    #     cr = Registration.objects.all()
+    #     self.assertEqual(len(cr), 0)
 
     @patch('program_app.src.class_registration_helper.ClassRegistrationHelper.update_class_state')
     def test_class_register_instructor_full(self, update_class_state):

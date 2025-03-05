@@ -125,7 +125,31 @@
                     </div>
                 {% endif %}
                 <div class="row pt-2">
-                    <div class="col"> Instructors/Staff </div>
+                    <div class="col"> Instructors </div>
+                    <div class="col"> Attending: {{ form.attend_count.instructors }} </div>
+                </div>
+                <div class="row">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <th> First Name </th>
+                            <th> Last Name </th>
+                            <th> Comment </th>
+                            <th>
+                                {% if form.is_closed %}
+                                    Attending
+                                {% endif %}
+                            </th>
+                            <th> Attended/</br>Registered</th>
+                        </thead>
+                        <tbody>
+                            {% for cr in form.instructors %}
+                                {% include "event/tables/volunteer_attend_table_row.html" %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row pt-2">
+                    <div class="col"> Staff </div>
                     <div class="col"> Attending: {{ form.attend_count.staff }} </div>
                 </div>
                 <div class="row">
