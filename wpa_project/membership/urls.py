@@ -6,7 +6,6 @@ urlpatterns = [
     path('level/', LevelView.as_view(), name='level'),
     path('election/', ElectionView.as_view(), name='election'),
     path('election/<int:election_id>/', ElectionView.as_view(), name='election'),
-    path('election_candidate/<int:election_id>/', ElectionCandidateView.as_view(), name='election_candidate'),
     path('election_list/', ElectionListView.as_view(), name='election_list'),
     path('election_result/<int:election_id>/', ElectionResultView.as_view(), name='election_result'),
     path('election_vote/<int:election_id>/', ElectionVoteView.as_view(), name='election_vote'),

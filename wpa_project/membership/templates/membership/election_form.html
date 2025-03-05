@@ -14,51 +14,17 @@
                 <p>{{ form.notify }}{{form.notify.label}}{{form.notify.errors}}</p>
                 <p>{{ form.description.label }} (remote meeting details) <br> {{ form.description }}{{ form.description.errors }}</p>
                 <p>{{ form.election_close.label }} {{ form.election_close }}{{ form.election_close.errors }}</p>
-
+                {{ formset.management_form }}
+                {% for candidate in formset %}
+                    <div class="d-flex flex-row m-2">{{ candidate.as_div }}</div>
+                {% endfor %}
                 <div class="row">
-                    <input class="btn btn-primary" type="submit" value="Submit">
+                    <div><input class="btn btn-primary" type="submit" value="Submit"></div>
                 </div>
             </form>
 
         </div>
     </div>
-    <hr/>
-    {% if form.instance.id %}
-        <div class="row p-3">
-            {{ form.instance.id }}
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th> ID </th>
-                            <th> Position </th>
-                            <th> Person </th>
-                            <th> Membership Expire</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for candidate in form.instance.electioncandidate_set.all %}
-                            <tr>
-                                <td>{{ candidate.id }}</td>
-                                <td>{{ candidate.position }}</td>
-                                <td>{{ candidate.student }}</td>
-                                <td>{{ candidate.student.member_set.last.expire_date }}</td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="3">No Candidates</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </ul>
-        </div>
-        <div class="row p-3">
-            <form method="post" action="{% url 'membership:election_candidate' form.instance.id %}">
-                {% csrf_token %}
-                {{ candidate_form.as_p }}
-                <input class="btn btn-primary" type="submit" value="Submit">
-            </form>
-        </div>
-    {% endif %}
+
 {% endblock %}
 
