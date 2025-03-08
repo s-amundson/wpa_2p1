@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView
 from django.shortcuts import get_object_or_404
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from django.forms import modelformset_factory
 
 from ..forms import ElectionForm, ElectionCanidateForm, ElectionVoteForm
 from ..models import Election, ElectionCandidate, ElectionVote, Member
@@ -15,30 +16,6 @@ from student_app.models import Student
 from src.mixin import BoardMixin, MemberMixin, StudentFamilyMixin
 
 logger = logging.getLogger(__name__)
-
-
-class ElectionCandidateView(BoardMixin, FormView):
-    template_name = 'student_app/form_as_p.html'
-    form_class = ElectionCanidateForm
-    success_url = reverse_lazy('registration:index')
-    election = None
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        if 'election_id' in self.kwargs:
-            self.election = get_object_or_404(Election, pk=self.kwargs.pop('election_id'))
-            kwargs['initial']['election'] =  self.election
-        return kwargs
-
-    def form_invalid(self, form):
-        logger.warning(form.errors)
-        return super().form_invalid(form)
-
-    def form_valid(self, form):
-        logger.warning(form.cleaned_data)
-        candidate = form.save()
-        self.success_url = reverse_lazy('membership:election', kwargs={'election_id': self.election.id})
-        return super().form_valid(form)
 
 
 class ElectionListView(StudentFamilyMixin, ListView):
@@ -92,7 +69,7 @@ class ElectionView(BoardMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.election is not None:
-            context['candidate_form'] = ElectionCanidateForm(initial={'election': self.election, 'state': 'scheduled'})
+            context['formset'] = self.get_formset()
         return context
 
     def get_form_kwargs(self):
@@ -103,12 +80,36 @@ class ElectionView(BoardMixin, FormView):
             kwargs['instance'] =  self.election
         return kwargs
 
+    def get_formset(self, **kwargs):
+        formset = modelformset_factory(ElectionCandidate, form=ElectionCanidateForm, can_delete=True, extra=1)
+        data = None
+        if self.request.method.lower() == 'post':
+            data = self.request.POST
+
+        formset = formset(
+            queryset=ElectionCandidate.objects.filter(election=self.election).order_by('position'),
+            initial=[{'election': self.election}],
+            data=data, **kwargs
+        )
+        return formset
+
     def form_invalid(self, form):
         logger.warning(form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
         logger.warning(form.cleaned_data)
+        logger.warning(self.request.POST)
+        if self.election is not None:
+            formset = self.get_formset()
+            if formset.is_valid():
+                logger.warning(formset.cleaned_data)
+                formset.save()
+
+            else:  # pragma: no cover
+                logger.warning(formset.errors)
+                logger.warning(formset.non_form_errors())
+                return self.form_invalid(form)
         election = form.save()
         if form.cleaned_data.get('notify', False):
             opened = False
@@ -117,7 +118,7 @@ class ElectionView(BoardMixin, FormView):
             em = EmailMessage()
             em.election_notification(election, opened)
 
-        if 'election_close' in form.changed_data:
+        if 'election_close' in form.changed_data or form.close_updated:
             icd = form.initial.get('election_close', None)
             logger.warning(icd)
             close_date = form.cleaned_data.get('election_close', None)

@@ -25,6 +25,16 @@ class TestsElection(TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
+        self.canidate_frm_dict = {
+            'form-TOTAL_FORMS': 1,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+            'form-0-election': None,
+            'form-0-position': 1,
+            'form-0-student': 9,
+            'form-0-id': '',
+        }
 
     def make_election(self):
         d = timezone.now() + timezone.timedelta(days=3)
@@ -73,8 +83,7 @@ class TestsElection(TestCase):
         d = timezone.now() + timezone.timedelta(days=3)
         d_close = d + timezone.timedelta(days=1)
         response = self.client.post(reverse('membership:election'),
-                                    {'election_date': d, 'state': 'open',
-                                     'election_close': d_close},
+                                    {'election_date': d, 'state': 'open',},
                                    secure=True)
         # self.assertEqual(response.status_code, 200)
         elections = Election.objects.all()
@@ -86,6 +95,59 @@ class TestsElection(TestCase):
         self.assertEqual(ct.minute, str(d_close.minute))
     #     self.assertRedirects(response, reverse('membership:election', kwargs={'election_id': elections[0].id}))
 
+    # @tag('temp')
+    def test_election_form_post_good_candidate(self):
+        d = timezone.now() + timezone.timedelta(days=3)
+        d_close = d + timezone.timedelta(days=1)
+        election =  Election.objects.create(
+            election_date=d,
+            state='open'
+        )
+        self.canidate_frm_dict['form-0-election'] = election.id
+        self.canidate_frm_dict['election_date'] = election.election_date
+        self.canidate_frm_dict['state'] = 'open'
+        self.canidate_frm_dict['election_close'] = d_close
+        response = self.client.post(reverse('membership:election',
+                                            kwargs={'election_id': election.id}),
+                                            self.canidate_frm_dict,
+                                            secure=True)
+        # self.assertEqual(response.status_code, 200)
+        elections = Election.objects.all()
+        self.assertEqual(len(elections), 1)
+        self.assertEqual(elections[0].election_date, d)
+        pt = PeriodicTask.objects.filter(name='Election Close')
+        self.assertEqual(pt.count(), 1)
+        ct = CrontabSchedule.objects.last()
+        self.assertEqual(ct.minute, str(d_close.minute))
+
+    # @tag('temp')
+    def test_election_form_update_closed(self):
+        d = timezone.now() + timezone.timedelta(days=3)
+        d_close = d + timezone.timedelta(days=1)
+        election =  Election.objects.create(
+            election_date=d,
+            state='open',
+            election_close=d_close
+        )
+        d_close = d + timezone.timedelta(days=1, minutes=10)
+        self.canidate_frm_dict['form-0-election'] = election.id
+        self.canidate_frm_dict['election_date'] = election.election_date
+        self.canidate_frm_dict['state'] = 'open'
+        self.canidate_frm_dict['election_close'] = d_close
+        response = self.client.post(reverse('membership:election',
+                                            kwargs={'election_id': election.id}),
+                                            self.canidate_frm_dict,
+                                            secure=True)
+        # self.assertEqual(response.status_code, 200)
+        elections = Election.objects.all()
+        self.assertEqual(len(elections), 1)
+        self.assertEqual(elections[0].election_date, d)
+        pt = PeriodicTask.objects.filter(name='Election Close')
+        self.assertEqual(pt.count(), 1)
+        ct = CrontabSchedule.objects.last()
+        self.assertEqual(ct.minute, str(d_close.minute))
+
+    # @tag('temp')
     def test_election_form_post_error(self):
         d = timezone.now().date() + timezone.timedelta(days=3)
         response = self.client.post(reverse('membership:election'), {'election_date': d},
@@ -94,36 +156,18 @@ class TestsElection(TestCase):
         elections = Election.objects.all()
         self.assertEqual(len(elections), 0)
 
+    # @tag('temp')
     def test_get_election_list(self):
         # Get the page, if not super or board, page is forbidden
         response = self.client.get(reverse('membership:election_list'), secure=True)
         self.assertTemplateUsed(response, 'membership/election_list.html')
         self.assertEqual(response.status_code, 200)
 
-    def test_get_election_candidate_form(self):
-        d = timezone.now().date() + timezone.timedelta(days=3)
-        election = Election.objects.create(
-            election_date=d,
-            state='open'
-        )
-        response = self.client.get(reverse('membership:election_candidate', kwargs={'election_id': election.id}), secure=True)
-        self.assertTemplateUsed(response, 'student_app/form_as_p.html')
-        self.assertEqual(response.status_code, 200)
 
-    def test_post_election_candidate_form_good(self):
-        d = timezone.now().date() + timezone.timedelta(days=3)
-        election = Election.objects.create(
-            election_date=d,
-            state='open'
-        )
-        response = self.client.post(reverse('membership:election_candidate', kwargs={'election_id': election.id}),
-                                    {'election': election.id, 'position': 1, 'student': 9}, secure=True)
-        ec = ElectionCandidate.objects.all()
-        self.assertEqual(len(ec), 1)
-        self.assertEqual(str(ec[0].position), 'President')
-
+    # @tag('temp')
     def test_post_election_candidate_form_error(self):
         d = timezone.now().date() + timezone.timedelta(days=3)
+        d_close = d + timezone.timedelta(days=1)
         election = Election.objects.create(
             election_date=d,
             state='open'
@@ -132,8 +176,17 @@ class TestsElection(TestCase):
         student.dob = d.replace(year=d.year - 10) # 10 year-olds cannot be on board.
         student.save()
 
-        response = self.client.post(reverse('membership:election_candidate', kwargs={'election_id': election.id}),
-                                    {'election': election.id, 'position': 1, 'student': 7}, secure=True)
+        self.canidate_frm_dict['form-0-election'] = election.id
+        self.canidate_frm_dict['election_date'] = election.election_date
+        self.canidate_frm_dict['state'] = 'open'
+        # self.canidate_frm_dict['election_close'] = d
+        self.canidate_frm_dict['form-0-student'] = 7
+        response = self.client.post(reverse('membership:election',
+                                            kwargs={'election_id': election.id}),
+                                            self.canidate_frm_dict,
+                                            secure=True)
+        # response = self.client.post(reverse('membership:election_candidate', kwargs={'election_id': election.id}),
+        #                             {'election': election.id, 'position': 1, 'student': 7}, secure=True)
         ec = ElectionCandidate.objects.all()
         self.assertEqual(len(ec), 0)
         self.assertContains(response, 'Select a valid choice. That choice is not one of the available choices.')
