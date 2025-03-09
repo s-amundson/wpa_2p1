@@ -4,6 +4,19 @@
 
 
 {% block main %}
+    <form class="form m-2" method="get">
+        <div class="d-flex flex-row m-2 justify-content-around align-items-center flex-wrap">
+            <div>{{form.search_string.label}} {{form.search_string}} {{form.search_string.errors}}</div>
+            <div class="flex-col m-2">
+                <div>Search in:</div>
+                <div>{{form.reports.label}} {{form.reports}} {{form.reports.errors}}</div>
+                <div>{{form.business.label}} {{form.business}} {{form.business.errors}}</div>
+            </div>
+            <div>{{form.begin_date.label}} {{form.begin_date}} {{form.begin_date.errors}}</div>
+            <div>{{form.end_date.label}} {{form.end_date}} {{form.end_date.errors}}</div>
+            <button id="btn-start" class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
     <div class="row p-3">
         <h3>Minutes List</h3>
     </div>

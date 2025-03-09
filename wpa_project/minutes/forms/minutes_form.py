@@ -1,6 +1,7 @@
 import logging
 from src.model_form import MyModelForm
 from django.utils import timezone
+from django.forms import Form, CharField, DateField, BooleanField
 
 from ..models import Minutes
 from membership.models import Member
@@ -25,3 +26,19 @@ class MinutesForm(MyModelForm):
         self.fields['reimbursement_review'].widget.attrs = {'class': "m-2", }
         for f in self.Meta.fields:
             self.fields[f].widget.attrs['class'] += ' minutes-input'
+
+
+class MinutesSearchForm(Form):
+    search_string = CharField(required=False)
+    begin_date = DateField(required=False)
+    end_date = DateField(required=False)
+    reports = BooleanField(required=False)
+    business = BooleanField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        minutes = Minutes.objects.all()
+        if len(minutes):
+            minutes.order_by('meeting_date')
+            self.fields['begin_date'].initial = minutes.first().meeting_date
+            self.fields['end_date'].initial = minutes.last().meeting_date

@@ -1,0 +1,13 @@
+[
+  {"model": "minutes.minutes", "pk": 1, "fields": {"meeting_date": "2021-09-04T19:20:30+03:00", "attending": "", "minutes_text": "", "memberships": 0, "balance":0, "discussion": "", "end_time": "2021-09-04T19:21:30+03:00"}},
+  {"model": "minutes.minutes", "pk": 2, "fields": {"meeting_date": "2021-10-04T19:20:30+03:00", "attending": "", "minutes_text": "", "memberships": 0, "balance":0, "discussion": "search1", "end_time": "2021-10-04T19:21:30+03:00"}},
+  {"model": "minutes.minutes", "pk": 3, "fields": {"meeting_date": "2021-11-04T19:20:30+03:00", "attending": "", "minutes_text": "", "memberships": 0, "balance":0, "discussion": "", "end_time": "2021-11-04T19:21:30+03:00"}},
+  {"model": "minutes.minutes", "pk": 4, "fields": {"meeting_date": "2021-12-04T19:20:30+03:00", "attending": "", "minutes_text": "", "memberships": 0, "balance":0, "discussion": "", "end_time": "2021-12-04T19:21:30+03:00"}},
+  {"model": "minutes.minutes", "pk": 5, "fields": {"meeting_date": "2022-01-04T19:20:30+03:00", "attending": "", "minutes_text": "", "memberships": 0, "balance":0, "discussion": "", "end_time": "2022-01-04T19:21:30+03:00"}},
+
+  {"model": "minutes.business", "pk": 1, "fields": { "minutes": 1, "added_date": "2021-09-04T19:20:50+03:00", "business": "Some old test business"}},
+  {"model": "minutes.business", "pk": 2, "fields": { "minutes": 2, "added_date": "2021-10-04T19:20:50+03:00", "business": "new test business"}},
+  {"model": "minutes.businessupdate", "pk": 1, "fields": { "business": 1, "update_date": "2021-10-04T19:20:55+03:00", "update_text": "test update"}},
+
+  {"model": "minutes.report", "pk": 1, "fields": {"minutes": 2, "report": "Test Report", "owner": "president"}}
+]

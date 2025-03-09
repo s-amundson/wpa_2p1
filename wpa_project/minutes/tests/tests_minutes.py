@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestsMinutes(TestCase):
-    fixtures = ['f1', 'level', 'member1']
+    fixtures = ['f1', 'level', 'member1', 'minutes_fixture']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +42,7 @@ class TestsMinutes(TestCase):
             'form-MIN_NUM_FORMS': 0,
             'form-MAX_NUM_FORMS': 1000,
         }
+        self.test_dict = {'first_name': '', 'last_name': '', 'safety_class': False, 'staff': False}
 
     # @tag('temp')
     def test_minutes_list(self):
@@ -64,27 +65,10 @@ class TestsMinutes(TestCase):
 
     # @tag('temp')
     def test_get_minutes_old(self):
-        m = Minutes(
-            meeting_date='2021-09-04T19:20:30+03:00', attending='', minutes_text='', memberships=0,
-            balance=0, discussion='', end_time=None,
-        )
-        m.save()
-        logger.debug(m)
+        response = self.client.get(reverse('minutes:minutes', kwargs={'minutes': 2}), secure=True)
 
-        r = Report(report='Test Report', minutes=m, owner='president')
-        r.save()
-        b1 = Business(minutes=None, added_date='2021-08-04T13:20:30+03:00', business='Some old test business')
-        b1.save()
-        logger.debug(b1.added_date)
-        b2 = Business(minutes=m, added_date='2021-09-04T19:25:30+03:00', business='new test business')
-        b2.save()
-        bu = BusinessUpdate(business=b1, update_date='2021-09-04T19:30:30+03:00', update_text="test update")
-        bu.save()
-
-        response = self.client.get(reverse('minutes:minutes', kwargs={'minutes': m.id}), secure=True)
-
-        self.assertEqual(response.context['minutes'].id, m.id)
-        self.assertEqual(len(response.context['formset']), 2)
+        self.assertEqual(response.context['minutes'].id, 2)
+        self.assertEqual(len(response.context['formset']), 1)
         self.assertEqual(len(response.context['old_businesses']), 1)
         self.assertEqual(len(response.context['new_business']), 1)
 
@@ -99,32 +83,72 @@ class TestsMinutes(TestCase):
     def test_post_minutes_from_new(self):
         response = self.client.post(reverse('minutes:minutes'), self.post_dict, secure=True)
         m = Minutes.objects.all()
-        self.assertEqual(len(m), 1)
+        self.assertEqual(len(m), 6)
 
     # @tag('temp')
     def test_post_minutes_old(self):
-        m = Minutes(
-            meeting_date='2021-09-04 19:30', attending='', minutes_text='', memberships=0,
-            balance=0, discussion='', end_time=None,
-        )
+        m = Minutes.objects.get(pk=5)
+        m.end_time = None
         m.save()
-        logging.debug(m)
-
-        r = Report(report='Test Report', minutes=m, owner='president')
-        r.save()
-        b1 = Business(minutes=None, added_date='2021-08-04', business='Some old test business')
-        b1.save()
-        logging.debug(b1)
-        b2 = Business(minutes=m, added_date='2021-09-04', business='new test business')
-        b2.save()
-        bu = BusinessUpdate(business=b1, update_date='2021-09-04', update_text="test update")
-        bu.save()
 
         self.post_dict['balance'] = 216.2
         self.post_dict['memberships'] = 5
         # d = {'meeting_date': '2021-09-04', 'memberships': 5, 'balance': }
-        response = self.client.post(reverse('minutes:minutes', kwargs={'minutes': m.id}), self.post_dict, secure=True)
+        response = self.client.post(reverse('minutes:minutes', kwargs={'minutes': 5}), self.post_dict, secure=True)
         mr = Minutes.objects.last()
         self.assertEqual(mr.memberships, 5)
         self.assertNotEqual(mr.meeting_date, '2021-09-04 19:30')
         self.assertEqual(mr.balance, 216.2)
+
+    # @tag('temp')
+    def test_minutes_list_search(self):
+        response = self.client.get(reverse('minutes:minutes_list'), {'search_string': 'search1'}, secure=True)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.status_code, 200)
+
+    # @tag('temp')
+    def test_minutes_list_search_report_none(self):
+        response = self.client.get(reverse('minutes:minutes_list'), {'search_string': 'Test Report'}, secure=True)
+        self.assertEqual(len(response.context['object_list']), 0)
+        self.assertEqual(response.status_code, 200)
+
+    # @tag('temp')
+    def test_minutes_list_search_report_good(self):
+        response = self.client.get(reverse('minutes:minutes_list'),
+                                   {'search_string': 'Test Report', 'reports': True}, secure=True)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.status_code, 200)
+
+    # @tag('temp')
+    def test_minutes_list_search_business_none(self):
+        response = self.client.get(reverse('minutes:minutes_list'), {'search_string': 'new test'}, secure=True)
+        self.assertEqual(len(response.context['object_list']), 0)
+        self.assertEqual(response.status_code, 200)
+
+    # @tag('temp')
+    def test_minutes_list_search_business_good(self):
+        response = self.client.get(reverse('minutes:minutes_list'),
+                                   {'search_string': 'new test', 'business': True}, secure=True)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.status_code, 200)
+
+    # @tag('temp')
+    def test_minutes_list_search_date_after(self):
+        response = self.client.get(reverse('minutes:minutes_list'),
+                                   {'search_string': 'search1', 'begin_date': "2021-10-05"}, secure=True)
+        self.assertEqual(len(response.context['object_list']), 0)
+        self.assertEqual(response.status_code, 200)
+
+    # @tag('temp')
+    def test_minutes_list_search_date_before(self):
+        response = self.client.get(reverse('minutes:minutes_list'),
+                                   {'search_string': 'search1', 'end_date': "2021-10-03"}, secure=True)
+        self.assertEqual(len(response.context['object_list']), 0)
+        self.assertEqual(response.status_code, 200)
+
+    # @tag('temp')
+    def test_minutes_list_search_date_include(self):
+        response = self.client.get(reverse('minutes:minutes_list'),
+                                   {'search_string': 'search1', 'begin_date': "2021-10-04", 'end_date': "2021-11-03"}, secure=True)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.status_code, 200)
