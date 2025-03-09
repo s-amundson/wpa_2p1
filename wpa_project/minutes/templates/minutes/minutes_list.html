@@ -4,7 +4,15 @@
 
 
 {% block main %}
+    <div class="row p-3">
+        <h3>Minutes Search</h3>
+    </div>
     <form class="form m-2" method="get">
+        <div class="row">
+            Case insensitive search for comma separated keywords, quotations are ignored. Select reports to include officer/char reports,
+            select business to include new and old business. Update the dates for an inclusive date search. Search will
+            update the list below.
+        </div>
         <div class="d-flex flex-row m-2 justify-content-around align-items-center flex-wrap">
             <div>{{form.search_string.label}} {{form.search_string}} {{form.search_string.errors}}</div>
             <div class="flex-col m-2">

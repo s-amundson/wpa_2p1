@@ -29,16 +29,16 @@ class MinutesListView(LoginRequiredMixin, ListView):
             if self.form.cleaned_data['end_date']:
                 object_list = object_list.filter(meeting_date__date__lte=self.form.cleaned_data['end_date'])
             if self.form.cleaned_data['search_string']:
-                logger.debug(self.form.cleaned_data['search_string'])
-                matching_objects = object_list.filter(discussion__icontains=self.form.cleaned_data['search_string'])
-                if self.form.cleaned_data['reports']:
-                    matching_objects = matching_objects | object_list.filter(
-                        report__report__icontains=self.form.cleaned_data['search_string'])
-                if self.form.cleaned_data['business']:
-                    matching_objects = matching_objects | object_list.filter(
-                        business__business__icontains=self.form.cleaned_data['search_string'])
-                    matching_objects = matching_objects | object_list.filter(
-                        business__businessupdate__update_text__icontains=self.form.cleaned_data['search_string'])
+                logger.debug(self.form.cleaned_data['search_string'].replace("'", "").replace('"', ''))
+                matching_objects = self.model.objects.none()
+                for s in self.form.cleaned_data['search_string'].replace("'", "").replace('"', '').split(','):
+                    matching_objects = matching_objects | object_list.filter(discussion__icontains=s)
+                    if self.form.cleaned_data['reports']:
+                        matching_objects = matching_objects | object_list.filter(report__report__icontains=s)
+                    if self.form.cleaned_data['business']:
+                        matching_objects = matching_objects | object_list.filter(business__business__icontains=s)
+                        matching_objects = matching_objects | object_list.filter(
+                            business__businessupdate__update_text__icontains=s)
                 object_list = matching_objects
 
         return object_list.order_by('-meeting_date')
