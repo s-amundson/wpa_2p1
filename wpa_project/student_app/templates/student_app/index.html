@@ -38,6 +38,7 @@
             For directions and a map, please click 
             <a href="information/info/directions/">here.</a>
         </p>
+        {% if not user.is_authenticated %}
         <p>
             In order to sign up for a class you will need to create an account and provide some information. 
             Use the link below to create an account!
@@ -45,6 +46,7 @@
                 <button class="signup-button">Join Us!</button>
             </form>
         </p>
+        {% endif %}
     </div>
 </div>
 
