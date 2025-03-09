@@ -13,7 +13,7 @@ class PinAttendanceBaseForm(MyModelForm):
     class Meta(MyModelForm.Meta):
         model = PinAttendance
         fields = ['bow', 'category', 'distance', 'target', 'inner_scoring', 'score', 'stars', 'event', 'student',
-                  'attended', 'previous_stars', 'award_received']
+                  'attended', 'previous_stars', 'award_received', 'pay_method']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -27,6 +27,7 @@ class PinAttendanceBaseForm(MyModelForm):
         self.fields['award_received'].label = 'Student has received their award.'
         self.fields['award_received'].widget.attrs.update({'class': 'm-2', 'disabled': 'disabled'})
         self.instruction = ''
+        self.pay_amount = 0
 
     def calculate_pins(self):
         """Calculates the pins based off of target size, distance, bow class and score"""
@@ -54,16 +55,19 @@ class PinAttendanceStaffForm(PinAttendanceBaseForm):
         hidden_fields = []
         disabled_fields = ['stars', ]
         exclude = ['event', 'student', 'category']
-        optional_fields = ['bow', 'distance', 'target', 'inner_scoring', 'score', 'attended', 'previous_stars', 'award_received']
+        optional_fields = ['bow', 'distance', 'target', 'inner_scoring', 'score', 'attended', 'previous_stars',
+                           'award_received', 'pay_method']
         fields = disabled_fields + optional_fields + hidden_fields
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         logger.debug('here')
-        logger.debug(self.instance)
         self.instruction = 'Staff responsibility is to mark the student as attending. ' \
                            'All other fields are optional and the responsibility of the student/guardian.'
-        if self.instance and self.instance.pay_status == 'paid':
+        self.fields['pay_method'].required = False
+
+        if self.instance and self.instance.pay_status in ['paid', 'cash']:
             self.instruction = 'Please verify that the information filled out is correct'
             for f in self.Meta.optional_fields:
                 self.fields[f].required = False
@@ -71,7 +75,13 @@ class PinAttendanceStaffForm(PinAttendanceBaseForm):
                     self.fields[f].widget.attrs.update({'class': 'm-2', 'disabled': 'disabled'})
                 else:
                     self.fields[f].widget.attrs.update({'class': 'form-control m-2', 'readonly': 'readonly'})
-            self.fields['award_received'].widget.attrs.pop('disabled')
+            if self.instance.pay_status == 'cash' and self.instance.stars:
+                # self.fields['pay_method'].initial = 'cash'
+                self.pay_amount = self.instance.stars * self.instance.event.pin_cost
+
+            self.fields['payment_received'] = BooleanField(initial=self.instance.pay_status == 'paid', required=False)
+            if self.instance.pay_status == 'paid':
+                self.fields['award_received'].widget.attrs.pop('disabled')
             logger.debug(self.fields['award_received'].widget.attrs)
 
 
@@ -82,7 +92,7 @@ class PinAttendanceStudentForm(PinAttendanceBaseForm):
         disabled_fields = ['award_received']
         read_fields = ['stars', 'attended']
         exclude = ['event', 'student', 'category']
-        required_fields = ['bow', 'distance', 'target', 'score', 'previous_stars']
+        required_fields = ['bow', 'distance', 'target', 'score', 'previous_stars', 'pay_method']
         optional_fields = ['inner_scoring']
         fields = read_fields + optional_fields + disabled_fields + required_fields
 
@@ -90,6 +100,10 @@ class PinAttendanceStudentForm(PinAttendanceBaseForm):
         super().__init__(*args, **kwargs)
         self.fields['attended'].widget.attrs.update({'class': 'm-2', 'readonly': 'readonly'})
         self.instruction = 'Please fill out all fields below or verify that the information filled out is correct'
+        logger.warning(self.instance.pay_status)
+        if self.instance and self.instance.pay_status == 'cash':
+            self.fields['pay_method'].initial = 'cash'
+
 
 
 class PinScoresForm(MyModelForm):

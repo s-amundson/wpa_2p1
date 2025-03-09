@@ -60,16 +60,29 @@
                 {{ form.score }}
                 {{ form.score.errors }}
             </div>
+
+        </div>
+        <div class="d-flex flex-row">
             <div class="col m-2">
-                {% if user.is_staff %}
-                    <p> Stars Earned: {{form.instance.stars }} </p>
-                {% endif %}
+                {{ form.pay_method.label }}
+                {{ form.pay_method }}
+                {{ form.pay_method.errors }}
+            </div>
+            {% if user.is_staff %}
+                <div class="col m-2">
+                    <p> Stars Earned: {{form.instance.stars }} <br> Payment: {{ form.pay_amount }}</p>
+                    {{ form.payment_received.label }}
+                    {{ form.payment_received }}
+                    {{ form.payment_received.errors }}
+                </div>
+            {% endif %}
+            <div class="col m-2">
                 {{ form.award_received.label }}
                 {{ form.award_received }}
                 {{ form.award_received.errors }}
             </div>
-        </div>
 
+        </div>
         <button class="btn btn-primary m-2" type="submit" name="button">Submit</button>
     </form>
 

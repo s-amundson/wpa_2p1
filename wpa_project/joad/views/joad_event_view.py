@@ -37,8 +37,13 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
 
     def get_initial(self):
         initial = super().get_initial()
+        logger.debug('get initial')
         if self.student is not None:
-            hs = self.student.pinattendance_set.high_score()
+            logger.debug(self.attendance)
+            if self.attendance:
+                hs = self.student.pinattendance_set.high_score(self.attendance.id)
+            else:
+                hs = self.student.pinattendance_set.high_score()
             if hs is not None:
                 initial['bow'] = hs.bow
                 initial['category'] = hs.category
@@ -58,6 +63,10 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
         context['student'] = f'{self.student.first_name} {self.student.last_name}'
         return context
 
+    def form_invalid(self, form):
+        logger.warning(form.errors)
+        return super().form_invalid(form)
+
     def form_valid(self, form):
         logger.debug(form.cleaned_data)
         record = form.save()
@@ -71,18 +80,25 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
                 pin_cost = self.joad_event.pin_cost
                 if pin_cost is None:  # pragma: no cover
                     pin_cost = 0
-                uid = str(uuid.uuid4())
-                self.request.session['idempotency_key'] = uid
-                record.idempotency_key = uid
-                record.pay_status = 'started'
-                self.request.session['line_items'] = self.request.session.get('line_items', [])
-                self.request.session['line_items'].append({'name': f"Joad Pin(s) for {self.student.first_name}",
-                                          'quantity': pins_earned, 'amount_each': pin_cost})
-                self.request.session['payment_category'] = 'joad'
-                self.request.session['payment_description'] = f'Joad Pin(s)'
-                self.success_url = reverse('payment:make_payment')
+                if form.cleaned_data['pay_method'] == 'cash':
+                    record.pay_status = 'cash'
+                else:
+                    uid = str(uuid.uuid4())
+                    self.request.session['idempotency_key'] = uid
+                    record.idempotency_key = uid
+                    record.pay_status = 'started'
+                    self.request.session['line_items'] = self.request.session.get('line_items', [])
+                    self.request.session['line_items'].append({'name': f"Joad Pin(s) for {self.student.first_name}",
+                                              'quantity': pins_earned, 'amount_each': pin_cost})
+                    self.request.session['payment_category'] = 'joad'
+                    self.request.session['payment_description'] = f'Joad Pin(s)'
+                    self.success_url = reverse('payment:make_payment')
                 self.success_message = f'Congratulations on earning {pins_earned} pins'
-
+        elif self.request.user.is_staff:
+            if form.cleaned_data['pay_method'] == 'cash':
+                if form.cleaned_data.get('payment_received', False):
+                    logger.debug('cash paid')
+                    record.pay_status = 'paid'
         record.save()
         return super().form_valid(form)
 
