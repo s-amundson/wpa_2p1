@@ -15,8 +15,6 @@ Total   {{ total }}
 
 COVID-19 Policy
 
-{% include "program_app/covid_policy.txt" %}
-
 
 Cancellation Policy
 

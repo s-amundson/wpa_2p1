@@ -8,9 +8,6 @@
         If {% if registrations.count == 1 %}a spot opens{% else %}{{ registrations.count }} spots open{% endif %} up
         you will get an email notification of the update in status and any charges that incur.
     </p>
-    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
-        {% include "program_app/covid_policy.txt" %}
-    </p>
     {% for registration in registrations %}
         <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
             {{ registration.student.first_name }} {{ registration.student.last_name }}

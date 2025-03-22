@@ -2,8 +2,6 @@ Hi,
 
 Either you or a member of your family is signed up for a class on {{ beginner_class.event.event_date }} We look forward to seeing you there. Please plan to be at the range {{ minutes }} minutes prior to the class to allow us to sign you in. {% if beginner_class.class_type == 'beginner' %} Students that arrive past {{ beginner_class.event.event_date|time }} will not be allowed to participate.{% endif %}
 
-{% include "program_app/covid_policy.txt" %}
-
 If for any reason you can't make it, please cancel your registration by going http://registration/woodleyparkarchers.org/
 https://woodleyparkarchers.org/">WoodleyParkArchers.org
 https://www.facebook.com/pages/Woodley-Park-Archers/131056656971079
