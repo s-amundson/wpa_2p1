@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block script %}
+    <script src="{% static 'js/info_preview.js' %}"></script>
+{% endblock %}
+{% block title %} {{title}} {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+    {% if current %}
+        <h1 class="text-center"> {{current.title.title}} </h1>
+        <div>
+            {% if current.is_html %}
+                {{ current.policy|safe }}
+            {% else %}
+                {{ current.policy|linebreaks }}
+            {% endif %}
+        </div>
+    {% endif %}
+    {% if user.is_board %}
+        <hr>
+        <form method="post">{% csrf_token %}
+            <p> {{ form.title_text.label }} {{ form.title_text }} {{ form.title_text.errors }}</p>
+            <p> {{ form.status.label }} {{ form.status }} {{ form.status.errors }}</p>
+            <p> {{ form.policy.label }} {{ form.policy }} {{ form.policy.errors }}</p>
+            <p> {{ form.is_html.label }} {{ form.is_html }} {{ form.is_html.errors }}</p>
+            <button class="btn btn-primary m-2" type="button" id="btn-info-preview">Preview</button>
+            <button class="btn btn-primary m-2" type="submit" name="button">Submit</button>
+        </form>
+        <div class="row border">
+            <div class="container" id="info-preview-container"></div>
+        </div>
+        {% if history %}
+            <hr>
+            <h3 class="text-center"> History </h3>
+            {% for policy in history %}
+                <div class="row border">
+                    <div class="row">
+                        {% if policy.is_html %}
+                            {{ policy.policy|safe }}
+                        {% else %}
+                            {{ policy.policy|linebreaks }}
+                        {% endif %}
+                    </div>
+                    <div class="d-flex flex-row justify-content-around">
+                        <div>
+                            Status: {{ policy.get_status_display}}
+                            {% if current and policy.id == current.id %} Current {% endif %}
+                        </div>
+                        <div>Created Time: {{ policy.created_at }}</div>
+                        <div>
+                            <a class="btn btn-primary" href="{% url 'information:policy' policy.title.id policy.id %}" role="button">
+                                edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+{% endblock %}

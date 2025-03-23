@@ -377,6 +377,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'student_app.context_processors.private_links',
+                'info.context_processors.policy_list',
                 'csp.context_processors.nonce'
             ],
         },

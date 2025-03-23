@@ -69,13 +69,17 @@
                     Policies
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{% url 'information:info' 'rules' %}">Rules</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'terms' %}">Terms</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'privacy' %}">Privacy</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'covid' %}">Covid 19</a>
+                    {% for policy in policies %}
+                        <a class="dropdown-item" href="{% url 'information:policy' policy.id %}">{{ policy.title }}</a>
+                    {% endfor %}
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{% url 'information:info' 'constitution' %}">Constitution</a>
                     <a class="dropdown-item" href="{% url 'information:info' 'by-laws' %}">By-Laws</a>
+                    {% if user.is_board %}
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'information:policy' %}">New Policy</a>
+                    {% endif %}
+
                 </div>
             </li>
 

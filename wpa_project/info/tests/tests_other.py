@@ -19,7 +19,7 @@ class TestsOther(TestCase):
         # self.client.force_login(self.test_user)
 
     def test_info(self):
-        items = ['about', 'by-laws', 'class_description', 'constitution', 'covid', 'directions', 'privacy', 'terms']
+        items = ['about', 'by-laws', 'class_description', 'constitution', 'directions']
         for item in items:
             self.client.get(reverse('information:info', kwargs={'info': item}), secure=True)
             self.assertTemplateUsed(f'info/{item}.html')
