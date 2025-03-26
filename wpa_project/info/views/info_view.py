@@ -1,20 +1,20 @@
-from django.contrib.sites.models import Site
-from django.shortcuts import render
-from django.views.generic.base import View
-from django.http import Http404
+from django.views.generic import ListView
+from ..models import Article
+
+import logging
+logger = logging.getLogger(__name__)
 
 
-class InfoView(View):
-    def get(self, request, info):
-        current_site = Site.objects.get_current()
-        if info == 'about':
-            return render(request, 'info/about.html')
-        if info == 'by-laws':
-            return render(request, 'info/by-laws.html')
-        if info == 'class_description':
-            return render(request, 'info/class_descriptions.html')
-        if info == 'constitution':
-            return render(request, 'info/constitution.html')
-        if info == 'directions':
-            return render(request, 'info/directions.html')
-        raise Http404("Policy not found")
+class InfoView(ListView):
+    model = Article
+    template_name = 'info/info.html'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['title'] = self.kwargs.get('info', '').replace('_', ' ')
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(page__page=self.kwargs.get('info', 'about'), status=1)
+        return queryset.order_by('position')

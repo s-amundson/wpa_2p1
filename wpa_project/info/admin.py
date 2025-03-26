@@ -1,5 +1,15 @@
 from django.contrib import admin
-from .models import Category, Faq
+from .models import Article, ArticlePage, Category, Faq
+
+
+@admin.register(Article)
+class ArticlePageAdmin(admin.ModelAdmin):
+    # list_display = ('id', 'page', 'position', 'status')
+    pass
+
+@admin.register(ArticlePage)
+class ArticlePageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'page')
 
 
 @admin.register(Category)

@@ -34,7 +34,7 @@ class TestsAnnouncement(TestCase):
             'policy': "tests shall be done"})
 
         pt = PolicyText.objects.all()
-        self.assertEqual(len(pt), 1)
+        self.assertEqual(len(pt), 2)
         self.assertEqual(pt[0].policy, 'tests shall be done')
         self.assertEqual(pt[0].title.title, 'test policy')
 
@@ -55,8 +55,8 @@ class TestsAnnouncement(TestCase):
 
         polices = Policy.objects.all()
         pt = PolicyText.objects.all()
-        self.assertEqual(len(polices), 1)
-        self.assertEqual(len(pt), 2)
+        self.assertEqual(len(polices), 2)
+        self.assertEqual(len(pt), 3)
         self.assertEqual(pt[0].policy, 'tests shall be done')
         self.assertEqual(pt[0].title.title, 'test policy')
         self.assertEqual(pt[0].status, 1)
