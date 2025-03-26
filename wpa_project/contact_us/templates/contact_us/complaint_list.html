@@ -11,6 +11,7 @@
                 <th> ID </th>
                 <th> Category </th>
                 <th> Submission Time </th>
+                <th> Number of Comments</th>
                 <th> Resolved </th>
             </tr>
         </thead>
@@ -20,6 +21,7 @@
                     <td><a href="{% url 'contact_us:complaint' complaint.id %}"> {{ complaint.id }} </a></td>
                     <td>{{ complaint.category }}</td>
                     <td>{{ complaint.created_time }}</td>
+                    <td>{{ complaint.complaintcomment_set.count }}</td>
                     <td>{{ complaint.resolved_date }}</td>
                 </tr>
             {% empty %}
