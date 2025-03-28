@@ -22,7 +22,7 @@
                     {% if user.is_board %}
                         <a class="dropdown-item" href="{% url 'information:faq' %}">Faq</a>
                         <a class="dropdown-item" href="{% url 'information:category_list' %}">Faq Categories</a>
-                        <div class="dropdown-header"> Contact Us</div>
+                        <div class="dropdown-header text-dark"> Contact Us</div>
                         <div class="dropdown-submenu ps-2">
                             <a class="dropdown-item" href="{% url 'contact_us:contact' %}">Contact Us</a>
                             <a class="dropdown-item" href="{% url 'contact_us:category_list' %}">Categories</a>
@@ -42,7 +42,7 @@
                 </div>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'information:info' 'rules' %}">Rules</a>
+                <a class="nav-link" href="{% url 'information:policy' 1 %}">Rules</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'payment:make_payment' %}">Donate</a>
@@ -69,13 +69,17 @@
                     Policies
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{% url 'information:info' 'rules' %}">Rules</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'terms' %}">Terms</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'privacy' %}">Privacy</a>
-                    <a class="dropdown-item" href="{% url 'information:info' 'covid' %}">Covid 19</a>
+                    {% for policy in policies %}
+                        <a class="dropdown-item" href="{% url 'information:policy' policy.id %}">{{ policy.title }}</a>
+                    {% endfor %}
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{% url 'information:info' 'constitution' %}">Constitution</a>
                     <a class="dropdown-item" href="{% url 'information:info' 'by-laws' %}">By-Laws</a>
+                    {% if user.is_board %}
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'information:policy' %}">New Policy</a>
+                    {% endif %}
+
                 </div>
             </li>
 

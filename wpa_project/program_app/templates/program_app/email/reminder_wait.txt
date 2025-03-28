@@ -4,7 +4,6 @@ Either you or a member of your family is on the wait-list for a class on {{ begi
 
 Please plan to be at the range {{ minutes }} minutes prior to the class to allow us to sign you in. {% if beginner_class.class_type == 'beginner' %} Students that arrive past {{ beginner_class.event.event_date|time }} will not be allowed to participate.{% endif %}
 
-{% include "program_app/covid_policy.txt" %}
 
 If for any reason you can't make it, please cancel your registration by going http://registration/woodleyparkarchers.org/
 https://woodleyparkarchers.org/">WoodleyParkArchers.org
