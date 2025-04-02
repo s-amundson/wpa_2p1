@@ -14,7 +14,7 @@
         {% for event in event_list %}
             <tr>
                 <td>
-                    {% if user.is_board %}
+                    {% if user.is_staff %}
                         <a class="nav-link" href="{% url 'joad:event' event.id %}">{{ event.event_date }}</a>
                     {% else %}
                         {{ event.event_date }}

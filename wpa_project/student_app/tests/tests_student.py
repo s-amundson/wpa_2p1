@@ -105,7 +105,7 @@ class TestsStudent(TestCase):
 
     # @tag("temp")
     def test_post_student_id_staff(self):
-        self.test_user = User.objects.get(pk=1)
+        self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         d = {"first_name": "Kiley", "last_name": "Conlan", "dob": "1995-12-03", "is_staff": "on"}
         response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 6}), d, secure=True)
@@ -113,6 +113,7 @@ class TestsStudent(TestCase):
         self.assertEqual(student.first_name, d['first_name'])
         self.assertEqual(student.last_name, d['last_name'])
         self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(student.student_family.id, 4)
 
 
     # @tag("temp")
