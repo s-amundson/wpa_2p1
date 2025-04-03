@@ -31,17 +31,18 @@ class AddStudentView(UserPassesTestMixin, FormView):
 
     def form_valid(self, form):
         # logger.warning(form.cleaned_data)
-        if self.request.user.is_board:
+        if self.request.user.is_staff:
             f = form.save()
-            uf = UserForm(self.request.POST, instance=self.student.user)
-            if uf.is_valid():
-                uf.save()
+            if self.request.user.is_board:
+                uf = UserForm(self.request.POST, instance=self.student.user)
+                if uf.is_valid():
+                    uf.save()
         else:
             f = form.save(commit=False)
 
             # student can't update their own safety class. Fixes safety class date set to None student update.
             f.safety_class = form.initial.get('safety_class', None)
-
+            # logger.warning(self.student)
             if self.student:
                 s = self.request.user.student_set.last()
                 if s is None:  # pragma: no cover
@@ -49,10 +50,11 @@ class AddStudentView(UserPassesTestMixin, FormView):
                     form.add_error(None, 'Address required')
                     return self.form_invalid(form)
                 else:
-                    # logging.debug(s.student_family.id)
+                    # logger.debug(s.student_family.id)
                     f.student_family = s.student_family
                     self.request.session['student_family'] = s.student_family.id
             else:
+                # logger.warning('not student')
                 if self.request.user.student_set.first() is None:
                     f.user = self.request.user
                 s = self.request.user.student_set.last()
@@ -60,9 +62,9 @@ class AddStudentView(UserPassesTestMixin, FormView):
                     f.student_family = s.student_family
             f.save()
 
-            if f.user is None:
-                if f.email is not None and f.email != self.request.user.email:
-                    EmailMessage().invite_user_email(self.request.user.student_set.first(), f)
+        if f.user is None:
+            if f.email is not None and f.email != self.request.user.email:
+                EmailMessage().invite_user_email(self.request.user.student_set.first(), f)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:
             return JsonResponse({'id': f.id, 'first_name': form.cleaned_data['first_name'],
                                  'last_name': form.cleaned_data['last_name']})

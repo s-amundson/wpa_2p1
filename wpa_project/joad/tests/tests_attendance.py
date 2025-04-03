@@ -1,7 +1,7 @@
 import logging
 import json
 from django.apps import apps
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 
 from student_app.models import Student
@@ -26,23 +26,26 @@ class TestsJoadAttendance(TestCase):
         response = self.client.get(reverse('joad:attendance'), secure=True)
         self.assertEqual(response.status_code, 403)
 
+    # @tag('temp')
     def test_staff_user_get_no_class(self):
-        self.test_user = User.objects.get(pk=1)
+        self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
 
         response = self.client.get(reverse('joad:attendance'), secure=True)
         self.assertEqual(response.status_code, 404)
 
+    # @tag('temp')
     def test_staff_user_get(self):
-        self.test_user = User.objects.get(pk=1)
+        self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
 
         response = self.client.get(reverse('joad:attendance', kwargs={'class_id': 1}), secure=True)
         self.assertEqual(len(response.context['object_list']), 4)
         self.assertTemplateUsed(response, 'joad/attendance.html')
 
+    # @tag('temp')
     def test_staff_user_get_attended(self):
-        self.test_user = User.objects.get(pk=1)
+        self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
 
         jc = JoadClass.objects.get(pk=1)
@@ -62,7 +65,7 @@ class TestsJoadAttendance(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_staff_user_post_attend(self):
-        self.test_user = User.objects.get(pk=1)
+        self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:attend', kwargs={'class_id': 1}), {'check_8': True}, secure=True)
@@ -72,7 +75,7 @@ class TestsJoadAttendance(TestCase):
         self.assertTrue(a[0].attended)
 
     def test_staff_user_post_unattend(self):
-        self.test_user = User.objects.get(pk=1)
+        self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
         jc = JoadClass.objects.get(pk=1)
         student = Student.objects.get(pk=8)
@@ -86,7 +89,7 @@ class TestsJoadAttendance(TestCase):
         self.assertFalse(a[0].attended)
 
     def test_staff_user_post_attend_error(self):
-        self.test_user = User.objects.get(pk=1)
+        self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)
 
         response = self.client.post(reverse('joad:attend', kwargs={'class_id': 1}), {}, secure=True)
