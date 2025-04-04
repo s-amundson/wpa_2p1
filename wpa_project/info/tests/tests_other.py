@@ -18,14 +18,14 @@ class TestsOther(TestCase):
         # self.test_user = self.User.objects.get(pk=2)
         # self.client.force_login(self.test_user)
 
-    @tag('temp')
+    # @tag('temp')
     def test_info(self):
         items = ['about', 'by-laws', 'class_description', 'constitution', 'directions']
         for item in items:
             self.client.get(reverse('information:info', kwargs={'info': item}), secure=True)
             self.assertTemplateUsed(f'info/info.html')
 
-    @tag('temp')
+    # @tag('temp')
     def test_info_no_exist(self):
         response = self.client.get(reverse('information:info', kwargs={'info': 'no exist'}), secure=True)
         self.assertEqual(response.status_code, 200)

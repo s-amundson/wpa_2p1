@@ -1,5 +1,5 @@
-{% if opened %} Elections are now open and will close at {{ election.election_close }}
-{% else %} We will be having elections on {{ election.election_date|date }} at {{ election.election_date|time }}. {% endif %}
+{% if election.state  == 'scheduled' %} We will be having elections on {{ election.election_date|date }} at {{ election.election_date|time }}.
+{% else %} Elections are now open and will close at {{ election.election_close }}. {% endif %}
 The slate is as follows:
 
   President: {{ pres|join:", " }}

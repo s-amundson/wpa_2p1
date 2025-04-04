@@ -72,6 +72,28 @@ class TestsElection(TestCase):
         ev.member_at_large.set(large_canidates)
         return ev
 
+    def vote_tie(self, election):
+        #         pos =      [1,  1,  2,  2,  3,  3,  4,  4,  4,    5,  5,  5,  5,  5]
+        #         students = [9, 10, 11, 12, 14, 15, 16, 17, 18,   19, 20, 22, 23, 24]
+        #                     0,  1,  2,  3,  4,  5,  6,  7,  8,    9, 10, 11, 12, 13
+        self.vote(election, 4, 0, 2, 5, 8, [9, 11, 13])
+        self.vote(election, 5, 1, 2, 4, 8, [9, 11, 13])
+        self.vote(election, 6, 1, 3, 5, 6, [11, 12, 13])
+        self.vote(election, 7, 0, 3, 4, 7, [10, 11])
+        self.vote(election, 8, 1, 3, 4, 6, [10, 11, 13])
+        self.vote(election, 9, 0, 3, 5, 7, [9, 12, 13])
+
+    def vote_winner(self, election):
+        #         pos =      [1,  1,  2,  2,  3,  3,  4,  4,  4,    5,  5,  5,  5,  5]
+        #         students = [9, 10, 11, 12, 14, 15, 16, 17, 18,   19, 20, 22, 23, 24]
+        #                     0,  1,  2,  3,  4,  5,  6,  7,  8,    9, 10, 11, 12, 13
+        self.vote(election, 4, 0, 2, 5, 8, [9, 11, 13])
+        self.vote(election, 5, 1, 2, 5, 8, [9, 11, 13])
+        self.vote(election, 6, 1, 3, 5, 6, [11, 12, 13])
+        self.vote(election, 7, 0, 3, 5, 7, [10, 13])
+        self.vote(election, 8, 1, 3, 4, 8, [10, 11, 13])
+        self.vote(election, 9, 1, 3, 5, 7, [9, 12, 13])
+
     def test_election_form_get_page(self):
         # Get the page, if not super or board, page is forbidden
         response = self.client.get(reverse('membership:election'), secure=True)
@@ -418,15 +440,7 @@ class TestsElection(TestCase):
             join_date=d.replace(year=d.year - 1),
             begin_date=d.replace(year=d.year - 3)
         )
-        #         pos =      [1,  1,  2,  2,  3,  3,  4,  4,  4,    5,  5,  5,  5,  5]
-        #         students = [9, 10, 11, 12, 14, 15, 16, 17, 18,   19, 20, 22, 23, 24]
-        #                     0,  1,  2,  3,  4,  5,  6,  7,  8,    9, 10, 11, 12, 13
-        self.vote(election, 4, 0, 2, 5, 8, [9, 11, 13])
-        self.vote(election, 5, 1, 2, 5, 8, [9, 11, 13])
-        self.vote(election, 6, 1, 3, 5, 6, [11, 12, 13])
-        self.vote(election, 7, 0, 3, 5, 7, [10, 13])
-        self.vote(election, 8, 1, 3, 4, 8, [10, 11, 13])
-        self.vote(election, 9, 1, 3, 5, 7, [9, 12, 13])
+        self.vote_winner(election)
 
         response = self.client.get(reverse('membership:election_result', kwargs={'election_id': election.id}),
                                    secure=True)
@@ -458,6 +472,7 @@ class TestsElection(TestCase):
         self.assertEqual(response.context['member_at_large'][2]['votes'], 3)
         self.assertTrue(response.context['member_at_large'][4]['tie'])
 
+    # @tag("temp")
     def test_election_result_tie(self):
         election = self.make_election()
         election.state = 'closed'
@@ -471,15 +486,7 @@ class TestsElection(TestCase):
             join_date=d.replace(year=d.year - 1),
             begin_date=d.replace(year=d.year - 3)
         )
-        #         pos =      [1,  1,  2,  2,  3,  3,  4,  4,  4,    5,  5,  5,  5,  5]
-        #         students = [9, 10, 11, 12, 14, 15, 16, 17, 18,   19, 20, 22, 23, 24]
-        #                     0,  1,  2,  3,  4,  5,  6,  7,  8,    9, 10, 11, 12, 13
-        self.vote(election, 4, 0, 2, 5, 8, [9, 11, 13])
-        self.vote(election, 5, 1, 2, 4, 8, [9, 11, 13])
-        self.vote(election, 6, 1, 3, 5, 6, [11, 12, 13])
-        self.vote(election, 7, 0, 3, 4, 7, [10, 11])
-        self.vote(election, 8, 1, 3, 4, 6, [10, 11, 13])
-        self.vote(election, 9, 0, 3, 5, 7, [9, 12, 13])
+        self.vote_tie(election)
 
         response = self.client.get(reverse('membership:election_result', kwargs={'election_id': election.id}),
                                    secure=True)
@@ -509,7 +516,9 @@ class TestsElection(TestCase):
     def test_election_notification(self):
         election = self.make_election()
         em = EmailMessage()
-        em.election_notification(election, False)
+        election.state = 'scheduled'
+        election.save()
+        em.election_notification(election)
         bulk_emails = BulkEmail.objects.all()
         self.assertEqual(bulk_emails.count(), 1)
         self.assertTrue(bulk_emails[0].body.find('We will be having elections on') > 0)
@@ -519,17 +528,14 @@ class TestsElection(TestCase):
         self.assertTrue(bulk_emails[0].body.find('Treasurer: Kevin Lezama, Scott Glidden, Crystal Vanover') > 0)
         self.assertTrue(bulk_emails[0].body.find(
             'Members at Large (select 3): Mark Davis, Dean Flynn, Amanda Jackson, Luther Cole, Jeanette Sheppard') > 0)
-        self.assertFalse(
+        self.assertTrue(
             bulk_emails[0].body.find("Join Zoom Meeting ID: 123 1234 1234\n\nhttps://us02web.zoom.us/j/1231231234") > 0)
-        logger.warning(bulk_emails[0].body)
 
     # @tag('temp')
     def test_election_notification_opened(self):
         election = self.make_election()
-        election.state = 'scheduled'
-        election.save()
         em = EmailMessage()
-        em.election_notification(election, True)
+        em.election_notification(election)
         bulk_emails = BulkEmail.objects.all()
         self.assertEqual(bulk_emails.count(), 1)
 
@@ -540,9 +546,9 @@ class TestsElection(TestCase):
         self.assertTrue(bulk_emails[0].body.find('Treasurer: Kevin Lezama, Scott Glidden, Crystal Vanover') > 0)
         self.assertTrue(bulk_emails[0].body.find(
             'Members at Large (select 3): Mark Davis, Dean Flynn, Amanda Jackson, Luther Cole, Jeanette Sheppard') > 0)
-        self.assertTrue(bulk_emails[0].body.find(
+        self.assertFalse(bulk_emails[0].body.find(
             "Join Zoom Meeting ID: 123 1234 1234\n\nhttps://us02web.zoom.us/j/1231231234") > 0)
-        logger.warning(bulk_emails[0].body)
+
 
     # @tag('temp')
     def test_election_scheduled_notification(self):
@@ -557,7 +563,25 @@ class TestsElection(TestCase):
     # @tag('temp')
     def test_task_election_close(self):
         election = self.make_election()
+        self.vote_winner(election)
         membership_election_close(election.id)
 
         e = Election.objects.get(pk=election.id)
         self.assertEqual(e.state, 'closed')
+        bulk_emails = BulkEmail.objects.all()
+        self.assertEqual(bulk_emails.count(), 1)
+        logger.warning(bulk_emails[0].body)
+        self.assertTrue(bulk_emails[0].body.find('President: Cathy Rodriguez') > 0)
+
+    # @tag('temp')
+    def test_task_election_close_tie(self):
+        election = self.make_election()
+        self.vote_tie(election)
+        membership_election_close(election.id)
+
+        e = Election.objects.get(pk=election.id)
+        self.assertEqual(e.state, 'closed')
+        bulk_emails = BulkEmail.objects.all()
+        self.assertEqual(bulk_emails.count(), 1)
+        logger.warning(bulk_emails[0].body)
+        self.assertTrue(bulk_emails[0].body.find('There is a tie for President: Cathy Rodriguez and Amanda Cushman') > 0)

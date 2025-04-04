@@ -1,0 +1,31 @@
+{% extends "email/email_layout.html" %}
+{% block main %}
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        Election results for {{election.election_date }}
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        The results are as follows:<br>
+        {% if president.1.tie %}There is a tie for {% endif%}President: {{ president.0.candidate }}
+        {% if president.1.tie %} and {{ president.1.candidate }}{% endif%}<br>
+
+        {% if vice_president.1.tie %}There is a tie for {% endif%}Vice President: {{ vice_president.0.candidate }}
+        {% if vice_president.1.tie %} and {{ vice_president.1.candidate }}{% endif%}<br>
+
+        {% if secretary.1.tie %}There is a tie for {% endif%}Secretary: {{ secretary.0.candidate }}
+        {% if secretary.1.tie %} and {{ secretary.1.candidate }}{% endif %}<br>
+
+        {% if treasurer.1.tie %}There is a tie for {% endif%}Treasurer: {{ treasurer.0.candidate }}
+        {% if treasurer.1.tie %} and {{ treasurer.1.candidate }}{% endif %}<br>
+
+        Members at Large: {{ member_at_large.0.candidate }}, {{ member_at_large.1.candidate }},
+        {% if member_at_large.3.tie %} There is a tie between {{ member_at_large.2.candidate }} and
+        {{ member_at_large.3.candidate }}.{% else %} and {{ member_at_large.2.candidate }}.{% endif%}<br>
+    </p>
+
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
+    </p>
+    <p style=" line-height: 100%; align: left; font-family: arial, sans-serif; color: black; margin: 10px;">
+        <a href="http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>
+    </p>
+{% endblock %}
