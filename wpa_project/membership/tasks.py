@@ -5,8 +5,10 @@ from datetime import timedelta
 from celery import shared_task
 from django_celery_beat.models import PeriodicTask
 
-from membership.models import Election, Member
+from membership.models import Election, Member, Membership
 from membership.src import EmailMessage
+from payment.models import PaymentLog
+from .signals import member_update
 logger = logging.getLogger('membership')
 from celery.utils.log import get_task_logger
 celery_logger = get_task_logger(__name__)
@@ -73,3 +75,12 @@ def membership_expire_update():
     except Exception as e:  # pragma: no cover
         logger.error(traceback.format_exc())
         # Logs the error appropriately.
+
+
+def membership_user_update():
+    # occasionally the signal is missed so check the membership payments and
+    memberships = Membership.objects.filter(pay_status='start')
+    logger.warning(memberships)
+    for m in memberships:
+        pl = PaymentLog.objects.get(idempotency_key=m.idempotency_key)
+        member_update(None, pl, False)
