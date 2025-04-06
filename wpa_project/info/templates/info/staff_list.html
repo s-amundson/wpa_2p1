@@ -44,12 +44,10 @@
                         <h5>Profile:</h5>
                     </div>
                     <div class="d-flex flex-row">
-                        <div class="offset-1">
-                            {% if staff.staffprofile_set.last.image %}
-                                <img class="img-max-300" src="{{ staff.staffprofile_set.last.image.url }}">
-                            {% endif %}
-                        </div>
                         <div class="container">
+                            {% if staff.staffprofile_set.last.image %}
+                                <img class="rounded float-start img-max-300 m-2" src="{{ staff.staffprofile_set.last.image.url }}">
+                            {% endif %}
                             {{ staff.staffprofile_set.last.bio|safe }}
                         </div>
                     </div>
