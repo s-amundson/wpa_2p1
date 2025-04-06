@@ -30,13 +30,17 @@ class AddStudentView(UserPassesTestMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        # logger.warning(form.cleaned_data)
         if self.request.user.is_staff:
             f = form.save()
             if self.request.user.is_board:
                 uf = UserForm(self.request.POST, instance=self.student.user)
+                is_active = uf.instance.is_active
                 if uf.is_valid():
-                    uf.save()
+                    user = uf.save()
+                    if not self.request.user.is_superuser:
+                        user.is_active = is_active
+                        user.save()
+
         else:
             f = form.save(commit=False)
 

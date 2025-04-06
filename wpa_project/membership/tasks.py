@@ -24,6 +24,8 @@ def membership_election_close(election_id):
     election = Election.objects.get(pk=election_id)
     election.state = 'closed'
     election.save()
+    em = EmailMessage()
+    em.election_result(election)
 
 
 def membership_election_calendar_notify(last_run):
@@ -36,7 +38,7 @@ def membership_election_calendar_notify(last_run):
             elections = elections.filter(election_date__gte=last_run + timedelta(days=nd))
         logger.warning(elections)
         for election in elections:
-            em.election_notification(election, False)
+            em.election_notification(election)
 
 
 @shared_task

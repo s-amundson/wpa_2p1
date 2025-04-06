@@ -194,6 +194,8 @@ class TestsStudent(TestCase):
 
     # @tag('temp')
     def test_modify_existing_user(self):
+        self.test_user.is_superuser = False
+        self.test_user.save()
         d = {"first_name": "Charles", "last_name": "Wells", "dob": "1995-12-03", "is_instructor": True}
         response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 4}), d, secure=True)
         student = Student.objects.get(pk=4)
@@ -201,6 +203,7 @@ class TestsStudent(TestCase):
         self.assertEqual(student.last_name, d['last_name'])
         self.assertTrue(student.user.is_staff)
         self.assertTrue(student.user.is_instructor)
+        self.assertTrue(student.user.is_active)
 
     # @tag("temp")
     def test_get_student_table(self):

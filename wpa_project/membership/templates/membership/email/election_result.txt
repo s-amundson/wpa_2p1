@@ -1,0 +1,11 @@
+Election results for {{election.election_date }}
+
+The results are as follows:
+  {% if president.1.tie %}There is a tie for {% endif%}President: {{ president.0.candidate }}{% if president.1.tie %} and {{ president.1.candidate }}{% endif%}
+  {% if vice_president.1.tie %}There is a tie for {% endif%}Vice President: {{ vice_president.0.candidate }}{% if vice_president.1.tie %} and {{ vice_president.1.candidate }}{% endif%}
+  {% if secretary.1.tie %}There is a tie for {% endif%}Secretary: {{ secretary.0.candidate }}{% if secretary.1.tie %} and {{ secretary.1.candidate }}{% endif %}
+  {% if treasurer.1.tie %}There is a tie for {% endif%}Treasurer: {{ treasurer.0.candidate }}{% if treasurer.1.tie %} and {{ treasurer.1.candidate }}{% endif %}
+  Members at Large: {{ member_at_large.0.candidate }}, {{ member_at_large.1.candidate }}, {% if member_at_large.3.tie %} There is a tie between {{ member_at_large.2.candidate }} and {{ member_at_large.3.candidate }}.{% else %}and {{ member_at_large.2.candidate }}.{% endif%}
+
+http://woodleyparkarchers.org/
+http://www.facebook.com/pages/Woodley-Park-Archers/131056656971079

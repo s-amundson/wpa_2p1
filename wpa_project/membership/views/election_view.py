@@ -26,18 +26,31 @@ class ElectionListView(StudentFamilyMixin, ListView):
 class ElectionResultView(MemberMixin, ListView):
     template_name = 'membership/election_result.html'
     model = ElectionVote
+    object_list = None
+    election = None
 
     def dispatch(self, request, *args, **kwargs):
         dispatch = super().dispatch(request, *args, **kwargs)
-        election = get_object_or_404(Election, pk=kwargs.get('election_id'))
-        if election.state in ['scheduled', 'open']:
+        self.election = get_object_or_404(Election, pk=kwargs.get('election_id'))
+        if self.election.state in ['scheduled', 'open']:
             logger.warning('This election is not closed')
             return HttpResponseRedirect(reverse_lazy('membership:election_list'))
         return dispatch
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs) | self.get_result(self.election)
+        logger.warning(context)
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset().filter(election__id=self.kwargs['election_id'])
+        return queryset
+
+    def get_result(self, election):
+        if self.object_list is None:
+            self.object_list = self.model.objects.filter(election=election)
         positions = ['president', 'vice_president', 'secretary', 'treasurer', 'member_at_large']
+        context = {}
         for position in positions:
             result = self.object_list.values(position).annotate(Count('id')).order_by('-id__count')
             context[position] = []
@@ -52,12 +65,7 @@ class ElectionResultView(MemberMixin, ListView):
                 except ElectionCandidate.DoesNotExist:  # pragma: no cover
                     pass
                 winning_count = candidate['id__count']
-        logger.warning(context)
         return context
-
-    def get_queryset(self):
-        queryset = super().get_queryset().filter(election__id=self.kwargs['election_id'])
-        return queryset
 
 
 class ElectionView(BoardMixin, FormView):
