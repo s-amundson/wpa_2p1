@@ -1,9 +1,8 @@
 import logging
 from django.test import TestCase, Client, tag
 from django.urls import reverse
-from django.utils import timezone
 from student_app.models import User
-from ..models import Announcement, Policy, PolicyText
+from ..models import Policy, PolicyText
 logger = logging.getLogger(__name__)
 
 
@@ -29,6 +28,7 @@ class TestsAnnouncement(TestCase):
     def test_post_board_draft_good(self):
         response = self.client.post(reverse('information:policy'), {
             'title_text': 'test policy',
+            'title_access': 'public',
             'status': 0,
             'is_html': False,
             'policy': "tests shall be done"})
@@ -49,6 +49,7 @@ class TestsAnnouncement(TestCase):
         )
         response = self.client.post(reverse('information:policy', kwargs={'policy': policy.id}), {
             'title_text': 'test policy',
+            'title_access': 'public',
             'status': 1,
             'is_html': False,
             'policy': "tests shall be done"})

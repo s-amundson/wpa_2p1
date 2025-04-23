@@ -57,6 +57,7 @@ class TestsSquareHelper(TestCase):
         self.assertEqual(len(pl), 0)
         self.assertTrue(mail.outbox[0].body.find('Payment Error: CVV') >= 0)
 
+    # @tag('temp')
     def test_card_good(self):
         payment = PaymentHelper(user=self.test_user)
         payment_log, created = payment.create_payment(
@@ -81,6 +82,7 @@ class TestsSquareHelper(TestCase):
         cl = Card.objects.all()
         self.assertEqual(len(cl), 2)
 
+    # @tag('temp')
     def test_card_retrieve_good(self):
         # Retrieve the card
         card_helper = CardHelper(Card.objects.get(pk=1))
@@ -89,6 +91,7 @@ class TestsSquareHelper(TestCase):
         cl = Card.objects.all()
         self.assertEqual(len(cl), 1)
 
+    # @tag('temp')
     def test_card_retrieve_bad(self):
         # change the value of the card id on file
         c = Card.objects.get(pk=1)
@@ -103,6 +106,7 @@ class TestsSquareHelper(TestCase):
         cl = Card.objects.all()
         self.assertEqual(len(cl), 1)
 
+    # @tag('temp')
     def test_customer_good(self):
         customer_helper = CustomerHelper(self.test_user)
         customer = customer_helper.create_customer()

@@ -30,7 +30,7 @@ class TestsRefund(TestCase):
         session['line_items'] = [{'name': 'Class on None student: test_user',
                                   'quantity': '1', 'base_price_money': {'amount': 500, 'currency': 'USD'}}]
         session.save()
-
+    # @tag('temp')
     def test_square_helper_refund_payment_error(self):
         rp = RefundHelper().refund_with_idempotency_key(str(uuid.uuid4()), 1000)
         self.assertEqual(rp, {'status': "FAIL", 'error': 'Record does not exist'})

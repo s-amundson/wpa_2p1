@@ -1,6 +1,7 @@
 import uuid
 import logging
 from django.utils import timezone
+from square.core.api_error import ApiError
 
 from .square_helper import SquareHelper
 from ..models import PaymentLog, RefundLog
@@ -64,32 +65,26 @@ class RefundHelper(SquareHelper):
                 return {'status': 'error', 'error': 'Previously refunded'}
 
         idempotency_key = uuid.uuid4()
-        result = self.client.refunds.refund_payment(
-            body={"idempotency_key": str(idempotency_key),
-                  "amount_money": {'amount': amount, 'currency': 'USD'},
-                  "payment_id": log.payment_id
-                  })
-        square_response = result.body.get('refund', {'refund': None})
-
-        logging.debug(square_response)
-        if result.is_success():
-            square_response['error'] = ""
+        try:
+            result = self.client.refunds.refund_payment(
+                idempotency_key=str(idempotency_key),
+                amount_money={'amount': amount, 'currency': 'USD'},
+                payment_id=log.payment_id
+            )
             log.status = 'refund'
             log.save()
-            RefundLog.objects.create(amount=square_response['amount_money']['amount'],
-                                     created_time=square_response['created_at'],
-                                     location_id=square_response['location_id'],
-                                     order_id=square_response['order_id'],
-                                     payment_id=square_response['payment_id'],
-                                     processing_fee=square_response.get('processing_fee', None),
-                                     refund_id=square_response['id'],
-                                     status=square_response.get('status', None),
+            RefundLog.objects.create(amount=result.refund.amount_money.amount,
+                                     created_time=result.refund.created_at,
+                                     location_id=result.refund.location_id,
+                                     order_id=result.refund.order_id,
+                                     payment_id=result.refund.payment_id,
+                                     processing_fee=result.refund.processing_fee,
+                                     refund_id=result.refund.id,
+                                     status=result.refund.status,
                                      volunteer_points=refund_points,
                                      )
-        elif result.is_error():  # pragma: no cover
-            square_response['status'] = 'error'
-            logging.warning(result.errors)
-            square_response['error'] = result.errors
-            for error in result.errors:
-                self.log_error('N/A', error.get('code', 'unknown_error'), idempotency_key, 'refunds.refund_payment')
-        return square_response
+            return result
+
+        except ApiError as e:
+            self.handle_error(e, 'refunds.refund_payment')
+        return None

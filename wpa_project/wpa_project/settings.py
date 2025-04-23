@@ -14,6 +14,7 @@ import sys
 import os
 from django.core.exceptions import ImproperlyConfigured
 from pathlib import Path
+from csp.constants import SELF, NONCE
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,10 +36,9 @@ def get_secret(setting, secrets=secret_settings, default=None):
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 ACCOUNT_ADAPTER = "src.account_adapter.CustomAccountAdapter"
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 ACCOUNT_EMAIL_DOMAIN_BLACKLIST = get_secret('ACCOUNT_EMAIL_DOMAIN_BLACKLIST', default=['example.com'])
-ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_FORMS = {'signup': 'student_app.forms.SignUpForm'}
 ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS')
@@ -58,7 +58,7 @@ ACCOUNT_RATE_LIMITS = {
     "signup": "10/h",
     # NOTE: Login is already protected via `ACCOUNT_LOGIN_ATTEMPTS_LIMIT`
 }
-ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
 
 
@@ -96,35 +96,23 @@ CELERY_RESULT_PERSISTENT = True
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TASK_IGNORE_RESULT = True
 
-# Content Security Policy
-CSP_DEFAULT_SRC = ("'self'",
-                   "https://cdnjs.cloudflare.com",
+CONTENT_SECURITY_POLICY = {
+    "EXCLUDE_URL_PREFIXES": ["/admin"],
+    "DIRECTIVES": {
+        "default-src": [SELF, "https://cdnjs.cloudflare.com",
                    "https://*.squareupsandbox.com",
-                   "https://*.squareup.com")
-CSP_FONT_SRC = ("'self'",
-                "https://cdnjs.cloudflare.com",
-                "https://*.cloudfront.net", "https://*.squarecdn.com")
-CSP_FRAME_ANCESTORS = ("'self'", "https://www.facebook.com", "https://www.google.com")
-CSP_FRAME_SRC = ("'self'",
-                 "https://*.squarecdn.com",
+                   "https://*.squareup.com"],
+        "font-src": [SELF, "https://cdnjs.cloudflare.com",
+                "https://*.cloudfront.net", "https://*.squarecdn.com"],
+        "frame-src": [SELF, "https://*.squarecdn.com",
                  "https://*.squareupsandbox.com",
                  "https://*.squareup.com",
                  "https://www.facebook.com",
-                 "https://*.google.com",
-                 )
-CSP_IMG_SRC = ("'self'", "data:",
-               "https://www.facebook.com",
-               "http://www.w3.org")
-CSP_INCLUDE_NONCE_IN = ['script-src']
-CSP_STYLE_SRC = ("'self' 'unsafe-inline'",
-                 "https://cdnjs.cloudflare.com",
-                 "https://cdn.jsdelivr.net",
-                 "https://*.squarecdn.com",
-                 "https://*.squareupsandbox.com",
-                 "https://*.squareup.com",
-                 )
-CSP_SCRIPT_SRC = ("'self' 'sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB' "
-                  "'sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13'",
+                 "https://*.google.com"],
+        "img-src": [SELF, "data:",
+                    "https://www.facebook.com",
+                    "http://www.w3.org"],
+        "script-src": [SELF, NONCE,
                   "https://code.jquery.com",
                   "https://cdn.jsdelivr.net",
                   "https://*.squarecdn.com",
@@ -132,8 +120,15 @@ CSP_SCRIPT_SRC = ("'self' 'sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgn
                   "https://*.squareup.com",
                   "https://*.facebook.net",
                   "https://*.google.com",
-                  "https://*.gstatic.com"
-                  )
+                  "https://*.gstatic.com"],
+        "style-src": [SELF, "'unsafe-inline'",
+                 "https://cdnjs.cloudflare.com",
+                 "https://cdn.jsdelivr.net",
+                 "https://*.squarecdn.com",
+                 "https://*.squareupsandbox.com",
+                 "https://*.squareup.com",],
+    },
+}
 
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = get_secret("CSRF_TRUSTED_ORIGINS")
@@ -188,6 +183,7 @@ INSTALLED_APPS = [
     'facebook',
     '_email',
 
+    'csp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
