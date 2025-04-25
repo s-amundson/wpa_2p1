@@ -22,6 +22,7 @@
         <hr>
         <form method="post">{% csrf_token %}
             <p> {{ form.title_text.label }} {{ form.title_text }} {{ form.title_text.errors }}</p>
+            <p> {{ form.title_access.label }} {{ form.title_access }} {{ form.title_access.errors }}</p>
             <p> {{ form.status.label }} {{ form.status }} {{ form.status.errors }}</p>
             <p> {{ form.policy.label }} {{ form.policy }} {{ form.policy.errors }}</p>
             <p> {{ form.is_html.label }} {{ form.is_html }} {{ form.is_html.errors }}</p>

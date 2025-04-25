@@ -43,6 +43,7 @@ class PolicyFormView(FormView):
                 # kwargs['initial'] = model_to_dict(self.version)
                 kwargs['instance'] = self.version
             kwargs['initial']['title_text'] = self.policy.title
+            kwargs['initial']['title_access'] = self.policy.access
         return kwargs
 
     def form_invalid(self, form):
@@ -57,6 +58,7 @@ class PolicyFormView(FormView):
             self.policy = Policy.objects.create(title=form.cleaned_data.get('title_text'))
         else:
             self.policy.title = form.cleaned_data.get('title_text')
+            self.policy.access = form.cleaned_data.get('title_access')
             self.policy.save()
         pt = form.save(commit=False)
         pt.title = self.policy

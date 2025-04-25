@@ -93,6 +93,7 @@ class TestsCard(TestCase):
         self.assertFalse(cl[1].default)
         self.assertRedirects(response, reverse('payment:card_manage'))
 
+    # @tag('temp')
     def test_post_manage_card_bad(self):
         response = self.client.post(reverse('payment:card_manage'), {'source_id': 'cnon:card-nonce-rejected-cvv'},
                                     secure=True)

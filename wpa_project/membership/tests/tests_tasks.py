@@ -4,10 +4,12 @@ from django.test import TestCase, tag
 from django.core import mail
 from django.utils import timezone
 from datetime import timedelta
+import uuid
 
 from student_app.models import Student, User
-from ..models import Level, Member
-from ..tasks import membership_expire_notice, membership_expire_update
+from payment.models import PaymentLog
+from ..models import Level, Member, Membership
+from ..tasks import membership_expire_notice, membership_expire_update, membership_user_update
 logger = logging.getLogger(__name__)
 
 
@@ -57,3 +59,36 @@ class TestsTasks(TestCase):
         self.assertTrue(s.user.is_member)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Membership Expiring')
+
+    # @tag('temp')
+    def test_membership_user_update(self):
+        # Get the page, if not super or board, page is forbidden
+
+        sf = Student.objects.get(pk=2).student_family
+        uid = uuid.uuid4()
+        # make the payment log first so the signal doesn't work.
+        log = PaymentLog.objects.create(user=User.objects.get(pk=2),
+                                        checkout_created_time=timezone.now(),
+                                        description="square_response",
+                                        location_id='location_id',
+                                        idempotency_key=uid,
+                                        order_id='order_id',
+                                        payment_id='id',
+                                        receipt='receipt_url',
+                                        source_type='source_type',
+                                        status='SUCCESS',
+                                        total_money=500,
+                                        )
+        log.save()
+        membership = Membership.objects.create(
+            level=Level.objects.get(pk=1),
+            pay_status='start',
+            idempotency_key=uid
+        )
+        membership.students.set(sf.student_set.all())
+        membership.save()
+        self.assertFalse(User.objects.get(pk=2).is_member)
+        membership_user_update()
+        members = Member.objects.all()
+        # self.assertEqual(len(members), 2)
+        self.assertTrue(User.objects.get(pk=2).is_member)

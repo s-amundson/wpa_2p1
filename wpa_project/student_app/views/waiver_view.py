@@ -24,7 +24,7 @@ class WaiverView(UserPassesTestMixin, FormView):
     student = None
     class_date = None
 
-    @method_decorator(csp_update(STYLE_SRC="https://ajax.googleapis.com", SCRIPT_SRC="https://ajax.googleapis.com"))
+    @csp_update({"style-src": ["https://ajax.googleapis.com"], "script-src": ["https://ajax.googleapis.com"]})
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 

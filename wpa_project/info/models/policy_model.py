@@ -9,10 +9,16 @@ STATUS = (
     (1, "Publish"),
     (2, 'Obsolete')
 )
-
+ACCESS = (
+    ('public', 'Public'),
+    ('members', 'Members'),
+    ('staff', 'Staff'),
+    ('board', 'Board')
+)
 
 class Policy(models.Model):
     title = models.CharField(max_length=200)
+    access = models.CharField(max_length=40, choices=ACCESS, default='public')
 
 class PolicyText(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
