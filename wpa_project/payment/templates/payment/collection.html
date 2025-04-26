@@ -11,14 +11,18 @@
     <p>A form record collections from the cash box.</p>
 </div>
 
-<form class="form m-2" method="post" enctype="multipart/form-data">
+<form class="form m-2" method="post">
     {% csrf_token %}
     {{ form.as_p }}
+    {% if correction %}
+        <p> Updated from: Collected Date: {{correction.collected_date}}, Cash: {{ correction.cash }},
+            Treasurer/Delegate: {{ correction.treasurer }}, Board Member: {{correction.board_member }}</p>
+    {% endif %}
     <button class="btn btn-primary m-2" type="submit"> Submit</button>
 </form>
 <hr>
 <div class="row">
-    <table class="col table table-bordered">
+    <table class="m-2 col table table-bordered">
         <thead>
             <tr>
                 <th>Collected Date</th>

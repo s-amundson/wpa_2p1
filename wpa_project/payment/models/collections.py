@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from student_app.models import Student
@@ -12,3 +11,5 @@ class Collections(models.Model):
     treasurer = models.ForeignKey(Student, on_delete=models.DO_NOTHING, null=True, related_name="+")
     board_member = models.ForeignKey(Student, on_delete=models.DO_NOTHING, null=True, related_name="+")
     note = models.CharField(max_length=200, default=None, null=True)
+    correction = models.IntegerField(null=True, default=None)
+    updated_at = models.DateTimeField(auto_now=True)

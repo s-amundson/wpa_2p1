@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 
 from ..models import Collections
 
@@ -13,11 +14,21 @@ class CollectionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['treasurer'].queryset = self.fields['treasurer'].queryset.filter(user__is_board=True)
-        self.fields['board_member'].queryset = self.fields['board_member'].queryset.filter(user__is_board=True)
+
         self.fields['treasurer'].label = 'Treasurer/Delegate'
         self.fields['note'].required = False
-        logger.debug(kwargs)
+        if self.instance.id:
+            logger.warning(self.instance.correction)
+            if self.instance.correction:
+                for f in self.Meta.fields:
+                    self.fields[f].widget.attrs.update({'disabled': 'disabled'})
+            self.fields['treasurer'].queryset = self.fields['treasurer'].queryset.filter(
+                Q(user__is_board=True) | Q(pk=self.instance.treasurer.id))
+            self.fields['board_member'].queryset = self.fields['board_member'].queryset.filter(
+                Q(user__is_board=True) | Q(pk=self.instance.board_member.id))
+        else:
+            self.fields['treasurer'].queryset = self.fields['treasurer'].queryset.filter(user__is_board=True)
+            self.fields['board_member'].queryset = self.fields['board_member'].queryset.filter(user__is_board=True)
 
     def clean(self):
         data = super().clean()
