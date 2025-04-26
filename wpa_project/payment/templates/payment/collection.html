@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block script %}
+{% load static %}
+{% endblock %}
+
+{% block title %} Collections {% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-4 text-center"><h2> Collection Form </h2></div>
+    <p>A form record collections from the cash box.</p>
+</div>
+
+<form class="form m-2" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-primary m-2" type="submit"> Submit</button>
+</form>
+<hr>
+<div class="row">
+    <table class="col table table-bordered">
+        <thead>
+            <tr>
+                <th>Collected Date</th>
+                <th>Cash</th>
+                <th>Treasurer/Delegate</th>
+                <th>Board Member</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for collection in collections %}
+                <tr>
+                    <td>
+                        <a class="mx-2" href="{% url 'payment:collections' collection.id%}">
+                            {{ collection.collected_date|date }}</a>
+                    </td>
+                    <td>{{ collection.cash }}</td>
+                    <td>{{ collection.treasurer }}</td>
+                    <td>{{ collection.board_member }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
