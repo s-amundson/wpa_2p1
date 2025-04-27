@@ -20,7 +20,7 @@ services:
     container_name: celery_dev
     image: *django
     restart: 'no'
-    entrypoint: celery -A wpa_project worker --beat --scheduler django --loglevel=info
+    entrypoint: celery -A wpa_project worker --beat --scheduler django --loglevel=info --without-gossip --without-mingle --without-heartbeat -Ofair
     volumes:
       - ../wpa_project:/code
     env_file:
@@ -66,6 +66,20 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+
+  discord:
+    container_name: 'discord_dev'
+    env_file:
+      - ../wpa_project/wpa_project.env
+#    image: &django django
+    build:
+      context: ..
+      dockerfile: docker_development/Dockerfile_discord
+    command: python discord_bot/bot.py
+    volumes:
+      - ../wpa_project:/app
+    depends_on:
+      - celery
 
 networks:
   default:

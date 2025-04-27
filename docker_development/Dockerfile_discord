@@ -1,0 +1,7 @@
+FROM gorialis/discord.py
+
+WORKDIR /app
+
+COPY ../wpa_project/discord/requirements.txt ./
+RUN pip install -r requirements.txt
+

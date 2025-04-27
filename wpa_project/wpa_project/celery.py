@@ -26,6 +26,7 @@ def config_loggers(*args, **kwargs):
     dictConfig(settings.LOGGING)
 
 
-@app.task(bind=True, ignore_result=True)
+@app.task(bind=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')
+    return 'task done'

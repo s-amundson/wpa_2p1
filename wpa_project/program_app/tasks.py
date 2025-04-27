@@ -14,6 +14,7 @@ from membership.tasks import membership_expire_notice, membership_expire_update,
 import logging
 logger = logging.getLogger('program_app')
 from celery.utils.log import get_task_logger
+# from discord_bot.bot import bot_task
 celery_logger = get_task_logger('program_app')
 crh = ClassRegistrationHelper()
 logger.warning(__name__)
@@ -178,6 +179,11 @@ def reminder_email(schedule_id):
     update_programs = UpdatePrograms()
     update_programs.reminder_email(beginner_schedule.class_time)
 
+# @shared_task
+# def reminder_message():
+#     print('reminder')
+#     bot_task.delay()
+#     return 'reminder'
 
 @shared_task
 def update_state(beginner_class):

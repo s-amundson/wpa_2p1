@@ -91,10 +91,10 @@ AUTHENTICATION_BACKENDS = (
 
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BROKER_URL = get_secret('CELERY_BROKER')
-CELERY_RESULT_BACKEND = 'rpc://rabbitmq_dev'
+CELERY_RESULT_BACKEND = 'rpc://'
 CELERY_RESULT_PERSISTENT = True
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_TASK_IGNORE_RESULT = True
+# CELERY_TASK_IGNORE_RESULT = True
 
 CONTENT_SECURITY_POLICY = {
     "EXCLUDE_URL_PREFIXES": ["/admin"],
@@ -148,6 +148,7 @@ DEBUG = get_secret("DEBUG")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_FROM_EMAIL = get_secret('DEFAULT_FROM_EMAIL')
 
+DISCORD_TOKEN = os.environ.get('DISCORD_TOKEN')
 EMAIL_BACKEND = get_secret("EMAIL_BACKEND") #'django.core.mail.backends.console.EmailBackend'
 EMAIL_FILE_PATH = "/tmp/app-messages"
 EMAIL_BATCH_DAY_LIMIT = 1500
