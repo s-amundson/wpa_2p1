@@ -30,6 +30,21 @@ services:
       - rabbitmq3
       - django
 
+  discord:
+    container_name: discord_dev
+    image: *django
+    restart: 'no'
+    command: python discord_bot/bot.py
+    volumes:
+      - ../wpa_project:/code
+    env_file:
+      - ../wpa_project/wpa_project.env
+    depends_on:
+      - db
+      - rabbitmq3
+      - django
+      - celery
+
   db:
     command: postgres -c config_file=conf/postgres.conf
     container_name: devdb
@@ -67,19 +82,19 @@ services:
       - "5672:5672"
       - "15672:15672"
 
-  discord:
-    container_name: 'discord_dev'
-    env_file:
-      - ../wpa_project/wpa_project.env
-#    image: &django django
-    build:
-      context: ..
-      dockerfile: docker_development/Dockerfile_discord
-    command: python discord_bot/bot.py
-    volumes:
-      - ../wpa_project:/app
-    depends_on:
-      - celery
+#  discord:
+#    container_name: 'discord_dev'
+#    env_file:
+#      - ../wpa_project/wpa_project.env
+##    image: &django django
+#    build:
+#      context: ..
+#      dockerfile: docker_development/Dockerfile_discord
+#    command: python discord_bot/bot.py
+#    volumes:
+#      - ../wpa_project:/app
+#    depends_on:
+#      - celery
 
 networks:
   default:
