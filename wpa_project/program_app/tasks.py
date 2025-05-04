@@ -9,7 +9,7 @@ from .src import ClassRegistrationHelper, UpdatePrograms, EmailMessage as Progra
 from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
 from payment.src import EmailMessage, RefundHelper
-from membership.tasks import membership_expire_notice, membership_expire_update
+from membership.tasks import membership_expire_notice, membership_expire_update, membership_user_update
 
 import logging
 logger = logging.getLogger('program_app')
@@ -121,6 +121,7 @@ def program_membership_expire():
     celery_logger.warning('ran membership expire notice')
     membership_expire_update()
     celery_logger.warning('ran membership expire update')
+    membership_user_update()
 
 
 @shared_task
