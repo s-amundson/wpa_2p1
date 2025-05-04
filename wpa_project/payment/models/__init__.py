@@ -1,4 +1,5 @@
 from .card import Card
+from .collections import Collections
 from .costs_model import CostsModel
 from .customer import Customer
 from .donation_log import DonationLog

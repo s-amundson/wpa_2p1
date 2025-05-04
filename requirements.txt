@@ -19,3 +19,4 @@ python3-saml==1.16.0
 reportlab==4.2.5
 scikit-learn==1.6.1
 squareup==37.1.0.20240604
+xmlsec==1.3.14

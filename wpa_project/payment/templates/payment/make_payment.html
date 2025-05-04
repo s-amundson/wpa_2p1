@@ -88,7 +88,7 @@
 
           {% if form.available_volunteer_points %}
               <div class="row p-3">
-                  You have ${{ form.available_volunteer_points }} available in volunteer points.  To use these points
+                  You have ${{ form.available_volunteer_points|floatformat:1 }} available in volunteer points.  To use these points
                   enter the amount you wish to use.
                   {{ form.volunteer_points }}
               </div>
