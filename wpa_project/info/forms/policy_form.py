@@ -2,6 +2,7 @@ from src.model_form import MyModelForm
 from ..models import Policy, PolicyText, ACCESS
 from django.forms import ModelForm, CharField, CheckboxInput, ChoiceField
 
+
 class PolicyForm(MyModelForm):
 
     class Meta(MyModelForm.Meta):

@@ -36,10 +36,9 @@ def get_secret(setting, secrets=secret_settings, default=None):
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 ACCOUNT_ADAPTER = "src.account_adapter.CustomAccountAdapter"
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 ACCOUNT_EMAIL_DOMAIN_BLACKLIST = get_secret('ACCOUNT_EMAIL_DOMAIN_BLACKLIST', default=['example.com'])
-ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_FORMS = {'signup': 'student_app.forms.SignUpForm'}
 ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS')
@@ -59,7 +58,7 @@ ACCOUNT_RATE_LIMITS = {
     "signup": "10/h",
     # NOTE: Login is already protected via `ACCOUNT_LOGIN_ATTEMPTS_LIMIT`
 }
-ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
 
 
