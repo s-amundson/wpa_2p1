@@ -1,8 +1,6 @@
 import logging
 from django.conf import settings
-from square import Square
-from square.environment import SquareEnvironment
-
+from square.client import Client
 from ..models import PaymentErrorLog
 
 logger = logging.getLogger(__name__)
@@ -13,13 +11,9 @@ class SquareHelper:
         # Create an instance of the API Client
         # and initialize it with the credentials
         # for the Square account whose assets you want to manage
-        if settings.SQUARE_CONFIG['environment'] == 'production':
-            environment = SquareEnvironment.PRODUCTION
-        else:
-            environment = SquareEnvironment.SANDBOX
-        self.client = Square(
-            environment=environment,
-            token=settings.SQUARE_CONFIG['access_token']
+        self.client = Client(
+            access_token=settings.SQUARE_CONFIG['access_token'],
+            environment=settings.SQUARE_CONFIG['environment'],
         )
 
         self.errors = []
@@ -46,12 +40,9 @@ class SquareHelper:
             api=api
         )
 
-    def handle_error(self, error, api, ik=None, default_error=''):
-        for e in error.errors:
-            logger.warning(api)
-            logger.error(e.category)
-            logger.error(e.code)
-            logger.error(e.detail)
-            self.log_error('N/A', self.error_dict.get(e.code, ''), ik, api)
-            self.errors.append(self.error_dict.get(e.code, default_error))
-            self.errors_codes.append(e.code)
+    def handle_error(self, result, default_error):
+        logging.error(result.errors)
+        for error in result.errors:
+            self.errors.append(self.error_dict.get(error.get('code', ''), default_error))
+            self.errors_codes.append(error.get('code', ''))
+

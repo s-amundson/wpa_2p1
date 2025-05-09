@@ -1,4 +1,6 @@
 # Create your tasks here
+import pika
+import json
 from celery import shared_task
 from django.utils import timezone
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
@@ -44,9 +46,13 @@ def daily_update():
 @shared_task
 def debug_task():
     celery_logger.warning('program debug task')
-    celery_logger.warning('to membership expire')
-    membership_expire_notice()
-    celery_logger.warning('ran membership expire')
+    credentials = pika.PlainCredentials('user', 'password')
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq_dev', credentials=credentials))
+    channel = connection.channel()
+
+    channel.queue_declare(queue='hello')
+    channel.basic_publish(exchange='', routing_key='hello', body=json.dumps({'channel': 1353451822538293288, 'message':'test message'}))
+    channel.close()
 
 @shared_task
 def init_class():  # pragma: no cover

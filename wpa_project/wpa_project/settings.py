@@ -271,6 +271,7 @@ LOGGING = {
             'level': get_secret('DJANGO_LOG_LEVEL'),
             'propagate': False,
         },
+        'discord_bot': logger_default,
     },
     'root': {
         'handlers': ['root_console'],
