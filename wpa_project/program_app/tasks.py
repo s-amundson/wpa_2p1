@@ -1,12 +1,10 @@
 # Create your tasks here
-import pika
-import json
 from celery import shared_task
 from django.utils import timezone
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from django.conf import settings
 from datetime import timedelta
-
+from src import SendDiscord
 from .src import ClassRegistrationHelper, UpdatePrograms, EmailMessage as ProgramEmailMessage
 from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
@@ -46,13 +44,25 @@ def daily_update():
 @shared_task
 def debug_task():
     celery_logger.warning('program debug task')
-    credentials = pika.PlainCredentials('user', 'password')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq_dev', credentials=credentials))
-    channel = connection.channel()
+    SendDiscord(1353451822538293288, 'spend up to $500 test dollars on testing.', True,
+                ['Aye', 'Nay', 'Abstain'])
 
-    channel.queue_declare(queue='hello')
-    channel.basic_publish(exchange='', routing_key='hello', body=json.dumps({'channel': 1353451822538293288, 'message':'test message'}))
-    channel.close()
+@shared_task(bind=True)
+def discord_message(self, message_dict):
+    celery_logger.warning(message_dict)
+    return {'status': 'success'}
+
+@shared_task(bind=True)
+def get_class_status(self):
+    bc = BeginnerClass.objects.filter(event__event_date__gte=timezone.now().date()).order_by('event__event_date')[:3]
+    status = ''
+    for b in bc:
+        c = crh.enrolled_count(b)
+        d = timezone.localtime(b.event.event_date)
+        status += (f"{b.class_type.capitalize()} class on {d.strftime('%a %d %b %Y, %I:%M%p')} has "
+                   f"{c['beginner'] + c['returnee']}, { c['instructor'] } instructors, and { c['staff'] } volunteers signed up.\n")
+    return status
+
 
 @shared_task
 def init_class():  # pragma: no cover

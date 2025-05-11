@@ -3,9 +3,11 @@ import uuid
 from unittest.mock import patch, call
 from django.test import TestCase, Client, tag
 from django.core import mail
+from django.utils import timezone
 
 from ..models import BeginnerClass
-from ..tasks import charge_group, close_create_class, daily_update, reminder_email, wait_list_email, refund_class
+from ..tasks import charge_group, close_create_class, daily_update, get_class_status, reminder_email, wait_list_email, refund_class
+from .helper import create_beginner_class
 from event.models import Registration, Event
 from payment.tests import MockSideEffects
 from student_app.models import Student
@@ -140,3 +142,12 @@ class TestsTasks(MockSideEffects, TestCase):
         # chrg_group.return_value = {'72eaee80-9f87-440a-9c60-a24f3feff4b3': 'SUCCESS'}
         charge_group([1])
         chrg_group.assert_called()
+
+    @tag('temp')
+    def test_get_class_status(self):
+        date = timezone.datetime.now() + timezone.timedelta(days=1)
+        date = date.replace(hour=9, minute=0, second=0, microsecond=0)
+        bc1 = create_beginner_class(date, 'wait', 'beginner')
+        bc2 = create_beginner_class(date.replace(hour=11), 'wait', 'returnee')
+        bc3 = create_beginner_class(date.replace(hour=13), 'open', 'beginner')
+        status = get_class_status()
