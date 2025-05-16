@@ -7,7 +7,7 @@ from django.db import migrations, models
 def insert_poll_type(apps, schema_editor):
     # insert common poll choices.
     ep = apps.get_model('minutes', 'PollType')
-    pt = ['Motion']
+    pt = ['motion']
     for c in pt:
         ep.objects.create(poll_type=c)
 

@@ -3,7 +3,7 @@ from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.apps import apps
 
-from ..models import Business, Minutes,Poll
+from ..models import Business, Minutes, Poll, PollType, PollChoices, PollVote
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +34,20 @@ class TestsReport(TestCase):
             'poll_type': 2
         }
 
+    def create_poll(self):
+        poll = Poll.objects.create(
+            description='test motion',
+            poll_type=PollType.objects.get(pk=2),
+            level='board',
+            state='open',
+        )
+        poll.poll_choices.set(PollChoices.objects.all()[:3])
+        return poll
+
     # @tag('temp')
     def test_get_poll(self):
         response = self.client.get(reverse('minutes:poll'), secure=True)
-        self.assertTemplateUsed('minutes/poll_form.html')
+        self.assertTemplateUsed('minutes/forms/poll_form.html')
         self.assertEqual(response.context['form'].fields['poll_choices'].queryset.count(), 5)
         self.assertEqual(response.context['form'].initial['poll_type'].poll_type, 'poll')
         self.assertEqual(response.context['poll_type'], 'poll')
@@ -45,24 +55,37 @@ class TestsReport(TestCase):
     # @tag('temp')
     def test_get_poll_with_type_motion(self):
         response = self.client.get(reverse('minutes:poll') + '?poll_type=motion', secure=True)
-        self.assertTemplateUsed('minutes/poll_form.html')
+        self.assertTemplateUsed('minutes/forms/poll_form.html')
+        self.assertTemplateUsed('minutes/poll.html')
         self.assertEqual(response.context['form'].fields['poll_choices'].queryset.count(), 3)
         self.assertEqual(response.context['form'].initial['poll_type'].poll_type, 'motion')
         self.assertEqual(response.context['poll_type'], 'motion')
 
     # @tag('temp')
-    def test_get_motion(self):
-        response = self.client.get(reverse('minutes:motion'), secure=True)
-        self.assertTemplateUsed('minutes/poll_form.html')
-        # self.assertEqual(response.context['form'].fields['poll_choices'].queryset.count(), 3)
-        # self.assertEqual(response.context['form'].initial['poll_type'].poll_type, 'motion')
-        # self.assertEqual(response.context['poll_type'], 'motion')
+    def test_get_poll_list(self):
+        response = self.client.get(reverse('minutes:poll_list'), secure=True)
+        self.assertTemplateUsed('minutes/poll_list.html')
+        self.assertEqual(response.context['poll_type'], 'poll')
 
     @tag('temp')
-    def test_post_motion(self):
-        response = self.client.post(reverse('minutes:poll'), self.post_dict, secure=True)
-        self.assertEqual(len(Poll.objects.all()), 1)
+    def test_get_poll_list_motion(self):
+        p = self.create_poll()
+        pv = PollVote.objects.create(poll=p, user=self.test_user, choice=PollChoices.objects.get(pk=1))
+        p.state = 'closed'
+        p.save()
+        response = self.client.get(reverse('minutes:poll_list') + '?poll_type=motion', secure=True)
+        self.assertTemplateUsed('minutes/poll_list.html')
+        self.assertEqual(response.context['poll_type'], 'motion')
+        self.assertContains(response, 'Results: Aye 1')
 
+    # @tag('temp')
+    def test_post_motion(self):
+        response = self.client.post(reverse('minutes:poll') + '?poll_type=motion', self.post_dict, secure=True)
+        polls = Poll.objects.all()
+        self.assertEqual(len(polls), 1)
+        self.assertEqual(polls[0].poll_type.poll_type, 'motion')
+        self.assertIsNone(polls[0].minutes)
+        self.assertIsNone(polls[0].business)
 
     # @tag('temp')
     def test_post_motion_minutes_and_business(self):
@@ -76,6 +99,32 @@ class TestsReport(TestCase):
 
         self.post_dict['minutes'] = m.id
         self.post_dict['business'] = b1.id
-        response = self.client.post(reverse('minutes:motion'), self.post_dict, secure=True)
+        response = self.client.post(reverse('minutes:poll') + '?poll_type=motion', self.post_dict, secure=True)
         self.assertEqual(len(Poll.objects.all()), 1)
         self.assertEqual(Poll.objects.last().business.id, b1.id)
+        self.assertEqual(Poll.objects.last().minutes.id, m.id)
+
+    # @tag('temp')
+    def test_get_poll_vote(self):
+        p = self.create_poll()
+        response = self.client.get(reverse('minutes:poll_vote', kwargs={'poll': p.id}), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('minutes/poll.html')
+        self.assertTemplateUsed('minutes/forms/poll_vote_form.html')
+
+    # @tag('temp')
+    def test_post_poll_vote(self):
+        p = self.create_poll()
+        response = self.client.post(reverse('minutes:poll_vote', kwargs={'poll': p.id}),
+                                    {'poll': p.id, 'choice': 1, 'user': self.test_user.id}, secure=True)
+        self.assertRedirects(response, reverse('minutes:poll_list') + '?poll_type=motion')
+        pv = PollVote.objects.all()
+        self.assertEqual(pv.count(), 1)
+        self.assertEqual(pv.last().choice.id, 1)
+
+        response = self.client.post(reverse('minutes:poll_vote', kwargs={'poll': p.id}),
+                                    {'poll': p.id, 'choice': 2, 'user': self.test_user.id}, secure=True)
+        pv = PollVote.objects.all()
+        self.assertEqual(pv.count(), 1)
+        self.assertEqual(pv.last().choice.id, 2)
+

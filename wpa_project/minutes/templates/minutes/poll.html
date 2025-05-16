@@ -6,7 +6,7 @@
 
 {% block main %}
     <h3>{{ poll_type|capfirst }}</h3>
-    {% if form.instance %}
+    {% if form.instance.id %}
         <p>Description: {{ form.instance.description }}</p>
         <p>
             Choices:{% for choice in form.instance.poll_choices.all %} {{choice.choice}}{% if not forloop.last %}, {% endif%}{% endfor %}

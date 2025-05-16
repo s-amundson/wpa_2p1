@@ -41,7 +41,6 @@ class Poll(models.Model):
     minutes = models.ForeignKey(Minutes, on_delete=models.SET_NULL, null=True, default=None)
 
     def get_votes(self):
-        # return apps.get_model('minutes', 'PollVote').objects.values('choice').annotate(num_votes=models.Count("id"))
         return apps.get_model('minutes', 'PollVote').objects.get_vote_count(self)
 
 

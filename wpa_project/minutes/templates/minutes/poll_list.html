@@ -28,7 +28,7 @@
                             {% if poll.state == 'open' %}
                                 <a href="{% url 'minutes:poll_vote' poll.id %}">Vote</a>
                             {% elif poll.state == 'closed' %}
-                                Results: {% for r in poll.get_votes %} {{ r.choice.choice}} {{r.num_votes}} {% endfor %}
+                                Results: {% for r in poll.get_votes %}{{ r.choice.choice}} {{r.num_votes}} {% endfor %}
                             {% endif %}
                         </td>
                     </tr>

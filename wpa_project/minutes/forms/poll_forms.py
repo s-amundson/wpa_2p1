@@ -33,8 +33,6 @@ class PollForm(MyModelForm):
         self.fields['business'].widget = HiddenInput()
         self.fields['poll_type'].widget = HiddenInput()
 
-        logger.warning(self.is_bound)
-        logger.warning(self.instance.poll_type)
         if self.instance.id:
             pass
         elif (not self.is_bound and kwargs['initial'].get('poll_type', None) is not None
