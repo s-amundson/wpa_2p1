@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{poll_type|capfirst}}
+{% endblock %}
+
+{% block main %}
+    <h3>{{ poll_type|capfirst }}</h3>
+    {% if form.instance %}
+        <p>Description: {{ form.instance.description }}</p>
+        <p>
+            Choices:{% for choice in form.instance.poll_choices.all %} {{choice.choice}}{% if not forloop.last %}, {% endif%}{% endfor %}
+        </p>
+        <p>Level: {{ form.instance.level }}</p>
+        <p>State: {{ form.instance.state }}</p>
+        <p>Duration: {{form.instance.duration }}</p>
+        <p>Is Anonymous: {{ form.instance.is_anonymous}}</p>
+        <p>Results: {% for r in form.instance.get_votes %} {{ r.choice.choice}} {{r.num_votes}} {% endfor %}</p>
+    {% else %}
+        <form method="post"> {% csrf_token %} {{ form }} </form>
+    {% endif %}
+
+{% endblock %}
