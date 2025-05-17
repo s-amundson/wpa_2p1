@@ -12,7 +12,7 @@ logger = logging.getLogger('facebook')
 from celery.utils.log import get_task_logger
 celery_logger = get_task_logger('facebook')
 
-logger.warning(__name__)
+# logger.warning(__name__)
 
 
 @shared_task

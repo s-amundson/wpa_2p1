@@ -13,7 +13,7 @@ class PostList(ListView):
     template_name = 'facebook/post_list.html'
 
     def get_queryset(self):
-        logger.warning('facebook get queryset')
+        # logger.warning('facebook get queryset')
         queryset = Posts.objects.filter(active=True).order_by('-created_time')
         return queryset
 
