@@ -117,8 +117,16 @@
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'registration:student_list'%}">Student List</a>
                                 <a class="dropdown-item" href="{% url 'registration:send_email'%}">Send Email</a>
-                                <a class="dropdown-item" href="{% url 'minutes:minutes'%}">New Minutes</a>
-                                <a class="dropdown-item" href="{% url 'minutes:decision_list' %}">Decision List</a>
+                                <div class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                                        Minutes
+                                    </a>
+                                     <ul class="dropdown-menu">
+                                         <a class="dropdown-item" href="{% url 'minutes:minutes'%}">New Minutes</a>
+                                         <a class="dropdown-item" href="{% url 'minutes:poll_list'%}?poll_type=motion">Motions</a>
+                                         <a class="dropdown-item" href="{% url 'minutes:decision_list' %}">Decision List</a>
+                                     </ul>
+                                </div>
                                 <a class="dropdown-item" href="{% url 'programs:class_registration_admin_list' %}">Admin Registrations</a>
                                 <a class="dropdown-item" href="{% url 'programs:staff_attendance' %}">Staff Attendance</a>
                                 <a class="dropdown-item" href="{% url 'payment:report' %}">Payment Report</a>
@@ -129,6 +137,7 @@
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'information:announcement_list'%}">Announcements</a>
                                 <a class="dropdown-item" href="{% url 'information:staff_list'%}">Staff List</a>
+                                <a class="dropdown-item" href="{% url 'minutes:poll_list'%}">Polls</a>
                             {% endif %}
                         </div>
                     </li>

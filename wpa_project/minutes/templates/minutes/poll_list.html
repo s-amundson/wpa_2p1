@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %} Election List {% endblock %}
+
+
+{% block main %}
+    <div class="row">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <th> ID </th>
+                <th> Date </th>
+                <th> State </th>
+                <th> </th>
+            </thead>
+            <tbody>
+                {% for poll in object_list %}
+                    <tr>
+                        <td>
+                            {% if user.is_superuser %}
+                                <a href="{% url 'minutes:poll' poll.id %}?poll_type={{poll_type}}">{{ poll.id }}</a>
+                            {% else %}
+                                {{ poll.id }}
+                            {% endif %}
+                        </td>
+                        <td>{{ poll.poll_date }}</td>
+                        <td>{{ poll.state }}</td>
+                        <td>
+                            {% if poll.state == 'open' %}
+                                <a href="{% url 'minutes:poll_vote' poll.id %}">Vote</a>
+                            {% elif poll.state == 'closed' %}
+                                Results: {% for r in poll.get_votes %}{{ r.choice.choice}} {{r.num_votes}} {% endfor %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">No {{ poll_type }}s yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        {% if user.is_superuser %}
+            <div><a href="{% url 'minutes:poll' %}?poll_type={{poll_type}}">Create New {{ poll_type|capfirst }}</a></div>
+        {% endif %}
+    </div>
+{% endblock %}

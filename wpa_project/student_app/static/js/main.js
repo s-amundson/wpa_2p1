@@ -45,6 +45,19 @@ $(document).ready(function(){
         window.history.back();
     });
 
+    // Enable dropdown submenu on hover
+    $('.dropdown-submenu').hover(function () {
+     $(this).find('.dropdown-menu').addClass('show');
+    }, function () {
+     $(this).find('.dropdown-menu').removeClass('show');
+    });
+
+    // Fix dropdown submenu positioning
+    $('.dropdown-submenu .dropdown-menu').hover(function () {
+     $(this).parent().addClass('show');
+    }, function () {
+     $(this).parent().removeClass('show');
+    });
 });
 
 async function add_student_function(student_id) {
