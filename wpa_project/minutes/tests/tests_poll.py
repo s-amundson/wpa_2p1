@@ -1,8 +1,11 @@
 import logging
+import time
+
 from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.apps import apps
-
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from ..tasks import close_poll
 from ..models import Business, Minutes, Poll, PollType, PollChoices, PollVote
 
 logger = logging.getLogger(__name__)
@@ -67,7 +70,7 @@ class TestsReport(TestCase):
         self.assertTemplateUsed('minutes/poll_list.html')
         self.assertEqual(response.context['poll_type'], 'poll')
 
-    @tag('temp')
+    # @tag('temp')
     def test_get_poll_list_motion(self):
         p = self.create_poll()
         pv = PollVote.objects.create(poll=p, user=self.test_user, choice=PollChoices.objects.get(pk=1))
@@ -86,6 +89,22 @@ class TestsReport(TestCase):
         self.assertEqual(polls[0].poll_type.poll_type, 'motion')
         self.assertIsNone(polls[0].minutes)
         self.assertIsNone(polls[0].business)
+        self.assertEqual(CrontabSchedule.objects.all().count(), 1)
+        self.assertEqual(PeriodicTask.objects.all().count(), 1)
+
+    # @tag('temp')
+    def test_post_motion_update(self):
+        m = self.create_poll()
+        time.sleep(.5)
+        response = self.client.post(reverse('minutes:poll', kwargs={'pk': m.id}) + '?poll_type=motion', self.post_dict, secure=True)
+        polls = Poll.objects.all()
+        self.assertEqual(len(polls), 1)
+        self.assertEqual(polls[0].poll_type.poll_type, 'motion')
+        self.assertIsNone(polls[0].minutes)
+        self.assertIsNone(polls[0].business)
+        self.assertEqual(m.poll_date, polls[0].poll_date)
+        self.assertEqual(CrontabSchedule.objects.all().count(), 1)
+        self.assertEqual(PeriodicTask.objects.all().count(), 1)
 
     # @tag('temp')
     def test_post_motion_minutes_and_business(self):
@@ -128,3 +147,11 @@ class TestsReport(TestCase):
         self.assertEqual(pv.count(), 1)
         self.assertEqual(pv.last().choice.id, 2)
 
+    # @tag('temp')
+    def test_task_close_poll(self):
+        p = self.create_poll()
+        close_poll(p.id)
+        polls = Poll.objects.all()
+        self.assertEqual(len(polls), 1)
+        self.assertEqual(polls.last().poll_type.poll_type, 'motion')
+        self.assertEqual(polls.last().state,'closed')

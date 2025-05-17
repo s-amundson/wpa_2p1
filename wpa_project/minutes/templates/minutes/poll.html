@@ -16,8 +16,8 @@
         <p>Duration: {{form.instance.duration }}</p>
         <p>Is Anonymous: {{ form.instance.is_anonymous}}</p>
         <p>Results: {% for r in form.instance.get_votes %} {{ r.choice.choice}} {{r.num_votes}} {% endfor %}</p>
-    {% else %}
-        <form method="post"> {% csrf_token %} {{ form }} </form>
-    {% endif %}
 
+    {% endif %}
+    <hr>
+    <form method="post"> {% csrf_token %} {{ form }} </form>
 {% endblock %}

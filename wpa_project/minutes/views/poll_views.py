@@ -2,6 +2,9 @@ import logging
 from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.conf import settings
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from ..forms import PollForm, PollVoteForm
 from ..models import Poll, PollType, PollVote
@@ -55,6 +58,31 @@ class PollView(BoardMixin, FormView):
     def form_valid(self, form):
         poll = form.save()
         self.success_url += f"?poll_type={poll.poll_type}"
+        initial_duration = form.initial.get('duration', poll.duration)
+        icd = poll.poll_date + timezone.timedelta(minutes=initial_duration)
+        logger.debug(icd)
+        close_date = poll.poll_date + timezone.timedelta(minutes=poll.duration)
+        close_schedule, _ = CrontabSchedule.objects.get_or_create(
+            minute=f'{icd.minute}',
+            hour=f'{icd.hour}',
+            day_of_month=f'{icd.day}',
+            month_of_year=f'{icd.month}',
+            defaults={'minute': close_date.minute,
+                      'hour': close_date.hour,
+                      'day_of_week': '*',
+                      'day_of_month': close_date.day,
+                      'month_of_year': close_date.month,
+                      'timezone': close_date.tzname()}
+        )
+        PeriodicTask.objects.update_or_create(
+            name=f'Poll Close {poll.id}',
+            task='minutes.tasks.close_poll',
+            description='close a poll',
+            enabled=True,
+            args=[poll.id],
+            defaults={'crontab':close_schedule,}
+        )
+
         return super().form_valid(form)
 
 
