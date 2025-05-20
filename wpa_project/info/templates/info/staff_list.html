@@ -46,7 +46,7 @@
                     <div class="d-flex flex-row">
                         <div class="container">
                             {% if staff.staffprofile_set.last.image %}
-                                <img class="rounded float-start img-max-300 m-2" src="{{ staff.staffprofile_set.last.image.url }}">
+                                <img class="rounded float-start img-max-300-ar m-2" src="{{ staff.staffprofile_set.last.image.url }}">
                             {% endif %}
                             {{ staff.staffprofile_set.last.bio|safe }}
                         </div>

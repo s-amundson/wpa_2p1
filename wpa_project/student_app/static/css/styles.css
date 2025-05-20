@@ -202,8 +202,15 @@ a {
 .img-max-300 {
   max-height: 300px;
   max-width: 300px;
-  width:100%;
+  width: 100%;
 }
+
+/* Preserve aspect ratio */
+.img-max-300-ar {
+  max-width: 300px;
+  width: 100%;
+}
+
 .hangingindent {
     padding-left: 50px ;
     text-indent: -50px ;
