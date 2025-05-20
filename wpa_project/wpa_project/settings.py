@@ -183,6 +183,7 @@ INSTALLED_APPS = [
     'info',
     'facebook',
     '_email',
+    'discord_bot',
 
     'csp',
     'django.contrib.admin',

@@ -3,14 +3,15 @@ import json
 import os
 import aio_pika
 
+
 class SendDiscord:
-    def __init__(self, channel, message, poll=False, poll_choices=None):
+    def __init__(self, channel, message, poll=None, poll_choices=None):
+        """ poll should be a dict {id: <int>, choices: [], state: <str>, duration: <int>"""
         self.routing_key = 'discord_bot'
         self.payload = json.dumps({
             'channel': channel,
             'message':message,
             'poll': poll,
-            'poll_choices': poll_choices
         })
         asyncio.run(self.main())
 

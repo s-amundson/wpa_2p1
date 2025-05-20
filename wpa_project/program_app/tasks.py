@@ -3,8 +3,7 @@ from celery import shared_task
 from django.utils import timezone
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from django.conf import settings
-from datetime import timedelta
-from src import SendDiscord
+
 from .src import ClassRegistrationHelper, UpdatePrograms, EmailMessage as ProgramEmailMessage
 from .models import BeginnerClass, BeginnerSchedule
 from event.models import Registration
@@ -14,7 +13,7 @@ from membership.tasks import membership_expire_notice, membership_expire_update,
 import logging
 logger = logging.getLogger('program_app')
 from celery.utils.log import get_task_logger
-# from discord_bot.bot import bot_task
+
 celery_logger = get_task_logger('program_app')
 crh = ClassRegistrationHelper()
 logger.warning(__name__)
@@ -41,17 +40,6 @@ def daily_update():
     update_programs.status_email()
 
 
-@shared_task
-def debug_task():
-    celery_logger.warning('program debug task')
-    SendDiscord(1353451822538293288, 'spend up to $500 test dollars on testing.', True,
-                ['Aye', 'Nay', 'Abstain'])
-
-@shared_task(bind=True)
-def discord_message(self, message_dict):
-    celery_logger.warning(message_dict)
-    return {'status': 'success'}
-
 @shared_task(bind=True)
 def get_class_status(self):
     bc = BeginnerClass.objects.filter(event__event_date__gte=timezone.now().date()).order_by('event__event_date')[:3]
@@ -60,7 +48,7 @@ def get_class_status(self):
         c = crh.enrolled_count(b)
         d = timezone.localtime(b.event.event_date)
         status += (f"{b.class_type.capitalize()} class on {d.strftime('%a %d %b %Y, %I:%M%p')} has "
-                   f"{c['beginner'] + c['returnee']}, { c['instructor'] } instructors, and { c['staff'] } volunteers signed up.\n")
+                   f"{c['beginner'] + c['returnee']} students, { c['instructor'] } instructors, and { c['staff'] } volunteers signed up.\n")
     return status
 
 

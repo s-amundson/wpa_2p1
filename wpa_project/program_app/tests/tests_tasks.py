@@ -143,7 +143,7 @@ class TestsTasks(MockSideEffects, TestCase):
         charge_group([1])
         chrg_group.assert_called()
 
-    @tag('temp')
+    # @tag('temp')
     def test_get_class_status(self):
         date = timezone.datetime.now() + timezone.timedelta(days=1)
         date = date.replace(hour=9, minute=0, second=0, microsecond=0)

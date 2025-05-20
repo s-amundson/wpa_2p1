@@ -3,6 +3,9 @@ from django.apps import apps
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+
+from discord_bot import SendDiscord
+from discord_bot.models import DiscordChannelRole
 from src.model_helper import choices
 from ..models import Business, Minutes
 logger = logging.getLogger(__name__)
@@ -39,10 +42,27 @@ class Poll(models.Model):
     duration = models.IntegerField(default=1) # hours
     business = models.ForeignKey(Business, on_delete=models.SET_NULL, null=True, default=None)
     minutes = models.ForeignKey(Minutes, on_delete=models.SET_NULL, null=True, default=None)
+    election = models.ForeignKey('membership.Election', on_delete=models.PROTECT, null=True, default=None)
+    discord_message = models.BigIntegerField(null=True, default=None)
+    # discord_ref_message = models.BigIntegerField(null=True, default=None)
 
     def get_votes(self):
         return apps.get_model('minutes', 'PollVote').objects.get_vote_count(self)
 
+    def to_discord(self, ref_msg_id=None):
+        channel = DiscordChannelRole.objects.filter(purpose=self.poll_type.poll_type).last().channel.channel
+        logger.debug(channel)
+        if not self.is_anonymous:
+            pc = []
+            for c in self.poll_choices.all().order_by('id'):
+                pc.append(c.choice)
+            SendDiscord(channel, self.description,{
+                'id': self.id,
+                'choices': pc,
+                'state': self.state,
+                'message_id': self.discord_message,
+                'duration': self.duration,
+                'reference_id': ref_msg_id})
 
 class PollVoteManager(models.Manager):
     def get_votes(self, poll):
@@ -59,6 +79,6 @@ class PollVoteManager(models.Manager):
 class PollVote(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, default=None, related_name='+')
-    choice = models.ForeignKey(PollChoices, on_delete=models.PROTECT, related_name='+')
+    choice = models.ForeignKey(PollChoices, on_delete=models.PROTECT, unique=False, related_name='+')
 
     objects = PollVoteManager()

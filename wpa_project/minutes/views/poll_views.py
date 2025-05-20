@@ -9,7 +9,6 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from ..forms import PollForm, PollVoteForm
 from ..models import Poll, PollType, PollVote
 from src.mixin import BoardMixin, StudentFamilyMixin
-
 logger = logging.getLogger(__name__)
 
 
@@ -56,6 +55,7 @@ class PollView(BoardMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
+        logger.debug(form.instance)
         poll = form.save()
         self.success_url += f"?poll_type={poll.poll_type}"
         initial_duration = form.initial.get('duration', poll.duration)
@@ -82,6 +82,7 @@ class PollView(BoardMixin, FormView):
             args=[poll.id],
             defaults={'crontab':close_schedule,}
         )
+        poll.to_discord()
 
         return super().form_valid(form)
 

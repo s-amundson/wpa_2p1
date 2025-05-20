@@ -5,8 +5,11 @@ from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.apps import apps
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
-from ..tasks import close_poll
+from unittest.mock import patch
+
+from ..tasks import close_poll, end_motion, update_motion
 from ..models import Business, Minutes, Poll, PollType, PollChoices, PollVote
+from discord_bot.models import DiscordChannel, DiscordChannelRole
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,9 @@ class TestsReport(TestCase):
         # Every test needs a client.
         self.client = Client()
         self.test_user = self.User.objects.get(pk=1)
+        self.test_user.discord_user = 456123
+        self.test_user.save()
+
         self.client.force_login(self.test_user)
         # pt, created = PollType.objects.get_or_create(poll_type='motion')
         self.post_dict = {
@@ -36,6 +42,17 @@ class TestsReport(TestCase):
             'business': '',
             'poll_type': 2
         }
+
+    def create_channel(self):
+        cr = DiscordChannelRole.objects.create(
+            channel=DiscordChannel.objects.create(
+                channel=654321,
+                title = 'test channel',
+                level = 'board'
+            ),
+            purpose = 'motion'
+        )
+        return cr.channel
 
     def create_poll(self):
         poll = Poll.objects.create(
@@ -82,7 +99,10 @@ class TestsReport(TestCase):
         self.assertContains(response, 'Results: Aye 1')
 
     # @tag('temp')
-    def test_post_motion(self):
+    # @patch('src.send_discord.SendDiscord.main')
+    @patch('minutes.models.poll_model.SendDiscord')
+    def test_post_motion(self, send_discord):
+        channel = self.create_channel()
         response = self.client.post(reverse('minutes:poll') + '?poll_type=motion', self.post_dict, secure=True)
         polls = Poll.objects.all()
         self.assertEqual(len(polls), 1)
@@ -91,10 +111,32 @@ class TestsReport(TestCase):
         self.assertIsNone(polls[0].business)
         self.assertEqual(CrontabSchedule.objects.all().count(), 1)
         self.assertEqual(PeriodicTask.objects.all().count(), 1)
+        send_discord.assert_called_with(654321, polls[0].description,
+                                        {'id': polls[0].id, 'choices': ['Aye', 'Nay', 'Abstain'],
+                                         'state': polls[0].state,'message_id': None, 'duration': 1})
 
     # @tag('temp')
-    def test_post_motion_update(self):
+    @patch('minutes.models.poll_model.SendDiscord')
+    def test_post_motion_anonymous(self, send_discord):
+        channel = self.create_channel()
+        self.post_dict['is_anonymous'] = True
+        response = self.client.post(reverse('minutes:poll') + '?poll_type=motion', self.post_dict, secure=True)
+        polls = Poll.objects.all()
+        self.assertEqual(len(polls), 1)
+        self.assertEqual(polls[0].poll_type.poll_type, 'motion')
+        self.assertIsNone(polls[0].minutes)
+        self.assertIsNone(polls[0].business)
+        self.assertEqual(CrontabSchedule.objects.all().count(), 1)
+        self.assertEqual(PeriodicTask.objects.all().count(), 1)
+        send_discord.assert_not_called()
+
+    # @tag('temp')
+    @patch('minutes.models.poll_model.SendDiscord')
+    def test_post_motion_update(self, send_discord):
+        channel = self.create_channel()
         m = self.create_poll()
+        m.discord_message = 123456
+        m.save()
         time.sleep(.5)
         response = self.client.post(reverse('minutes:poll', kwargs={'pk': m.id}) + '?poll_type=motion', self.post_dict, secure=True)
         polls = Poll.objects.all()
@@ -105,9 +147,14 @@ class TestsReport(TestCase):
         self.assertEqual(m.poll_date, polls[0].poll_date)
         self.assertEqual(CrontabSchedule.objects.all().count(), 1)
         self.assertEqual(PeriodicTask.objects.all().count(), 1)
+        send_discord.assert_called_with(654321, polls[0].description,
+                        {'id': polls[0].id, 'choices':['Aye', 'Nay', 'Abstain'], 'state': polls[0].state,
+                         'message_id': 123456, 'duration': 1})
 
     # @tag('temp')
-    def test_post_motion_minutes_and_business(self):
+    @patch('minutes.models.poll_model.SendDiscord')
+    def test_post_motion_minutes_and_business(self, send_discord):
+        channel = self.create_channel()
         m = Minutes(
             meeting_date='2021-09-04T19:20:30+03:00', attending='', minutes_text='', memberships=0,
             balance=0, discussion='', end_time=None,
@@ -120,9 +167,12 @@ class TestsReport(TestCase):
         self.post_dict['business'] = b1.id
         response = self.client.post(reverse('minutes:poll') + '?poll_type=motion', self.post_dict, secure=True)
         self.assertEqual(len(Poll.objects.all()), 1)
-        self.assertEqual(Poll.objects.last().business.id, b1.id)
-        self.assertEqual(Poll.objects.last().minutes.id, m.id)
-
+        poll = Poll.objects.last()
+        self.assertEqual(poll.business.id, b1.id)
+        self.assertEqual(poll.minutes.id, m.id)
+        send_discord.assert_called_with(654321, poll.description,
+                                        {'id': poll.id, 'choices': ['Aye', 'Nay', 'Abstain'], 'state': poll.state,
+                                         'message_id': None, 'duration': 1})
     # @tag('temp')
     def test_get_poll_vote(self):
         p = self.create_poll()
@@ -148,10 +198,72 @@ class TestsReport(TestCase):
         self.assertEqual(pv.last().choice.id, 2)
 
     # @tag('temp')
-    def test_task_close_poll(self):
+    @patch('minutes.models.poll_model.SendDiscord')
+    def test_task_close_poll(self, send_discord):
+        self.create_channel()
         p = self.create_poll()
+        p.discord_message = 123456
+        p.save()
         close_poll(p.id)
         polls = Poll.objects.all()
         self.assertEqual(len(polls), 1)
         self.assertEqual(polls.last().poll_type.poll_type, 'motion')
         self.assertEqual(polls.last().state,'closed')
+        send_discord.assert_called_with(654321, polls[0].description,
+                                        {'id': polls[0].id, 'choices': ['Aye', 'Nay', 'Abstain'],
+                                         'state': polls[0].state,
+                                         'message_id': 123456, 'duration': 1})
+
+
+    # @tag('temp')
+    @patch('minutes.models.poll_model.SendDiscord')
+    def test_task_update_poll(self, send_discord):
+        channel = self.create_channel()
+        p = self.create_poll()
+        p.discord_message = 123456
+        p.save()
+
+        update_motion(654321, 456123, 'updated test motion', 123450, 123456)
+
+        polls = Poll.objects.all()
+        self.assertEqual(polls.count(), 1)
+        poll = polls.last()
+        self.assertEqual(poll.description, 'updated test motion')
+        send_discord.assert_called_with(654321, poll.description,
+                                        {'id': poll.id, 'choices': ['Aye', 'Nay', 'Abstain'],
+                                         'state': poll.state,
+                                         'message_id': 123450, 'duration': 1, 'reference_id': 123450})
+
+
+    # @tag('temp')
+    @patch('minutes.models.poll_model.SendDiscord')
+    def test_task_end_poll_cancel(self, send_discord):
+        channel = self.create_channel()
+        p = self.create_poll()
+        p.discord_message = 123456
+        p.save()
+
+        end_motion(654321, 456123, 123456, True)
+
+        polls = Poll.objects.all()
+        self.assertEqual(polls.count(), 1)
+        poll = polls.last()
+        self.assertEqual(poll.state, 'canceled')
+        send_discord.assert_not_called()
+
+
+    # @tag('temp')
+    @patch('minutes.models.poll_model.SendDiscord')
+    def test_task_end_poll_close(self, send_discord):
+        channel = self.create_channel()
+        p = self.create_poll()
+        p.discord_message = 123456
+        p.save()
+
+        end_motion(654321, 456123, 123456, False)
+
+        polls = Poll.objects.all()
+        self.assertEqual(polls.count(), 1)
+        poll = polls.last()
+        self.assertEqual(poll.state, 'closed')
+        send_discord.assert_not_called()

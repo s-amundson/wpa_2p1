@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models import BooleanField, DateField, IntegerField, CharField
+from django.db.models import BooleanField, DateField, IntegerField, CharField, BigIntegerField
 
 
 class User(AbstractUser):
@@ -12,3 +12,4 @@ class User(AbstractUser):
     is_member = BooleanField(default=False)
     instructor_level = IntegerField(default=None, null=True)
     theme = CharField(max_length=20, choices=THEME_CHOICES, default='browser')
+    discord_user = BigIntegerField(null=True, default=None)
