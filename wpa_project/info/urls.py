@@ -17,6 +17,7 @@ urlpatterns = [
     path('policy/', PolicyFormView.as_view(), name='policy'),
     path('policy/<int:policy>/', PolicyFormView.as_view(), name='policy'),
     path('policy/<int:policy>/<int:version>/', PolicyFormView.as_view(), name='policy'),
+    path('policy_list', PolicyListView.as_view(), name='policy_list'),
     path('staff_list/', StaffList.as_view(), name='staff_list'),
     path('staff_profile_form/', StaffProfileFormView.as_view(), name='staff_profile_form'),
     path('staff_profile_form/<int:pk>/', StaffProfileFormView.as_view(), name='staff_profile_form'),

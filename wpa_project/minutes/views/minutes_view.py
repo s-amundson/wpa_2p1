@@ -7,11 +7,13 @@ from django.http import JsonResponse
 from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
 from django.forms import modelformset_factory
+from django.utils import timezone
 
 from src.mixin import MemberMixin
 from ..forms import MinutesForm, ReportForm2, ReportFormset
 from ..models import Business, Minutes, Report
-
+from contact_us.models import Complaint
+from payment.models import Reimbursement
 logger = logging.getLogger(__name__)
 
 
@@ -47,6 +49,8 @@ class MinutesView(MemberMixin, FormView):
         context['new_business'] = nb.order_by('id')
         context['minutes'] = self.minutes
         context['minutes_edit'] = self.minutes is not None and self.minutes.end_time is None
+        context['complaints'] = Complaint.objects.filter(resolved_date=None).count()
+        context['reimbursements'] = Reimbursement.objects.filter(status='pending').count()
 
         for owner in self.owners:
             context[f'{owner}_formset'] = self.get_formset(owner)
@@ -86,6 +90,8 @@ class MinutesView(MemberMixin, FormView):
 
     def form_valid(self, form):
         minutes = form.save()
+        if self.minutes is None:
+            minutes.meeting_date = timezone.now()
         self.success_url = reverse_lazy('minutes:minutes', kwargs={'minutes': minutes.id})
         minutes.save()
 
