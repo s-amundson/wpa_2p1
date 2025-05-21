@@ -73,7 +73,7 @@
         </div>
 
         <div class="row p-3">
-            <div class="col-2"> Treasure's Report:</div>
+            <div class="col-2"> Treasurer's Report:</div>
             <div class="col">
                 {{ treasure_formset.as_div }}
             </div>
@@ -128,6 +128,12 @@
         </div>
 
     </form>
+    {% if not form.instance.end_time %}
+        <h5 class="p-3">Complaints</h5>
+        <div class="ps-5">There are {{complaints}} unresolved complaints</div>
+        <h5 class="p-3"> Reimbursements </h5>
+        <div class="ps-5">There are {{reimbursements}} pending reimbursements</div>
+    {% endif %}
     <h5 class="p-3">Old Business</h5>
     <div id="old-business-forms"></div>
     <h5 class="p-3">New Business</h5>

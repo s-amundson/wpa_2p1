@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %} Policy List {% endblock %}
+
+
+{% block main %}
+    <div class="m-2"><h5>FAQ Categories:</h5></div>
+    {% for policy in object_list %}
+        <div class="d-flex flex-row m-2">
+            <div class="col">
+                <a href="{% url 'information:policy' policy.id %}">
+                    {{ policy.title }}
+                </a>
+            </div>
+
+        </div>
+    {% empty %}
+        <h6>No categories yet.</h6>
+    {% endfor %}
+
+    <div class="d-flex flex-row m-2">
+        <div class="m-3">
+            <a href="{% url 'information:policy'%}" class="btn btn-primary" role="button">
+                Add Policy
+            </a>
+        </div>
+    </div>
+
+{% endblock %}

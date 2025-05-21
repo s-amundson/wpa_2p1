@@ -1,10 +1,11 @@
-from django.views.generic.edit import FormView
+from django.views.generic import FormView, ListView
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.forms.models import model_to_dict
+
 from ..models import Policy
 from ..forms import PolicyTextForm
-
+from src.mixin import BoardMixin
 import logging
 logger = logging.getLogger(__name__)
 
@@ -67,3 +68,11 @@ class PolicyFormView(FormView):
         self.success_url = reverse_lazy('info:policy', kwargs={'policy': self.policy.id})
 
         return super().form_valid(form)
+
+
+class PolicyListView(BoardMixin, ListView):
+    model = Policy
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset
