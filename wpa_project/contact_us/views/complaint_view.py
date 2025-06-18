@@ -97,8 +97,8 @@ class ComplaintView(UserPassesTestMixin, FormView):
                 complaint_dict['student'] = complaint.user.student_set.last()
                 complaint_dict['email'] = EmailAddress.objects.get_primary(complaint.user)
 
-            EmailMessage().send_mass_bcc(
-                User.objects.filter(is_board=True),
+            EmailMessage().send_group(
+                [settings.EMAIL_ADDRESSES.get("BOARD", 'none@example.com')],
                 'WPA Complaint Filed',
                 get_template('contact_us/email/complaint.txt').render(complaint_dict),
                 get_template('contact_us/email/complaint.html').render(complaint_dict)

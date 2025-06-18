@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %} Complaint Form {% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/complaint.js' %}"></script>
+{% endblock %}
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>

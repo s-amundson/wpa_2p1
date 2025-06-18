@@ -26,8 +26,9 @@ class ComplaintForm(MyModelForm):
         self.fields['anonymous'] = BooleanField(
             widget=CheckboxInput(attrs={'class': "m-2"}),
             required=False,
-            initial=True,
+            initial=False,
             label='I wish to make an anonymous complaint')
+        self.fields['category'].label += ' (only harassment complaints can be submitted anonymously)'
         self.fields['resolved'] = BooleanField(
             widget=CheckboxInput(attrs={'class': "m-2"}),
             required=False,

@@ -61,6 +61,13 @@ class EmailMessage(EmailMultiAlternatives):
         counts.save()
         super().send(fail_silently)
 
+    def send_group(self, to, subject, body, html):
+        self.to = to
+        self.subject = subject
+        self.body = body
+        self.attach_alternative(html, 'text/html')
+        self.send()
+
     def paragraph_message(self, message):
         paragraphs = []
         for line in message.split('\n'):
