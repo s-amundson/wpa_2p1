@@ -5,20 +5,18 @@
 
 {% block main %}
     <div class="m-2"><h5>Contact Categories:</h5></div>
-    {% for category in categories %}
+    {% for category in object_list %}
         <div class="d-flex flex-row m-2">
-            <div class="col">
+            <div class="m-3">
                 <a href="{% url 'contact_us:category' category.id %}">
                     {{ category.title }}
                 </a>
             </div>
-            <div class="col">
-                {% for r in category.recipients  %}
-                    <div class="row">
-                        {{ r }}
-                    </div>
-
-                {% endfor %}
+            <div class="m-3">
+                {{ category.email }}
+            </div>
+            <div class="m-3">
+                {{ category.is_public }}
             </div>
         </div>
     {% empty %}

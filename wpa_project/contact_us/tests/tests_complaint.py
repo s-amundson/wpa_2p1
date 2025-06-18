@@ -6,7 +6,7 @@ from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 
-from ..models import Complaint, ComplaintComment
+from ..models import Category, Complaint, ComplaintComment
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -31,6 +31,7 @@ class TestsComplaint(TestCase):
             'form-MAX_NUM_FORMS': 1000,
         }
         self.complaint = None
+        c = Category.objects.create(title='board', email='board@example.com')
 
     def add_message(self):
         self.complaint = Complaint.objects.create(
