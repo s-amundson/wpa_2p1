@@ -9,7 +9,7 @@ from django.conf import settings
 from ipware import get_client_ip
 
 from ..forms import MessageForm
-from ..models import Message
+from ..models import Category, Message
 from ..tasks import send_contact_email
 from student_app.models import Student
 from allauth.account.models import EmailAddress
@@ -55,7 +55,11 @@ class MessageView(FormView):
             score = self.request.session.get('recaptcha_score', 0)
             logging.warning(score)
             context['probably_human'] = score > 0.5
-        context['email'] = settings.DEFAULT_FROM_EMAIL
+        # cat = Category.objects.filter(title='Website').last()
+        # if cat is not None:
+        #     context['email'] = cat.email
+        # else:
+        #     context['email'] = settings.DEFAULT_FROM_EMAIL
         return context
 
     def get_form_kwargs(self):

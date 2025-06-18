@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   bkupdb:
     command: postgres -c config_file=conf/postgres.conf

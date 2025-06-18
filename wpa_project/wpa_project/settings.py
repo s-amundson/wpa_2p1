@@ -39,6 +39,7 @@ ACCOUNT_ADAPTER = "src.account_adapter.CustomAccountAdapter"
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 ACCOUNT_EMAIL_DOMAIN_BLACKLIST = get_secret('ACCOUNT_EMAIL_DOMAIN_BLACKLIST', default=['example.com'])
+ACCOUNT_EMAIL_UNKNOWN_ACCOUNTS = False
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_FORMS = {'signup': 'student_app.forms.SignUpForm'}
 ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS')
