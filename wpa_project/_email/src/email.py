@@ -6,6 +6,7 @@ from django.utils import timezone
 import logging
 
 from _email.models import BulkEmail, EmailCounts
+from contact_us.models import Category
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,15 @@ class EmailMessage(EmailMultiAlternatives):
         counts.bcc += len(self.bcc)
         counts.save()
         super().send(fail_silently)
+
+    def send_contact(self, contact, subject, body, html):
+        _contact = Category.objects.filter(title=contact).last()
+        if _contact is not None:
+            self.to = [_contact.email]
+            self.subject = subject
+            self.body = body
+            self.attach_alternative(html, 'text/html')
+            self.send()
 
     def paragraph_message(self, message):
         paragraphs = []

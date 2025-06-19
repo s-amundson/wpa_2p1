@@ -21,8 +21,7 @@ class TestsMessageList(TestCase):
                           'message': ['test message']}
 
     def add_message(self):
-        c = Category.objects.create(title='test category')
-        c.recipients.set([User.objects.get(pk=3)])
+        c = Category.objects.create(title='test category', email='none@example.com')
         message = Message.objects.create(category=c,
                                          contact_name=self.post_dict['contact_name'][0],
                                          email=self.post_dict['email'][0],

@@ -7,7 +7,8 @@ logger = logging.getLogger(__name__)
 
 class Category(models.Model):
     title = models.CharField(max_length=50)
-    recipients = models.ManyToManyField(settings.AUTH_USER_MODEL, limit_choices_to={'is_staff': True})
+    email = models.EmailField(null=True, default=None)
+    is_public = models.BooleanField(default=True)
 
     def __str__(self):
         return f'{self.title}'

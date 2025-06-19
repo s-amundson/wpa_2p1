@@ -2,7 +2,7 @@ import logging
 from unittest.mock import patch
 
 from django.apps import apps
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 from django.core import mail
@@ -48,7 +48,6 @@ class TestsMessage(TestCase):
                           'email': ['EmilyNConlan@einrot.com'],
                           'category': ['2'],
                           'message': ['test message'],
-                          'captcha': ['on'],
                           }
         self.client_ip = '0.0.0.0'
 
@@ -57,8 +56,7 @@ class TestsMessage(TestCase):
         super().tearDownClass()
 
     def _category_post(self):
-        c = Category.objects.create(title='test category')
-        c.recipients.set([self.test_user])
+        c = Category.objects.create(title='test category', email='none@example.com')
         self.post_dict['category'] = c.id
         return c
 
@@ -84,8 +82,7 @@ class TestsMessage(TestCase):
         self.assertTrue(response.context['form'].has_instance)
 
     def test_get_message_board_existing_good(self):
-        c = Category.objects.create(title='test category')
-        c.recipients.set([self.test_user])
+        c = Category.objects.create(title='test category', email='none@example.com')
         message = Message.objects.create(category=c,
                                          contact_name=self.post_dict['contact_name'][0],
                                          email=self.post_dict['email'][0],
@@ -95,12 +92,12 @@ class TestsMessage(TestCase):
         response = self.client.get(reverse('contact_us:contact', kwargs={'message_id': message.id}), secure=True)
         self.assertFalse(response.context['form'].has_instance)
 
+    # @tag('temp')
     @patch('contact_us.views.message_view.send_contact_email.delay')
     def test_post_message_user(self, sce):
         sce.side_effect = self.send_email
 
         self._category_post()
-        self.post_dict.pop('captcha')
         response = self.client.post(reverse('contact_us:contact'), self.post_dict, secure=True)
         message = Message.objects.all()
         self.assertEqual(len(message), 1)
@@ -224,8 +221,7 @@ class TestsMessage(TestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_message_email_timeout(self):
-        c = Category.objects.create(title='test category')
-        c.recipients.set([self.test_user])
+        c = Category.objects.create(title='test category', email='none@example.com')
         message = Message.objects.create(category=c,
                                          contact_name=self.post_dict['contact_name'][0],
                                          created_time=timezone.now() - timezone.timedelta(hours=1),

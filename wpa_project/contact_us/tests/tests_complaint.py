@@ -1,12 +1,12 @@
 import logging
 
 from django.apps import apps
+from django.core import mail
 from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
-from _email.models import BulkEmail
 
-from ..models import Category, Message, Complaint, ComplaintComment
+from ..models import Category, Complaint, ComplaintComment
 
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
@@ -31,6 +31,7 @@ class TestsComplaint(TestCase):
             'form-MAX_NUM_FORMS': 1000,
         }
         self.complaint = None
+        c = Category.objects.create(title='board', email='board@example.com')
 
     def add_message(self):
         self.complaint = Complaint.objects.create(
@@ -66,10 +67,10 @@ class TestsComplaint(TestCase):
                                     self.post_dict, secure=True)
 
         self.assertRedirects(response, reverse('contact_us:thanks', kwargs={'arg':'complaint'}))
-        be = BulkEmail.objects.all()
-        self.assertEqual(len(be), 1)
-        self.assertTrue(be[0].body.find('anonymously') > 0)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(mail.outbox[0].body.find('anonymously') > 0)
         self.assertIsNone(Complaint.objects.last().resolved_date)
+        self.assertIn("board@example.com", mail.outbox[0].to)
 
     # @tag('temp')
     def test_post_complaint_user_not_anonymous(self):
@@ -78,12 +79,11 @@ class TestsComplaint(TestCase):
         response = self.client.post(reverse('contact_us:complaint'), self.post_dict, secure=True)
 
         self.assertRedirects(response, reverse('contact_us:thanks', kwargs={'arg':'complaint'}))
-        be = BulkEmail.objects.all()
-        self.assertEqual(len(be), 1)
-        logger.warning(be[0].body)
-        self.assertFalse(be[0].body.find('anonymously') > 0)
-        self.assertTrue(be[0].body.find('Charles Wells') > 0)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertFalse(mail.outbox[0].body.find('anonymously') > 0)
+        self.assertTrue(mail.outbox[0].body.find('Charles Wells') > 0)
         self.assertIsNone(Complaint.objects.last().resolved_date)
+        self.assertIn("board@example.com", mail.outbox[0].to)
 
     # @tag('temp')
     def test_post_complaint_resolved(self):

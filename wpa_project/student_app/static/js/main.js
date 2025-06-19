@@ -287,7 +287,7 @@ async function post_is_joad(checkbox, send_data) {
     await $.post(checkbox.attr('joad_url'), send_data, function(data, status){
         console.log(data);
         if(data['error']) {
-            checkbox.attr('checked', false);
+            checkbox.prop('checked', false);
             alert_notice("Error", data['message']);
         }
         return data;

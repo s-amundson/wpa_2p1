@@ -20,6 +20,7 @@
     {% endif %}
     {% if user.is_board %}
         <hr>
+        <h4 class="text-center"> Board only below this line </h4>
         <form method="post">{% csrf_token %}
             <p> {{ form.title_text.label }} {{ form.title_text }} {{ form.title_text.errors }}</p>
             <p> {{ form.title_access.label }} {{ form.title_access }} {{ form.title_access.errors }}</p>
