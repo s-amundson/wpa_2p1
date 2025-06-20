@@ -29,3 +29,4 @@ class MessageForm(MyModelForm):
             for f in self.fields:
                 self.fields[f].required = False
                 self.fields[f].widget.attrs.update({'class': 'form-control m-2'})
+        self.fields['category'].queryset = self.fields['category'].queryset.filter(is_public=True)

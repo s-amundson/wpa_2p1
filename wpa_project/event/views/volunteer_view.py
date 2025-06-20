@@ -10,6 +10,7 @@ from ..models import VolunteerEvent
 from ..tasks import cancel_event
 
 from event.models import Event, VolunteerAward
+from info.models import Policy
 from student_app.models import Student, StudentFamily
 from src.mixin import BoardMixin
 
@@ -19,6 +20,11 @@ logger = logging.getLogger(__name__)
 
 class VolunteerAwardInfoView(TemplateView):
     template_name = 'event/volunteer_points_info.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['volunteer_policy'] = Policy.objects.filter(title='Volunteer Incentive Policy').last()
+        return context
 
 
 class VolunteerAwardListView(ListView):

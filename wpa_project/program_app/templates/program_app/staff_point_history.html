@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %} Staff Point History {% endblock %}
+
+{% block main %}
+    <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th> Event </th>
+                <th> Points Earned/Spent (spent shows as negative)</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for record in object_list %}
+            <tr>
+                <td> {{ record.id }}</td>
+                <td> {{ record.event }} </td>
+                <td> {{ record.volunteer_points|floatformat:"1"  }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
