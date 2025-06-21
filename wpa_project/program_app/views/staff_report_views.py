@@ -1,5 +1,6 @@
 from django.db.models import Sum
-from django.views.generic import FormView
+from django.shortcuts import get_object_or_404
+from django.views.generic import FormView, ListView
 from django.urls import reverse_lazy
 from django.forms import model_to_dict
 from django.utils import timezone
@@ -51,3 +52,13 @@ class StaffReportView(BoardMixin, FormView):
         self.start_date = self.aware_date(form.cleaned_data.get('start_date', None))
         self.end_date = self.aware_date(form.cleaned_data.get('end_date', None))
         return self.form_invalid(form)
+
+
+class StaffPointHistoryView(BoardMixin, ListView):
+    model = VolunteerRecord
+    template_name = 'program_app/staff_point_history.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(student=get_object_or_404(Student, pk=self.kwargs['student']))
+        return queryset.order_by('-id')

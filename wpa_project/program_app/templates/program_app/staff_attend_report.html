@@ -29,7 +29,10 @@
                 <td> {{ staff.user.instructor_level }}</td>
                 <td> {{ staff.registrations }} </td>
                 <td> {{ staff.attended }} </td>
-                <td> {{ staff.points|floatformat:"1" }}</td>
+                <td>
+                    {{ staff.points|floatformat:"1" }}
+                    {% if staff.points %} <a href="{% url 'programs:staff_point_history' staff.id %}">History</a> {% endif %}
+                </td>
             </tr>
         {% endfor %}
         </tbody>
