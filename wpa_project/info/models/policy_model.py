@@ -1,6 +1,7 @@
 from django.db import models
 from django.template import Context, Template
 from django.utils import timezone
+from django_ckeditor_5.fields import CKEditor5Field
 import logging
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class PolicyText(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(choices=STATUS, default=0)
     title = models.ForeignKey(Policy, on_delete=models.CASCADE)
-    policy = models.TextField()
+    policy = CKEditor5Field('Text', config_name='extends')
     is_html = models.BooleanField(default=False)
 
     class Meta:

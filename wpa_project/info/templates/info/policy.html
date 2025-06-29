@@ -3,6 +3,7 @@
 {% load static %}
 {% block script %}
     <script src="{% static 'js/info_preview.js' %}"></script>
+    {{ form.media }}
 {% endblock %}
 {% block title %} {{title}} {% endblock %}
 
@@ -38,7 +39,7 @@
             <h3 class="text-center"> History </h3>
             {% for policy in history %}
                 <div class="row border">
-                    <div class="row">
+                    <div class="row px-3">
                         {% if policy.is_html %}
                             {{ policy.policy|safe }}
                         {% else %}

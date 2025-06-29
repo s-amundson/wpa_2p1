@@ -1,6 +1,7 @@
 from src.model_form import MyModelForm
 from ..models import Policy, PolicyText, ACCESS
-from django.forms import ModelForm, CharField, CheckboxInput, ChoiceField
+from django.forms import CharField, CheckboxInput, ChoiceField
+from django_ckeditor_5.widgets import CKEditor5Widget
 
 
 class PolicyForm(MyModelForm):
@@ -27,5 +28,8 @@ class PolicyTextForm(MyModelForm):
         self.fields['title_access'] = ChoiceField(label='Access', choices=ACCESS)
         self.fields['is_html'].widget = CheckboxInput()
         self.fields['is_html'].required = False
+        self.fields['policy'].widget = CKEditor5Widget(
+            attrs={"class": "django_ckeditor_5"}, config_name="no-color"
+        )
         if self.instance.id:
             self.fields['policy'].widget.attrs.update({'class': 'form-control m-2', 'readonly': 'readonly'})

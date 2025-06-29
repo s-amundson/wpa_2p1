@@ -33,7 +33,8 @@ urlpatterns = [
     path('membership/', include('membership.urls', namespace='membership')),
     path('minutes/', include('minutes.urls', namespace='minutes')),
     path('payment/', include('payment.urls', namespace='payment')),
-    path('programs/', include('program_app.urls', namespace='programs'))
+    path('programs/', include('program_app.urls', namespace='programs')),
+    path("ckeditor5/", include('django_ckeditor_5.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

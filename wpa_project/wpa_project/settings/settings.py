@@ -17,7 +17,7 @@ from pathlib import Path
 from csp.constants import SELF, NONCE
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 with open(os.path.join(BASE_DIR, 'wpa_project', 'secrets.json')) as secrets_file:
     secret_settings = json.load(secrets_file)
@@ -204,6 +204,7 @@ INSTALLED_APPS = [
     'django_sendfile',
     'django_celery_beat',
     'django_recaptcha',
+    'django_ckeditor_5',
 ]
 
 LOGIN_REDIRECT_URL = 'registration:profile'
