@@ -47,7 +47,8 @@ class TestsVolunteerEvent(TestCase):
         d = timezone.now().replace(hour=14, minute=0, second=0, microsecond=0) + timezone.timedelta(days=2)
         response = self.client.post(
             reverse('events:volunteer_event'),
-            {'volunteer_limit': 4, 'event_date': d, 'state': 'open', 'description':'Updated description'},
+            {'volunteer_limit': 4, 'event_date': d, 'state': 'open', 'description':'Updated description',
+             'volunteer_points': 10},
             secure=True)
         # self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, reverse('events:volunteer_event_list'))
@@ -56,6 +57,7 @@ class TestsVolunteerEvent(TestCase):
         logger.warning(ve.description)
         self.assertEqual(event.state, 'open')
         self.assertEqual(event.type, 'work')
+        self.assertEqual(event.volunteer_points, 10)
         self.assertEqual(ve.description, 'Updated description')
 
     # @tag('temp')

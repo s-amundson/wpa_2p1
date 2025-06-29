@@ -121,7 +121,8 @@ class VolunteerEventView(BoardMixin, FormView):
             v_event.event = Event.objects.create(
                 event_date=form.cleaned_data['event_date'],
                 state=form.cleaned_data['state'],
-                type='work'
+                type='work',
+                volunteer_points=form.cleaned_data.get('volunteer_points', 0)
             )
         v_event.save()
         logger.warning(f'v_event: {v_event.id} {v_event.description}, event: {v_event.event.id}')
