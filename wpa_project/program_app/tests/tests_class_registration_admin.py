@@ -10,7 +10,7 @@ from student_app.models import Student, User
 
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp')
 class TestsClassAdminRegistration(TestCase):
     fixtures = ['f1']
 

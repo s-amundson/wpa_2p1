@@ -53,7 +53,7 @@ class SessionFormView(UserPassesTestMixin, FormView):
         if self.kwargs.get('session_id', None) is not None:
             self.session = get_object_or_404(Session, pk=self.kwargs['session_id'])
         if self.request.user.is_authenticated:
-            return self.request.user.is_board
+            return self.request.user.has_perm('student_app.board')
         return False
 
 

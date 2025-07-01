@@ -21,7 +21,7 @@ class EmailMessage(_EmailMessage):
         self.send()
 
     def instructor_canceled_email(self, event, num_instructors):
-        students = Student.objects.filter(user__is_instructor=True)
+        students = Student.objects.filter(user__groups__name="instructors")
         logger.warning(students)
         self.bcc_from_students(students)
         logger.warning(self.bcc)

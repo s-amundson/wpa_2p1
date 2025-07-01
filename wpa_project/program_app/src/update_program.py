@@ -132,9 +132,9 @@ class UpdatePrograms:
         crh = ClassRegistrationHelper()
         email_date = self.today + timezone.timedelta(days=2)
         # logger.warning(email_date)
-        staff_query = User.objects.filter(is_staff=True, is_active=True)
-        staff_students = Student.objects.filter(user__in=staff_query)
-        # staff_students = Student.objects.filter(user__is_staff=True)
+        staff_query = User.objects.filter(groups__name='staff', is_active=True)
+        staff_students = Student.objects.filter(user__groups__name='staff')
+
         classes = BeginnerClass.objects.filter(
             event__event_date__date=email_date, event__state__in=self.states[:self.states.index('closed')])
         # logger.warning(classes)
@@ -146,7 +146,7 @@ class UpdatePrograms:
                 cr = Registration.objects.filter(event=c.event, student__in=staff_students,
                                                  pay_status__in=['paid', 'admin'])
                 for r in cr:
-                    if r.student.user.is_instructor:
+                    if r.student.user.has_perm('student_app.instructors'):
                         instructors.append(r.student)
                     else:
                         staff.append(r.student)

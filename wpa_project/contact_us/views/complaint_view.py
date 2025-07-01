@@ -117,6 +117,6 @@ class ComplaintView(UserPassesTestMixin, FormView):
         if self.request.user.is_authenticated:
             if 'pk' in self.kwargs:
                 self.complaint = get_object_or_404(Complaint, pk=self.kwargs.get('pk'))
-                return self.request.user.is_board
+                return self.request.user.has_perm('user.board')
             return True
         return False

@@ -31,6 +31,6 @@ class UserView(UserPassesTestMixin, FormView):
         if uid is not None:
             self.user = get_object_or_404(User, pk=uid)
         if self.request.user.is_authenticated:
-            return self.request.user.is_staff
+            return self.request.user.has_perm('student_app.staff')
         else:  # pragma: no cover
             return False

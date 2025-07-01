@@ -103,4 +103,4 @@ class PaymentView(UserPassesTestMixin, DetailView):
         self.object = self.get_object()
         if self.object.user is None:
             return True
-        return self.request.user.is_staff or self.object.user == self.request.user
+        return self.request.user.has_perm('student_app.staff') or self.object.user == self.request.user

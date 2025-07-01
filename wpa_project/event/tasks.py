@@ -64,7 +64,7 @@ def cancel_pending(reg_list, donated):
 
     # if an instructor cancels within 24 hours send an email to the instructors.
     staff_registrations = registrations.filter(
-        student__user__is_staff=True,
+        student__user__groups__name='staff',
         event__event_date__lt=timezone.now() + timezone.timedelta(hours=24),
         event__type='class'
     )
@@ -72,7 +72,7 @@ def cancel_pending(reg_list, donated):
         for ir in staff_registrations.values('event').annotate(event_count=Count('event')).order_by():
             reg = Registration.objects.filter(
                 event__id=ir['event'],
-                student__user__is_instructor=True,
+                student__user__groups__name='instructors',
                 pay_status__in=['admin', 'paid']
             )
             celery_logger.warning(len(reg))
@@ -85,7 +85,7 @@ def cancel_pending(reg_list, donated):
 
     # remove the instructor registrations
     registrations = registrations.exclude(
-        student__user__is_instructor=True,
+        student__user__groups__name='instructors',
         event__event_date__lt=timezone.now() + timezone.timedelta(hours=24),
         event__type='class'
     )

@@ -40,7 +40,7 @@ class EventAttendView(StaffMixin, View):
                     if cr.event.event_date.date() == cr.student.safety_class:
                         cr.student.safety_class = None
                         cr.student.save()
-                if cr.student.user is not None and cr.student.user.is_staff:
+                if cr.student.user is not None and cr.student.user.has_perm('user.staff'):
                     if cr.event.volunteer_points and cr.attended:
                         if cr.reg_time <= cr.event.event_date - timezone.timedelta(days=3):
                             points = cr.event.volunteer_points

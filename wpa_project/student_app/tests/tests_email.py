@@ -17,7 +17,7 @@ from .helper import remove_signatures
 
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp')
 class TestsEmail(TestCase):
     fixtures = ['f1']
 

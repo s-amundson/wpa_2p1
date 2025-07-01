@@ -29,7 +29,7 @@ class TestsMinutes(TestCase):
         self.client.force_login(self.test_user)
         d_now = timezone.localtime(timezone.now()).date()
         student = Student.objects.get(pk=1)
-        student.user.is_member = True
+        student.user.has_perm('student_app.members')
         student.user.save()
         member = Member.objects.create(student=student, expire_date=d_now + timezone.timedelta(days=30),
                                        level=Level.objects.get(pk=1), join_date=d_now - timezone.timedelta(days=600))

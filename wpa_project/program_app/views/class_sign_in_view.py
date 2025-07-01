@@ -23,7 +23,7 @@ class ClassSignInView(WaiverView):
                 'events:event_attend_list',
                 kwargs={'event': self.class_registration.event.id})
         if self.request.user.is_authenticated:
-            return self.request.user.is_staff
+            return self.request.user.has_perm('student_app.staff')
         else:
             return False
 

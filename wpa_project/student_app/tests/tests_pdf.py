@@ -1,6 +1,6 @@
 import logging
 import base64
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.apps import apps
 from reportlab.pdfgen.canvas import Canvas
@@ -9,7 +9,7 @@ from ..models import Student
 from .helper import remove_signatures
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp')
 class TestsPdf(TestCase):
     fixtures = ['f1']
 

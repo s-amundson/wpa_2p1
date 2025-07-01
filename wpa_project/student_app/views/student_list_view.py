@@ -1,12 +1,12 @@
 import logging
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic.list import ListView
 from ..forms import SearchColumnsForm
 from ..models import Student
+from src.mixin import BoardExtMixin
 logger = logging.getLogger(__name__)
 
 
-class StudentList(UserPassesTestMixin, ListView):
+class StudentList(BoardExtMixin, ListView):
     model = Student
     paginate_by = 100  # if pagination is desired
     form_class = SearchColumnsForm
@@ -28,11 +28,5 @@ class StudentList(UserPassesTestMixin, ListView):
             if self.form.cleaned_data['first_name']:
                 object_list = object_list.filter(first_name__icontains=self.form.cleaned_data['first_name'])
             if self.form.cleaned_data['staff']:
-                object_list = object_list.filter(user__is_staff=True)
+                object_list = object_list.filter(user__groups__name='staff')
         return object_list.order_by('last_name')
-
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            return self.request.user.is_board
-        else:
-            return False

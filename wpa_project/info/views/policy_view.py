@@ -52,7 +52,7 @@ class PolicyFormView(FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        if not self.request.user.is_board: # pragma: no cover
+        if not self.request.user.has_perm('student_app.board'): # pragma: no cover
             return self.form_invalid(form)
 
         if self.policy is None:

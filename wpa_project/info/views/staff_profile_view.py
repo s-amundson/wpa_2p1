@@ -52,9 +52,9 @@ class StaffList(ListView):
     def get_queryset(self):
         d = timezone.now() - timezone.timedelta(days=60)
         object_list = self.model.objects.filter(
-            (Q(user__is_staff=True) &
+            (Q(user__groups__name='staff') &
             Q(registration__event__event_date__gte=d) &
-            Q(registration__attended=True)) | Q(user__is_board=True)
+            Q(registration__attended=True)) | Q(user__groups__name='board')
         )
 
         return object_list.distinct().order_by('-user__is_board', '-user__is_instructor')

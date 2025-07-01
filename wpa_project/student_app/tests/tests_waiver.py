@@ -12,7 +12,7 @@ from ..tasks import waiver_pdf
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
-
+# @tag('temp')
 class TestsWaiver(TestCase):
     fixtures = ['f1']
     url = 'registration:waiver'

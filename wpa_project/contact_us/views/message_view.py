@@ -36,7 +36,7 @@ class MessageListView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         if self.request.user.is_authenticated:
-            return self.request.user.is_board
+            return self.request.user.has_perm('student_app:board')
         return False
 
 
@@ -65,7 +65,7 @@ class MessageView(FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         message = self.kwargs.get("message_id", None)
-        if self.request.user.is_authenticated and self.request.user.is_board and message is not None:
+        if self.request.user.is_authenticated and self.request.user.has_perm('user.board') and message is not None:
             self.message = get_object_or_404(Message, pk=message)
             kwargs['instance'] = self.message
         kwargs['user'] = self.request.user

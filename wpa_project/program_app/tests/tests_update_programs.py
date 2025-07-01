@@ -4,6 +4,7 @@ from django.core import mail
 from django.utils import timezone
 from datetime import timedelta
 from django.test import TestCase, Client, tag
+from django.contrib.auth.models import Group
 
 from ..models import BeginnerClass, BeginnerSchedule
 from event.models import Event, Registration, RegistrationAdmin
@@ -12,7 +13,7 @@ from student_app.models import Student, User
 from ..src import UpdatePrograms, EmailMessage
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp')
 class TestsUpdatePrograms(TestCase):
     fixtures = ['f1']
 
@@ -20,6 +21,10 @@ class TestsUpdatePrograms(TestCase):
         # Every test needs a client.
         self.client = Client()
         self.beginner_class_count = [16, 17, 18]
+        self.staff_group = Group.objects.get(name='staff')
+        self.instructor_group = Group.objects.get(name='instructors')
+        self.test_user = User.objects.get(pk=3)
+        self.test_user.groups.add(self.staff_group, self.instructor_group)
 
     def test_close_class(self):
         d = timezone.localtime(timezone.now()).date() + timedelta(days=1)
@@ -46,10 +51,7 @@ class TestsUpdatePrograms(TestCase):
         d = timezone.make_aware(d, timezone.get_current_timezone())
         bc1 = create_beginner_class(d, 'open', 'beginner')
         bc2 = create_beginner_class(timezone.datetime(year=d.year, month=d.month, day=d.day, hour=11), 'open', 'returnee')
-        u = User.objects.get(pk=3)
-        u.is_staff = True
-        u.is_instructor = True
-        u.save()
+        self.test_user.groups.remove(self.instructor_group)
 
         for i in range(5):
             cr = Registration(
@@ -71,10 +73,6 @@ class TestsUpdatePrograms(TestCase):
         d = timezone.datetime(year=d.year, month=d.month, day=d.day, hour=9)
         d = timezone.make_aware(d, timezone.get_current_timezone())
         bc1 = create_beginner_class(d, 'open', 'beginner')
-        u = User.objects.get(pk=3)
-        u.is_staff = True
-        u.is_instructor = True
-        u.save()
 
         for i in range(5):
             cr = Registration(
@@ -84,7 +82,7 @@ class TestsUpdatePrograms(TestCase):
                 idempotency_key=str(uuid.uuid4()))
             cr.save()
 
-        reg = Registration.objects.filter(event=bc1.event, student__user=u).last()
+        reg = Registration.objects.filter(event=bc1.event, student__user=self.test_user).last()
         reg.pay_status = 'canceled'
         reg.save()
 
@@ -105,10 +103,7 @@ class TestsUpdatePrograms(TestCase):
         bc1 = create_beginner_class(d, 'open', 'beginner', 10, 0)
         bc2 = create_beginner_class(timezone.datetime(year=d.year, month=d.month, day=d.day, hour=11), 'open',
                                     'returnee', 0, 10)
-        u = User.objects.get(pk=3)
-        u.is_staff = True
-        u.is_instructor = True
-        u.save()
+
 
         for i in range(5):
             cr = Registration(
@@ -128,10 +123,7 @@ class TestsUpdatePrograms(TestCase):
         bc1 = create_beginner_class(d, 'open', 'beginner', 3, 0)
         bc1.beginner_wait_limit = 5
         bc1.save()
-        u = User.objects.get(pk=3)
-        u.is_staff = True
-        u.is_instructor = True
-        u.save()
+
         ps = ['paid', 'paid', 'paid', 'waiting', 'waiting']
         for i in range(5):
             cr = Registration(
@@ -163,10 +155,7 @@ class TestsUpdatePrograms(TestCase):
         bc1 = create_beginner_class(d, 'open', 'returnee', 0, 3)
         bc1.returnee_wait_limit = 5
         bc1.save()
-        u = User.objects.get(pk=3)
-        u.is_staff = True
-        u.is_instructor = True
-        u.save()
+
         ps = ['paid', 'paid', 'paid', 'waiting', 'waiting']
         for i in range(5):
             cr = Registration(

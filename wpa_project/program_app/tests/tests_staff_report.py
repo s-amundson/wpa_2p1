@@ -1,7 +1,7 @@
 import logging
 
 from django.apps import apps
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from event.models import Registration
 
@@ -17,12 +17,14 @@ class TestsStaffReport(TestCase):
         self.client = Client()
         self.url = reverse('programs:staff_attendance')
 
+    # @tag('temp')
     def test_get_sign_in_page_bad(self):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
         response = self.client.get(self.url, secure=True)
         self.assertEqual(response.status_code, 403)
 
+    # @tag('temp')
     def test_get_sign_in_page_good(self):
         cr = Registration.objects.get(pk=1)
         cr.pay_status = 'paid'
@@ -51,6 +53,7 @@ class TestsStaffReport(TestCase):
         self.assertEqual(response.context['staff_list'][0]['registrations'], 0)
         self.assertEqual(response.context['staff_list'][0]['attended'], 0)
 
+    # @tag('temp')
     def test_get_sign_in_page_good_inactive_staff(self):
         u = User.objects.get(pk=2)
         u.is_active = False

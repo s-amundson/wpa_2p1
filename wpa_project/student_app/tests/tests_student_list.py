@@ -1,12 +1,12 @@
 import logging
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 
 from ..models import User
 
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp')
 class TestsSearchList(TestCase):
     fixtures = ['f1']
 
@@ -39,6 +39,7 @@ class TestsSearchList(TestCase):
         self.assertEqual(len(response.context['object_list']), 2)
         self.assertEqual(response.status_code, 200)
 
+    # @tag('temp')
     def test_student_list_get_staff(self):
         self.test_dict['staff'] = True
         response = self.client.get(reverse('registration:student_list'), self.test_dict, secure=True)

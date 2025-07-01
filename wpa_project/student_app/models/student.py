@@ -32,13 +32,7 @@ class Student(models.Model):
     def get_user(self):
         User = apps.get_model('student_app', 'User')
         if self.user is None:
-            # users = User.objects.none()
             return User.objects.filter(student__student_family=self.student_family)
-            # family = self.student_family.student_set.filter(user__isnull=False)
-            # logger.warning(family)
-            # for s in family:
-            #     # self.bcc_append_user(s.user)
-            #     users = users | users.filter(id=s.user.id)
         else:
             users = User.objects.filter(id=self.user.id)
         return users

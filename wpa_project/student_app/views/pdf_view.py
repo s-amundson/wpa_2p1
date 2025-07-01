@@ -10,7 +10,7 @@ from ..models import Student
 
 class PdfGetView(LoginRequiredMixin, View):
     def get(self, request, student_id, thumb=False):
-        if request.user.is_board:
+        if request.user.has_perm('student_app.board'):
             student = get_object_or_404(Student, id=student_id)
         else:
             sf = get_object_or_404(Student, user=request.user).student_family

@@ -22,13 +22,17 @@ class CollectionForm(forms.ModelForm):
             if self.instance.correction:
                 for f in self.Meta.fields:
                     self.fields[f].widget.attrs.update({'disabled': 'disabled'})
-            self.fields['treasurer'].queryset = self.fields['treasurer'].queryset.filter(
-                Q(user__is_board=True) | Q(pk=self.instance.treasurer.id))
-            self.fields['board_member'].queryset = self.fields['board_member'].queryset.filter(
-                Q(user__is_board=True) | Q(pk=self.instance.board_member.id))
+            logger.debug(self.fields['treasurer'].queryset)
+            logger.debug(self.instance.treasurer.id)
+            # self.fields['treasurer'].queryset = self.fields['treasurer'].queryset.filter(
+            #     Q(user__groups__name='board') | Q(pk=self.instance.treasurer.id))
+            # self.fields['board_member'].queryset = self.fields['board_member'].queryset.filter(
+            #     Q(user__groups__name='board') | Q(pk=self.instance.board_member.id))
+            self.fields['treasurer'].queryset = self.fields['treasurer'].queryset.filter(user__groups__name='board')
+            self.fields['board_member'].queryset = self.fields['board_member'].queryset.filter(user__groups__name='board')
         else:
-            self.fields['treasurer'].queryset = self.fields['treasurer'].queryset.filter(user__is_board=True)
-            self.fields['board_member'].queryset = self.fields['board_member'].queryset.filter(user__is_board=True)
+            self.fields['treasurer'].queryset = self.fields['treasurer'].queryset.filter(user__groups__name='board')
+            self.fields['board_member'].queryset = self.fields['board_member'].queryset.filter(user__groups__name='board')
 
     def clean(self):
         data = super().clean()

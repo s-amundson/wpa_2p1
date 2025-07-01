@@ -37,19 +37,21 @@ class RegistrationQuerySet(models.QuerySet):
     def intro_beginner_count(self, date):
         qs = self.filter(event__type='class', pay_status__in=['paid', 'admin'])
         qs = qs.filter(models.Q(student__safety_class__isnull=True) | models.Q(student__safety_class__gte=date))
-        qs = qs.filter(models.Q(student__user__is_staff=False) | models.Q(student__user__isnull=True))
+        # qs = qs.filter(models.Q(student__user__is_staff=False) | models.Q(student__user__isnull=True))
+        qs = qs.exclude(student__user__groups__name='staff')
         return qs.count()
 
     def intro_returnee_count(self, date):
         qs = self.filter(event__type='class', pay_status__in=['paid', 'admin'], student__safety_class__isnull=False)
-        qs = qs.filter(models.Q(student__user__is_staff=False) | models.Q(student__user__isnull=True))
+        # qs = qs.filter(models.Q(student__user__is_staff=False) | models.Q(student__user__isnull=True))
+        qs = qs.exclude(student__user__groups__name='staff')
         return qs.filter(student__safety_class__lt=date).count()
 
     def intro_instructor_count(self):
-        return self.filter(event__type='class', student__user__is_instructor=True, pay_status__in=['paid', 'admin']).count()
+        return self.filter(event__type='class', student__user__groups__name='instructors', pay_status__in=['paid', 'admin']).count()
 
     def intro_staff_count(self):
-        return self.filter(event__type='class', student__user__is_staff=True, pay_status__in=['paid', 'admin']).count()
+        return self.filter(event__type='class', student__user__groups__name='staff', pay_status__in=['paid', 'admin']).count()
 
     def registered_count(self):
         return self.filter(pay_status__in=['paid', 'admin']).count()

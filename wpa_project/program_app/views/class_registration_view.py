@@ -45,10 +45,10 @@ class ClassRegistrationView(RegistrationSuperView):
         if not processed_formset['success']:
             return self.has_error(self.form, processed_formset['error'])
         crh = ClassRegistrationHelper()
-        beginners = self.students.filter(safety_class=None).exclude(user__is_staff=True)
-        returnee = self.students.exclude(safety_class=None).exclude(user__is_staff=True)
-        instructors = self.students.filter(user__is_instructor=True, user__instructor_expire_date__gte=self.events[0].event_date)
-        staff = self.students.exclude(user__is_instructor=True).filter(user__is_staff=True)
+        beginners = self.students.filter(safety_class=None).exclude(user__groups__name='staff')
+        returnee = self.students.exclude(safety_class=None).exclude(user__groups__name='staff')
+        instructors = self.students.filter(user__groups__name='instructors', user__instructor_expire_date__gte=self.events[0].event_date)
+        staff = self.students.exclude(user__groups__name='instructors').filter(user__groups__name='staff')
 
         if not self.students.count():
             return self.has_error(form, 'No students selected')
@@ -63,7 +63,7 @@ class ClassRegistrationView(RegistrationSuperView):
         #     return self.has_error(form, 'Please update your instructor certification')
 
         # check for multiple events for non staff:
-        if self.events.count() > 1 and not self.request.user.is_staff:
+        if self.events.count() > 1 and not self.request.user.has_perm('student_app.staff'):
             return self.has_error(form, 'Must only select one class at a time.')
 
         event_list = []
@@ -140,7 +140,7 @@ class ClassRegistrationView(RegistrationSuperView):
                             user=self.request.user,
                             comment=f.cleaned_data.get('comment', None)
                         )
-                        if new_reg.student.user and new_reg.student.user.is_staff:
+                        if new_reg.student.user and new_reg.student.user.has_perm('student_app.staff'):
                             new_reg.pay_status = 'paid'
                             self.request.session['line_items'].append({
                                 'name': f"Class on {str(class_date)[:10]} staff: {new_reg.student.first_name}",
@@ -171,8 +171,9 @@ class ClassRegistrationAdminView(BoardMixin, ClassRegistrationView):
         self.admin_registration = True
 
     def form_valid(self, form):
+        logger.debug('form valid')
         self.form = form
-        if self.request.user.is_board:
+        if self.request.user.has_perm('student_app.board'):
             self.student_family = get_object_or_404(StudentFamily, pk=form.cleaned_data['student_family'])
         processed_formset = self.process_formset(admin=True)
         if not processed_formset['success']:

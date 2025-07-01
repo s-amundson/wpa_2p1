@@ -29,7 +29,7 @@ class MinutesView(MemberMixin, FormView):
         if 'minutes' not in self.kwargs:
             if not self.request.user.is_authenticated:
                 return self.handle_no_permission()
-            if not self.request.user.is_board:
+            if not self.request.user.has_perm('student_app.board'):
                 return self.handle_no_permission()
         return dispatch
 

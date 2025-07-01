@@ -28,8 +28,8 @@ class StaffReportView(BoardMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        staff_users = User.objects.filter(is_staff=True, is_active=True)
-        staff_students = Student.objects.filter(user__in=staff_users).order_by('last_name')
+        # staff_users = User.objects.filter(groups__name='staff', is_active=True)
+        staff_students = Student.objects.filter(user__groups__name='staff', user__is_active=True).order_by('last_name')
         context['staff_list'] = []
         for i in staff_students:
             cr = Registration.objects.filter(student=i, pay_status__in=['paid', 'admin'])

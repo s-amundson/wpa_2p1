@@ -41,7 +41,7 @@ class CancelSetForm(MyModelForm):
         amount = 0
         # if self.instance.student.member_set.filter():
 
-        if self.instance.pay_status == 'paid' and not (self.instance.student.user and self.instance.student.user.is_staff):
+        if self.instance.pay_status == 'paid' and not (self.instance.student.user and self.instance.student.user.has_perm('student_app.staff')):
             amount = self.instance.event.cost_standard
             # TODO add member price if member when registered.
         self.pay_status = self.instance.pay_status

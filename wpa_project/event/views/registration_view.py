@@ -45,16 +45,16 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if self.request.user.is_board and 'family_id' in self.kwargs:
+        if self.request.user.has_perm('student_app.board') and 'family_id' in self.kwargs:
             self.student_family = get_object_or_404(StudentFamily, pk=self.kwargs.get('family_id', None))
-        if not self.request.user.is_staff:
+        if not self.request.user.has_perm('student_app.staff'):
             self.event_queryset = self.event_queryset.filter(state__in=['open', 'wait'])
 
         if self.kwargs.get('event', None) is not None:
             kwargs['initial']['event'] = self.kwargs.get('event')
             # self.event = get_object_or_404(Event, pk=self.kwargs.get('event'))
             self.events = self.event_queryset.filter(pk=self.kwargs.get('event'))
-            if not self.request.user.is_staff:
+            if not self.request.user.has_perm('student_app.staff'):
                 self.event_queryset = self.events
             else:
                 self.event_queryset = self.event_queryset.filter(
@@ -70,7 +70,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         data = None
         if self.request.method.lower() == 'post':
             data = self.request.POST
-            if self.request.user.is_board:
+            if self.request.user.has_perm('user.board'):
                 self.formset_students = Student.objects.all()
         self.formset = modelformset_factory(Registration, form=RegistrationForm2, can_delete=False,
                                             extra=len(self.formset_students))
@@ -88,7 +88,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         self.formset = self.formset(
             form_kwargs={
                 'students': self.formset_students,
-                'is_staff': self.request.user.is_staff,
+                'is_staff': self.request.user.has_perm('user.staff'),
                 'event_type': self.event_type
             },
             queryset=Registration.objects.none(),
@@ -142,7 +142,7 @@ class RegistrationView(RegistrationSuperView):
     def form_valid(self, form):
         self.form = form
         logger.warning(form.cleaned_data)
-        if self.request.user.is_board:
+        if self.request.user.has_perm('user.board'):
             self.student_family = get_object_or_404(StudentFamily, pk=form.cleaned_data['student_family'])
         processed_formset = self.process_formset()
         if not processed_formset['success']:

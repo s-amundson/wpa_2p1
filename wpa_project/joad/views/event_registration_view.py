@@ -22,7 +22,7 @@ class EventRegistrationView(RegistrationSuperView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if self.request.user.is_board:
+        if self.request.user.has_perm('student_app.board'):
             kwargs['students'] = Student.objects.filter(is_joad=True)
         else:
             kwargs['students'] = kwargs['students'].filter(is_joad=True)

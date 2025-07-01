@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.auth.models import Group
 from django.utils import timezone
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
@@ -35,7 +36,7 @@ def member_update(sender, instance, created, **kwargs):
 
                 # set is_member in user
                 if student.user is not None:
-                    student.user.is_member = True
+                    student.user.groups.add(Group.objects.get(name='members'))
                     student.user.save()
             membership.save()
 

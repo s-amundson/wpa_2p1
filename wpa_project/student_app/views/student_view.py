@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 import logging
 from django.http import JsonResponse, HttpResponseRedirect
@@ -13,7 +13,7 @@ from src.mixin import StaffMixin, StudentFamilyMixin
 logger = logging.getLogger(__name__)
 
 
-class AddStudentView(UserPassesTestMixin, FormView):
+class AddStudentView(LoginRequiredMixin, FormView):
     template_name = 'student_app/forms/student.html'
     form_class = StudentForm
     success_url = reverse_lazy('registration:profile')
@@ -30,9 +30,9 @@ class AddStudentView(UserPassesTestMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        if self.request.user.is_staff:
+        if self.request.user.has_perm('student_app.staff'):
             f = form.save()
-            if self.request.user.is_board:
+            if self.request.user.has_perm('student_app.board') or self.request.user.has_perm('student_app.board_plus'):
                 uf = UserForm(self.request.POST, instance=self.student.user)
                 is_active = uf.instance.is_active
                 if uf.is_valid():
@@ -85,15 +85,15 @@ class AddStudentView(UserPassesTestMixin, FormView):
             context['student']['id'] = student_id
             context['student']['is_joad'] = self.student.is_joad
             context['student']['is_user'] = self.student.user_id
-            if self.request.user.is_staff:
+            if self.request.user.has_perm('student_app.staff'):
                 context['student']['this_user'] = False
             else:
                 context['student']['this_user'] = (self.student.user == self.request.user)
             age = StudentHelper().calculate_age(self.student.dob)
             context['student']['joad_age'] = 8 < age < 21
-            if self.student.user is not None and self.student.user.is_staff:
+            if self.student.user is not None and self.student.user.has_perm('staff'):
                 context['student']['staff'] = True
-            if self.request.user.is_board and self.student.user_id:
+            if (self.request.user.has_perm('student_app.board') or self.request.user.has_perm('board_plus')) and self.student.user_id:
                 context['user_form'] = UserForm(instance=self.student.user)
         return context
 
@@ -101,7 +101,7 @@ class AddStudentView(UserPassesTestMixin, FormView):
         kwargs = super().get_form_kwargs()
         student_id = self.kwargs.get('student_id', None)
         if student_id is not None:
-            if self.request.user.is_staff:
+            if self.request.user.has_perm('student_app.staff'):
                 self.student = get_object_or_404(Student, pk=student_id)
             else:
                 sf = self.request.user.student_set.last().student_family
@@ -113,9 +113,6 @@ class AddStudentView(UserPassesTestMixin, FormView):
             if s.count() == 0:
                 kwargs['initial'] = {'email': self.request.user.email}
         return kwargs
-
-    def test_func(self):
-        return self.request.user.is_authenticated
 
 
 class StudentDeleteView(StudentFamilyMixin, FormView):
@@ -177,7 +174,7 @@ class StudentIsJoadView(StaffMixin, View):
     def post(self, request, student_id):
         # logging.debug(request.POST)
         student = Student.objects.get(pk=student_id)
-        if student.user is not None and student.user.is_staff:
+        if student.user is not None and student.user.has_perm('student_app.staff'):
             pass
         else:
             age = StudentHelper().calculate_age(student.dob)
