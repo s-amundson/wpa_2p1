@@ -159,24 +159,23 @@ class ClassRegistrationHelper:
         # logger.warning(beginner_class.event.state)
 
     def update_waiting(self, beginner_class):
-        logger.warning(beginner_class)
-        logging.warning(beginner_class)
+        # logger.warning(beginner_class)
+        # logging.warning(beginner_class)
         if type(beginner_class) == int:
             beginner_class = BeginnerClass.objects.get(pk=beginner_class)
         records = self.student_registrations(beginner_class)
-        logger.warning(len(records))
-        logging.warning(len(records))
+        # logger.warning(len(records))
+        # logging.warning(len(records))
         waiting = records.filter(pay_status='waiting').order_by('modified')
         admitted = records.filter(pay_status__in=['paid', 'admin']).order_by('modified')
         logger.warning(f'class type: {beginner_class.class_type}, waiting: {len(waiting)}, admitted: {len(admitted)}')
-        logging.warning(f'class type: {beginner_class.class_type}, waiting: {len(waiting)}, admitted: {len(admitted)}')
         if not len(waiting):
             return
         if beginner_class.class_type == 'beginner':
             if len(admitted) < beginner_class.beginner_limit:
-                logger.warning(f'space available {beginner_class.beginner_limit - len(admitted)}')
+                # logger.warning(f'space available {beginner_class.beginner_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
-                logger.warning(f'next group {len(next_group)}')
+                # logger.warning(f'next group {len(next_group)}')
                 if beginner_class.beginner_limit - len(admitted) >= len(next_group):
                     response = self.charge_group(next_group)
                     if not response[str(waiting.first().idempotency_key)] == 'SUCCESS':  # pragma: no cover
@@ -185,9 +184,9 @@ class ClassRegistrationHelper:
 
         elif beginner_class.class_type == 'returnee':
             if len(admitted) < beginner_class.returnee_limit:
-                logger.warning(f'space available {beginner_class.returnee_limit - len(admitted)}')
+                # logger.warning(f'space available {beginner_class.returnee_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
-                logger.warning(f'next group {len(next_group)}')
+                # logger.warning(f'next group {len(next_group)}')
                 if beginner_class.returnee_limit - len(admitted) >= len(next_group):
                     response = self.charge_group(next_group)
                     if not response[str(waiting.first().idempotency_key)] == 'SUCCESS':  # pragma: no cover

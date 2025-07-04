@@ -19,7 +19,6 @@ class ReimbursementForm(forms.ModelForm):
         else:  # pragma: no cover
             self.board_student = False
         super().__init__(*args, **kwargs)
-        logging.debug(self.initial)
         self.fields['student'].widget = forms.HiddenInput()
         self.fields['note'].widget.attrs.update({'cols': 80, 'rows': 3})
         self.fields['note'].required = False
@@ -47,7 +46,6 @@ class ReimbursementItemForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.id:
             self.fields['attachment'].required = False
-            logger.warning(self.instance)
             if self.instance.reimbursement.status not in ['pending', 'denied']:
                 for f in ['amount', 'description', 'attachment']:
                     logger.warning(f)
@@ -61,13 +59,11 @@ class ReimbursementVoteForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        logging.warning(self.initial)
         self.fields['reimbursement'].widget = forms.HiddenInput()
         self.fields['student'].widget = forms.HiddenInput()
         self.fields['approve'].widget = forms.RadioSelect(choices=[(True, "Approve"), (False, "Deny")])
 
         self.sum = self.initial['reimbursement'].reimbursementitem_set.all().aggregate(Sum('amount'))['amount__sum']
-        logger.warning(self.sum)
         self.title = 'Reimbursement'
         if self.initial['reimbursement'].status == 'pending':
             self.title = 'Reimbursement Vote'

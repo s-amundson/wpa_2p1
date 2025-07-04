@@ -78,7 +78,7 @@
             </div>
         </div>
     </div>
-    {% if user.is_board and student_family.id %}
+    {% if perms.student_app.board and student_family.id %}
         <div class="row p-4">
                 Past class attendance:
                 {% include 'program_app/tables/history_table.html' %}

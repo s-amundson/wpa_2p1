@@ -3,7 +3,7 @@
         <tr>
             <th> Class Date </th>
             <th> Class State</th>
-            {% if user.is_staff %}
+            {% if perms.student_app.staff %}
                 <th></th>
                 <th></th>
             {% endif %}
@@ -14,7 +14,7 @@
             <tr>
                 <td>{{ row.event.event_date }}</td>
                 <td>{{ row.event.state }}</td>
-                {% if user.is_staff %}
+                {% if perms.student_app.staff %}
                     <td>
                         <button class="btn btn-primary edit-class" type="button" class_id="{{row.id}}">
                             Edit Class

@@ -570,7 +570,6 @@ class TestsElection(TestCase):
         self.assertEqual(e.state, 'closed')
         bulk_emails = BulkEmail.objects.all()
         self.assertEqual(bulk_emails.count(), 1)
-        logger.warning(bulk_emails[0].body)
         self.assertTrue(bulk_emails[0].body.find('President: Cathy Rodriguez') > 0)
 
     # @tag('temp')
@@ -583,5 +582,4 @@ class TestsElection(TestCase):
         self.assertEqual(e.state, 'closed')
         bulk_emails = BulkEmail.objects.all()
         self.assertEqual(bulk_emails.count(), 1)
-        logger.warning(bulk_emails[0].body)
         self.assertTrue(bulk_emails[0].body.find('There is a tie for President: Cathy Rodriguez and Amanda Cushman') > 0)

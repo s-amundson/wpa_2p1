@@ -7,7 +7,7 @@
             {{ announcement.announcement|safe }}
         </div>
     </div>
-    {% if user.is_board %}
+    {% if perms.student_app.board %}
         <div class="row ps-4">
             <div class="d-flex flex-column">
                 <div><a href="{% url 'info:announcement_form' announcement.id %}">{{ announcement.id }}</a></div>

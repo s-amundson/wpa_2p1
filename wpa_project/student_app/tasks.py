@@ -25,6 +25,11 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
+def hourly():
+    logger.debug('hourly task')
+
+
+@shared_task
 def waiver_pdf(student_id, sig_first_name, sig_last_name):
     student = Student.objects.get(pk=student_id)
     if student is None:  # pragma: no cover

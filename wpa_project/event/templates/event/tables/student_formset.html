@@ -7,7 +7,7 @@
             {% if form.event_type == 'work' %}
                 <th>Can perform heavy duty tasks</th>
             {% endif %}
-            {% if form.event_type == 'work' or user.is_staff %}
+            {% if form.event_type == 'work' or perms.student_app.staff %}
                 <th>Comment</th>
             {% endif %}
         </tr>

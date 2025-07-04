@@ -33,7 +33,7 @@
             <div class="row pt-1" id="registered_table"></div>
         </div>
     </div>
-    {% if not user.is_staff%}
+    {% if not perms.student_app.staff%}
         <div class="row p-2">
             <h5>
                 <strong>
@@ -68,7 +68,7 @@
     <div class="row p-2">
         <form id="beginner-class-form" class="col form" method="post" autocomplete="off">
             {% csrf_token %}
-            <input type="hidden" id="is_staff" value="{{ user.is_staff }}">
+            <input type="hidden" id="is_staff" value="{{ perms.student_app.staff }}">
             <div class="row p-3">
                 <div class="d-md-inline-flex">
                     <div class="text-right">Select a class date:</div>
@@ -108,7 +108,7 @@
             {% endif %}
             <div class="row pt-5">
                 <div class="col">
-                    {% if not user.is_staff %}
+                    {% if not perms.student_app.staff %}
                         <div class="row"><h4>ACCIDENT WAIVER AND RELEASE OF LIABILITY (AWRL)</h4></div>
 
                         <div class="row p-1 pl-3"> {{ awrl|linebreaks }} </div>

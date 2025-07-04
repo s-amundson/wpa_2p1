@@ -14,7 +14,7 @@
         {% for event in event_list %}
             <tr>
                 <td>
-                    {% if user.is_staff %}
+                    {% if perms.student_app.staff %}
                         <a class="nav-link" href="{% url 'joad:event' event.id %}">{{ event.event_date }}</a>
                     {% else %}
                         {{ event.event_date }}
@@ -50,7 +50,7 @@
     </tbody>
 </table>
 <div class="m-2">
-    {% if user.is_staff %}
+    {% if perms.student_app.staff %}
         <a href="{% url 'joad:event' %}" class="btn btn-primary" role="button">
             Add Event
         </a>

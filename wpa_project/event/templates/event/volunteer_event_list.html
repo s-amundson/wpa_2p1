@@ -24,7 +24,7 @@
                 {% for c in object_list %}
                     <tr>
                         <td>
-                            {% if user.is_staff %}
+                            {% if perms.student_app.staff %}
                                 <a class="nav-link" href="{% url 'events:event_attend_list' c.event.id %}">
                                     {{ c.event.event_date }}
                                 </a>
@@ -61,7 +61,7 @@
             {% endif %}
         </div>
 
-        {% if user.is_board %}
+        {% if perms.student_app.board %}
             <div class="col">
                 <a class="nav-link" href="{% url 'events:volunteer_event' %}">
                     Add

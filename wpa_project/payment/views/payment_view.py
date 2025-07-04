@@ -39,12 +39,10 @@ class CreatePaymentView(FormView):
             payments = PaymentLog.objects.filter(
                 user=self.request.user,
                 checkout_created_time__gte=timezone.now() - timezone.timedelta(seconds=5))
-            logger.warning(payments.count())
             if payments.count():
                 self.success_url = reverse_lazy('payment:view_payment', args=[payments.last().id])
                 return super().form_valid(form)
         idempotency_key = self.request.session.get('idempotency_key', str(uuid.uuid4()))
-        logger.warning(idempotency_key)
         if form.process_payment(idempotency_key, self.request.session.get('instructions', None)):
             self.success_url = reverse_lazy('payment:view_payment', args=[form.log.id])
             if self.request.user.is_authenticated:

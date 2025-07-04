@@ -68,7 +68,7 @@
                 {{ form.pay_method }}
                 {{ form.pay_method.errors }}
             </div>
-            {% if user.is_staff %}
+            {% if perms.student_app.staff %}
                 <div class="col m-2">
                     <p> Stars Earned: {{form.instance.stars }} <br> Payment: {{ form.pay_amount }}</p>
                     {{ form.payment_received.label }}

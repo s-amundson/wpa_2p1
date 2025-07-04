@@ -43,7 +43,7 @@ class TestsUserView(TestCase):
         user = User.objects.get(pk=4)
         self.assertTrue(user.dark_theme)
 
-    @tag('temp')
+    # @tag('temp')
     def test_post_user_remove_groups(self):
         user = User.objects.get(pk=4)
         user.groups.add(Group.objects.get(name='instructors'))
