@@ -84,7 +84,7 @@ class TestsMembership(TestCase):
     def test_get_student_table(self):
         d_now = timezone.localtime(timezone.now()).date()
         student = Student.objects.get(pk=2)
-        student.user.is_member = True
+        student.user.has_perm('student_app.members')
         student.user.save()
         member = Member.objects.create(student=student, expire_date=d_now + timedelta(days=30),
                                        level=Level.objects.get(pk=1), join_date=d_now - timedelta(days=600))

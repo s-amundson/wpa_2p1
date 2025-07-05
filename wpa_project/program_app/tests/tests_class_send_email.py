@@ -17,7 +17,7 @@ from _email.models import BulkEmail
 logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
-
+# @tag('temp')
 class TestsClassSendEmail(TestCase):
     fixtures = ['f1']
 

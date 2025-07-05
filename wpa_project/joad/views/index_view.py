@@ -22,8 +22,8 @@ class IndexView(JoadEventListView):
         context = super().get_context_data(**kwargs)
         context['session_list'] = self.session_list
         context['has_joad'] = self.has_joad
-        if self.request.user.is_staff or self.students:
-            context['is_auth'] = len(self.students) > 0 or self.request.user.is_staff
+        if self.request.user.has_perm('student_app.staff') or self.students:
+            context['is_auth'] = len(self.students) > 0 or self.request.user.has_perm('student_app.staff')
         else:
             context['is_auth'] = False
         context['students'] = self.students
@@ -32,10 +32,10 @@ class IndexView(JoadEventListView):
     def get_queryset(self):
         session_date = timezone.now() - timezone.timedelta(days=8*7)
         sessions = Session.objects.filter(start_date__gte=session_date)
-        if not self.request.user.is_staff:
+        if not self.request.user.has_perm('student_app.staff'):
             sessions = sessions.filter(state__in=['scheduled', 'open', 'full', 'closed'])
         sessions = sessions.order_by('start_date')
-        self.has_joad = self.request.user.is_staff
+        self.has_joad = self.request.user.has_perm('student_app.staff')
         for session in sessions:
             s = model_to_dict(session)
             reg_list = []

@@ -31,7 +31,7 @@ class ReimbursementFormView(StudentFamilyMixin, FormView):
             logger.warning(self.instance.id)
             formset = self.get_formset()
             formset.save()
-            if self.request.user.is_board and self.instance.student == self.request.user.student_set.last() \
+            if self.request.user.has_perm('student_app.board') and self.instance.student == self.request.user.student_set.last() \
                     and self.instance.status in ['pending', 'denied']:
                 v, created = ReimbursementVote.objects.get_or_create(
                     reimbursement=self.instance,
@@ -56,10 +56,10 @@ class ReimbursementFormView(StudentFamilyMixin, FormView):
         kwargs = super().get_form_kwargs()
         if 'pk' in self.kwargs:
             self.instance = get_object_or_404(Reimbursement, pk=self.kwargs.get('pk'))
-            kwargs['board_student'] = self.instance.student == self.request.user.student_set.last() and self.request.user.is_board
+            kwargs['board_student'] = self.instance.student == self.request.user.student_set.last() and self.request.user.has_perm('student_app.board')
         else:
             kwargs['initial']['student'] = self.request.user.student_set.last()
-            kwargs['board_student'] = self.request.user.is_board
+            kwargs['board_student'] = self.request.user.has_perm('student_app.board')
         logger.warning(kwargs['board_student'])
         kwargs['instance'] = self.instance
         return kwargs

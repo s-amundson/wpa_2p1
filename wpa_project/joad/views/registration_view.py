@@ -56,7 +56,7 @@ class RegistrationSuperView(UserPassesTestMixin, FormView):
 class RegistrationView(RegistrationSuperView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if self.request.user.is_board:
+        if self.request.user.has_perm('student_app.board'):
             kwargs['students'] = Student.objects.filter(is_joad=True)
         else:
             kwargs['students'] = self.request.user.student_set.first().student_family.student_set.filter(is_joad=True)
@@ -139,7 +139,7 @@ class RegistrationCancelView(RegistrationSuperView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if self.request.user.is_board:
+        if self.request.user.has_perm('student_app.board'):
             students = Student.objects.filter(is_joad=True)
         else:
             students = self.request.user.student_set.last().student_family.student_set.filter(is_joad=True)
@@ -155,33 +155,6 @@ class RegistrationCancelView(RegistrationSuperView):
             return super().form_valid(form)
         else:
             return self.form_invalid(form)
-        # self.form = form
-        # students = []
-        # # message = ""
-        # logger.debug(form.cleaned_data['session'])
-        # session = form.cleaned_data['session']
-        # if session.state != "open":  # pragma: no cover
-        #     return self.has_error('Session in wrong state')
-        #
-        # # reg = Registration.objects.filter(session=session).exclude(
-        # #     pay_status="refunded").exclude(pay_status='canceled')
-        # reg = session.registration_set.exclude(pay_status="refunded").exclude(pay_status='canceled')
-        # logger.debug(len(reg.filter(pay_status='paid')))
-        #
-        # for k, v in form.cleaned_data.items():
-        #     logger.debug(k)
-        #     if str(k).startswith('student_') and v:
-        #         i = int(str(k).split('_')[-1])
-        #         s = Student.objects.get(pk=i)
-        #         logger.debug(s)
-        #         sreg = reg.filter(student=s)
-        #         logger.debug(len(sreg))
-        #         if len(sreg) == 0:
-        #             return self.has_error('Student is not enrolled')
-        #         else:
-        #             students.append(s)
-        # if len(students) == 0:
-        #     return self.has_error('Invalid student selected')
 
     def test_func(self):
         if super().test_func():

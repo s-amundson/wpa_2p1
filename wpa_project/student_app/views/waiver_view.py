@@ -54,10 +54,7 @@ class WaiverView(UserPassesTestMixin, FormView):
         sid = self.kwargs.get('student_id', None)
         if sid is not None:
             self.student = get_object_or_404(Student, pk=sid)
-        if self.request.user.is_authenticated:
-            return self.request.user.is_staff
-        else:  # pragma: no cover
-            return False
+        return self.request.user.has_perm('student_app.staff')
 
     def update_attendance(self):
         pass

@@ -1,4 +1,6 @@
 import logging
+
+from django.contrib.auth.models import Group
 from django.test import TestCase, Client, tag
 from django.utils import timezone
 from django.urls import reverse
@@ -10,7 +12,7 @@ from student_app.models import Student
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
-
+# @tag('temp')
 class TestsCollections(TestCase):
     fixtures = ['f1']
 
@@ -38,9 +40,7 @@ class TestsCollections(TestCase):
 
     # @tag('temp')
     def test_post_collections(self):
-        u = User.objects.get(pk=2)
-        u.is_board = True
-        u.save()
+        User.objects.get(pk=2).groups.add(Group.objects.get(name='board'))
 
         response = self.client.post(reverse('payment:collections'), self.post_dict, secure=True)
         self.assertRedirects(response, reverse('payment:collections'))
@@ -49,9 +49,7 @@ class TestsCollections(TestCase):
 
     # @tag('temp')
     def test_post_collections_one_board_member(self):
-        u = User.objects.get(pk=2)
-        u.is_board = True
-        u.save()
+        User.objects.get(pk=2).groups.add(Group.objects.get(name='board'))
         self.post_dict['board_member'] = 1
 
         response = self.client.post(reverse('payment:collections'), self.post_dict, secure=True)
@@ -62,9 +60,7 @@ class TestsCollections(TestCase):
 
     # @tag('temp')
     def test_post_collections_correction(self):
-        u = User.objects.get(pk=2)
-        u.is_board = True
-        u.save()
+        User.objects.get(pk=2).groups.add(Group.objects.get(name='board'))
         self.post_dict['collected_date'] = self.post_dict['collected_date'] - timezone.timedelta(hours=1)
         c = Collections.objects.create(
             collected_date = self.post_dict['collected_date'],

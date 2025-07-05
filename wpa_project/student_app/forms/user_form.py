@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from src import MyModelForm
 from django.forms.widgets import CheckboxInput, SelectDateWidget
 from django.utils import timezone
@@ -30,7 +31,21 @@ class UserForm(MyModelForm):
         self.fields['is_staff'].help_text = ''
         self.fields['is_active'].help_text = ''
 
-    def clean(self):
-        cleaned_data = super().clean()
-        if cleaned_data['is_instructor']:
-            cleaned_data['is_staff'] = True
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     if cleaned_data['is_instructor']:
+    #         cleaned_data['is_staff'] = True
+
+    def save(self, *args, **kwargs):
+        i = super().save(*args, **kwargs)
+        for g in ['instructors', 'staff', 'board']:
+            i.groups.remove(Group.objects.get(name=g))
+        if self.cleaned_data['is_instructor']:
+            i.groups.add(Group.objects.get(name='instructors'))
+            i.groups.add(Group.objects.get(name='staff'))
+        if self.cleaned_data['is_staff']:
+            i.groups.add(Group.objects.get(name='staff'))
+        if self.cleaned_data['is_board']:
+            i.groups.add(Group.objects.get(name='board'))
+            i.groups.add(Group.objects.get(name='staff'))
+        return i

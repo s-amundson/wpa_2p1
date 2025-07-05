@@ -10,7 +10,7 @@
 
 {% block main %}
     <div class="row" message_text="{{ message }}" hidden id="message"><h3>"{{ message }}"</h3></div>
-    {% if user.is_board %}
+    {% if perms.student_app.board %}
         {% if form.event.type == 'class' %}
             <a href="{% url 'programs:beginner_class' form.event.id %}" class="btn btn-primary" role="button">
                 Edit Class

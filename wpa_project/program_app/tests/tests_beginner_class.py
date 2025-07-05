@@ -2,6 +2,7 @@ import logging
 import uuid
 from datetime import date
 from django.apps import apps
+from django.contrib.auth.models import Group
 from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
@@ -148,7 +149,7 @@ class TestsBeginnerClass(MockSideEffects, TestCase):
     @patch('program_app.views.beginner_class_view.refund_class.delay')
     def test_refund_success_class(self, refund):
         self.test_user = User.objects.get(pk=2)
-        self.test_user.is_staff = False
+        self.test_user.groups.add(Group.objects.get(name='staff'))
         self.test_user.save()
 
         self.create_payment([Student.objects.get(pk=2), Student.objects.get(pk=3)], 1000)

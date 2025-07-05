@@ -86,7 +86,7 @@ class ClassRegistrationHelper:
             return 'open'
 
         elif beginner_class.event.state in ['full', 'closed']:
-            if user.is_staff:
+            if user.has_perm('student_app.staff'):
                 if instructor and enrolled_count['staff'] + instructor > beginner_class.instructor_limit:
                     return 'full'
                 if staff and enrolled_count['staff'] + staff > beginner_class.staff_limit:
@@ -100,17 +100,15 @@ class ClassRegistrationHelper:
     def student_registrations(self, beginner_class):
         return Registration.objects.filter(
             event=beginner_class.event,
-            pay_status__in=['paid', 'admin', 'waiting']).exclude(student__user__is_staff=True)
+            pay_status__in=['paid', 'admin', 'waiting']).exclude(student__user__groups__name='staff')
 
     def update_class_state(self, beginner_class):
         logger.warning(beginner_class)
         records = self.student_registrations(beginner_class)
         if beginner_class.class_type == 'beginner' and beginner_class.event.state in ['open', 'wait', 'full']:
-            logger.warning(f'state: {beginner_class.event.state}, registered: {len(records)}, ' +
-                           f'limit: {beginner_class.beginner_limit}, wait: {beginner_class.beginner_wait_limit}')
-            # logging.warning(f'state: {beginner_class.event.state}, registered: {len(records)}, ' +
+            # logger.warning(f'state: {beginner_class.event.state}, registered: {len(records)}, ' +
             #                f'limit: {beginner_class.beginner_limit}, wait: {beginner_class.beginner_wait_limit}')
-            logger.warning(len(records) >= beginner_class.beginner_limit)
+            # logger.warning(len(records) >= beginner_class.beginner_limit)
             if len(records) >= beginner_class.beginner_limit and beginner_class.event.state in ['open', 'wait']:
                 if len(records) >= beginner_class.beginner_limit + beginner_class.beginner_wait_limit:
                     beginner_class.event.state = 'full'
@@ -124,8 +122,7 @@ class ClassRegistrationHelper:
                 else:
                     beginner_class.event.state = 'wait'
                 beginner_class.event.save()
-            logger.warning(f'event: {beginner_class.event.id}, state: {beginner_class.event.state}')
-            # logging.warning(f'event: {beginner_class.event.id}, state: {beginner_class.event.state}')
+            # logger.warning(f'event: {beginner_class.event.id}, state: {beginner_class.event.state}')
         elif beginner_class.class_type == 'returnee' and beginner_class.event.state in ['open', 'wait', 'full']:
             if len(records) >= beginner_class.returnee_limit and beginner_class.event.state in ['open', 'wait']:
                 if len(records) >= beginner_class.returnee_limit + beginner_class.returnee_wait_limit:
@@ -162,24 +159,23 @@ class ClassRegistrationHelper:
         # logger.warning(beginner_class.event.state)
 
     def update_waiting(self, beginner_class):
-        logger.warning(beginner_class)
-        logging.warning(beginner_class)
+        # logger.warning(beginner_class)
+        # logging.warning(beginner_class)
         if type(beginner_class) == int:
             beginner_class = BeginnerClass.objects.get(pk=beginner_class)
         records = self.student_registrations(beginner_class)
-        logger.warning(len(records))
-        logging.warning(len(records))
+        # logger.warning(len(records))
+        # logging.warning(len(records))
         waiting = records.filter(pay_status='waiting').order_by('modified')
         admitted = records.filter(pay_status__in=['paid', 'admin']).order_by('modified')
         logger.warning(f'class type: {beginner_class.class_type}, waiting: {len(waiting)}, admitted: {len(admitted)}')
-        logging.warning(f'class type: {beginner_class.class_type}, waiting: {len(waiting)}, admitted: {len(admitted)}')
         if not len(waiting):
             return
         if beginner_class.class_type == 'beginner':
             if len(admitted) < beginner_class.beginner_limit:
-                logger.warning(f'space available {beginner_class.beginner_limit - len(admitted)}')
+                # logger.warning(f'space available {beginner_class.beginner_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
-                logger.warning(f'next group {len(next_group)}')
+                # logger.warning(f'next group {len(next_group)}')
                 if beginner_class.beginner_limit - len(admitted) >= len(next_group):
                     response = self.charge_group(next_group)
                     if not response[str(waiting.first().idempotency_key)] == 'SUCCESS':  # pragma: no cover
@@ -188,9 +184,9 @@ class ClassRegistrationHelper:
 
         elif beginner_class.class_type == 'returnee':
             if len(admitted) < beginner_class.returnee_limit:
-                logger.warning(f'space available {beginner_class.returnee_limit - len(admitted)}')
+                # logger.warning(f'space available {beginner_class.returnee_limit - len(admitted)}')
                 next_group = waiting.filter(idempotency_key=waiting.first().idempotency_key)
-                logger.warning(f'next group {len(next_group)}')
+                # logger.warning(f'next group {len(next_group)}')
                 if beginner_class.returnee_limit - len(admitted) >= len(next_group):
                     response = self.charge_group(next_group)
                     if not response[str(waiting.first().idempotency_key)] == 'SUCCESS':  # pragma: no cover

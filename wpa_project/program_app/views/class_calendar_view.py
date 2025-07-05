@@ -62,7 +62,7 @@ class CalendarView(TemplateView):
         dark = False
         if self.request.user.is_authenticated:
             dark = self.request.user.dark_theme
-        cal = Calendar(year, month, dark, self.request.user.is_staff)
+        cal = Calendar(year, month, dark, self.request.user.has_perm('student_app.staff'))
 
         # Call the formatmonth method, which returns our calendar as a table
         context['html_cal'] = mark_safe(cal.formatmonth(withyear=True))

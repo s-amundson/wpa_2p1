@@ -3,6 +3,7 @@ import logging
 import uuid
 from unittest.mock import patch
 
+from django.contrib.auth.models import Group
 from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
@@ -15,6 +16,7 @@ from payment.models import Card, Customer
 logger = logging.getLogger(__name__)
 
 
+# @tag('temp')
 class TestsClassRegistration(TestCase):
     fixtures = ['f1']
 
@@ -126,8 +128,7 @@ class TestsClassRegistration(TestCase):
             idempotency_key=str(uuid.uuid4()))
         cr.save()
         u = User.objects.get(pk=2)
-        u.is_staff = False
-        u.save()
+        u.groups.clear()
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(u)
@@ -297,7 +298,7 @@ class TestsClassRegistration(TestCase):
         # make user instructor
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.test_user.is_instructor = True
+        self.test_user.groups.add(Group.objects.get(name='instructors'))
         d = timezone.now()
         self.test_user.instructor_expire_date = d.replace(year=d.year + 1)
         self.test_user.save()
@@ -322,11 +323,12 @@ class TestsClassRegistration(TestCase):
                          f'Class on {str(self.event.event_date)[:10]} staff: Emily')
         self.assertEqual(cr[0].user, self.test_user)
 
+    # @tag('temp')
     def test_class_register_instructor_current_multiple(self):
         # make user instructor
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.test_user.is_instructor = True
+        self.test_user.groups.add(Group.objects.get(name='instructors'))
         d = timezone.now()
         self.test_user.instructor_expire_date = d.replace(year=d.year + 1)
         self.test_user.save()
@@ -376,6 +378,7 @@ class TestsClassRegistration(TestCase):
     #     cr = Registration.objects.all()
     #     self.assertEqual(len(cr), 0)
 
+    # @tag('temp')
     @patch('program_app.src.class_registration_helper.ClassRegistrationHelper.update_class_state')
     def test_class_register_instructor_full(self, update_class_state):
         # Don't add an instructor when instructors are at limit.
@@ -384,7 +387,8 @@ class TestsClassRegistration(TestCase):
         # make user instructor
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.test_user.is_instructor = True
+        self.test_user.groups.add(Group.objects.get(name='instructors'))
+        logger.debug(self.test_user.groups.all())
         d = timezone.now()
         self.test_user.instructor_expire_date = d + timezone.timedelta(days=30)
         self.test_user.save()
@@ -414,7 +418,7 @@ class TestsClassRegistration(TestCase):
         # make user instructor
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)
-        self.test_user.is_instructor = True
+        self.test_user.groups.add(Group.objects.get(name='instructors'))
         d = timezone.now()
         self.test_user.instructor_expire_date = d + timezone.timedelta(days=30)
         self.test_user.save()
@@ -525,6 +529,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 1)
         self.assertContains(response, 'Student is already enrolled')
 
+    # @tag('temp')
     def test_class_register_wait_no_card(self):
         # put a record in to the database
         cr = Registration(event=self.event,
@@ -537,8 +542,7 @@ class TestsClassRegistration(TestCase):
         bc.save()
 
         u = User.objects.get(pk=2)
-        u.is_staff = False
-        u.save()
+        u.groups.clear()
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
         self.client.force_login(u)
@@ -554,6 +558,7 @@ class TestsClassRegistration(TestCase):
         self.assertEqual(len(cr), 3)
         self.assertRedirects(response, reverse('payment:card_manage'))
 
+    # @tag('temp')
     @patch('program_app.tasks.wait_list_email.delay')
     def test_class_register_wait_with_card(self, wait_list_email):
         # put a record in to the database
@@ -568,8 +573,7 @@ class TestsClassRegistration(TestCase):
         bc.save()
 
         u = User.objects.get(pk=2)
-        u.is_staff = False
-        u.save()
+        u.groups.clear()
         card = self.add_card(u)
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
@@ -618,8 +622,7 @@ class TestsClassRegistration(TestCase):
         bc2.save()
 
         u = User.objects.get(pk=2)
-        u.is_staff = False
-        u.save()
+        u.groups.clear()
         card = self.add_card(u)
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.
@@ -666,8 +669,7 @@ class TestsClassRegistration(TestCase):
         bc2.save()
 
         u = User.objects.get(pk=2)
-        u.is_staff = False
-        u.save()
+        u.groups.clear()
         card = self.add_card(u)
 
         # change user, then try to add 2 more beginner students. Since limit is 2 can't add.

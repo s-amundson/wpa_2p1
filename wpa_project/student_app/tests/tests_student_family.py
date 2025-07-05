@@ -10,7 +10,7 @@ from ..models import Student, StudentFamily,  User
 
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp')
 class TestsStudentFamily(TestCase):
     fixtures = ['f1']
 
@@ -25,6 +25,7 @@ class TestsStudentFamily(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('student_app/forms/student_family_form.html')
 
+    # @tag('temp')
     def test_get_student_family_id(self):
         response = self.client.get(reverse('registration:student_family', kwargs={'family_id': 2}), secure=True)
         self.assertEqual(response.status_code, 200)
@@ -44,6 +45,7 @@ class TestsStudentFamily(TestCase):
         # self.assertEqual(response.status_code, 400)
         self.assertEqual(response.status_code, 404)
 
+    # @tag('temp')
     def test_get_student_family_id_staff(self):
         self.test_user = User.objects.get(pk=2)
         self.client.force_login(self.test_user)

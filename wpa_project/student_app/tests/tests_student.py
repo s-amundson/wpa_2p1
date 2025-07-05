@@ -12,6 +12,7 @@ from event.models import Event, Registration
 logger = logging.getLogger(__name__)
 
 
+# @tag('temp')
 class TestsStudent(TestCase):
     fixtures = ['f1']
 
@@ -201,8 +202,8 @@ class TestsStudent(TestCase):
         student = Student.objects.get(pk=4)
         self.assertEqual(student.first_name, d['first_name'])
         self.assertEqual(student.last_name, d['last_name'])
-        self.assertTrue(student.user.is_staff)
-        self.assertTrue(student.user.is_instructor)
+        self.assertTrue(student.user.has_perm('student_app.staff'))
+        self.assertTrue(student.user.has_perm('student_app.instructors'))
         self.assertTrue(student.user.is_active)
 
     # @tag("temp")

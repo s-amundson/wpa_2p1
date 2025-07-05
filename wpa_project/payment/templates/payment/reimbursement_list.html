@@ -29,13 +29,13 @@
                             {% if object.student.user == user or user.is_superuser %}
                                 <a class="mx-2" href="{% url 'payment:reimbursement_form' object.id%}">Edit</a><br/>
                             {% endif %}
-                            {% if object.student.user != user and user.is_board %}
+                            {% if object.student.user != user and perms.student_app.board %}
                                 {% voter_status object user%}
                                 <a href="{% url 'payment:reimbursement_vote' object.id%}">
                                     Vote {% vote_again object user %}</a>
                             {% endif %}
                         {% else %}
-                            {% if object.status == 'approved' and user.is_board %}
+                            {% if object.status == 'approved' and perms.student_app.board %}
                                 <a class="mx-2" href="{% url 'payment:reimbursement_form' object.id%}">Edit</a>
                             {% endif %}
                             <a href="{% url 'payment:reimbursement_vote' object.id%}">View</a>

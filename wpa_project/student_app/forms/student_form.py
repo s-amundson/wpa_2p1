@@ -38,8 +38,8 @@ class StudentDeleteForm(forms.Form):
                     initial='remove'
                 )
         self.fields['delete'] = forms.CharField(label='Enter "delete" in order to remove this student')
-        logger.warning(self.can_delete)
-        logger.warning(self.multi_user)
+        # logger.warning(self.can_delete)
+        # logger.warning(self.multi_user)
 
     def clean(self):
         data = super().clean()
@@ -52,7 +52,7 @@ class StudentDeleteForm(forms.Form):
 
         else:
             student = Student.objects.filter(pk=data['pk']).last()
-            logger.warning(student)
+            # logger.warning(student)
             if student is None:
                 raise ValidationError("Form Error - Invalid Student")
             if student.registration_set.filter(

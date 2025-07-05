@@ -52,7 +52,7 @@ class BusinessView(UserPassesTestMixin, FormView):
                 return 0
             if self.business.resolved is not None:
                 return 0
-            if not self.request.user.is_board:
+            if not self.request.user.has_perm('student_app.board'):
                 return 0
             if queryset.count() == 0:
                 return 1
@@ -109,6 +109,6 @@ class BusinessView(UserPassesTestMixin, FormView):
             else:
                 return False
             if self.request.method == 'GET':
-                return self.request.user.is_member
-            return self.request.user.is_board
+                return self.request.user.has_perm('student_app.members')
+            return self.request.user.has_perm('student_app.board')
         return False

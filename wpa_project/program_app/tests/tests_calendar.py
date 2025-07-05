@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
+# @tag('temp')
 class TestsCalendar(TestCase):
     fixtures = ['f1']
 

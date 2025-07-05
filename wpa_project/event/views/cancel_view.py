@@ -67,7 +67,7 @@ class CancelView(StudentFamilyMixin, FormView):
         else:  # pragma: no cover
             logger.warning(formset.errors)
             logger.warning(formset.non_form_errors())
-        if self.request.user.is_board and 'student_family' in self.kwargs:
+        if self.request.user.has_perm('user.board') and 'student_family' in self.kwargs:
             self.success_url = reverse_lazy('events:cancel',
                                             kwargs={'student_family': self.kwargs.get('student_family')})
         # return HttpResponseRedirect(reverse_lazy('events:cancel'))

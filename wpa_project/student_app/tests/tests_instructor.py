@@ -2,12 +2,12 @@ import logging
 import json
 from datetime import date
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from ..models import User
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp')
 class TestsInstructor(TestCase):
     fixtures = ['f1']
 

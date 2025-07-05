@@ -35,11 +35,11 @@ class SendEmailView(UserPassesTestMixin, FormView):
         users = User.objects.filter(is_active=True)
         days = form.cleaned_data.get('include_days', None)
         if 'board' in form.cleaned_data['recipients']:
-            email_users = email_users | users.filter(is_board=True)
+            email_users = email_users | users.filter(groups__name='board')
         if 'staff' in form.cleaned_data['recipients']:
-            email_users = email_users | users.filter(is_staff=True)
+            email_users = email_users | users.filter(groups__name='staff')
         if 'current members' in form.cleaned_data['recipients']:
-            email_users = email_users | users.filter(is_member=True)
+            email_users = email_users | users.filter(groups__name='members')
             # em.bcc_from_users(, append=True)
         if 'joad' in form.cleaned_data['recipients']:
             students = Student.objects.filter(is_joad=True)
@@ -64,4 +64,4 @@ class SendEmailView(UserPassesTestMixin, FormView):
 
     def test_func(self):
         self.is_super = self.request.user.is_superuser
-        return self.request.user.is_board
+        return self.request.user.has_perm('student_app.board')

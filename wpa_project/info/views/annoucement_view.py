@@ -1,17 +1,16 @@
 from django.views.generic import ListView
 from django.views.generic.edit import FormView
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
 from ..models import Announcement
 from ..forms import AnnouncementForm
-
+from src.mixin import BoardMixin
 import logging
 logger = logging.getLogger(__name__)
 
 
-class AnnouncementFormView(UserPassesTestMixin, FormView):
+class AnnouncementFormView(BoardMixin, FormView):
     model = Announcement
     form_class = AnnouncementForm
     template_name = 'info/preview_form.html'
@@ -33,11 +32,6 @@ class AnnouncementFormView(UserPassesTestMixin, FormView):
         form.save()
         return super().form_valid(form)
 
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            return self.request.user.is_board
-        return False
-
 
 class AnnouncementList(ListView):
     """
@@ -58,7 +52,7 @@ class AnnouncementList(ListView):
             begin_date__lte=timezone.now(),
             status=1,
         )
-        if self.request.user.is_authenticated and self.request.user.is_board:
+        if self.request.user.is_authenticated and self.request.user.has_perm('student_app.board'):
             object_list = self.model.objects.filter(
                 end_date__gte=timezone.now() - timezone.timedelta(days=30),
                 begin_date__lte=timezone.now(),

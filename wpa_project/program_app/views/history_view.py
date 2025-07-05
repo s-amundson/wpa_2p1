@@ -20,7 +20,7 @@ class HistoryView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         if self.request.user.is_authenticated and self.request.user.student_set.last():
             self.student_family = self.request.user.student_set.last().student_family
-            if self.request.user.is_board:
+            if self.request.user.has_perm('student_app.board'):
                 self.student_family = self.kwargs.get('family_id', self.student_family)
             return self.student_family is not None
         else:

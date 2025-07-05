@@ -99,7 +99,7 @@ class AdmitWaitView(UserPassesTestMixin, FormView):
             return self.form_invalid(form)
 
     def test_func(self):
-        if self.request.user.is_authenticated and self.request.user.is_staff:
+        if self.request.user.is_authenticated and self.request.user.has_perm('student_app.staff'):
             if self.kwargs.get('event'):
                 self.event = get_object_or_404(Event, pk=self.kwargs.get('event'))
                 self.success_url = reverse_lazy('programs:admit_wait', kwargs={'event': self.event.id})

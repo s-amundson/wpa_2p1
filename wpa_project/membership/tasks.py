@@ -4,6 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 from celery import shared_task
 from django_celery_beat.models import PeriodicTask
+from django.contrib.auth.models import Group
 
 from membership.models import Election, Member, Membership
 from membership.src import EmailMessage
@@ -69,9 +70,7 @@ def membership_expire_update():
         for member in expired_members:
             u = member.student.user
             if u is not None:
-                logging.warning(u.id)
-                u.is_member = False
-                u.save()
+                u.groups.remove(Group.objects.get(name='members'))
     except Exception as e:  # pragma: no cover
         logger.error(traceback.format_exc())
         # Logs the error appropriately.

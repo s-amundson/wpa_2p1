@@ -24,7 +24,7 @@ class EmailMessage(EmailMultiAlternatives):
             self.bcc.append(address)
 
     def bcc_append_user(self, user):
-        if user.is_active or user.is_staff:
+        if user.is_active or user.has_perm('student_app.staff'):
             self.bcc_append(EmailAddress.objects.get_primary(user))
 
     def bcc_from_students(self, queryset, append=False):

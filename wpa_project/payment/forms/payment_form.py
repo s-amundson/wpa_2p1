@@ -75,7 +75,6 @@ class PaymentForm(forms.ModelForm):
 
     def clean_email(self):
         address = self.cleaned_data['email']
-        logger.warning(address)
         if address == '':
             return None
         is_valid = validate_email(address, self.client_ip)

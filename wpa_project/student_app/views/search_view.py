@@ -1,5 +1,5 @@
 from allauth.account.models import EmailAddress
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.views.generic.base import TemplateView
 from django.views.generic import FormView, ListView
@@ -28,7 +28,7 @@ class SearchResultListView(UserPassesTestMixin, ListView):
         self.queryset = self.families
 
     def test_func(self):
-        if self.request.user.is_authenticated and self.request.user.is_staff:
+        if self.request.user.has_perm('student_app.staff'):
             if self.request.session.get('families', None) is not None:
                 self.families = StudentFamily.objects.filter(id__in=self.request.session.pop('families'))
             return True
@@ -49,17 +49,18 @@ class SearchResultView(UserPassesTestMixin, TemplateView):
         return context
 
     def test_func(self):
-        if self.request.user.is_authenticated and self.request.user.is_staff:
+        if self.request.user.has_perm('student_app.staff'):
             self.student_family_id = self.kwargs.get('student_family', None)
             self.student_family = get_object_or_404(StudentFamily, pk=self.student_family_id)
             return self.student_family_id is not None
         return False
 
 
-class SearchAbstractView(UserPassesTestMixin, FormView):
+class SearchAbstractView(PermissionRequiredMixin, FormView):
     template_name = 'student_app/student_search.html'
     success_url = reverse_lazy('registration:search_result_list')
     form_class = SearchEmailForm
+    permission_required = 'staff'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -71,9 +72,6 @@ class SearchAbstractView(UserPassesTestMixin, FormView):
     def form_invalid(self, form):
         logging.debug(form.errors)
         return super().form_invalid(form)
-
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.is_staff
 
 
 class SearchEmailView(SearchAbstractView):

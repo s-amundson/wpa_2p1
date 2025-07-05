@@ -53,7 +53,7 @@
             </div>
         </div>
     </div>
-    {% if user.is_staff %}
+    {% if perms.student_app.staff %}
         <div class="d-flex flex-row px-3 input-group input-group-md">
             <div class="col-2">
                 {{ form.safety_class.label }}
@@ -86,7 +86,7 @@
             </div>
         </div>
 
-        {% if user.is_board and student.is_user %}
+        {% if perms.student_app.board and student.is_user %}
         <div class="d-flex flex-row px-3 input-group input-group-md">
             <div class="m-2">{{user_form.is_staff}} {{user_form.is_staff.label}}</div>
             <div class="m-2">{{user_form.is_board}} {{user_form.is_board.label}}</div>

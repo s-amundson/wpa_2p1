@@ -19,7 +19,7 @@
             {% endif %}
         </div>
     {% endif %}
-    {% if user.is_board %}
+    {% if perms.student_app.board %}
         <hr>
         <h4 class="text-center"> Board only below this line </h4>
         <form method="post">{% csrf_token %}

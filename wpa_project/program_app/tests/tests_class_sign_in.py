@@ -1,7 +1,7 @@
 import uuid
 
 from django.apps import apps
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 from unittest.mock import patch
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
+# @tag('temp')
 class TestsClassSignIn(MockSideEffects, TestCase):
     fixtures = ['f1', 'f2']
 

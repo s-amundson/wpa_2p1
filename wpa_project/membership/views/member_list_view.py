@@ -1,15 +1,15 @@
 import logging
 import csv
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic.list import ListView
 from django.utils import timezone
 from django.http import HttpResponse
 from ..forms import MemberExpireDateForm
 from ..models import Member
+from src.mixin import BoardMixin
 logger = logging.getLogger(__name__)
 
 
-class MemberList(UserPassesTestMixin, ListView):
+class MemberList(BoardMixin, ListView):
     model = Member
     paginate_by = 100  # if pagination is desired
     form_class = MemberExpireDateForm
@@ -63,9 +63,3 @@ class MemberList(UserPassesTestMixin, ListView):
             return response
         else:
             return super().render_to_response(context, **response_kwargs)
-
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            return self.request.user.is_board
-        else:
-            return False

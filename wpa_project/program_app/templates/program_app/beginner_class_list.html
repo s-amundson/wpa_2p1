@@ -12,7 +12,7 @@
                     <th>Beginners</th>
                     <th>Returnees</th>
                     <th>Waiting</th>
-                    {% if user.is_staff or user.is_instructor %}
+                    {% if perms.student_app.staff or user.is_instructor %}
                         <th>Instructors</th>
                         <th>Staff </th>
                     {% endif %}
@@ -30,7 +30,7 @@
                         <td>{{ c.beginner }}/{{ c.beginner_limit }}</td>
                         <td>{{ c.returnee }}/{{ c.returnee_limit }}</td>
                         <td>{{ c.waiting }}/{{ c.beginner_wait_limit|add:c.returnee_wait_limit }}</td>
-                        {% if user.is_staff or user.is_instructor %}
+                        {% if perms.student_app.staff or user.is_instructor %}
                             <td>{{c.instructor}}/{{ c.instructor_limit }}</td>
                             <td>{{ c.staff}}/{{ c.staff_limit }}</td>
                         {% endif %}
@@ -54,7 +54,7 @@
             {% endif %}
         </div>
 
-        {% if user.is_board %}
+        {% if perms.student_app.board %}
             <div class="col">
                 <a class="nav-link" href="{% url 'programs:beginner_class' %}">
                     Add

@@ -149,7 +149,7 @@
                 {{ form.instance.end_time }}
             {% else %}
 
-                {% if user.is_board %}
+                {% if perms.student_app.board %}
                     <button id="btn-end" class="btn btn-primary" type="submit">End Meeting Now</button>
                 {% endif %}
             {% endif %}

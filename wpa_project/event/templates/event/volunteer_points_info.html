@@ -10,7 +10,7 @@
         Instructor certification training may be reimbursed at $3 per point. See the
         <a href="{% url 'info:policy' volunteer_policy.id %}">Volunteer Incentive Policy</a> for more information.
     </p>
-    {% if user.is_board %}
+    {% if perms.student_app.board %}
         <h4>Modifying Student's Awards (Board Members)</h4>
         <p>
             To modify a student's awards for either volunteering or for reimbursement of approved purchases find the

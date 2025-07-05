@@ -44,7 +44,7 @@ class StudentFamilyView(LoginRequiredMixin, FormView):
             if student is not None:
                 self.student_family = student.student_family
         else:
-            if self.request.user.is_staff:
+            if self.request.user.has_perm('student_app.staff'):
                 self.student_family = get_object_or_404(StudentFamily, pk=family_id)
             else:
                 self.student_family = get_object_or_404(Student, user=self.request.user).student_family

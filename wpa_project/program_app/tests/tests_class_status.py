@@ -1,7 +1,7 @@
 import logging
 import json
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 
 from event.models import Event, Registration
@@ -10,6 +10,7 @@ from student_app.models import Student, User
 logger = logging.getLogger(__name__)
 
 
+# @tag('temp')
 class TestsClassStatus(TestCase):
     fixtures = ['f1']
 

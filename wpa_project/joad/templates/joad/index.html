@@ -72,7 +72,7 @@
         <tbody id="class-list-body">
             {% for session in session_list %}
                 <tr>
-                    {% if user.is_staff %}
+                    {% if perms.student_app.staff %}
                         <td>
                             <a href="{% url 'joad:session' session.id %}">{{ session.start_date }}</a>
                         </td>
@@ -105,7 +105,7 @@
         </tbody>
     </table>
     <div id="class-div"></div>
-    {% if user.is_staff %}
+    {% if perms.student_app.staff %}
         <div class="m-3">
             <a href="{% url 'joad:session' %}" class="btn btn-primary" role="button">New Session</a>
         </div>

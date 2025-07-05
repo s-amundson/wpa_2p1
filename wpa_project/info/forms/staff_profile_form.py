@@ -12,5 +12,5 @@ class StaffProfileForm(MyModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['student'].queryset = self.fields['student'].queryset.filter(user__is_staff=True)
+        self.fields['student'].queryset = self.fields['student'].queryset.filter(user__groups__name='staff')
         self.multipart = True

@@ -34,5 +34,5 @@ class SendEmailView(UserPassesTestMixin, FormView):
             if bid is not None:
                 self.beginner_class = get_object_or_404(BeginnerClass, pk=bid)
                 self.success_url = reverse_lazy('events:event_attend_list', kwargs={'event': self.beginner_class.event.id})
-                return self.request.user.is_board
+                return self.request.user.has_perm('student_app.board')
         return False

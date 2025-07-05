@@ -17,7 +17,7 @@ class StudentListView(StudentList):
         return context
 
     def get_queryset(self):
-        queryset = super().get_queryset().filter(is_joad=True).exclude(user__is_staff=True).order_by('last_name')
+        queryset = super().get_queryset().filter(is_joad=True).exclude(user__groups__name='staff').order_by('last_name')
         if self.form.is_valid():
             self.last_event = self.form.cleaned_data['last_event']
         return queryset

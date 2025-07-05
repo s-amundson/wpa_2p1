@@ -1,20 +1,17 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic.edit import FormView
 
 import logging
-from django.http import HttpResponseRedirect, Http404, JsonResponse
-from django.urls import reverse
-from django.views.generic.base import View
+from django.http import JsonResponse
 
 from ..forms import InstructorForm
 logger = logging.getLogger(__name__)
 
 
-class InstructorUpdateView(UserPassesTestMixin, FormView):
+class InstructorUpdateView(PermissionRequiredMixin, FormView):
     form_class = InstructorForm
     template_name = 'student_app/forms/instructor.html'
+    permission_required = 'instructors'
 
     def form_invalid(self, form):
         logging.warning(form.errors)
@@ -36,8 +33,3 @@ class InstructorUpdateView(UserPassesTestMixin, FormView):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.request.user
         return kwargs
-
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            return self.request.user.is_instructor
-        return False  # pragma: no cover

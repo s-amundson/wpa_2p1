@@ -1,10 +1,10 @@
 import logging
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.views.generic.base import View
 from django.shortcuts import get_object_or_404
 
+from src.mixin import StaffMixin
 from ..forms import LevelForm
 from ..models import Level
 
@@ -12,14 +12,12 @@ from ..models import Level
 logger = logging.getLogger(__name__)
 
 
-class LevelView(LoginRequiredMixin, View):
+class LevelView(StaffMixin, View):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.table = Level.objects.all()
 
     def get(self, request, level_id=None):
-        if not request.user.is_staff:
-            return HttpResponseForbidden()
         if level_id is not None:
             c = get_object_or_404(Level, pk=level_id)
         else:

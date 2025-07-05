@@ -1,4 +1,3 @@
-from .covid_vax_view import CovidVaxView
 from .index_view import IndexView
 from .instructor_update_view import InstructorUpdateView
 from .login_view import LoginView

@@ -15,7 +15,7 @@
         <p> {{ form.incident_date.label }} {{ form.incident_date }} {{ form.incident_date.errors }}</p>
         <p> {{ form.message.label }} {{ form.message }} {{ form.message.errors }}</p>
         <p> {{ form.anonymous.label }} {{ form.anonymous }} {{ form.anonymous.errors }}</p>
-        {% if form.instance.id and user.is_board %}
+        {% if form.instance.id and perms.student_app.board %}
             <div class="container mx-auto">
 
                 {{ formset.management_form }}

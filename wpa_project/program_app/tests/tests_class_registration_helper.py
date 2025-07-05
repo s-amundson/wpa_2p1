@@ -14,7 +14,7 @@ from payment.tests import MockSideEffects
 
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp)')
 class TestsClassRegistrationHelper(MockSideEffects, TestCase):
     fixtures = ['f1']
 
@@ -47,6 +47,7 @@ class TestsClassRegistrationHelper(MockSideEffects, TestCase):
         bc = BeginnerClass.objects.get(pk=1)
         self.assertEqual(bc.event.state, 'full')
 
+    # @tag('temp')
     def test_update_status_beginner_full_then_open(self):
         bc = BeginnerClass.objects.get(pk=1)
         bc.class_type = 'beginner'

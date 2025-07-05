@@ -94,7 +94,7 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
                     self.request.session['payment_description'] = f'Joad Pin(s)'
                     self.success_url = reverse('payment:make_payment')
                 self.success_message = f'Congratulations on earning {pins_earned} pins'
-        elif self.request.user.is_staff:
+        elif self.request.user.has_perm('student_app.staff'):
             if form.cleaned_data['pay_method'] == 'cash':
                 if form.cleaned_data.get('payment_received', False):
                     logger.debug('cash paid')
@@ -111,7 +111,7 @@ class EventAttendanceView(UserPassesTestMixin, SuccessMessageMixin, FormView):
             self.attendance = self.joad_event.pinattendance_set.filter(student=self.student).last()
         if not self.request.user.is_authenticated:
             return False
-        if self.request.user and self.request.user.is_staff:
+        if self.request.user and self.request.user.has_perm('student_app.staff'):
             self.form_class = PinAttendanceStaffForm
             self.success_url = reverse_lazy('joad:event', kwargs={'event_id': eid})
             return True
@@ -141,7 +141,7 @@ class EventAttendListView(UserPassesTestMixin, ListView):
             sid = self.kwargs.get("event_id", None)
             if sid is not None:
                 self.joad_event = get_object_or_404(JoadEvent, pk=sid)
-            return self.request.user.is_board
+            return self.request.user.has_perm('student_app.board')
         return False
 
 

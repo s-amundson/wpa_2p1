@@ -1,12 +1,12 @@
 import logging
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 
 from ..models import User
 
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp')
 class TestsSearch(TestCase):
     fixtures = ['f1']
 

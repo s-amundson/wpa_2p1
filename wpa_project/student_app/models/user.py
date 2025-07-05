@@ -12,3 +12,12 @@ class User(AbstractUser):
     is_member = BooleanField(default=False)
     instructor_level = IntegerField(default=None, null=True)
     theme = CharField(max_length=20, choices=THEME_CHOICES, default='browser')
+
+    class Meta:
+        permissions = [
+            ("board", "For voting board members"),
+            ('board_plus', 'For board members and previous President'),
+            ('instructors', 'For our active instructors'),
+            ('staff', 'for our staff'),
+            ('members', 'For members'),
+        ]

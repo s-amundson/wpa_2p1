@@ -1,11 +1,13 @@
 import logging
-from django.test import TestCase, Client
+
+from django.contrib.auth.models import Group
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 
 from ..models import User
 logger = logging.getLogger(__name__)
 
-
+# @tag('temp')
 class TestsUserView(TestCase):
     fixtures = ['f1']
 
@@ -40,3 +42,15 @@ class TestsUserView(TestCase):
         self.assertRedirects(response, reverse('registration:profile'))
         user = User.objects.get(pk=4)
         self.assertTrue(user.dark_theme)
+
+    # @tag('temp')
+    def test_post_user_remove_groups(self):
+        user = User.objects.get(pk=4)
+        user.groups.add(Group.objects.get(name='instructors'))
+        user.groups.add(Group.objects.get(name='board'))
+        response = self.client.post(self.url, self.post_dict, secure=True)
+        self.assertRedirects(response, reverse('registration:profile'))
+        user = User.objects.get(pk=4)
+        self.assertFalse(user.has_perm('student_app.board'))
+        self.assertFalse(user.has_perm('student_app.instructors'))
+        self.assertTrue(user.has_perm('student_app.staff'))

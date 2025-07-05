@@ -5,6 +5,7 @@ from django.test import TestCase, Client, tag
 from django.utils import timezone
 from django.db.models import signals
 from django.core import mail
+from django.contrib.auth.models import Group
 
 from program_app.tests.helper import create_beginner_class
 from event.models import Registration
@@ -39,7 +40,8 @@ class TestsEventTasks(MockSideEffects, TestCase):
         self.client = Client()
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
-
+        self.staff_group = Group.objects.get(name='staff')
+        self.instructors_group = Group.objects.get(name='instructors')
         self.payments = []
 
     def create_register_class(self, payment=True, days=4, amount=500):
@@ -158,11 +160,12 @@ class TestsEventTasks(MockSideEffects, TestCase):
         self.assertFalse(refund.called)
         self.assertFalse(refund_email.called)
 
+    # @tag('temp')
     def test_cancel_staff_within_24_hours(self, refund, refund_email):
         refund.side_effect = self.refund_side_effect
 
-        self.test_user = User.objects.get(pk=2)
-        user = User.objects.create(username="john", email="john@example.org", is_staff=True)
+        user = User.objects.create(username="john", email="john@example.org")
+        user.groups.add(self.staff_group)
         reg2 = self.create_register_class(payment=False)
         reg2[0].event.event_date = timezone.now() + timezone.timedelta(hours=12)
         reg2[0].event.save()
@@ -180,11 +183,12 @@ class TestsEventTasks(MockSideEffects, TestCase):
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Instructor Cancellation')
         self.assertFalse(refund_email.called)
 
+    # @tag('temp')
     def test_cancel_staff_within_24_hours_no_email(self, refund, refund_email):
         refund.side_effect = self.refund_side_effect
 
-        self.test_user = User.objects.get(pk=2)
-        user = User.objects.create(username="john", email="john@example.org", is_staff=True)
+        user = User.objects.create(username="john", email="john@example.org")
+        user.groups.add(self.staff_group)
         reg2 = self.create_register_class(payment=False)
         reg2[0].event.event_date = timezone.now() + timezone.timedelta(hours=12)
         reg2[0].event.save()
@@ -193,9 +197,9 @@ class TestsEventTasks(MockSideEffects, TestCase):
 
         # create some more instructors to so that we can test removing staff without sending email
         self.test_user = User.objects.get(pk=5)
-        self.test_user.is_staff=True
-        self.test_user.is_instructor=True
-        self.test_user.save()
+        self.test_user.groups.add(self.staff_group, self.instructors_group)
+
+        # self.test_user.save()
         sf = self.test_user.student_set.first().student_family
         ik = uuid.uuid4()
         for i in range(5):
@@ -207,11 +211,10 @@ class TestsEventTasks(MockSideEffects, TestCase):
                 email=f'john{i}@example.org',
                 user=User.objects.create(
                     username=f'john{i}@example.org',
-                    email=f'john{i}@example.org',
-                    is_staff=True,
-                    is_instructor=True
+                    email=f'john{i}@example.org'
                 )
             )
+            student.user.groups.add(self.staff_group, self.instructors_group)
             r = Registration.objects.create(
                 event=reg2[0].event,
                 student=student,

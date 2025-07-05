@@ -38,7 +38,7 @@ class MembershipView(AccessMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if 'sf_id' in self.kwargs and self.request.user.is_board:
+        if 'sf_id' in self.kwargs and self.request.user.has_perm('student_app.board'):
             self.student_family = StudentFamily.objects.get(pk=self.kwargs.get('sf_id'))
         kwargs['students'] = self.student_family.student_set.all()
         return kwargs
@@ -93,7 +93,7 @@ class MembershipView(AccessMixin, FormView):
                 form.add_error(None, 'Incorrect membership selected')
                 return self.form_invalid(form)
             else:
-                if 'sf_id' in self.kwargs and self.request.user.is_board:
+                if 'sf_id' in self.kwargs and self.request.user.has_perm('student_app.board'):
                     self.transact(form, members, 0)
                 else:
                     self.transact(form, members, level.cost)

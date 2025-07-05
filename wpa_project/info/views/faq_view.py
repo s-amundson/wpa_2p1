@@ -1,18 +1,18 @@
 from django.views.generic import ListView
 from django.views.generic.edit import FormView
 from django.db.models import Q
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
 from ..models import Faq
 from ..forms import FaqForm, FaqFilterForm, FaqSearchForm
+from src.mixin import BoardMixin
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class FaqFormView(UserPassesTestMixin, FormView):
+class FaqFormView(BoardMixin, FormView):
     model = Faq
     form_class = FaqForm
     template_name = 'student_app/form_as_p.html'
@@ -33,9 +33,7 @@ class FaqFormView(UserPassesTestMixin, FormView):
     def test_func(self):
         if self.kwargs.get('faq_id', None) is not None:
             self.faq = get_object_or_404(Faq, pk=self.kwargs['faq_id'])
-        if self.request.user.is_authenticated:
-            return self.request.user.is_board
-        return False
+        return super().test_func()
 
 
 class FaqList(ListView):
