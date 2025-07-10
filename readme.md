@@ -30,6 +30,8 @@ f1.json level.json pinscores.json policy_article.json`
 
 If the above ran successfully, open your browser and visit https://0.0.0.0:8000/ to access the dev version of the website.
 
+To view the site on other devices on your network, add the IP address of the host machine to the "ALLOWED_HOSTS" in secrets.json.
+
 ## To run tests:
 `docker exec -it django_dev python manage.py test [app]`
 

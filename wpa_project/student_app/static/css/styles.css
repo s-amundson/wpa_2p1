@@ -272,6 +272,10 @@ svg {
   color: black;
 }
 
+.navbar-custom .dropdown-item-text #small{
+  color: black;
+}
+
 .navbar-right-container {
   display: inline-flex;
   float: right;
