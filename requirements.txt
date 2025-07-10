@@ -17,6 +17,7 @@ psycopg2-binary==2.9.10
 pyenchant==3.2.2
 pyjwt==2.10.1
 python3-saml==1.16.0
+pyzbar==0.1.9
 reportlab==4.4.0
 requests==2.32.3
 scikit-learn==1.6.1

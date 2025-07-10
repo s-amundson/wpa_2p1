@@ -183,6 +183,7 @@ INSTALLED_APPS = [
     'info',
     'facebook',
     '_email',
+    'inventory',
 
     'csp',
     'django.contrib.admin',
@@ -265,6 +266,7 @@ LOGGING = {
         'joad': logger_default,
         'contact_us': logger_default,
         'info': logger_default,
+        'inventory': logger_default,
         'facebook': logger_default,
         'src': logger_default,
         'django': {

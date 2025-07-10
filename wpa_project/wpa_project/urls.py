@@ -29,6 +29,7 @@ urlpatterns = [
     path('events/', include('event.urls', namespace='events')),
     path('facebook/', include('facebook.urls', namespace='facebook')),
     path('information/', include('info.urls', namespace='information')),
+    path('inventory/', include('inventory.urls', namespace='inventory')),
     path('joad/', include('joad.urls', namespace='joad')),
     path('membership/', include('membership.urls', namespace='membership')),
     path('minutes/', include('minutes.urls', namespace='minutes')),
