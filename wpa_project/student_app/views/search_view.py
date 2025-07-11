@@ -60,7 +60,7 @@ class SearchAbstractView(PermissionRequiredMixin, FormView):
     template_name = 'student_app/student_search.html'
     success_url = reverse_lazy('registration:search_result_list')
     form_class = SearchEmailForm
-    permission_required = 'staff'
+    permission_required = 'student_app.staff'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

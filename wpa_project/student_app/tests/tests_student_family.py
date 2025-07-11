@@ -169,7 +169,10 @@ class TestsStudentFamily(TestCase):
         pf = PhoneField()
         self.assertIsNone(pf.to_python(None))
 
+    # @tag('temp')
     def test_student_family_delete_get_super(self):
+        self.test_user.is_superuser = True
+        self.test_user.save()
         response = self.client.get(reverse('registration:delete_student_family', kwargs={'pk': 3}), secure=True)
         self.assertTemplateUsed('student_app/delete.html')
         self.assertEqual(response.status_code, 200)
@@ -240,6 +243,8 @@ class TestsStudentFamily(TestCase):
     # @tag("temp")
     def test_post_delete_student_family_super(self):
         # self.test_user = User.objects.get(pk=3)
+        self.test_user.is_superuser = True
+        self.test_user.save()
         self.client.force_login(self.test_user)
         response = self.client.post(reverse('registration:delete_student_family', kwargs={'pk': 3}),
                                     {'delete': 'delete', 'pk': 3}, secure=True)

@@ -1,7 +1,6 @@
 import logging
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -13,10 +12,11 @@ from ..models import Category, Message
 from ..tasks import send_contact_email
 from student_app.models import Student
 from allauth.account.models import EmailAddress
+from src.mixin import BoardMixin
 logger = logging.getLogger(__name__)
 
 
-class MessageListView(UserPassesTestMixin, ListView):
+class MessageListView(BoardMixin, ListView):
     model = Message
     paginate_by = 20  # if pagination is desired
     template_name = 'contact_us/message_list.html'
@@ -33,11 +33,6 @@ class MessageListView(UserPassesTestMixin, ListView):
         else:
             queryset = queryset.exclude(spam_category='spam')
         return queryset.order_by('-created_time')
-
-    def test_func(self):
-        if self.request.user.is_authenticated:
-            return self.request.user.has_perm('student_app:board')
-        return False
 
 
 class MessageView(FormView):
@@ -65,7 +60,7 @@ class MessageView(FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         message = self.kwargs.get("message_id", None)
-        if self.request.user.is_authenticated and self.request.user.has_perm('user.board') and message is not None:
+        if self.request.user.is_authenticated and self.request.user.has_perm('student_app.board') and message is not None:
             self.message = get_object_or_404(Message, pk=message)
             kwargs['instance'] = self.message
         kwargs['user'] = self.request.user

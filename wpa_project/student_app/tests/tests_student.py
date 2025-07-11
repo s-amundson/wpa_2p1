@@ -195,7 +195,6 @@ class TestsStudent(TestCase):
 
     # @tag('temp')
     def test_modify_existing_user(self):
-        self.test_user.is_superuser = False
         self.test_user.save()
         d = {"first_name": "Charles", "last_name": "Wells", "dob": "1995-12-03", "is_instructor": True}
         response = self.client.post(reverse('registration:add_student', kwargs={'student_id': 4}), d, secure=True)
@@ -253,6 +252,8 @@ class TestsStudent(TestCase):
 
     # @tag("temp")
     def test_get_delete_student_superuser(self):
+        self.test_user.is_superuser = True
+        self.test_user.save()
         response = self.client.get(reverse('registration:delete_student', kwargs={'pk': 4}), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'student_app/delete.html')
@@ -265,6 +266,7 @@ class TestsStudent(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'student_app/delete.html')
 
+    # @tag('temp')
     def test_get_delete_student_invalid(self):
         self.test_user = User.objects.get(pk=3)
         self.client.force_login(self.test_user)
@@ -279,6 +281,8 @@ class TestsStudent(TestCase):
 
     # @tag("temp")
     def test_post_delete_student_superuser(self):
+        self.test_user.is_superuser = True
+        self.test_user.save()
         response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
                                     {'delete': 'delete', 'pk': 3}, secure=True)
         self.assertRedirects(response, reverse('registration:profile'))
@@ -326,8 +330,10 @@ class TestsStudent(TestCase):
         self.assertEqual(len(EmailAddress.objects.filter(email='RicardoRHoyt@jourrapide.com')), 1)
         self.assertIsNone(Student.objects.get(pk=5).student_family)
 
+    # @tag('temp')
     def test_post_delete_invalid(self):
-
+        self.test_user.is_superuser = True
+        self.test_user.save()
         response = self.client.post(reverse('registration:delete_student', kwargs={'pk': 3}),
                                     {'delete': 'delete', 'pk': 10}, secure=True)
         self.assertContains(response, 'Form Error - Invalid Student')

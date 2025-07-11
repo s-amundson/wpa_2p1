@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class InstructorUpdateView(PermissionRequiredMixin, FormView):
     form_class = InstructorForm
     template_name = 'student_app/forms/instructor.html'
-    permission_required = 'instructors'
+    permission_required = 'student_app.instructors'
 
     def form_invalid(self, form):
         logging.warning(form.errors)

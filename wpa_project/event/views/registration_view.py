@@ -70,7 +70,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         data = None
         if self.request.method.lower() == 'post':
             data = self.request.POST
-            if self.request.user.has_perm('user.board'):
+            if self.request.user.has_perm('student_app.board'):
                 self.formset_students = Student.objects.all()
         self.formset = modelformset_factory(Registration, form=RegistrationForm2, can_delete=False,
                                             extra=len(self.formset_students))
@@ -88,7 +88,7 @@ class RegistrationSuperView(StudentFamilyMixin, FormView):
         self.formset = self.formset(
             form_kwargs={
                 'students': self.formset_students,
-                'is_staff': self.request.user.has_perm('user.staff'),
+                'is_staff': self.request.user.has_perm('student_app.staff'),
                 'event_type': self.event_type
             },
             queryset=Registration.objects.none(),
@@ -142,7 +142,7 @@ class RegistrationView(RegistrationSuperView):
     def form_valid(self, form):
         self.form = form
         logger.warning(form.cleaned_data)
-        if self.request.user.has_perm('user.board'):
+        if self.request.user.has_perm('student_app.board'):
             self.student_family = get_object_or_404(StudentFamily, pk=form.cleaned_data['student_family'])
         processed_formset = self.process_formset()
         if not processed_formset['success']:

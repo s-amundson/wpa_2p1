@@ -10,13 +10,19 @@ logger = logging.getLogger(__name__)
 class BoardMixin(UserPassesTestMixin):
     def test_func(self):
         if self.request.user.is_authenticated:
-            return self.request.user.has_perm('user.board')
+            return self.request.user.has_perm('student_app.board')
         return False
 
 class BoardExtMixin(UserPassesTestMixin):
     def test_func(self):
         if self.request.user.is_authenticated:
-            return self.request.user.has_perm('user.board') or self.request.user.has_perm('user.board_plus')
+            return self.request.user.has_perm('student_app.board') or self.request.user.has_perm('student_app.board_plus')
+        return False
+
+class InstructorMixin(UserPassesTestMixin):
+    def test_func(self):
+        if self.request.user.is_authenticated:
+            return self.request.user.has_perm('student_app.instructors')
         return False
 
 class StaffMixin(UserPassesTestMixin):

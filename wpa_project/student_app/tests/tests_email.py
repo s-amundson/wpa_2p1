@@ -123,6 +123,8 @@ class TestsEmail(TestCase):
     @patch('_email.tasks.send_bulk_email.delay')
     def test_send_email_students(self, task_send_email):
         self.test_user = User.objects.get(pk=1)
+        self.test_user.is_superuser = True
+        self.test_user.save()
         self.client.force_login(self.test_user)
         event = Event.objects.create(
             event_date=timezone.now() - timezone.timedelta(days=20),
