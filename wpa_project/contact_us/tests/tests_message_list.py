@@ -1,7 +1,7 @@
 import logging
 
 from django.apps import apps
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 
 
@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 User = apps.get_model('student_app', 'User')
 
 
+# @tag('temp')
 class TestsMessageList(TestCase):
     fixtures = ['f1']
 
@@ -27,6 +28,7 @@ class TestsMessageList(TestCase):
                                          email=self.post_dict['email'][0],
                                          message=self.post_dict['message'][0])
 
+    # @tag('temp')
     def test_get_list_auth(self):
         self.add_message()
         self.test_user = User.objects.get(pk=1)
@@ -36,6 +38,7 @@ class TestsMessageList(TestCase):
         self.assertTemplateUsed(response, 'contact_us/message_list.html')
         self.assertEqual(len(response.context['object_list']), 1)
 
+    # @tag('temp')
     def test_get_list_auth_empty(self):
         self.test_user = User.objects.get(pk=1)
         self.client.force_login(self.test_user)

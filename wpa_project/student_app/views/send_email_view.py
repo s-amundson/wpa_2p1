@@ -28,6 +28,10 @@ class SendEmailView(UserPassesTestMixin, FormView):
         kwargs['is_super'] = self.is_super
         return kwargs
 
+    def form_invalid(self, form):
+        # logger.debug(form.errors)
+        return super().form_invalid(form)
+
     def form_valid(self, form):
         # send_email.delay(form.cleaned_data['recipients'], form.cleaned_data['subject'], form.cleaned_data['message'],
         #                  form.cleaned_data.get('include_days', None))

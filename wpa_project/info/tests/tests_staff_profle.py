@@ -1,6 +1,6 @@
 import logging
 import uuid
-from django.test import TestCase, Client
+from django.test import TestCase, Client, tag
 from django.urls import reverse
 from django.utils import timezone
 from event.models import Event, Registration
@@ -9,6 +9,7 @@ from ..models import StaffProfile
 logger = logging.getLogger(__name__)
 
 
+# @tag('temp')
 class TestsStaffProfile(TestCase):
     fixtures = ['f1']
 
@@ -19,6 +20,8 @@ class TestsStaffProfile(TestCase):
         # Every test needs a client.
         self.client = Client()
         self.test_user = User.objects.get(pk=1)
+        self.test_user.is_superuser = True
+        self.test_user.save()
         self.client.force_login(self.test_user)
 
     def test_get_staff_list(self):
@@ -40,6 +43,7 @@ class TestsStaffProfile(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 2)
 
+    # @tag('temp')
     def test_get_staff_profile_form(self):
         response = self.client.get(reverse('information:staff_profile_form'), secure=True)
         self.assertEqual(response.status_code, 200)
