@@ -32,9 +32,9 @@ class Bow(models.Model):
     limb_manufacturer = models.CharField(max_length=40)
     limb_model = models.CharField(max_length=20)
     in_service = models.BooleanField(default=True)
-    # is_youth = models.BooleanField(default=False)
+    is_youth = models.BooleanField(default=False)
     added_date = models.DateTimeField(auto_now_add=True)
-    # notes = models.TextField()
+    notes = models.TextField(null=True, default=None)
 
     objects = BowManager()
     def last_inventory(self):
