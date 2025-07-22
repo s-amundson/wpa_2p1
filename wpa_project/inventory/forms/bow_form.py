@@ -12,7 +12,7 @@ class BowForm(forms.ModelForm):
     class Meta:
         model = Bow
         fields = ['bow_id', 'hand', 'poundage', 'length', 'type', 'riser_material', 'riser_manufacturer',
-                  'riser_color', 'limb_color', 'limb_manufacturer', 'limb_model', 'in_service']
+                  'riser_color', 'limb_color', 'limb_manufacturer', 'limb_model', 'in_service','is_youth', 'notes']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -21,6 +21,8 @@ class BowForm(forms.ModelForm):
         else:
             self.fields["bow_id"].required = False
             self.fields["bow_id"].widget = forms.HiddenInput()
+        self.fields['is_youth'].required = False
+        self.fields['in_service'].required = False
 
     def clean(self):
         cleaned_data = super().clean()
@@ -50,7 +52,6 @@ class BowInventoryForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        logger.debug(cleaned_data['image_field'])
         if cleaned_data['bow_id'] == "":
             if cleaned_data['image_field']:
                 image = Image.open(cleaned_data['image_field'])
@@ -73,10 +74,9 @@ class BowInventoryForm(forms.ModelForm):
             if len(dcode):
                 cleaned_data['bow_id'] = dcode[0].data.decode()
             else:
-                self.raise_error(cleaned_data, 'captured image error')
-
+                self.raise_error(cleaned_data, 'could not read barcode from captured image')
         cleaned_data['bow'] = Bow.objects.filter(bow_id=cleaned_data['bow_id']).first()
-        if cleaned_data['bow'] is None:
+        if cleaned_data['bow'] is None and not len(self.errors.items()):
             self.raise_error(cleaned_data, 'Bow not found')
         return cleaned_data
 
@@ -86,4 +86,4 @@ class BowInventoryForm(forms.ModelForm):
             self.add_error('image_field', message)
         else:
             self.add_error('image', message)
-        raise forms.ValidationError(message)
+        # raise forms.ValidationError(message)

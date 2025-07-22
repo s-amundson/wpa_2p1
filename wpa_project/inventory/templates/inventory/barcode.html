@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block script %}
+    {{ form.media }}
+    {% load static %}
+    <script src="{% static 'js/camera.js' %}"></script>
+{% endblock %}
+
+{% block main %}
+    <form id="barcode-form" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.errors }}
+        {{ form.as_div }}
+        Click on the image to take picture.
+        <div class="camera ratio">
+          <video id="video">Video stream not available.</video>
+        </div>
+        <div class="message"></div>
+        <canvas id="canvas" hidden="hidden"> </canvas>
+        <div class="output ratio">
+          <img id="photo" alt="The screen capture will appear in this box." />
+        </div>
+        <button name="barcode_btn" class="btn btn-primary" type="submit"> Submit </button>
+    </form>
+
+
+{% endblock %}
+
+{% block end_script %}
+<!--    {% load static %}-->
+<!--    <script src="{% static 'js/camera.js' %}"></script>-->
+{% endblock %}

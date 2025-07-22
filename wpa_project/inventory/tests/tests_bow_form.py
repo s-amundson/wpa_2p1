@@ -96,7 +96,7 @@ class TestsBusiness(TestCase):
         self.assertEqual(len(Bow.objects.all()), 2)
         self.assertEqual(b.bow_id, "R1004")
 
-    @tag('temp')
+    # @tag('temp')
     def test_post_business_existing(self):
         self.add_bow()
         self.post_dict['bow_id'] = 'R1004'
