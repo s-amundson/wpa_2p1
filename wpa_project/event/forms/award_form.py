@@ -42,7 +42,8 @@ class AwardForm(forms.ModelForm):
                 for record in event.volunteerrecord_set.all():
                     points = math.floor(record.volunteer_points)
                     for n in range(points):
-                        student_list.append(record.student)
+                        if not record.student.user.has_perm('student_app.board'):
+                            student_list.append(record.student)
             logger.warning(student_list)
             if len(student_list):
                 cleaned_data['student'] = random.choice(student_list)
