@@ -6,7 +6,8 @@ logger = logging.getLogger(__name__)
 
 
 class Complaint(models.Model):
-    category_choices = [('services', 'Services'), ('harassment', 'Harassment'), ('website', 'Website')]
+    category_choices = [('services', 'Services'), ('harassment', 'Harassment'), ('website', 'Website'),
+                        ('staff', 'Staff Issues')]
     category = models.CharField(max_length=20, null=True, choices=category_choices)
     created_time = models.DateTimeField(default=timezone.now)
     incident_date = models.DateField(null=True, default=None)
