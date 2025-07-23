@@ -33,10 +33,9 @@
                     {% else %}
                         <a class="dropdown-item" href="{% url 'information:faq' %}">Faq</a>
                         <a class="dropdown-item" href="{% url 'contact_us:contact' %}">Contact Us</a>
-                        {% if user.is_authenticated %}
-                            <a class="dropdown-item" href="{% url 'contact_us:complaint' %}">File a complaint</a>
-                        {% endif %}
-
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                        <a class="dropdown-item" href="{% url 'contact_us:complaint' %}">File a complaint</a>
                     {% endif %}
                     <a class="dropdown-item" href="{% url 'information:staff_list' %}">Staff</a>
                 </div>
@@ -90,7 +89,7 @@
                         Membership
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        {% if perms.student_app.member %}
+                        {% if perms.student_app.members %}
                             <a class="dropdown-item" href="{% url 'membership:election_list' %}">Elections</a>
                             <a class="dropdown-item" href="{% url 'membership:membership' %}">Membership</a>
                             <a class="dropdown-item" href="{% url 'minutes:minutes_list' %}">Minutes</a>
