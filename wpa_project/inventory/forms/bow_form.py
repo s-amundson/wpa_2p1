@@ -1,9 +1,9 @@
 import io
 import base64
 from django import forms
-from pyzbar.pyzbar import decode, ZBarSymbol
+from pyzbar.pyzbar import decode
 from PIL import Image
-from django_ckeditor_5.widgets import CKEditor5Widget
+
 from ..models import Bow, BowInventory
 import logging
 logger = logging.getLogger(__name__)
@@ -23,6 +23,7 @@ class BowForm(forms.ModelForm):
             self.fields["bow_id"].widget = forms.HiddenInput()
         self.fields['is_youth'].required = False
         self.fields['in_service'].required = False
+        self.fields['notes'].required = False
 
     def clean(self):
         cleaned_data = super().clean()
@@ -86,4 +87,3 @@ class BowInventoryForm(forms.ModelForm):
             self.add_error('image_field', message)
         else:
             self.add_error('image', message)
-        # raise forms.ValidationError(message)

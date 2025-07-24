@@ -3,7 +3,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
-from ..models import Bow
+from ..models import Bow, BowInventory
 from ..forms import BowForm, BowInventoryForm
 from src.mixin import StaffMixin
 logger = logging.getLogger(__name__)
@@ -60,6 +60,11 @@ class BowInventoryView(StaffMixin, FormView):
         logger.debug(form.cleaned_data)
         b = form.save()
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_list'] = BowInventory.objects.filter(user=self.request.user).order_by('-inventory_date')[:10]
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 # @tag('temp')
 class TestsTasks(TestCase):
 
-    @tag('temp')
+    # @tag('temp')
     def test_add_inventory(self):
 
         inventory_from_csv()

@@ -25,14 +25,14 @@
                 {% for bow in object_list %}
                     <tr>
                         <td>
-                            {{bow.bow_id}}
+                            <a href="{% url 'inventory:bow_form' bow.id %}"> {{bow.bow_id}} </a>
                         </td>
                         <td>{{ bow.length }}</td>
                         <td>{{ bow.type }}</td>
                         {% if in_service %}
                             <td>{{ bow.in_service }}</td>
                         {% endif %}
-                        <td>{{ bow.last_inventory }}</td>
+                        <td>{{ bow.last_inventory.inventory_date }}</td>
                     </tr>
                 {% empty %}
                     <tr><td colspan="4"> No Bows Yet </td></tr>
@@ -40,6 +40,9 @@
             </tbody>
         </table>
     </div>
-    <a class="nav-link" href="{% url 'inventory:bow_form' %}"> Add </a>
+    <div class="d-flex justify-content-evenly">
+        <a href="{% url 'inventory:bow_form' %}"> Add bow to list </a>
+        <a href="{% url 'inventory:bow_inventory' %}"> Do Inventory</a>
+    </div>
     {% include 'student_app/paginate.html' %}
 {% endblock %}
