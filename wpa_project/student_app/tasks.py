@@ -15,6 +15,7 @@ from reportlab.lib.pagesizes import letter
 from django_celery_beat.models import PeriodicTask
 
 from student_app.src import EmailMessage
+from program_app.src import UpdatePrograms
 from .models import Student, User
 
 import os
@@ -27,6 +28,7 @@ logger = get_task_logger(__name__)
 @shared_task
 def hourly():
     logger.debug('hourly task')
+    UpdatePrograms().hourly_update()
 
 
 @shared_task
