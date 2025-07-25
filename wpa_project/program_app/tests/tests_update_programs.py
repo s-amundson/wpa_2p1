@@ -91,9 +91,9 @@ class TestsUpdatePrograms(TestCase):
         email_message.instructor_canceled_email(bc1.event, 2)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Instructor Cancellation')
         # logger.warning(mail.outbox[0].body)
-        s = 'One of our instructors has cannot make it to the event'
+        s = "One of our instructors can't make it to the event"
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
-        s = 'and we now have 2 singed up.'
+        s = 'and we now have 2 signed up.'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
 
     def test_email_staff_notice_no_class(self):
