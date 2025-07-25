@@ -76,6 +76,7 @@
                     <a class="dropdown-item" href="{% url 'information:info' 'by-laws' %}">By-Laws</a>
                     {% if perms.student_app.board %}
                         <div class="dropdown-divider"></div>
+                        <div class="dropdown-item-text"><small class="text-muted">Board</small></div>
                         <a class="dropdown-item" href="{% url 'information:policy_list' %}">Policy List</a>
                     {% endif %}
 
@@ -111,6 +112,7 @@
                             <a class="dropdown-item" href="{% url 'programs:class_list'%}">Intro Class List</a>
                             <a class="dropdown-item" href="{% url 'registration:search'%}">Search Students</a>
                             <a class="dropdown-item" href="{% url 'payment:reimbursement_list'%}">Reimbursement List</a>
+                            <a class="dropdown-item" href="{% url 'inventory:bow_list'%}">Bow List</a>
 
                             {% if perms.student_app.board %}
                                 <div class="dropdown-divider"></div>

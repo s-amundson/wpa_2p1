@@ -5,6 +5,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.test import TestCase, Client, tag
 from django.contrib.auth.models import Group
+from unittest.mock import patch
 
 from ..models import BeginnerClass, BeginnerSchedule
 from event.models import Event, Registration, RegistrationAdmin
@@ -90,9 +91,9 @@ class TestsUpdatePrograms(TestCase):
         email_message.instructor_canceled_email(bc1.event, 2)
         self.assertEqual(mail.outbox[0].subject, 'Woodley Park Archers Instructor Cancellation')
         # logger.warning(mail.outbox[0].body)
-        s = 'One of our instructors has cannot make it to the event'
+        s = "One of our instructors can't make it to the event"
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
-        s = 'and we now have 2 singed up.'
+        s = 'and we now have 2 signed up.'
         self.assertTrue(mail.outbox[0].body.find(s) > 0)
 
     def test_email_staff_notice_no_class(self):
@@ -172,6 +173,37 @@ class TestsUpdatePrograms(TestCase):
         self.assertEqual(mail.outbox[1].subject, f"WPA Class Wait List Reminder {d.strftime('%Y-%m-%d')}")
         s = 'Either you or a member of your family is on the wait-list for a class'
         self.assertTrue(mail.outbox[1].body.find(s) > 0)
+
+    # @tag('temp')
+    def test_hourly_update_close(self):
+        now = timezone.localtime(timezone.now())
+        BeginnerSchedule.objects.create(
+            class_time=now - timedelta(minutes=15),
+            day_of_week=(now + timedelta(days=1)).weekday(),
+            state='open',
+            beginner_limit=10,
+            returnee_limit=10,
+        )
+        UpdatePrograms().hourly_update()
+        bc = BeginnerClass.objects.all()
+        self.assertEqual(bc.count(), 8)
+
+    # @tag('temp')
+    @patch('program_app.src.update_program.UpdatePrograms.reminder_email')
+    def test_hourly_update_reminder(self, reminder_email):
+        logger.warning(BeginnerClass.objects.all().count())
+        now = timezone.localtime(timezone.now())
+        bs = BeginnerSchedule.objects.create(
+            class_time=(now - timedelta(minutes=15)).time().replace(second=0, microsecond=0),
+            day_of_week=(now + timedelta(days=2)).weekday(),
+            state='open',
+            beginner_limit=10,
+            returnee_limit=10,
+        )
+        UpdatePrograms().hourly_update()
+        bc = BeginnerClass.objects.all()
+        self.assertEqual(bc.count(), 2)
+        reminder_email.assert_called_with(bs.class_time)
 
 
 class TestsUpdatePrograms2(TestCase):

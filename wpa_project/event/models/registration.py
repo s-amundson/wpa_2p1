@@ -66,6 +66,7 @@ class Registration(models.Model):
     idempotency_key = models.UUIDField()
     reg_time = models.DateTimeField(auto_now_add=True, blank=True)
     attended = models.BooleanField(default=False)
+    # attend_time = models.DateTimeField(default=None, null=True)
     modified = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     volunteer_heavy = models.BooleanField(default=False)

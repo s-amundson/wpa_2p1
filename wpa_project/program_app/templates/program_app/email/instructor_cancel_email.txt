@@ -1,6 +1,6 @@
 Hi,
 
-One of our instructors has cannot make it to the event on {{ event.event_date }} and we now have {{ num_instructors }} singed up.
+One of our instructors can't make it to the event on {{ event.event_date }} and we now have {{ num_instructors }} signed up.
 
 <a href="https://woodleyparkarchers.org/">WoodleyParkArchers.org</a>
 <a href="https://www.facebook.com/pages/Woodley-Park-Archers/131056656971079">Facebook: Woodley Park Archers</a>

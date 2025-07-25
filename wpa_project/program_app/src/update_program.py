@@ -79,6 +79,23 @@ class UpdatePrograms:
         self.status_email()
         self.record_classes()
 
+    def hourly_update(self):
+        now = timezone.localtime(timezone.now())
+        scheduled = BeginnerSchedule.objects.filter(class_time__lte=now.time(),
+                                                    class_time__gte=(now - timedelta(hours=1)).time())
+        if scheduled.count:
+            # Close classes one day from now and create new ones..
+            tomorrow = now + timedelta(days=1)
+            to_close = scheduled.filter(day_of_week=tomorrow.weekday())
+            for c in to_close:
+                self.close_class(c.class_time)
+                self.create_class(c)
+            # send reminders for upcomming classes.
+            to_remind = scheduled.filter(day_of_week=(tomorrow + timedelta(days=1)).weekday())
+            for c in to_remind:
+                self.reminder_email(c.class_time)
+        self.record_classes()
+
     def next_class_day(self, target_day):
         """Returns the next eligible class day (not today or tomorrow)
         target_day is  0-6. Monday is 0 and Sunday is 6"""

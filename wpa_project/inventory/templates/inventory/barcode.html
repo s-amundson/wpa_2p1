@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block script %}
+    {{ form.media }}
+    {% load static %}
+    <script src="{% static 'js/camera.js' %}"></script>
+{% endblock %}
+
+{% block main %}
+    <form id="barcode-form" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.errors }}
+        {{ form.as_div }}
+        Click on the image to take picture.
+        <div class="camera ratio">
+          <video id="video">Video stream not available.</video>
+        </div>
+        <div class="message"></div>
+        <canvas id="canvas" hidden="hidden"> </canvas>
+        <div class="output ratio">
+          <img id="photo" alt="The screen capture will appear in this box." />
+        </div>
+        <button name="barcode_btn" class="btn btn-primary" type="submit"> Submit </button>
+    </form>
+
+    <h3>Recently checked bows</h3>
+    <div class="row p-2">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Bow ID</th>
+                    <th>Length</th>
+                    <th>Type</th>
+                    {% if in_service %}
+                        <th>In Service</th>
+                    {% endif %}
+                    <th>Inventory Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inv in object_list %}
+                    <tr>
+                        <td>
+                            {{ inv.bow.bow_id }}
+                        </td>
+                        <td>{{ inv.bow.length }}</td>
+                        <td>{{ inv.bow.type }}</td>
+                        {% if in_service %}
+                            <td>{{ inv.bow.in_service }}</td>
+                        {% endif %}
+                        <td>{{ inv.inventory_date }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4"> No Bows Yet </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block end_script %}
+<!--    {% load static %}-->
+<!--    <script src="{% static 'js/camera.js' %}"></script>-->
+{% endblock %}
