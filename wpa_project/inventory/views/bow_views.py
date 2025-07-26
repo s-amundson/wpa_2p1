@@ -50,7 +50,7 @@ class BowInventoryView(StaffMixin, FormView):
     model = Bow
     form_class = BowInventoryForm
     template_name = 'inventory/barcode.html'
-    success_url = reverse_lazy('inventory:bow_list')
+    success_url = reverse_lazy('inventory:bow_inventory')
 
     def form_invalid(self, form):
         logger.warning(form.errors)
