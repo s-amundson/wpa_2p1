@@ -14,6 +14,11 @@ class RecaptchaView(FormView): # pragma: no cover
     form_class = RecaptchaForm
     success_url = reverse_lazy('registration:profile')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Recaptcha'
+        return context
+
     def form_invalid(self, form):
         logger.warning(self.request.POST)
         logger.warning(form.errors)

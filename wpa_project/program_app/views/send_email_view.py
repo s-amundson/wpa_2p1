@@ -14,6 +14,11 @@ class SendEmailView(UserPassesTestMixin, FormView):
     form_class = SendClassEmailForm
     success_url = reverse_lazy('registration:index')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Send Email'
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['beginner_class'] = self.beginner_class

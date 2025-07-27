@@ -18,6 +18,11 @@ class PinScoreView(BoardMixin, FormView):
     form_class = PinScoresForm
     success_url = reverse_lazy('joad:pin_score_list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Pin Score'
+        return context
+
     def get_form(self):
         sid = self.kwargs.get("score_id", None)
         if sid is not None:

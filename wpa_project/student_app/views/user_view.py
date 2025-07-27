@@ -15,6 +15,11 @@ class UserView(UserPassesTestMixin, FormView):
     success_url = reverse_lazy('registration:profile')
     user = None
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'User Form'
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.user

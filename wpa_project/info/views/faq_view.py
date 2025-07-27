@@ -19,6 +19,11 @@ class FaqFormView(BoardMixin, FormView):
     faq = None
     success_url = reverse_lazy('info:faq')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'FAQ Form'
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         if self.faq:

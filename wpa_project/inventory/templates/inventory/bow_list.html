@@ -42,7 +42,8 @@
     </div>
     <div class="d-flex justify-content-evenly">
         <a href="{% url 'inventory:bow_form' %}"> Add bow to list </a>
-        <a href="{% url 'inventory:bow_inventory' %}"> Do Inventory</a>
+        <a href="{% url 'inventory:bow_inventory' %}"> Inventory with camera</a>
+        <a href="{% url 'inventory:bow_inventory' %}"> Inventory no camera</a>
     </div>
     {% include 'student_app/paginate.html' %}
 {% endblock %}

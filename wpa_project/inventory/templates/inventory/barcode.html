@@ -3,7 +3,7 @@
 {% block script %}
     {{ form.media }}
     {% load static %}
-<!--    <script src="{% static 'js/camera.js' %}"></script>-->
+    <script src="{% static 'js/camera.js' %}"></script>
 {% endblock %}
 
 {% block main %}
@@ -11,7 +11,7 @@
         {% csrf_token %}
         {{ form.errors }}
         {{ form.as_div }}
-        Click on the image to take picture.
+        {% if not form.no_camera %} Click on the image to take picture. {% endif %}
         <div class="camera ratio">
           <video id="video">Video stream not available.</video>
         </div>
@@ -20,7 +20,7 @@
         <div class="output ratio">
           <img id="photo" alt="The screen capture will appear in this box." />
         </div>
-        <button name="barcode_btn" class="btn btn-primary" type="submit"> Submit </button>
+        <button name="barcode_btn" class="btn btn-primary m-3" type="submit"> Submit </button>
     </form>
 
     <h3>Recently checked bows</h3>

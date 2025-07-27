@@ -44,7 +44,12 @@ class TestsBowInventory(TestCase):
     # @tag('temp')
     def test_get_bow_inventory(self):
         response = self.client.get(reverse('inventory:bow_inventory'), secure=True)
-        self.assertTemplateUsed('student_app/barcode.html')
+        self.assertTemplateUsed('inventory/barcode.html')
+
+    @tag('temp')
+    def test_get_bow_inventory_no_camera(self):
+        response = self.client.get(reverse('inventory:bow_inventory', kwargs={'no_camera': 'no_camera'}), secure=True)
+        self.assertTemplateUsed('inventory/barcode.html')
 
     # @tag('temp')
     def test_post_inventory(self):

@@ -50,104 +50,106 @@ $(document).ready(() => {
     const canvas = document.getElementById("canvas");
     const photo = document.getElementById("photo");
 
-    $("#photo").hide()
-    $(".output").hide()
-
-    const constraints = {
-      video: {
-        width: {
-          min: 1280,
-          ideal: 1920,
-          max: 2560,
-
-        },
-        height: {
-          min: 720,
-          ideal: 1080,
-          max: 1440,
-        },
-        facingMode: "environment",
-      },
-    }
-    navigator.mediaDevices.getUserMedia(constraints)
-        .then((stream) => {
-            video.srcObject = stream;
-            video.play();
-            const track = stream.getVideoTracks()[0];
-
-//            //Create image capture object and get camera capabilities
-//            const imageCapture = new ImageCapture(track)
-//            const photoCapabilities = imageCapture.getPhotoCapabilities().then(() => {
-//
-//            //todo: check if camera has a torch
-//
-//            //let there be light!
-//            const btn = document.querySelector('.switch');
-//            btn.addEventListener('click', function(){
-//              track.applyConstraints({
-//                advanced: [{torch: true}]
-//              });
-//            });
-//            $(".message").html("hasTorch " + hasTorch);
-        })
-        .catch((error) => {
-            console.error("Error accessing the camera: ", error);
-            alert("Could not access the camera. Please allow permissions and try again.");
-        });
-    video.addEventListener(
-      "canplay",
-      (ev) => {
-
-        if (!streaming) {
-          height = video.videoHeight / (video.videoWidth / width);
-
-          if (video.videoHeight > video.videoWidth) {
-            $(".ratio").css("--bs-aspect-ratio", "177%") // 9:16 aspect ratio for vertical camera
-          } else {
-            $(".ratio").css("--bs-aspect-ratio", "56%") // 16:9 aspect ratio for horizontal camera
-          }
-          video.setAttribute("width", width);
-          video.setAttribute("height", height);
-          canvas.setAttribute("width", width);
-          canvas.setAttribute("height", height);
-          streaming = true;
-        }
-      },
-      false,
-    );
-
-    $("#video").click(function(ev) {
-        takePicture();
-        ev.preventDefault();
-    });
-
-    clearPhoto();
-    $("#barcode-form").submit(function(e){
-        if ($("#id_bow_id").val() == '' && !photo_captured && $("#id_image_field").val()) {
-            e.preventDefault();
-        }
-    });
-    $('[name="barcode_btn"]').prop('disabled', true);
-
-    $("#id_bow_id").change(function(e){
-        if ($("#id_bow_id").val() == '' && !photo_captured) {
-            $('[name="barcode_btn"]').prop('disabled', true);
-        } else {
-            $('[name="barcode_btn"]').prop('disabled', false);
-        }
-    });
-    $("#id_image_field").change(function(e) {
-        if ($("#id_image_field").val() == '' && $("#id_bow_id").val() == '' && !photo_captured){
-            $('[name="barcode_btn"]').prop('disabled', true);
-        } else {
-            $('[name="barcode_btn"]').prop('disabled', false);
-        }
-    });
-    $("#photo").click(function(ev) {
+    if ($("#id_image_field").length) {
         $("#photo").hide()
         $(".output").hide()
-        $("#video").show()
-        $(".camera").show()
-        clearPhoto()
-    });
+
+        const constraints = {
+          video: {
+            width: {
+              min: 1280,
+              ideal: 1920,
+              max: 2560,
+
+            },
+            height: {
+              min: 720,
+              ideal: 1080,
+              max: 1440,
+            },
+            facingMode: "environment",
+          },
+        }
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then((stream) => {
+                video.srcObject = stream;
+                video.play();
+                const track = stream.getVideoTracks()[0];
+
+    //            //Create image capture object and get camera capabilities
+    //            const imageCapture = new ImageCapture(track)
+    //            const photoCapabilities = imageCapture.getPhotoCapabilities().then(() => {
+    //
+    //            //todo: check if camera has a torch
+    //
+    //            //let there be light!
+    //            const btn = document.querySelector('.switch');
+    //            btn.addEventListener('click', function(){
+    //              track.applyConstraints({
+    //                advanced: [{torch: true}]
+    //              });
+    //            });
+    //            $(".message").html("hasTorch " + hasTorch);
+            })
+            .catch((error) => {
+                console.error("Error accessing the camera: ", error);
+                alert("Could not access the camera. Please allow permissions and try again.");
+            });
+        video.addEventListener(
+          "canplay",
+          (ev) => {
+
+            if (!streaming) {
+              height = video.videoHeight / (video.videoWidth / width);
+
+              if (video.videoHeight > video.videoWidth) {
+                $(".ratio").css("--bs-aspect-ratio", "177%") // 9:16 aspect ratio for vertical camera
+              } else {
+                $(".ratio").css("--bs-aspect-ratio", "56%") // 16:9 aspect ratio for horizontal camera
+              }
+              video.setAttribute("width", width);
+              video.setAttribute("height", height);
+              canvas.setAttribute("width", width);
+              canvas.setAttribute("height", height);
+              streaming = true;
+            }
+          },
+          false,
+        );
+
+        $("#video").click(function(ev) {
+            takePicture();
+            ev.preventDefault();
+        });
+
+        clearPhoto();
+        $("#barcode-form").submit(function(e){
+            if ($("#id_bow_id").val() == '' && !photo_captured && $("#id_image_field").val()) {
+                e.preventDefault();
+            }
+        });
+        $('[name="barcode_btn"]').prop('disabled', true);
+
+        $("#id_bow_id").change(function(e){
+            if ($("#id_bow_id").val() == '' && !photo_captured) {
+                $('[name="barcode_btn"]').prop('disabled', true);
+            } else {
+                $('[name="barcode_btn"]').prop('disabled', false);
+            }
+        });
+        $("#id_image_field").change(function(e) {
+            if ($("#id_image_field").val() == '' && $("#id_bow_id").val() == '' && !photo_captured){
+                $('[name="barcode_btn"]').prop('disabled', true);
+            } else {
+                $('[name="barcode_btn"]').prop('disabled', false);
+            }
+        });
+        $("#photo").click(function(ev) {
+            $("#photo").hide()
+            $(".output").hide()
+            $("#video").show()
+            $(".camera").show()
+            clearPhoto()
+        });
+    }
 });

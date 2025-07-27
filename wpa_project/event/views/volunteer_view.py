@@ -136,6 +136,11 @@ class VolunteerRecordView(BoardMixin, FormView):
     form_class = VolunteerRecordForm
     success_url = reverse_lazy('events:volunteer_event_list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Volunteer Record'
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         logger.warning(self.request.GET)

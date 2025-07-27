@@ -3,6 +3,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
+from django.contrib import messages
 from ..models import Bow, BowInventory
 from ..forms import BowForm, BowInventoryForm
 from src.mixin import StaffMixin
@@ -13,7 +14,7 @@ class BowFormView(StaffMixin, FormView):
     model = Bow
     form_class = BowForm
     template_name = 'student_app/form_as_p.html'
-    success_url = reverse_lazy('inventory:bow_list')
+    success_url = reverse_lazy('inventory:bow_form')
 
     def form_invalid(self, form):
         logger.warning(form.errors)
@@ -22,7 +23,13 @@ class BowFormView(StaffMixin, FormView):
     def form_valid(self, form):
         logger.debug(form.cleaned_data)
         b = form.save()
+        messages.success(self.request, f'Bow {b.bow_id} has been added.')
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Bow Form'
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -68,5 +75,7 @@ class BowInventoryView(StaffMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        logger.debug(self.kwargs)
+        kwargs['no_camera'] = self.kwargs.get('no_camera', '') == 'no_camera'
         kwargs['initial']['user'] = self.request.user
         return kwargs

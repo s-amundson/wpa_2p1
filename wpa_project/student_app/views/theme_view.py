@@ -14,6 +14,11 @@ class ThemeView(FormView):
     form_class = ThemeForm
     success_url = reverse_lazy('registration:profile')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Theme'
+        return context
+
     def form_invalid(self, form):
         logging.warning(form.errors)
         if self.request.META.get('HTTP_ACCEPT', '').find('application/json') >= 0:

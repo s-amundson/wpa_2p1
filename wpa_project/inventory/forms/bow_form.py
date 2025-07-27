@@ -44,10 +44,14 @@ class BowInventoryForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.no_camera = kwargs.pop('no_camera')
         super().__init__(*args, **kwargs)
-        self.fields['bow_id'] = forms.CharField(required=False)
-        self.fields["image_field"] = forms.ImageField(required=False)
-        self.fields['image'] = forms.CharField(widget=forms.HiddenInput(), required=False)
+        if self.no_camera:
+            self.fields['bow_id'] = forms.CharField()
+        else:
+            self.fields['bow_id'] = forms.CharField(required=False)
+            self.fields["image_field"] = forms.ImageField(required=False)
+            self.fields['image'] = forms.CharField(widget=forms.HiddenInput(), required=False)
         self.fields['bow'].required = False
 
 
