@@ -63,6 +63,7 @@ class TestsEventAttendance(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Attending', 8)
 
+    # @tag('temp')
     def test_class_beginner_attendance(self):
         # register instructor and close class.
         bc = BeginnerClass.objects.get(pk=1)
@@ -90,6 +91,7 @@ class TestsEventAttendance(TestCase):
         response = self.client.get(reverse('events:event_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
 
+    # @tag('temp')
     def test_class_beginner_unattend(self):
         # register instructor and close class.
         bc = BeginnerClass.objects.get(pk=1)
@@ -109,7 +111,8 @@ class TestsEventAttendance(TestCase):
         self.assertEqual(cr.attended, False)
         self.assertIsNone(cr.student.safety_class)
 
-    def test_class_instructor_attendance(self):
+    # @tag('temp')
+    def test_class_instructor_attendance_2x_points(self):
         # make user instructor
         u = User.objects.get(pk=1)
         u.is_instructor = True
@@ -147,7 +150,7 @@ class TestsEventAttendance(TestCase):
         vr = VolunteerRecord.objects.all()
         self.assertEqual(len(vr), 1)
         self.assertEqual(vr[0].student, student)
-        self.assertEqual(vr[0].volunteer_points, 2)
+        self.assertEqual(vr[0].volunteer_points, 4)
 
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('events:event_attend_list', kwargs={'event': 1}), secure=True)
@@ -165,7 +168,8 @@ class TestsEventAttendance(TestCase):
         self.assertEqual(vr[0].student, student)
         self.assertEqual(vr[0].volunteer_points, 0)
 
-    def test_class_instructor_attendance_late_half_points(self):
+    # @tag('temp')
+    def test_class_instructor_attendance_1p5_points(self):
         # make user instructor
         u = User.objects.get(pk=1)
         u.is_instructor = True
@@ -182,8 +186,8 @@ class TestsEventAttendance(TestCase):
         cr.student.save()
         cr.save()
 
-        d = timezone.now() + timezone.timedelta(days=2)
-        bc.event.event_date = bc.event.event_date.replace(year=d.year, month=d.month, day=d.day)
+        d = timezone.now() + timezone.timedelta(hours=50)
+        bc.event.event_date = bc.event.event_date.replace(year=d.year, month=d.month, day=d.day, hour=d.hour)
         bc.event.volunteer_points = 2
         bc.event.state = 'closed'
         bc.event.save()
@@ -203,14 +207,14 @@ class TestsEventAttendance(TestCase):
         vr = VolunteerRecord.objects.all()
         self.assertEqual(len(vr), 1)
         self.assertEqual(vr[0].student, student)
-        self.assertEqual(vr[0].volunteer_points, 1)
+        self.assertEqual(vr[0].volunteer_points, 3)
 
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('events:event_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
 
-
-    def test_class_instructor_attendance_late_little_points(self):
+    # @tag('temp')
+    def test_class_instructor_attendance_late_standard_points(self):
         # make user instructor
         u = User.objects.get(pk=1)
         u.is_instructor = True
@@ -248,13 +252,13 @@ class TestsEventAttendance(TestCase):
         vr = VolunteerRecord.objects.all()
         self.assertEqual(len(vr), 1)
         self.assertEqual(vr[0].student, student)
-        self.assertEqual(vr[0].volunteer_points, 0.2)
+        self.assertEqual(vr[0].volunteer_points, 2)
         # check that the attending column is there with checkboxes
         response = self.client.get(reverse('events:event_attend_list', kwargs={'event': 1}), secure=True)
         self.assertEqual(response.status_code, 200)
 
+    # @tag('temp')
     def test_class_attend_error(self):
-
         # register student and close class.
         bc = BeginnerClass.objects.get(pk=1)
         cr = Registration(event=bc.event,
@@ -274,8 +278,8 @@ class TestsEventAttendance(TestCase):
         content = json.loads(response.content)
         self.assertTrue(content['error'])
 
+    # @tag('temp')
     def test_class_unattend(self):
-
         # register student and close class.
         bc = BeginnerClass.objects.get(pk=1)
         cr = Registration(event=bc.event,

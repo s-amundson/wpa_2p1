@@ -327,7 +327,7 @@ class TestsStudent(TestCase):
         users = User.objects.all()
         self.assertEqual(len(users), 5)
         self.assertEqual(len(users.filter(pk=4)), 1)
-        self.assertEqual(len(EmailAddress.objects.filter(email='RicardoRHoyt@jourrapide.com')), 1)
+        self.assertEqual(len(EmailAddress.objects.filter(email='ricardorhoyt@jourrapide.com')), 1)
         self.assertIsNone(Student.objects.get(pk=5).student_family)
 
     # @tag('temp')

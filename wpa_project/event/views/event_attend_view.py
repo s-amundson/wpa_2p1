@@ -43,11 +43,13 @@ class EventAttendView(StaffMixin, View):
                 if cr.student.user is not None and cr.student.user.has_perm('student_app.staff'):
                     if cr.event.volunteer_points and cr.attended:
                         if cr.reg_time <= cr.event.event_date - timezone.timedelta(days=3):
-                            points = cr.event.volunteer_points
+                            points = cr.event.volunteer_points * 2
+                        elif cr.reg_time <= cr.event.event_date - timezone.timedelta(days=2):
+                            points = cr.event.volunteer_points * 1.5
                         elif cr.reg_time <= cr.event.event_date - timezone.timedelta(days=1):
-                            points = cr.event.volunteer_points / 2
+                            points = cr.event.volunteer_points * 1.25
                         else:
-                            points = cr.event.volunteer_points * 0.1
+                            points = cr.event.volunteer_points
                     VolunteerRecord.objects.update_points(
                         cr.event,
                         cr.student,

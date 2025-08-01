@@ -27,6 +27,7 @@ class PolicyText(models.Model):
     title = models.ForeignKey(Policy, on_delete=models.CASCADE)
     policy = CKEditor5Field('Text', config_name='extends')
     is_html = models.BooleanField(default=False)
+    user = models.ForeignKey('student_app.User', on_delete=models.PROTECT, null=True, default=None)
 
     class Meta:
         ordering = ['-created_at']
