@@ -52,6 +52,7 @@
                             {% if current and policy.id == current.id %} Current {% endif %}
                         </div>
                         <div>Created Time: {{ policy.created_at }}</div>
+                        <div>Created By: {{ policy.user.student_set.last }}</div>
                         <div>
                             <a class="btn btn-primary" href="{% url 'information:policy' policy.title.id policy.id %}" role="button">
                                 edit

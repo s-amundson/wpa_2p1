@@ -45,6 +45,7 @@ class PolicyFormView(FormView):
                 kwargs['instance'] = self.version
             kwargs['initial']['title_text'] = self.policy.title
             kwargs['initial']['title_access'] = self.policy.access
+        kwargs['initial']['user'] = self.request.user
         return kwargs
 
     def form_invalid(self, form):
@@ -63,6 +64,7 @@ class PolicyFormView(FormView):
             self.policy.save()
         pt = form.save(commit=False)
         pt.title = self.policy
+        pt.is_html = True
         pt.save()
 
         self.success_url = reverse_lazy('info:policy', kwargs={'policy': self.policy.id})

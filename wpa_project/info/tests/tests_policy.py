@@ -30,15 +30,18 @@ class TestsAnnouncement(TestCase):
             'title_text': 'test policy',
             'title_access': 'public',
             'status': 0,
-            'is_html': False,
-            'policy': "tests shall be done"})
+            'policy': "tests shall be done",
+            'user': 1
+        })
 
         pt = PolicyText.objects.all()
         self.assertEqual(len(pt), 2)
         self.assertEqual(pt[0].policy, 'tests shall be done')
         self.assertEqual(pt[0].title.title, 'test policy')
+        self.assertEqual(pt[0].user.id, 1)
+        self.assertTrue(pt[0].is_html)
 
-    # @tag('temp')
+    @tag('temp')
     def test_post_board_update_good(self):
         policy = Policy.objects.create(title='test policy')
         pt1 = PolicyText.objects.create(
@@ -51,7 +54,6 @@ class TestsAnnouncement(TestCase):
             'title_text': 'test policy',
             'title_access': 'public',
             'status': 1,
-            'is_html': False,
             'policy': "tests shall be done"})
 
         polices = Policy.objects.all()

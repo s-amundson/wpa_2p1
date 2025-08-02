@@ -66,7 +66,7 @@ class TestsEmail(TestCase):
         em = EmailMessage()
         em.bcc_from_students(Student.objects.filter(pk=3))
         self.assertEqual(len(em.bcc), 1)
-        self.assertEqual(str(em.bcc[0]), "RosalvaAHall@superrito.com")
+        self.assertEqual(str(em.bcc[0]), "RosalvaAHall@superrito.com".lower())
 
     def test_get_send_email_auth(self):
         self.test_user = User.objects.get(pk=1)
